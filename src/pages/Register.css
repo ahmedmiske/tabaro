@@ -1,0 +1,18 @@
+.register {
+    padding: 20px;
+    margin-top:10px;
+    margin-bottom: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.register .user-register{
+   background-color: red;
+}
+
+
+.register h2{
+    color:var(--main-color-alt);
+    text-align: center;
+}

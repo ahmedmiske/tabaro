@@ -1,0 +1,51 @@
+.landing-page {
+  background: url('./tabarou.png') no-repeat center center;
+  background-size: cover;
+  margin-top: 0px;
+  padding: 20px 20px;
+  max-height: 100vh;
+  animation: moveBackground 15s infinite alternate;
+  -webkit-animation: moveBackground 15s infinite alternate;
+}
+
+@keyframes moveBackground {
+  0% {
+      background-position: center bottom;
+  }
+  50% {
+    background-position: center center;
+}
+  100% {
+      background-position: center top;
+  }
+}
+
+.container {
+  height: 80vh;
+}
+
+.container .card-landing {
+  background-color: rgb(20, 114, 20) !important;
+  opacity: 0.9;
+  color: white;
+  padding: 2rem;
+  border: none;
+  border-radius: 10px;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  -ms-border-radius: 10px;
+  -o-border-radius: 10px;
+}
+
+.btn-go{
+  width: 50%;
+  padding: 20px 10px;
+  font-size: 20px !important;
+}
+
+.container .card-landing .btn-go:hover{
+ background-color: var(--color-secondary);
+}
+
+
+  

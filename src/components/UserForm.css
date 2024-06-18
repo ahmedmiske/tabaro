@@ -1,0 +1,55 @@
+.user-form {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 600px; /* زيادة عرض النموذج */
+    text-align: right;
+    background-color: #f9f9f9;
+}
+
+.info-section {
+    margin-bottom: 20px; /* زيادة المسافة بين الأقسام */
+}
+
+.info-section h3 {
+    margin-bottom: 15px; /* زيادة المسافة تحت العنوان */
+    color: #333;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px; /* زيادة الحشو أسفل العنوان */
+}
+
+.input-group {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px; /* تقليل المسافة بين الحقول */
+    margin-bottom: 15px; /* تقليل المسافة بين الحقول */
+}
+
+.form-group {
+    width: 100%; /* جعل الحقول تأخذ العرض الكامل */
+}
+
+.form-group-half {
+    flex: 1; /* جعل الحقول تأخذ نصف العرض */
+    margin-bottom: 10px; /* تقليل المسافة بين الحقول */
+}
+
+button[type="submit"] {
+    display: block;
+    width: 100%;
+    padding: 15px; /* زيادة حجم الزر */
+    font-size: 18px; /* زيادة حجم الخط للزر */
+    font-weight: bold;
+}
+
+.modal-body p {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.text-danger {
+    color: #dc3545;
+    font-weight: bold;
+}

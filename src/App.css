@@ -1,38 +1,40 @@
-.App {
-  text-align: center;
+/* START Global Rulez */
+* {
+  box-sizing: border-box;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+:root {
+  --main-color: #4CAF50; /* Green */
+  --main-color-alt: #2E7D32; /* Darker Green */
+  --main-color-fundo: #EFEFEF; /* Light Grey */
+  --color-primary: #1E88E5; /* Blue */
+  --color-secondary: #FF7043; /* Orange */
+  --main-transition: 0.3s;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+body {
+  font-family: 'Cairo', sans-serif;
+  margin: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  min-height: 100vh;
+  background-color: var(--main-color-fundo);
+ 
 }
 
-.App-link {
-  color: #61dafb;
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #F5F5F5;
+  /* background-color: red; */
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+main {
+  /* flex-grow: 1; */
 }

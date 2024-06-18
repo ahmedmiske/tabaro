@@ -1,0 +1,208 @@
+{
+  "users": [
+    {
+      "id": "1",
+      "firstName": "محمد",
+      "lastName": "سيدي عالي",
+      "phone": "36373673",
+      "whatsapp": "46464646",
+      "address": "تواكشوط,عرفات ",
+      "userType": "donor",
+      "confirmPassword": "123",
+      "email": "ahmedma85@yahoo.fr",
+      "username": "ahmed",
+      "password": "123",
+      "username_fr": "Ahmed",
+      "password_fr": "123"
+    },
+    {
+      "id": "2",
+      "firstName": "أحمد",
+      "lastName": "امبارك",
+      "phone": "32456789",
+      "whatsapp": "32333435",
+      "address": "النعمة,اشميم ",
+      "userType": "needy",
+      "confirmPassword": "123",
+      "email": "ahmed.miske@izarraherrieskola.eus",
+      "username": "sidi",
+      "password": "123",
+      "username_fr": "Sidi",
+      "password_fr": "123"
+    },
+    {
+      "id": "1f21",
+      "firstName": "Ahmed",
+      "lastName": "Ahmed miske",
+      "phone": "672195628",
+      "whatsapp": "36351161",
+      "address": "01440",
+      "userType": "publicInstitution",
+      "email": "ahmed@example.com",
+      "username": "ahmed",
+      "password": "123",
+      "username_fr": "Ahmed",
+      "password_fr": "123"
+    },
+    {
+      "id": "cd31",
+      "firstName": "سيدس اعلي ",
+      "lastName": "المصطف",
+      "phone": "672195628",
+      "whatsapp": "567580998",
+      "address": "عدل بكرو",
+      "userType": "needy",
+      "email": "said@example.com",
+      "username": "said",
+      "password": "123",
+      "username_fr": "Said",
+      "password_fr": "123"
+    },
+    {
+      "id": "186e",
+      "firstName": "امباركه",
+      "lastName": "العبد",
+      "phone": "3434355454",
+      "whatsapp": "36351161",
+      "address": "بتلميت",
+      "userType": "needy",
+      "email": "ambarka@example.com",
+      "username": "ambarka",
+      "password": "123",
+      "username_fr": "Ambarka",
+      "password_fr": "123"
+    },
+    {
+      "id": "0532",
+      "firstName": " اعلي",
+      "lastName": "امحمد",
+      "phone": "672195628",
+      "whatsapp": "36351161",
+      "address": "تنبدعة ",
+      "userType": "needy",
+      "email": "ali@example.com",
+      "username": "ali",
+      "password": "123",
+      "username_fr": "Ali",
+      "password_fr": "123"
+    },
+    {
+      "id": "9b9a",
+      "firstName": "med",
+      "lastName": "miske",
+      "phone": "36373673",
+      "whatsapp": "46464646",
+      "address": "تواكشوط,عرفات ",
+      "userType": "needy",
+      "email": "med@example.com",
+      "username": "med",
+      "password": "123",
+      "username_fr": "Med",
+      "password_fr": "123"
+    },
+    {
+      "id": "4795",
+      "firstName": "slkjkl",
+      "lastName": "kljklj",
+      "phone": "3424324",
+      "whatsapp": "43243232",
+      "address": "lkjfddsiofj",
+      "userType": "needy",
+      "email": "kljklj@example.com",
+      "username": "ahmed",
+      "password": "123",
+      "confirmPassword": "123",
+      "username_fr": "Ahmed",
+      "password_fr": "123"
+    },
+    {
+      "id": "15b2",
+      "firstName": "slkjkl",
+      "lastName": "kljklj",
+      "phone": "3424324",
+      "whatsapp": "43243232",
+      "address": "lkjfddsiofj",
+      "userType": "needy",
+      "email": "jdh@example.com",
+      "username": "jdh",
+      "password": "123",
+      "confirmPassword": "123",
+      "username_fr": "JDH",
+      "password_fr": "123"
+    }
+  ],
+  "donations": [
+    {
+      "id": "1",
+      "type": "التبرع بالدم",
+      "description": "تبرع بالدم لصالح المستشفى المحلي",
+      "date": "2024-06-10",
+      "donorId": "1",
+      "headerImageUrl": "https://picsum.photos/200/300"
+    },
+    {
+      "id": "2",
+      "type": "قضاء الدين",
+      "description": "قضاء دين فقير في منطقتي",
+      "date": "2024-06-09",
+      "donorId": "1f21",
+      "headerImageUrl": "https://picsum.photos/100/300"
+    },
+    {
+      "id": "3",
+      "type": "صدقة",
+      "description": "صدقة للأيتام في المنطقة",
+      "date": "2024-06-08",
+      "donorId": "9b9a",
+      "headerImageUrl": "https://picsum.photos/300/400"
+    },
+    {
+      "id": "4",
+      "type": "زكاة",
+      "description": "دفع زكاة الثروة للفقراء",
+      "date": "2024-06-07",
+      "donorId": "4795",
+      "headerImageUrl": " https://picsum.photos/400/300"
+    },
+    {
+      "id": "5",
+      "type": "كفالة",
+      "description": "كفالة يتيم لتأمين حياة كريمة له",
+      "date": "2024-06-06",
+      "donorId": "15b2",
+      "headerImageUrl": "https://picsum.photos/300/300"
+    },
+    {
+      "id": "6",
+      "type": "اجبار خاطر",
+      "description": "تبرع للمساهمة في تحقيق حلم مريض",
+      "date": "2024-06-05",
+      "donorId": "cd31",
+      "headerImageUrl": "https://picsum.photos/200/300"
+    },
+    {
+      "id": "7",
+      "type": "الصحة",
+      "description": "تبرع لتوفير الرعاية الصحية للمحتاجين",
+      "date": "2024-06-04",
+      "donorId": "cd31",
+      "headerImageUrl": "https://picsum.photos/200/300"
+    },
+    {
+      "id": "8",
+      "type": "التعليم",
+      "description": "دعم مالي لتعليم الأطفال في المناطق النائية",
+      "date": "2024-06-03",
+      "donorId": "cd31",
+      "headerImageUrl": "https://picsum.photos/300/100"
+    },
+    {
+      "id": "9",
+      "type": "اعمار",
+      "description": "مساهمة في إعادة بناء منازل متضررة",
+      "date": "2024-06-02",
+      "donorId": "1",
+      "headerImageUrl": "https://picsum.photos/500/300"
+    }
+  ]
+}

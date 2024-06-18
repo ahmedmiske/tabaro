@@ -1,0 +1,35 @@
+.userpage-container {
+    background-color: #F5F5F5;
+    color: #2ECC71;
+    border-radius: 5px;
+    text-align: right;
+    border: 1px solid #F5F5F5;
+    padding: 20px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    margin-bottom: 80px;
+    
+  }
+
+  .userpage-container  h1{
+   
+  margin-top: 20px;
+  }
+
+  .userpage-container .container-userform{
+    margin-top:10px;
+    padding: 10px;
+
+    border:1px solid none !important;
+    /* background-color: #2ECC71; */
+  }
+  .userpage-container .container-userform h2{
+    text-align: center;
+  }
+
+  .userpage-container .user-list{
+    padding: 20px 0;
+    /* background-color: blue; */
+  }
+  

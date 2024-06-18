@@ -1,0 +1,38 @@
+.container {
+    max-width: 100%; /* Adjust container width */
+    margin: 0 auto;
+  }
+  
+  h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .table {
+    margin-bottom: 0;
+  }
+  
+  th, td {
+    text-align: center;
+    vertical-align: middle;
+  }
+  
+  button[type="submit"] {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    font-weight: bold;
+  }
+  
+  .modal-body p {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  
+  .text-danger {
+    color: #dc3545;
+    font-weight: bold;
+  }
+  

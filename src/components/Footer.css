@@ -1,0 +1,18 @@
+/* Footer.css */
+
+.footer {
+  background-color: var(--main-color);
+  color: #FFFFFF;
+  text-align: center;
+  padding: 20px;
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+}
+
+
+.footer p {
+  font-weight: bold;
+  font-size: 20px;
+  margin: 0;
+}
