@@ -1,0 +1,38 @@
+.containar-infoBar {
+    position: relative;
+    padding: 10px 0;
+    display: flex;
+    justify-content: end;
+    align-items: center;
+    padding: 5px;
+    height: 40px;
+    max-height: 40vh;
+    background-color:var(--main-color) !important;
+    z-index: 10000;
+  }
+  
+  .containar-infoBar  .bar-info-s-media{
+    /* background-color: white; */
+    position: absolute;
+    left: 25px;
+    top: auto;
+    width: 10vw;
+    max-width: 20vw;
+    padding: 5px auto;
+    display: flex;
+    justify-content: space-between;
+    gap:5px;
+   
+
+  }
+
+  .containar-infoBar  .bar-info-s-media  .social-icon{
+  font-size: 25px;
+  max-block-size: auto;
+  color: white;
+  }
+  
+  .containar-infoBar  .bar-info-s-media  .social-icon:hover{
+    color: var(--color-secondary);
+    }
+  

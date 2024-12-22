@@ -1,5 +1,3 @@
-/* Footer.css */
-
 .footer {
   background-color: var(--main-color);
   color: #FFFFFF;
@@ -8,11 +6,25 @@
   width: 100%;
   position: fixed;
   bottom: 0;
+  z-index: 10000; /* Ensure footer is on top */
+  transform: translateY(100%);
+  transition: transform 0.3s ease-in-out;
 }
 
+.footer.show {
+  transform: translateY(0);
+}
 
 .footer p {
   font-weight: bold;
   font-size: 20px;
   margin: 0;
+}
+
+.header {
+  transition: transform 0.3s ease-in-out;
+}
+
+.header.hide {
+  transform: translateY(-100%);
 }

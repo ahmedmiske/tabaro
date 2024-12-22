@@ -13,7 +13,10 @@
       "username": "ahmed",
       "password": "123",
       "username_fr": "Ahmed",
-      "password_fr": "123"
+      "password_fr": "123",
+      "institutionName": "",
+      "institutionLicenseNumber": "",
+      "institutionEstablishmentDate": ""
     },
     {
       "id": "2",
@@ -23,12 +26,14 @@
       "whatsapp": "32333435",
       "address": "النعمة,اشميم ",
       "userType": "needy",
-      "confirmPassword": "123",
       "email": "ahmed.miske@izarraherrieskola.eus",
       "username": "sidi",
       "password": "123",
       "username_fr": "Sidi",
-      "password_fr": "123"
+      "password_fr": "123",
+      "institutionName": "",
+      "institutionLicenseNumber": "",
+      "institutionEstablishmentDate": ""
     },
     {
       "id": "1f21",
@@ -42,10 +47,12 @@
       "username": "ahmed",
       "password": "123",
       "username_fr": "Ahmed",
-      "password_fr": "123"
+      "password_fr": "123",
+      "institutionName": "بسمة",
+      "institutionLicenseNumber": "012345678"
     },
     {
-      "id": "cd31",
+      "id": "1",
       "firstName": "سيدس اعلي ",
       "lastName": "المصطف",
       "phone": "672195628",
@@ -56,7 +63,10 @@
       "username": "said",
       "password": "123",
       "username_fr": "Said",
-      "password_fr": "123"
+      "password_fr": "123",
+      "institutionName": "",
+      "institutionLicenseNumber": "",
+      "institutionEstablishmentDate": ""
     },
     {
       "id": "186e",
@@ -70,7 +80,10 @@
       "username": "ambarka",
       "password": "123",
       "username_fr": "Ambarka",
-      "password_fr": "123"
+      "password_fr": "123",
+      "institutionName": "",
+      "institutionLicenseNumber": "",
+      "institutionEstablishmentDate": ""
     },
     {
       "id": "0532",
@@ -84,7 +97,10 @@
       "username": "ali",
       "password": "123",
       "username_fr": "Ali",
-      "password_fr": "123"
+      "password_fr": "123",
+      "institutionName": "",
+      "institutionLicenseNumber": "",
+      "institutionEstablishmentDate": ""
     },
     {
       "id": "9b9a",
@@ -98,7 +114,10 @@
       "username": "med",
       "password": "123",
       "username_fr": "Med",
-      "password_fr": "123"
+      "password_fr": "123",
+      "institutionName": "",
+      "institutionLicenseNumber": "",
+      "institutionEstablishmentDate": ""
     },
     {
       "id": "4795",
@@ -113,7 +132,10 @@
       "password": "123",
       "confirmPassword": "123",
       "username_fr": "Ahmed",
-      "password_fr": "123"
+      "password_fr": "123",
+      "institutionName": "",
+      "institutionLicenseNumber": "",
+      "institutionEstablishmentDate": ""
     },
     {
       "id": "15b2",
@@ -126,9 +148,60 @@
       "email": "jdh@example.com",
       "username": "jdh",
       "password": "123",
-      "confirmPassword": "123",
       "username_fr": "JDH",
-      "password_fr": "123"
+      "password_fr": "123",
+      "institutionName": "",
+      "institutionLicenseNumber": "",
+      "institutionEstablishmentDate": ""
+    },
+    {
+      "id": "89bd",
+      "firstName": "عبد الله",
+      "lastName": "سيد",
+      "phone": "36373673",
+      "whatsapp": "46464646",
+      "address": "تواكشوط,عرفات ",
+      "email": "ahmedma85@yahoo.fr",
+      "userType": "donor",
+      "username": "dd",
+      "password": "123",
+      "institutionName": "",
+      "institutionLicenseNumber": "",
+      "institutionEstablishmentDate": ""
+    },
+    {
+      "id": "c550",
+      "firstName": "sidiahmed",
+      "lastName": "uomar",
+      "phone": "762203242",
+      "whatsapp": "32333435",
+      "address": "01440",
+      "email": "mariemmiske1@gmail.com",
+      "userType": "individual",
+      "username": "sidia",
+      "password": "123",
+      "confirmPassword": "123",
+      "institutionName": "",
+      "institutionAddress": "",
+      "institutionLicenseNumber": "",
+      "institutionEstablishmentDate": ""
+    },
+    {
+      "id": "d292",
+      "firstName": "mariem",
+      "lastName": "Ahmed Miske",
+      "phone": "762203242",
+      "whatsapp": "36351161",
+      "address": "01440",
+      "email": "mariemmiske1@gmail.com",
+      "userType": "individual",
+      "username": "mary",
+      "password": "123",
+      "confirmPassword": "123",
+      "institutionName": "",
+      "institutionAddress": "",
+      "institutionLicenseNumber": "",
+      "institutionEstablishmentDate": ""
     }
   ],
   "donations": [
@@ -137,55 +210,85 @@
       "type": "التبرع بالدم",
       "description": "تبرع بالدم لصالح المستشفى المحلي",
       "date": "2024-06-10",
-      "donorId": "1",
-      "headerImageUrl": "https://picsum.photos/200/300"
+      "needId": "1",
+      "headerImageUrl": "https://picsum.photos/200/300",
+      "imageUrls": [
+        "https://picsum.photos/200/300",
+        "https://picsum.photos/300/300",
+        "https://picsum.photos/400/300"
+      ]
     },
     {
       "id": "2",
       "type": "قضاء الدين",
       "description": "قضاء دين فقير في منطقتي",
       "date": "2024-06-09",
-      "donorId": "1f21",
-      "headerImageUrl": "https://picsum.photos/100/300"
+      "needId": "2",
+      "headerImageUrl": "https://picsum.photos/300/400",
+      "imageUrls": [
+        "https://picsum.photos/200/300",
+        "https://picsum.photos/400/200",
+        "https://picsum.photos/400/300"
+      ]
     },
     {
       "id": "3",
       "type": "صدقة",
       "description": "صدقة للأيتام في المنطقة",
       "date": "2024-06-08",
-      "donorId": "9b9a",
-      "headerImageUrl": "https://picsum.photos/300/400"
+      "needId": "2",
+      "headerImageUrl": "https://picsum.photos/200/300",
+      "imageUrls": [
+        "https://picsum.photos/200/300",
+        "https://picsum.photos/300/300",
+        "https://picsum.photos/400/300"
+      ]
     },
     {
       "id": "4",
       "type": "زكاة",
       "description": "دفع زكاة الثروة للفقراء",
       "date": "2024-06-07",
-      "donorId": "4795",
-      "headerImageUrl": " https://picsum.photos/400/300"
+      "needId": "1",
+      "headerImageUrl": "https://picsum.photos/200/300",
+      "imageUrls": [
+        "https://picsum.photos/200/300",
+        "https://picsum.photos/300/300",
+        "https://picsum.photos/400/300"
+      ]
     },
     {
       "id": "5",
       "type": "كفالة",
       "description": "كفالة يتيم لتأمين حياة كريمة له",
       "date": "2024-06-06",
-      "donorId": "15b2",
-      "headerImageUrl": "https://picsum.photos/300/300"
+      "needId": "1",
+      "headerImageUrl": "https://picsum.photos/200/300",
+      "imageUrls": [
+        "https://picsum.photos/200/300",
+        "https://picsum.photos/300/300",
+        "https://picsum.photos/400/300"
+      ]
     },
     {
       "id": "6",
       "type": "اجبار خاطر",
       "description": "تبرع للمساهمة في تحقيق حلم مريض",
       "date": "2024-06-05",
-      "donorId": "cd31",
-      "headerImageUrl": "https://picsum.photos/200/300"
+      "needId": "1",
+      "headerImageUrl": "https://picsum.photos/200/300",
+      "imageUrls": [
+        "https://picsum.photos/200/300",
+        "https://picsum.photos/300/300",
+        "https://picsum.photos/400/300"
+      ]
     },
     {
       "id": "7",
       "type": "الصحة",
       "description": "تبرع لتوفير الرعاية الصحية للمحتاجين",
       "date": "2024-06-04",
-      "donorId": "cd31",
+      "donorId": "2",
       "headerImageUrl": "https://picsum.photos/200/300"
     },
     {
@@ -193,16 +296,293 @@
       "type": "التعليم",
       "description": "دعم مالي لتعليم الأطفال في المناطق النائية",
       "date": "2024-06-03",
-      "donorId": "cd31",
-      "headerImageUrl": "https://picsum.photos/300/100"
+      "needId": "1",
+      "headerImageUrl": "https://picsum.photos/200/300",
+      "imageUrls": [
+        "https://picsum.photos/200/300",
+        "https://picsum.photos/300/300",
+        "https://picsum.photos/400/300"
+      ]
     },
     {
       "id": "9",
       "type": "اعمار",
       "description": "مساهمة في إعادة بناء منازل متضررة",
       "date": "2024-06-02",
+      "needId": "1",
+      "headerImageUrl": "https://picsum.photos/200/300",
+      "imageUrls": [
+        "https://picsum.photos/200/300",
+        "https://picsum.photos/300/300",
+        "https://picsum.photos/400/300"
+      ]
+    },
+    {
+      "id": "10",
+      "type": "اعمار",
+      "description": "مساهمة في إعادة بناء منازل متضررة",
+      "date": "2024-06-02",
+      "needId": "1",
+      "headerImageUrl": "https://picsum.photos/200/300",
+      "imageUrls": [
+        "https://picsum.photos/200/300",
+        "https://picsum.photos/300/300",
+        "https://picsum.photos/400/300"
+      ]
+    },
+    {
+      "id": "11",
+      "type": "اعمار",
+      "description": "مساهمة في إعادة بناء منازل متضررة",
+      "date": "2024-06-02",
       "donorId": "1",
       "headerImageUrl": "https://picsum.photos/500/300"
+    },
+    {
+      "id": "12",
+      "type": "الصحة",
+      "description": "تبرع لتوفير الرعاية الصحية للمحتاجين",
+      "date": "2024-06-04",
+      "needId": "1",
+      "headerImageUrl": "https://picsum.photos/200/300",
+      "imageUrls": [
+        "https://picsum.photos/200/300",
+        "https://picsum.photos/300/300",
+        "https://picsum.photos/400/300"
+      ]
+    },
+    {
+      "id": "13",
+      "type": "الصحة",
+      "description": "تبرع لتوفير الرعاية الصحية للمحتاجين",
+      "date": "2024-06-04",
+      "needId": "1",
+      "headerImageUrl": "https://picsum.photos/200/300",
+      "imageUrls": [
+        "https://picsum.photos/200/300",
+        "https://picsum.photos/300/300",
+        "https://picsum.photos/400/300"
+      ]
+    },
+    {
+      "id": "14",
+      "type": "الصحة",
+      "description": "تبرع لتوفير الرعاية الصحية للمحتاجين",
+      "date": "2024-06-04",
+      "needId": "1",
+      "headerImageUrl": "https://picsum.photos/200/300",
+      "imageUrls": [
+        "https://picsum.photos/200/300",
+        "https://picsum.photos/300/300",
+        "https://picsum.photos/400/300"
+      ]
+    },
+    {
+      "id": "15",
+      "type": "صدقة",
+      "description": "تبرع لتوفير الرعاية الصحية للمحتاجين",
+      "date": "2024-06-04",
+      "needId": "1",
+      "headerImageUrl": "https://picsum.photos/200/300",
+      "imageUrls": [
+        "https://picsum.photos/200/300",
+        "https://picsum.photos/300/300",
+        "https://picsum.photos/400/300"
+      ]
+    },
+    {
+      "id": "16",
+      "type": "صدقة",
+      "description": "تبرع لتوفير الرعاية الصحية للمحتاجين",
+      "date": "2024-06-04",
+      "needId": "1",
+      "headerImageUrl": "https://picsum.photos/200/300",
+      "imageUrls": [
+        "https://picsum.photos/200/300",
+        "https://picsum.photos/300/300",
+        "https://picsum.photos/400/300"
+      ]
+    },
+    {
+      "id": "17",
+      "type": "صدقة",
+      "description": "تبرع لتوفير الرعاية الصحية للمحتاجين",
+      "date": "2024-06-04",
+      "needId": "1",
+      "headerImageUrl": "https://picsum.photos/200/300",
+      "imageUrls": [
+        "https://picsum.photos/200/300",
+        "https://picsum.photos/300/300",
+        "https://picsum.photos/400/300"
+      ]
+    },
+    {
+      "id": "18",
+      "type": "صدقة",
+      "description": "تبرع لتوفير الرعاية الصحية للمحتاجين",
+      "date": "2024-06-04",
+      "needId": "1",
+      "headerImageUrl": "https://picsum.photos/200/300",
+      "imageUrls": [
+        "https://picsum.photos/200/300",
+        "https://picsum.photos/300/300",
+        "https://picsum.photos/400/300"
+      ]
+    },
+    {
+      "id": "19",
+      "type": "التبرع بالدم",
+      "description": "تبرع لتوفير الرعاية الصحية للمحتاجين",
+      "date": "2024-06-04",
+      "needId": "1",
+      "headerImageUrl": "https://picsum.photos/200/300",
+      "imageUrls": [
+        "https://picsum.photos/200/300",
+        "https://picsum.photos/300/300",
+        "https://picsum.photos/400/300"
+      ]
+    },
+    {
+      "id": "20",
+      "type": "التبرع بالدم",
+      "description": "تبرع لتوفير الرعاية الصحية للمحتاجين",
+      "date": "2024-06-04",
+      "needId": "1",
+      "headerImageUrl": "https://picsum.photos/200/300",
+      "imageUrls": [
+        "https://picsum.photos/200/300",
+        "https://picsum.photos/300/300",
+        "https://picsum.photos/400/300"
+      ]
+    },
+    {
+      "id": "21",
+      "type": "التبرع بالدم",
+      "description": "تبرع لتوفير الرعاية الصحية للمحتاجين",
+      "date": "2024-06-04",
+      "needId": "1",
+      "headerImageUrl": "https://picsum.photos/200/300",
+      "imageUrls": [
+        "https://picsum.photos/200/300",
+        "https://picsum.photos/300/300",
+        "https://picsum.photos/400/300"
+      ]
+    },
+    {
+      "id": "22",
+      "type": "التبرع بالدم",
+      "description": "تبرع لتوفير الرعاية الصحية للمحتاجين",
+      "date": "2024-06-04",
+      "needId": "1",
+      "headerImageUrl": "https://picsum.photos/200/300",
+      "imageUrls": [
+        "https://picsum.photos/200/300",
+        "https://picsum.photos/300/300",
+        "https://picsum.photos/400/300"
+      ]
+    },
+    {
+      "id": "23",
+      "type": "التبرع بالدم",
+      "description": "تبرع لتوفير الرعاية الصحية للمحتاجين",
+      "date": "2024-06-04",
+      "needId": "1",
+      "headerImageUrl": "https://picsum.photos/200/300",
+      "imageUrls": [
+        "https://picsum.photos/200/300",
+        "https://picsum.photos/300/300",
+        "https://picsum.photos/400/300"
+      ]
+    }
+  ],
+  "campaigns": [
+    {
+      "id": "1",
+      "title": "حملة تبرع بالدم",
+      "description": "حملة لتجميع التبرعات بالدم لصالح المستشفى المحلي.",
+      "startDate": "2024-07-01",
+      "endDate": "2024-07-10",
+      "goalAmount": 5000,
+      "donationsCollected": 3000,
+      "needId": "1",
+      "imageUrls": [
+        "https://picsum.photos/400/300",
+        "https://picsum.photos/350/300",
+        "https://picsum.photos/600/300"
+      ]
+    },
+    {
+      "id": "2",
+      "title": "حملة قضاء دين فقير",
+      "description": "جمع تبرعات لقضاء ديون الفقراء في منطقتنا.",
+      "startDate": "2024-07-15",
+      "endDate": "2024-07-25",
+      "goalAmount": 2000,
+      "donationsCollected": 1200,
+      "needId": "2",
+      "imageUrls": [
+        "https://picsum.photos/600/300",
+        "https://picsum.photos/300/500",
+        "https://picsum.photos/500/300",
+        "https://picsum.photos/250/300",
+        "https://picsum.photos/400/600"
+      ]
+    },
+    {
+      "id": "3",
+      "title": "حملة دعم تعليم الأطفال",
+      "description": "جمع تبرعات لتوفير الدعم المالي لتعليم الأطفال في المناطق النائية.",
+      "startDate": "2024-08-01",
+      "endDate": "2024-08-15",
+      "goalAmount": 3000,
+      "donationsCollected": 1800,
+      "needId": "1",
+      "imageUrls": [
+        "https://picsum.photos/300/300",
+        "https://picsum.photos/300/300",
+        "https://picsum.photos/300/300",
+        "https://picsum.photos/300/300"
+      ]
+    }
+  ],
+  "important-info": [
+    {
+      "id": "1",
+      "title": "انشطة الجمعيات الخيرية ",
+      "description": "جمع تبرعات لتوفير الدعم المالي لتعليم الأطفال في المناطق النائية.",
+      "startDate": "2024-08-01"
+    },
+    {
+      "id": "2",
+      "title": "ابلاغ عن حالة ضياع",
+      "description": "ضياع سيارة حمراء من عرفات .",
+      "startDate": "2024-08-01"
+    },
+    {
+      "id": "3",
+      "title": "حملة دعم تعليم الأطفال",
+      "description": "جمع تبرعات لتوفير الدعم المالي لتعليم الأطفال في المناطق النائية.",
+      "startDate": "2024-08-01"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "1",
+      "title": "انشطة الجمعيات الخيرية ",
+      "message": "تم حفظ تبرعك ",
+      "dateMessage": "2024-08-01"
+    },
+    {
+      "id": "2",
+      "title": "ابلاغ عن حالة ضياع",
+      "message": "ضياع سيارة حمراء من عرفات .",
+      "dateMessage": "2024-08-01"
+    },
+    {
+      "id": "3",
+      "title": "حملة دعم تعليم الأطفال",
+      "message": "جمع تبرعات لتوفير الدعم المالي لتعليم الأطفال في المناطق النائية.",
+      "dateMessage": "2024-08-01"
     }
   ]
 }

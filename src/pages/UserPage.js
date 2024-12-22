@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import UserForm from '../components/UserForm';
 import UserList from '../components/UserList';
 import './UserPage.css';
+import Title from '../components/Title';
 
 function UserPage() {
   const [users, setUsers] = useState([]);
@@ -65,7 +66,7 @@ function UserPage() {
 
   return (
     <div className="userpage-container">
-      <h1>إدارة المستخدمين</h1>
+      <Title text="إدارة المستخدمين"/>
       <div className="container-userform">
         <UserForm addUser={addUser} editingUser={editingUser} updateUser={updateUser} />
       </div>

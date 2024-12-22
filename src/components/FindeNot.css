@@ -1,0 +1,16 @@
+.finde-not-container {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+  }
+  
+  .finde-not-container .card {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    color:var(--main-color-alt);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+  }
+  

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button, Modal } from 'react-bootstrap';
 import './UserList.css';
+import Title from './Title';
 
 function UserList({ onEdit, onDelete }) {
   const [userList, setUserList] = useState([]);
@@ -31,7 +32,7 @@ function UserList({ onEdit, onDelete }) {
 
   return (
     <div className="container mt-5">
-      <h2>قائمة المستخدمين</h2>
+      <Title text='المستخدمين'/>
       <Table striped bordered hover>
         <thead>
           <tr>

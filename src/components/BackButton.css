@@ -1,0 +1,17 @@
+/* BackButton.css */
+.back-button {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    margin-top: 40px;
+    margin-left: 60px;
+    background-color: var(--main-color);
+    border: none;
+    color: #fff;
+    font-weight: bold;
+  }
+  
+  .back-button:hover {
+    background-color: var(--color-secondary);
+  }
+  

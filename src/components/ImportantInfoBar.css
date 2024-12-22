@@ -1,0 +1,22 @@
+.important-info-bar {
+  background-color:var(--main-color-alt) !important;
+    padding: 10px 0;
+    border-bottom: 1px solid #ccc;
+    max-width: 70vw;
+    max-height: 40px;
+    height: 40px;
+    border-left: 4px solid var(--color-secondary);
+    border-right: 4px solid var(--color-secondary);
+  }
+  
+  .info-item {
+    font-size: 1rem;
+    margin-right: 30px;
+    white-space: nowrap;
+    display: flex;
+   justify-content: center;
+   align-items: center;
+   color: white;
+
+  }
+  

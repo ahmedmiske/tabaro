@@ -1,0 +1,52 @@
+.filter-donor {
+  margin: 0 auto !important;
+  max-width: auto; 
+  max-height: fit-content !important;
+  height: 150px;
+  display: flex;
+  flex-direction: row !important;
+  justify-content: space-between;
+  align-items: center!important;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.filter-donor .form-control {
+  width: 100% !important; /* يضمن أن العنصر لا يتجاوز حدود الوالد */
+  text-align: center; 
+  height: fit-content !important;
+  max-height: 100% !important ;
+  margin-bottom: 8px !important;
+  margin-right: 50px !important;
+  border: 2px solid #ccc;
+  box-sizing: border-box;
+}
+
+.filter-donor .filter-date {
+  border: 2px solid #ccc;
+  width: 100% !important; /* يضمن أن العنصر لا يتجاوز حدود الوالد */
+  padding: 5px;
+  margin-left: 20px !important;
+  border-radius: 10px;
+  text-align: center;
+  /* display: flex;
+  justify-content: center;
+  flex-direction: column; */
+  /* box-sizing: border-box; */
+}
+
+.filter-donor .filter-date .input-date {
+  display: flex;
+  justify-content: space-around;
+  width: 100% !important; /* يضمن أن العنصر لا يتجاوز حدود الوالد */
+  box-sizing: border-box;
+}
+
+.filter-donor .filter-date .form-control {
+  width: calc(100% - 20px) !important; /* يضمن أن العنصر لا يتجاوز حدود الوالد */
+  margin-top: 3px !important;
+  text-align: center;
+  box-sizing: border-box;
+  max-width: 100% !important;
+
+}

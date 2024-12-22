@@ -1,0 +1,40 @@
+.campaign-details{
+ margin: auto;
+ padding-top: 40px;
+ margin-bottom: 100px;
+}
+.title-section {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.campaign-details img {
+  transition: transform 0.3s ease;
+}
+
+.campaign-details img:hover {
+  transform: scale(1.3);
+}
+
+.amount-detail {
+  background-color: #e1af64;
+  border: 2px solid #ff9800;
+  font-weight: bold;
+}
+
+.total-amount-detail {
+  background-color: #e4e782;
+  border: 2px solid #ff9800;
+  font-weight: bold;
+}
+
+.campaign-details {
+  border: 2px solid #ccc;
+  background-color: #ccc;
+  border-top: 4px solid green;
+  border-radius: 8px;
+  padding: 40px;
+}

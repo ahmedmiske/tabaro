@@ -1,20 +1,24 @@
 .header {
-  background-color: var(--main-color-fundo); /* Light grey background */
-  position: relative;
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5); /* Softer shadow */
-  color: black !important;
-  padding-left: 60px;
-  padding-right: 60px;
+  background-color: var(--main-color-fundo);
+  position: fixed;
+  width: 100%;
+  top: 0;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+  z-index: 1000; /* Ensure header is on top */
+  transition: transform 0.3s ease-in-out;
+  display: flex;
+  align-items: center;
 }
- .header .logo {
- 
-  margin-left: 60px;
- }
+
+.header .logo {
+  margin-left: 20px;
+  margin-right:60px !important;
+;
+}
+
 .header .nav-header {
   margin-left: 20px;
   padding: 10px 20px;
-  padding-left: 60px;
-  padding-right: 60px;
 }
 
 .header .nav-link {
@@ -22,12 +26,12 @@
   font-size: 20px !important;
   position: relative;
   color: black !important;
-  overflow: hidden;
-  background-color: var(--main-color-alt); /* Darker green */
+  background-color: var(--main-color);
   padding: 10px 10px;
   min-width: 100px;
   text-align: center;
   border-radius: 5px;
+  overflow: hidden;
 }
 
 .header .nav-link::before {
@@ -37,7 +41,7 @@
   height: 4px;
   top: 0;
   left: -100%;
-  background-color: var(--color-primary); /* Blue */
+  background-color: var(--color-primary);
   transition: var(--main-transition);
 }
 
@@ -47,17 +51,8 @@
 }
 
 .header .nav-link:hover {
-  background-color: var(--color-secondary); /* Orange */
+  background-color: var(--color-secondary);
   color: white !important;
-}
-
-.header .logo {
-  color: var(--color-primary); /* Blue */
-  font-size: 26px;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .header .logo img {
@@ -65,5 +60,16 @@
 }
 
 .navbar-nav {
-  direction: rtl; /* Right-to-left direction */
+  direction: rtl;
+}
+
+.auth-button {
+  margin-left: auto;
+  margin-right: 20px;
+  font-size: 25px;
+  padding: 10px !important;
+color:white !important;
+font-weight: bold !important;
+background-color: var(--color-secondary) !important;
+border: none !important;
 }

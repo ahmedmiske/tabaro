@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Card, ListGroup, Row, Col, Container } from 'react-bootstrap';
-import './DonorList.css'; // تأكد من أن ملف CSS تم استيراده بشكل صحيح
+import { Row, Container } from 'react-bootstrap';
+import './DonorList.css';
+import Title from './Title';
+import DonorFilter from './DonorFilter';
+import DonationCard from './DonationCard';
+import FindeNot from './FindeNot'; // استدعاء مكون FindeNot
 
 function DonorListe() {
   const [donations, setDonations] = useState([]);
+  const [filteredDonations, setFilteredDonations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [filter, setFilter] = useState('');
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
   useEffect(() => {
     const fetchDonations = async () => {
@@ -16,6 +24,7 @@ function DonorListe() {
         }
         const data = await response.json();
         setDonations(data);
+        setFilteredDonations(data);
         setLoading(false);
       } catch (error) {
         setError('حدث خطأ أثناء جلب البيانات');
@@ -26,6 +35,24 @@ function DonorListe() {
     fetchDonations();
   }, []);
 
+  useEffect(() => {
+    let filtered = donations;
+
+    if (filter) {
+      filtered = filtered.filter(donation => donation.type === filter);
+    }
+
+    if (startDate) {
+      filtered = filtered.filter(donation => new Date(donation.date) >= new Date(startDate));
+    }
+
+    if (endDate) {
+      filtered = filtered.filter(donation => new Date(donation.date) <= new Date(endDate));
+    }
+
+    setFilteredDonations(filtered);
+  }, [filter, startDate, endDate, donations]);
+
   if (loading) {
     return <p>جاري التحميل...</p>;
   }
@@ -34,40 +61,35 @@ function DonorListe() {
     return <p>{error}</p>;
   }
 
+  const donationTypes = [...new Set(donations.map(donation => donation.type))];
+
   return (
     <div className="donation-container">
-      <h2>التبرعات</h2>
-      <Container>
-        <Row className="donation-grid">
-          {donations.map((donation) => (
-            <Col key={donation.id} xs={12} sm={6} md={4} lg={2} className="donation-card">
-              <Card style={{ height: '100%' ,maxHeight:'100%'}}>
-                <Card.Header
-                  style={{
-                    backgroundImage: `url(${donation.headerImageUrl})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    height: '150px',
-                    color: 'white',
-                    display: 'flex',
-                    alignItems: 'center',
-                    border:'1px solid #cccc',
-                    justifyContent: 'center',
-                    color: 'red'
-                  }}
-                >
-                  <Card.Title>{donation.type}</Card.Title>
-                </Card.Header>
-                <Card.Body style={{ direction: 'rtl' }}>
-                  <Card.Text>{donation.description}</Card.Text>
-                </Card.Body>
-                <ListGroup className="list-group-flush">
-                  <ListGroup.Item>تاريخ الإضافة: {donation.date}</ListGroup.Item>
-                </ListGroup>
-              </Card>
-            </Col>
-          ))}
-        </Row>
+       <Title text="حالات التبرع"/>
+      <div className='filter'>
+     
+      <DonorFilter
+          filter={filter}
+          setFilter={setFilter}
+          startDate={startDate}
+          setStartDate={setStartDate}
+          endDate={endDate}
+          setEndDate={setEndDate}
+          donationTypes={donationTypes}
+        />
+      </div>
+      <Container className='container-card'>
+      
+        {filteredDonations.length === 0 ? (
+          <FindeNot /> // استدعاء مكون FindeNot
+        ) : (
+          
+          <Row className="donation-grid">
+            {filteredDonations.slice(0, 15).map(donation => (
+              <DonationCard key={donation.id} donation={donation} />
+            ))}
+          </Row>
+        )}
       </Container>
     </div>
   );

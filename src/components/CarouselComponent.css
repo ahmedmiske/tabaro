@@ -1,0 +1,24 @@
+.carousel {
+    width: 100%;
+    /* max-width: 800px; */
+    height: 200px;
+    /* margin: auto; */
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .carousel img {
+    max-height: 200px;
+    object-fit: cover;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 2px solid #ccc;
+    border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms-border-radius: 5px;
+    -o-border-radius: 5px;
+}
+  
