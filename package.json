@@ -14,12 +14,12 @@
   "dependencies": {
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
-    "dotenv": "^16.4.5",
+    "dotenv": "^16.4.7",
     "express": "^4.19.2",
     "firebase": "^10.12.5",
     "firebase-admin": "^12.3.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.4.1",
+    "mongoose": "^8.9.2",
     "morgan": "^1.10.0",
     "twilio": "^5.2.2"
   },
