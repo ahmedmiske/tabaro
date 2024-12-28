@@ -1,90 +1,68 @@
 .user-form {
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 25px;
     margin: 20px auto;
     max-width: 500px;
     text-align: right;
-    background-color: #f9f9f9;
+    position: relative;
+    background-color: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.info-section {
-    margin-bottom: 20px; 
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    align-items: center;
-    justify-content: center;
-  
+.user-form:hover {
+    transform: scale(1.01);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
 }
 
-.info-section h3 {
-    margin-bottom: 15px;
-    color: #333;
-    width: 400px;
-    background-color:#eee;
-    text-align: center;
-    border-bottom: 1px solid gray;
-    padding-bottom: 10px;
-    border-radius: 5px;
-    -webkit-border-radius: 5px;
-    -moz-border-radius: 5px;
-    -ms-border-radius: 5px;
-    -o-border-radius: 5px;
-}
+.user-form input[type="text"],
+.user-form input[type="tel"],
+.user-form input[type="email"] {
+    margin-bottom: 10px ;
+    padding: 10px;
 
-.input-group {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px; /* تقليل المسافة بين الحقول */
-    margin-bottom: 0px !important; /* تقليل المسافة بين الحقول */
-    /* border: 1px solid #333; */
 }
-
-.form-group {
-    width: 100%; /* جعل الحقول تأخذ العرض الكامل */
-    margin-bottom: -20px !important;
-}
-
-.form-group-half {
-    flex: 1; /* جعل الحقول تأخذ نصف العرض */
-    margin-bottom: 10px; /* تقليل المسافة بين الحقول */
-}
-
-button[type="submit"] {
-    display: block;
+.user-form .btn-userType{
+    margin: 20px auto;
     width: 100%;
-    padding: 15px; /* زيادة حجم الزر */
-    font-size: 18px; /* زيادة حجم الخط للزر */
+    padding: 20px auto;
+    background-color: var(--main-color);
+    font-size: 20px;
     font-weight: bold;
+    border: none;
+}
+.user-form .btn-userType:hover{
+   
+    background-color: var(--color-secondary);
+   
 }
 
-.modal-body p {
-    margin: 0;
-    font-size: 16px;
-    line-height: 1.5;
-}
-
-.text-danger {
-    color: #dc3545;
-    font-weight: bold;
-}
-
-.info-section .btn-userType{
-    margin-top: 20px !important;
-    width: 200px !important;
-    background-color: rgb(56, 228, 56);
-    color: black !important;
-    padding: 5px 20px !important;
+.user-form #userType {
+    background-color: #ddd;
+    padding: 10px;
+    font-size: 20px;
     text-align: center;
+    font-weight: bold;
+}
+.user-form .sendButton{
+    margin-right: 150px;
+    margin-top:20px ;
+    padding: 20px auto;
+    width: 100%;
+    background-color: var(--main-color);
+    font-size: 20px;
+    font-weight: bold;
+    border: none;
+
 }
 
-.info-section .action-btn-stp2 {
-    display: flex !important;
-    justify-content: space-between;
-    align-items: center !important;
-    gap: 20px !important;
-    margin-top: 0 auto !important;
-    padding: 0px auto !important;
+.user-form .sendButton:hover{
+    background-color: var(--color-secondary);
+}
 
+.user-form .backButton{
+ position: absolute;
+ top:28px;
+ left:25px;
 }

@@ -8,21 +8,21 @@ import Register from './pages/Register';
 import Login from './pages/Login';
 import SocialMedia from './components/SocialMedia';
 import DonationDetails from './components/DonationDetails';
-import CampaignDetails from './components/CampaignDetails'; // Import the new component
+import CampaignDetails from './components/CampaignDetails'; 
 import Donor from './components/Donor';
-import './App.css';
 import InfoBar from './components/InfoBar';
+import './App.css';
 
-// import ImportantInfoBar from './components/ImportantInfoBar';
-// import Notifications from './components/Notifications';
-
-function App({ donations }) {
+function App() {
   const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
       const header = document.querySelector('.header');
       const footer = document.querySelector('.footer');
+
+      if (!header || !footer) return;
+
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
       const windowHeight = window.innerHeight;
       const bodyHeight = document.body.scrollHeight - windowHeight;
@@ -46,8 +46,8 @@ function App({ donations }) {
 
   return (
     <div>
-        <InfoBar />
-        <Header />
+      <InfoBar />
+      <Header />
       <SocialMedia />
       <Routes>
         <Route path="/" element={<LandingPage />} />
@@ -55,8 +55,8 @@ function App({ donations }) {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/donation-details/:id" element={<DonationDetails />} />
-        <Route path="/campaign/:id" element={<CampaignDetails />} /> 
-        <Route path="/donor" element={<Donor />} /> 
+        <Route path="/campaign/:id" element={<CampaignDetails />} />
+        <Route path="/donor" element={<Donor />} />
       </Routes>
       <Footer />
     </div>

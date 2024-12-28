@@ -12,17 +12,18 @@ const CarouselComponent = () => {
     fetch('http://localhost:5000/campaigns')
       .then(response => response.json())
       .then(data => {
-        console.log('API response:', data);  // Log the entire response
+        // console.log('API response:', data);  // Log the entire response
         if (Array.isArray(data)) {
           setCampaigns(data);
+          
         } else {
           setCampaigns([]);
-          console.log('Campaigns array:', data);
+          // console.log('Campaigns array:', data);
         }
         setLoading(false);
       })
       .catch(error => {
-        console.error('Error fetching campaigns:', error);
+        console.error('Error fetching campaigns is:', error);
         setError(error);
         setLoading(false);
       });
@@ -48,7 +49,7 @@ const CarouselComponent = () => {
             <img
               className="d-block w-100"
               src={campaign.imageUrls[0]}
-              alt={`Slide ${index + 1}`}
+              alt={`SLIDE ${index + 1}`}
             />
             <Carousel.Caption>
               <h3>{campaign.title}</h3>

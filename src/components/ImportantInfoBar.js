@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import Marquee from 'react-marquee-slider';
+// import Marquee from 'react-marquee-slider';
 import { Container } from 'react-bootstrap';
+import Marquee from 'react-fast-marquee';
+
 import './ImportantInfoBar.css';
 
 const ImportantInfoBar = ({ apiUrl = 'http://localhost:5000/important-info' }) => {
@@ -15,13 +17,14 @@ const ImportantInfoBar = ({ apiUrl = 'http://localhost:5000/important-info' }) =
 
   return (
     <Container fluid className="important-info-bar">
-      <Marquee velocity={25}>
+      <Marquee gradient={false}>
         {info.map((item, index) => (
           <span key={index} className="info-item">{item.description}</span>
         ))}
       </Marquee>
     </Container>
   );
+  
 };
 
 export default React.memo(ImportantInfoBar);

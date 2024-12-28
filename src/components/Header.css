@@ -68,8 +68,21 @@
   margin-right: 20px;
   font-size: 25px;
   padding: 10px !important;
-color:white !important;
-font-weight: bold !important;
-background-color: var(--color-secondary) !important;
-border: none !important;
+  color:white !important;
+  font-weight: bold !important;
+  background-color: gray !important;
+  border: none !important;
+  cursor: pointer;
+  transition: 0.4s;
+  -webkit-transition: 0.4s;
+  -moz-transition: 0.4s;
+  -ms-transition: 0.4s;
+  -o-transition: 0.4s;
 }
+.auth-button:hover {
+  background-color: var(--color-secondary) !important;
+  color: white !important;
+}
+
+
+

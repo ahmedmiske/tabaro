@@ -12,7 +12,7 @@ function Header() {
           <img src="../logo.png" alt="logo" />
         </Navbar.Brand>
         
-        <Button variant="outline-primary" className="auth-button " as={Link} to="/login">
+        <Button variant="outline-primary auth-button " as={Link} to="/login">
           تسجيل الدخول
         </Button>
         
