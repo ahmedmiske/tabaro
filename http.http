@@ -1,0 +1,76 @@
+@hostname = localhost
+@port = 5000
+@host = {{hostname}}:{{port}}
+//# @prompt username
+GET http://{{host}} HTTP/1.1
+
+### Register User
+POST http://{{host}}/api/users
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YzMyYmNkODkwMTNhYmYyYWY1NGQ4MSIsImlhdCI6MTcyNDA2Njc5NywiZXhwIjoxNzI2NjU4Nzk3fQ._q9Z_IKKX1M8obBGe7jIGot6OTlOJuZHjJrpEzczHU0
+
+{
+  "name": "tstgr",
+  "email": "siduf.doe@example.com",
+  "password": "password123"
+}
+
+### Login User
+# @name user
+POST http://{{host}}/api/users/login
+Content-Type: application/json
+
+{
+  "email": "siduf.doe@example.com",
+  "password": "password123"
+}
+
+### Login admin
+# @name admin
+POST http://{{host}}/api/users/login
+Content-Type: application/json
+
+{
+  "phoneNumber": "36250105",
+  "password": "password123"
+}
+
+### Get All Users (Admin Only)
+GET http://{{host}}/api/users
+Authorization: Bearer {{admin.response.body.token}}
+
+### Middleware to Set JWT Token (for non-admin user)
+### Unauthorized Access to Get All Users
+GET http://{{host}}/api/users
+Authorization: Bearer {{user.response.body.token}}
+
+### Middleware to Set JWT Token (for admin user)
+### Invalid Login
+POST http://{{host}}/api/users/login
+Content-Type: application/json
+
+{
+  "email": "invalid@example.com",
+  "password": "wrongpassword"
+}
+
+
+### Get All Users Without Token
+GET http://{{host}}/api/users
+
+### send otp
+POST http://{{host}}/api/otp/send-otp
+Content-Type: application/json
+
+{
+  "phoneNumber": "36250105"
+}
+
+### verify otp
+POST http://{{host}}/api/otp/verify-otp
+Content-Type: application/json
+
+{
+  "phoneNumber": "36250105",
+  "otp": "133789"
+}
