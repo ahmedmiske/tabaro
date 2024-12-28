@@ -51,7 +51,7 @@ body {
   background-color: #F5F5F5;
 }
 
-main {
+.container {
   flex: 1;
   padding-top: 60px; /* Space for fixed header */
   padding-bottom: 60px; /* Space for fixed footer */

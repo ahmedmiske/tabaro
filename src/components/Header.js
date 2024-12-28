@@ -12,8 +12,11 @@ function Header() {
           <img src="../logo.png" alt="logo" />
         </Navbar.Brand>
         
+        <Button variant="outline-primary auth-button " as={Link} to="/addUserPage">
+          انشاء حساب
+        </Button>
         <Button variant="outline-primary auth-button " as={Link} to="/login">
-          تسجيل الدخول
+         تسجيل الدخول
         </Button>
         
         <Navbar.Toggle aria-controls="basic-navbar-nav" />

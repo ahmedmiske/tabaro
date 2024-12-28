@@ -72,7 +72,7 @@ function Login() {
         </Button>
         <div className="signup-link">
           <span>ليس لديك حساب؟ </span>
-          <Button variant="link" as={Link} to="/signup" className="signup-button">إنشاء حساب</Button>
+          <Button variant="link" as={Link} to="/addUserPage" className="signup-button">إنشاء حساب</Button>
         </div>
       </Form>
         </div>

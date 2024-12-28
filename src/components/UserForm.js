@@ -337,8 +337,9 @@ function UserForm({ addUser, editingUser, updateUser }) {
           <Modal.Title>تم التسجيل بنجاح</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <p>اسم المستخدم: {user.username}</p>
-          <p>كلمة المرور: {user.password}</p>
+          {/* <p>اسم المستخدم: {user.username}</p>
+          <p>كلمة المرور: {user.password}</p> */}
+          <p>{user.name}</p>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowModal(false)}>

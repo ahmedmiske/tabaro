@@ -287,6 +287,40 @@
       "institutionEstablishmentDate": "",
       "institutionWebsite": "",
       "address": "01440"
+    },
+    {
+      "id": "94db",
+      "firstName": "احمد",
+      "lastName": "احمد مسكه",
+      "phone": "345656656",
+      "email": "ahmedma85@yahoo.fr",
+      "userType": "individual",
+      "username": "test",
+      "password": "123",
+      "confirmPassword": "123",
+      "institutionName": "",
+      "institutionLicenseNumber": "",
+      "institutionAddress": "",
+      "institutionEstablishmentDate": "",
+      "institutionWebsite": "",
+      "address": "01440"
+    },
+    {
+      "id": "8cd7",
+      "firstName": "sidiid",
+      "lastName": "alyyyyyy",
+      "phone": "367883993",
+      "email": "ahmedma85@yahoo.fr",
+      "userType": "individual",
+      "username": "sidii",
+      "password": "1234",
+      "confirmPassword": "1234",
+      "institutionName": "",
+      "institutionLicenseNumber": "",
+      "institutionAddress": "",
+      "institutionEstablishmentDate": "",
+      "institutionWebsite": "",
+      "address": "01440"
     }
   ],
   "donations": [
