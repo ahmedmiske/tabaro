@@ -48,7 +48,7 @@ function App() {
 
   return (
     <div>
-      <InfoBar />
+      {/* <InfoBar /> */}
       <Header />
       <SocialMedia />
       <div className="container">

@@ -2,30 +2,59 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
-  name: {
+  firstName: {
+    type: String,
+  },
+  lastName: {
     type: String,
   },
   email: {
     type: String,
+    unique: true,
+    required: true
   },
-  password: {
-    type: String,
-  },
-  phoneNumber: {
+  phone: {
     type: String,
     unique: true,
     required: true
   },
-  address: String,
+  userType: {
+    type: String
+  },
+  username: {
+    type: String,
+    unique: true
+  },
+  password: {
+    type: String,
+  },
+  institutionName: {
+    type: String,
+  },
+  institutionLicenseNumber: {
+    type: String,
+  },
+  institutionAddress: {
+    type: String,
+  },
+  institutionEstablishmentDate: {
+    type: Date,  // Changed to Date if you expect a date value
+  },
+  institutionWebsite: {
+    type: String,
+  },
+  address: {
+    type: String,
+  },
   role: {
     type: String,
     enum: ['user', 'admin', 'beneficiary', 'donor', 'public_institution', 'charity_organization'],
     default: 'user',
   },
-  status:{
+  status: {
     type: String,
-    enum: ['pending','verifid','valid','suspended'],
-    default: "pending"
+    enum: ['pending', 'verified', 'valid', 'suspended'], // corrected 'verified' spelling
+    default: 'pending'
   }
 }, {
   timestamps: true,

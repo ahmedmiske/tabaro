@@ -12,7 +12,7 @@ function LandingPage() {
     <div className="landing-page">
    
       <Container className="text-center d-flex align-items-center justify-content-center vh-100 container-landing">
-      <CarouselComponent  className='carousel-landing'/>
+      {/* <CarouselComponent  className='carousel-landing'/> */}
         <Card className="p-4 card-landing">
           <Card.Body>
             <Card.Title as="h1">مرحبًا بكم في منصة تبرع</Card.Title>

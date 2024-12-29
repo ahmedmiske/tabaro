@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Form, Button, Toast, Modal } from 'react-bootstrap';
 import './UserForm.css';
@@ -40,7 +41,7 @@ function UserForm({ addUser, editingUser, updateUser }) {
   const verifyCode = () => {
     if (verificationCode === '3229') {
       setIsPhoneVerified(true);
-      setStep(3);
+      setStep(step + 1);
     } else {
       setError('رمز التحقق غير صحيح');
     }
@@ -56,13 +57,36 @@ function UserForm({ addUser, editingUser, updateUser }) {
       setError('يرجى التحقق من الهاتف قبل المتابعة');
       return;
     }
+
+    fetch('http://localhost:5000/users', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(user)
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Success:', data);
+      setShowModal(true);
+      resetForm();
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+      setError('حدث خطأ أثناء إرسال البيانات');
+    });
+    
+
     if (editingUser) {
       updateUser(user);
     } else {
       addUser(user);
-      setShowModal(true);
     }
-    resetForm();
   };
 
   const resetForm = () => {
@@ -96,22 +120,15 @@ function UserForm({ addUser, editingUser, updateUser }) {
 
   return (
     <>
-      <Toast
-        onClose={() => setShowToast(false)}
-        show={showToast}
-        delay={3000}
-        autohide
-        style={{ position: 'fixed', top: 20, right: 20 }}
-      >
+      <Toast onClose={() => setShowToast(false)} show={showToast} delay={3000} autohide style={{ position: 'fixed', top: 20, right: 20 }}>
         <Toast.Header>
           <strong className="me-auto">إشعار</strong>
         </Toast.Header>
         <Toast.Body>تم إرسال رمز التحقق إلى رقم الهاتف: {user.phone}</Toast.Body>
       </Toast>
-
       <Form onSubmit={handleSubmit} className="user-form">
-        {/* الخطوة 1: اختيار نوع الحساب */}
-        {step === 1 && (
+         {/* الخطوة 1: اختيار نوع الحساب */}
+         {step === 1 && (
           <div className="info-section">
             <h3>اختر نوع الحساب</h3>
             <Form.Group controlId="userType">
@@ -123,16 +140,17 @@ function UserForm({ addUser, editingUser, updateUser }) {
                 onChange={handleChange}
                 required
               >
-                <option value="">اختر نوع الحساب</option>
-                <option value="individual">حساب فردي</option>
-                <option value="institutional">حساب مؤسسي</option>
-              </Form.Control>
-            </Form.Group>
+                 <option value="">اختر نوع الحساب</option>
+                 <option value="individual">حساب فردي</option>
+                 <option value="institutional">حساب مؤسسي</option>
+               </Form.Control>
+             </Form.Group>
             <Button variant="primary sendButton" onClick={handleNext}>
               التالي
             </Button>
           </div>
-        )}
+         )}
+
 
         {/* الخطوة 2: التحقق من رقم الهاتف */}
         {step === 2 && (
@@ -148,7 +166,7 @@ function UserForm({ addUser, editingUser, updateUser }) {
                 required
               />
             </Form.Group>
-            {sentCode && (
+             {sentCode && (
               <>
                 <Form.Group controlId="verificationCode">
                   <Form.Label>رمز التحقق</Form.Label>
@@ -158,14 +176,14 @@ function UserForm({ addUser, editingUser, updateUser }) {
                     onChange={(e) => setVerificationCode(e.target.value)}
                     required
                   />
-                </Form.Group>
-                {error && <p className="text-danger">{error}</p>}
-                <Button variant="primary sendButton" onClick={verifyCode}>
-                  تحقق
-                </Button>
-              </>
-            )}
-            {!sentCode && (
+                 </Form.Group>
+                 {error && <p className="text-danger">{error}</p>}
+                 <Button variant="primary sendButton" onClick={verifyCode}>
+                   تحقق
+                 </Button>
+               </>
+             )}
+             {!sentCode && (
               <Button variant="primary sendButton" onClick={sendVerificationCode}>
                 أرسل رمز التحقق
               </Button>
@@ -175,6 +193,7 @@ function UserForm({ addUser, editingUser, updateUser }) {
             </Button>
           </div>
         )}
+
 
         {/* الخطوة 3: تسجيل المعلومات الشخصية أو المؤسسية */}
         {step === 3 && user.userType === 'individual' && (
@@ -201,6 +220,7 @@ function UserForm({ addUser, editingUser, updateUser }) {
               />
             </Form.Group>
 
+
             <Form.Group controlId="email">
               <Form.Label>البريد الالكتروني </Form.Label>
               <Form.Control
@@ -208,9 +228,10 @@ function UserForm({ addUser, editingUser, updateUser }) {
                 name="email"
                 value={user.email}
                 onChange={handleChange}
-                
+               
               />
             </Form.Group>
+
 
             <Form.Group controlId="address">
               <Form.Label>العنوان </Form.Label>
@@ -219,9 +240,10 @@ function UserForm({ addUser, editingUser, updateUser }) {
                 name="address"
                 value={user.address}
                 onChange={handleChange}
-                
+               
               />
             </Form.Group>
+
 
             <Button variant="secondary backButton" onClick={handlePrev}>
               السابق
@@ -231,6 +253,7 @@ function UserForm({ addUser, editingUser, updateUser }) {
             </Button>
           </div>
         )}
+
 
         {step === 3 && user.userType === 'institutional' && (
           <div className="info-section">
@@ -256,6 +279,7 @@ function UserForm({ addUser, editingUser, updateUser }) {
               />
             </Form.Group>
 
+
             <Form.Group controlId="institutionAddress">
               <Form.Label> العنوان</Form.Label>
               <Form.Control
@@ -277,7 +301,7 @@ function UserForm({ addUser, editingUser, updateUser }) {
                 required
               />
             </Form.Group>
-            
+           
             <Button variant="secondary backButton" onClick={handlePrev}>
               السابق
             </Button>
@@ -286,6 +310,7 @@ function UserForm({ addUser, editingUser, updateUser }) {
             </Button>
           </div>
         )}
+
 
         {/* الخطوة 4: تسجيل معلومات الحساب */}
         {step === 4 && (
@@ -330,21 +355,15 @@ function UserForm({ addUser, editingUser, updateUser }) {
             </Button>
           </div>
         )}
-      </Form>
-
+       </Form>
+          
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>تم التسجيل بنجاح</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-          {/* <p>اسم المستخدم: {user.username}</p>
-          <p>كلمة المرور: {user.password}</p> */}
-          <p>{user.name}</p>
-        </Modal.Body>
+        <Modal.Body>تم تسجيل بياناتك بنجاح في النظام.</Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
-            إغلاق
-          </Button>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>إغلاق</Button>
         </Modal.Footer>
       </Modal>
     </>
