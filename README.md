@@ -68,3 +68,60 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+HTTP/1.1 500 Internal Server Error
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Type: application/json; charset=utf-8
+Content-Length: 617
+ETag: W/"269-XwlPwkeNCchrBK8wSRQheio6+9Q"
+Date: Sun, 29 Dec 2024 16:53:24 GMT
+Connection: close
+
+{
+  "message": "User validation failed: phone: Path `phone` is required., email: Path `email` is required.",
+  "stack": "ValidationError: User validation failed: phone: Path `phone` is required., email: Path `email` is required.\n    at Document.invalidate (C:\\Front-end\\Project-tabaro\\tabaro\\node_modules\\mongoose\\lib\\document.js:3331:32)\n    at C:\\Front-end\\Project-tabaro\\tabaro\\node_modules\\mongoose\\lib\\document.js:3092:17\n    at C:\\Front-end\\Project-tabaro\\tabaro\\node_modules\\mongoose\\lib\\schemaType.js:1407:9\n    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)"
+}
+
+HTTP/1.1 500 Internal Server Error
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Type: application/json; charset=utf-8
+Content-Length: 549
+ETag: W/"225-VFOiIYVz7EB3BQiyfENFr2e5Zl4"
+Date: Sun, 29 Dec 2024 16:57:23 GMT
+Connection: close
+
+{
+  "message": "User validation failed: phone: Path `phone` is required.",
+  "stack": "ValidationError: User validation failed: phone: Path `phone` is required.\n    at Document.invalidate (C:\\Front-end\\Project-tabaro\\tabaro\\node_modules\\mongoose\\lib\\document.js:3331:32)\n    at C:\\Front-end\\Project-tabaro\\tabaro\\node_modules\\mongoose\\lib\\document.js:3092:17\n    at C:\\Front-end\\Project-tabaro\\tabaro\\node_modules\\mongoose\\lib\\schemaType.js:1407:9\n    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)"
+}
+
+HTTP/1.1 201 Created
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Type: application/json; charset=utf-8
+Content-Length: 22
+ETag: W/"16-c0B7i8fEAxKJO3fmRZ68aw5PmCA"
+Date: Sun, 29 Dec 2024 17:04:28 GMT
+Connection: close
+
+{
+  "message": "OTP sent"
+}
+
+
+
+HTTP/1.1 500 Internal Server Error
+X-Powered-By: Express
+Access-Control-Allow-Origin: *
+Content-Type: application/json; charset=utf-8
+Content-Length: 609
+ETag: W/"261-EU8v4MuqjlLnbMCFVSwi9cjtGmM"
+Date: Sun, 29 Dec 2024 17:14:26 GMT
+Connection: close
+
+{
+  "message": "User validation failed: status: `verifid` is not a valid enum value for path `status`.",
+  "stack": "ValidationError: User validation failed: status: `verifid` is not a valid enum value for path `status`.\n    at Document.invalidate (C:\\Front-end\\Project-tabaro\\tabaro\\node_modules\\mongoose\\lib\\document.js:3331:32)\n    at C:\\Front-end\\Project-tabaro\\tabaro\\node_modules\\mongoose\\lib\\document.js:3092:17\n    at C:\\Front-end\\Project-tabaro\\tabaro\\node_modules\\mongoose\\lib\\schemaType.js:1407:9\n    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)"
+}

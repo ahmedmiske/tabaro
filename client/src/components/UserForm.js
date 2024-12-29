@@ -7,7 +7,7 @@ function UserForm({ addUser, editingUser, updateUser }) {
   const [user, setUser] = useState({
     firstName: '',
     lastName: '',
-    phone: '',
+    phoneNumber: '',
     email: '',
     userType: '',
     username: '',
@@ -58,7 +58,7 @@ function UserForm({ addUser, editingUser, updateUser }) {
       return;
     }
 
-    fetch('http://localhost:5000/users', {
+    fetch('http://localhost:5000/api/users', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -93,7 +93,7 @@ function UserForm({ addUser, editingUser, updateUser }) {
     setUser({
       firstName: '',
       lastName: '',
-      phone: '',
+      phoneNumber: '',
       email: '',
       userType: '',
       username: '',
@@ -124,7 +124,7 @@ function UserForm({ addUser, editingUser, updateUser }) {
         <Toast.Header>
           <strong className="me-auto">إشعار</strong>
         </Toast.Header>
-        <Toast.Body>تم إرسال رمز التحقق إلى رقم الهاتف: {user.phone}</Toast.Body>
+        <Toast.Body>تم إرسال رمز التحقق إلى رقم الهاتف: {user.phoneNumber}</Toast.Body>
       </Toast>
       <Form onSubmit={handleSubmit} className="user-form">
          {/* الخطوة 1: اختيار نوع الحساب */}
@@ -156,12 +156,12 @@ function UserForm({ addUser, editingUser, updateUser }) {
         {step === 2 && (
           <div className="info-section">
             <h3>التحقق من رقم الهاتف</h3>
-            <Form.Group controlId="phone">
+            <Form.Group controlId="phoneNumber">
               <Form.Label>رقم الهاتف</Form.Label>
               <Form.Control
                 type="tel"
-                name="phone"
-                value={user.phone}
+                name="phoneNumber"
+                value={user.phoneNumber}
                 onChange={handleChange}
                 required
               />

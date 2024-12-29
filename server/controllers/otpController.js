@@ -22,7 +22,7 @@ const verifyOTP = asyncHandler(async (req, res) => {
   const { phoneNumber } = req.body;
 
   const user = await User.findOne({ phoneNumber });
-  user.status = 'verifid';
+  user.status = 'verified';
   await user.save();
 
   const token = generateToken(user.id);
