@@ -18,7 +18,7 @@ function DonorListe() {
   useEffect(() => {
     const fetchDonations = async () => {
       try {
-        const response = await fetch('http://localhost:5000/donations');
+        const response = await fetch('/donations');
         if (!response.ok) {
           throw new Error('Failed to fetch data');
         }

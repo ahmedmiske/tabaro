@@ -14,7 +14,7 @@ const CampaignDetails = () => {
   useEffect(() => {
     const fetchCampaign = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/campaigns/${id}`);
+        const response = await fetch(`/campaigns/${id}`);
         const data = await response.json();
         setCampaign(data);
       } catch (error) {

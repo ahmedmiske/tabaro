@@ -12,7 +12,7 @@ function DonationDetails() {
   //get the user needed information
 
   useEffect(() => {
-    fetch(`http://localhost:5000/donations/${id}`)
+    fetch(`/donations/${id}`)
       .then((res) => res.json())
       .then((data) => setDonation(data))
       .catch((error) => {

@@ -5,7 +5,7 @@ import Marquee from 'react-fast-marquee';
 
 import './ImportantInfoBar.css';
 
-const ImportantInfoBar = ({ apiUrl = 'http://localhost:5000/important-info' }) => {
+const ImportantInfoBar = ({ apiUrl = '/important-info' }) => {
   const [info, setInfo] = useState([]);
 
   useEffect(() => {

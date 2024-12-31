@@ -16,7 +16,7 @@ function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/users');
+      const response = await fetch('/users');
       const users = await response.json();
       const user = users.find(user => user.username === username && user.password === password);
       if (user) {

@@ -9,7 +9,7 @@ function UserPage() {
   const [editingUser, setEditingUser] = useState(null);
 
   const getAllUsers = () => {
-    fetch('http://localhost:5000/users')
+    fetch('/users')
       .then((res) => res.json())
       .then((data) => setUsers(data))
       .catch((error) => console.error('Error:', error));
@@ -20,7 +20,7 @@ function UserPage() {
   }, []);
 
   const addUser = (user) => {
-    fetch('http://localhost:5000/users', {
+    fetch('/users', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -35,7 +35,7 @@ function UserPage() {
   };
 
   const updateUser = (user) => {
-    fetch(`http://localhost:5000/users/${user.id}`, {
+    fetch(`/users/${user.id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -51,7 +51,7 @@ function UserPage() {
   };
 
   const deleteUser = (id) => {
-    fetch(`http://localhost:5000/users/${id}`, {
+    fetch(`/users/${id}`, {
       method: 'DELETE',
     })
       .then(() => {

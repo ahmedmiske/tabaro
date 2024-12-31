@@ -10,8 +10,9 @@ const { generateToken } = require('../utils/otpUtils');
 const sendOtp = asyncHandler(async (req, res) => {
   // save user 
   const { phoneNumber } = req.body;
-  const user = new User({ phoneNumber });
-  await user.save();
+  // const user = new User({ phoneNumber }); 
+  await User.updateOne({ phoneNumber },{phoneNumber}, {upsert: true});
+  // await user.save();
   res.status(201).send({ message: 'OTP sent' });
 });
 

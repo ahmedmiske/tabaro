@@ -32,19 +32,56 @@ function UserForm({ addUser, editingUser, updateUser }) {
     setUser({ ...user, [e.target.name]: e.target.value });
   };
 
-  const sendVerificationCode = () => {
-    setShowToast(true);
-    setSentCode(true);
-    setTimeout(() => setShowToast(false), 3000);
+  const verifyOtp = (phoneNumber,otp) => {
+    fetch('/api/otp/verify-otp', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({phoneNumber, otp})
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Success:', data);
+      sessionStorage.setItem('token', data.token);
+      setShowToast(true);
+      // setSentCode(true);
+      setTimeout(() => setShowToast(false), 6000);
+      handleNext();
+    })
+    .catch((error) => {
+      setError('رمز التحقق غير صحيح');
+      console.error('Error:', error);
+    });
   };
 
-  const verifyCode = () => {
-    if (verificationCode === '3229') {
-      setIsPhoneVerified(true);
-      setStep(step + 1);
-    } else {
-      setError('رمز التحقق غير صحيح');
-    }
+  const sendOtp = () => {
+    
+    fetch('/api/otp/send-otp', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({phoneNumber: user.phoneNumber})
+    }).then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    }).then(data => {
+      console.log('Success:', data);
+      // setIsPhoneVerified(true);
+      setSentCode(true);
+      // setStep(step + 1);
+    }).catch((error) => {
+      console.error('Error:', error);
+    });
+    
   };
 
   const handleSubmit = (e) => {
@@ -58,7 +95,7 @@ function UserForm({ addUser, editingUser, updateUser }) {
       return;
     }
 
-    fetch('http://localhost:5000/api/users', {
+    fetch('/api/users', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -109,11 +146,7 @@ function UserForm({ addUser, editingUser, updateUser }) {
   };
 
   const handleNext = () => {
-    if (step === 2 && !isPhoneVerified) {
-      sendVerificationCode();
-    } else {
-      setStep(step + 1);
-    }
+    setStep(step + 1);
   };
 
   const handlePrev = () => setStep(step - 1);
@@ -178,13 +211,13 @@ function UserForm({ addUser, editingUser, updateUser }) {
                   />
                  </Form.Group>
                  {error && <p className="text-danger">{error}</p>}
-                 <Button variant="primary sendButton" onClick={verifyCode}>
+                 <Button variant="primary sendButton" onClick={()=>{verifyOtp(user.phoneNumber,verificationCode)}}>
                    تحقق
                  </Button>
                </>
              )}
              {!sentCode && (
-              <Button variant="primary sendButton" onClick={sendVerificationCode}>
+              <Button variant="primary sendButton" onClick={sendOtp}>
                 أرسل رمز التحقق
               </Button>
             )}

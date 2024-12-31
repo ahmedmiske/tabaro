@@ -16,7 +16,7 @@ function DonationForm({ addDonation }) {
     formData.append('headerImage', headerImage);
 
     try {
-      const response = await fetch('http://localhost:5000/donations', {
+      const response = await fetch('/donations', {
         method: 'POST',
         body: formData,
       });

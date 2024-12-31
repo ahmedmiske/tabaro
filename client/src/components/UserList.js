@@ -9,7 +9,7 @@ function UserList({ onEdit, onDelete }) {
   const [userToDelete, setUserToDelete] = useState(null);
 
   const getAllUsers = () => {
-    fetch('http://localhost:5000/users')
+    fetch('/users')
       .then((res) => res.json())
       .then((data) => setUserList(data));
   };

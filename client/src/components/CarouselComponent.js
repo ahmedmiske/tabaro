@@ -9,7 +9,7 @@ const CarouselComponent = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch('http://localhost:5000/campaigns')
+    fetch('/campaigns')
       .then(response => response.json())
       .then(data => {
         // console.log('API response:', data);  // Log the entire response

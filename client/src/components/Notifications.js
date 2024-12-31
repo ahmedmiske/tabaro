@@ -10,7 +10,7 @@ const Notifications = () => {
   const ref = useRef(null);
 
   useEffect(() => {
-    fetch('http://localhost:5000/notifications')
+    fetch('/notifications')
       .then(response => response.json())
       .then(data => setNotifications(data))
       .catch(error => console.error('Error fetching notifications:', error));
