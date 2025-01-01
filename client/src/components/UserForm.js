@@ -23,7 +23,7 @@ function UserForm({ addUser, editingUser, updateUser }) {
   const [step, setStep] = useState(1);
   const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState('');
-  const [isPhoneVerified, setIsPhoneVerified] = useState(false);
+  // const [isPhoneVerified, setIsPhoneVerified] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
   const [sentCode, setSentCode] = useState(false);
   const [showToast, setShowToast] = useState(false);
@@ -42,7 +42,7 @@ function UserForm({ addUser, editingUser, updateUser }) {
     })
     .then(response => {
       if (!response.ok) {
-        throw new Error('Network response was not ok');
+        throw new Error('Network response was not ok', response);
       }
       return response.json();
     })
@@ -90,15 +90,16 @@ function UserForm({ addUser, editingUser, updateUser }) {
       setError('كلمتا المرور غير متطابقتين');
       return;
     }
-    if (!isPhoneVerified) {
-      setError('يرجى التحقق من الهاتف قبل المتابعة');
-      return;
-    }
+    // if (!isPhoneVerified) {
+    //   setError('يرجى التحقق من الهاتف قبل المتابعة');
+    //   return;
+    // }
 
     fetch('/api/users', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${sessionStorage.getItem('token')}`  //     token
       },
       body: JSON.stringify(user)
     })
@@ -111,6 +112,7 @@ function UserForm({ addUser, editingUser, updateUser }) {
     .then(data => {
       console.log('Success:', data);
       setShowModal(true);
+      addUser(user);
       resetForm();
     })
     .catch((error) => {
@@ -119,11 +121,11 @@ function UserForm({ addUser, editingUser, updateUser }) {
     });
     
 
-    if (editingUser) {
-      updateUser(user);
-    } else {
-      addUser(user);
-    }
+    // if (editingUser) {
+    //   updateUser(user);
+    // } else {
+    //   addUser(user);
+    // }
   };
 
   const resetForm = () => {

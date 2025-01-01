@@ -4,15 +4,26 @@
 //# @prompt username
 GET http://{{host}} HTTP/1.1
 
+### Login and receive JWT Token
+POST http://{{host}}/api/users/login
+Content-Type: application/json
+
+{
+  "phoneNumber": "36250105",
+  "password": "123"
+}
+
+
+
 ### Register User
 POST http://{{host}}/api/users
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YzMyYmNkODkwMTNhYmYyYWY1NGQ4MSIsImlhdCI6MTcyNDA2Njc5NywiZXhwIjoxNzI2NjU4Nzk3fQ._q9Z_IKKX1M8obBGe7jIGot6OTlOJuZHjJrpEzczHU0
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NzE4MTFjNGJiMTAxNWNiNDAyZjIxMCIsImlhdCI6MTczNTY3NTc3MCwiZXhwIjoxNzM4MjY3NzcwfQ.Qu5X9e22atvD8zvBgHB_4GhIZcI6uFiQe6785D8gic4
 
 {
-  "name": "tstgr",
-  "email": "siduf.doe@example.com",
-  "password": "password123"
+  "name": "ab",
+  "email": "amedmiskeahmed@gmail.com",
+  "password": "123"
 }
 
 ### Login User

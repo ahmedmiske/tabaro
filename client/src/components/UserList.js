@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button, Modal } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom'; // استيراد هوك useNavigate للتوجيه
 import './UserList.css';
 import Title from './Title';
 
@@ -7,11 +8,34 @@ function UserList({ onEdit, onDelete }) {
   const [userList, setUserList] = useState([]);
   const [showConfirm, setShowConfirm] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
+  const navigate = useNavigate(); // استخدام useNavigate للتوجيه
 
   const getAllUsers = () => {
-    fetch('/users')
-      .then((res) => res.json())
-      .then((data) => setUserList(data));
+    const token = sessionStorage.getItem('token');
+
+    fetch('/api/users', {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    })
+    .then((res) => {
+      if (!res.ok) {
+        if (res.status === 401) {
+          // إذا كان الخطأ 401 (غير مصرح)، قم بإعادة التوجيه إلى صفحة تسجيل الدخول
+          throw new Error('Unauthorized. Redirecting to login.');
+        }
+        throw new Error(`HTTP error! Status: ${res.status}`);
+      }
+      return res.json();
+    })
+    .then((data) => setUserList(data))
+    .catch((error) => {
+      console.error('Error fetching users:', error.message);
+      if (error.message.includes('Unauthorized')) {
+        navigate('/login'); // إعادة التوجيه إلى صفحة تسجيل الدخول
+      }
+    });
   };
 
   useEffect(() => {
@@ -24,10 +48,13 @@ function UserList({ onEdit, onDelete }) {
   };
 
   const confirmDelete = () => {
-    onDelete(userToDelete.id);
-    setShowConfirm(false);
-    setUserToDelete(null);
-    getAllUsers(); // Update the list after deletion
+    onDelete(userToDelete.id)
+      .then(() => {
+        getAllUsers(); // Update the list after deletion
+        setShowConfirm(false);
+        setUserToDelete(null);
+      })
+      .catch((error) => console.error('Error deleting user:', error));
   };
 
   return (
@@ -53,13 +80,13 @@ function UserList({ onEdit, onDelete }) {
             <tr key={user.id}>
               <td>{user.firstName}</td>
               <td>{user.lastName}</td>
-              <td>{user.phone}</td>
+              <td>{user.phoneNumber}</td>
               <td>{user.whatsapp}</td>
               <td>{user.address}</td>
               <td>{user.email}</td>
               <td>{user.userType}</td>
               <td>{user.username}</td>
-              <td>{user.password}</td>
+              <td>{'****'}</td>
               <td>
                 <Button variant="warning" onClick={() => onEdit(user)}>تعديل</Button>{' '}
                 <Button variant="danger" onClick={() => handleDeleteClick(user)}>حذف</Button>

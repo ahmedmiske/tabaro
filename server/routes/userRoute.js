@@ -16,4 +16,5 @@ router.route('/')
         authorize('admin'), 
         getUsers
     );
+    
 module.exports.userRoutes = router;

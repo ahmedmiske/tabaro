@@ -5,22 +5,36 @@ import './UserPage.css';
 import Title from '../components/Title';
 
 function UserPage() {
-  const [users, setUsers] = useState([]);
+  const [userList, setUserList] = useState([]);
   const [editingUser, setEditingUser] = useState(null);
 
   const getAllUsers = () => {
-    fetch('/users')
-      .then((res) => res.json())
-      .then((data) => setUsers(data))
-      .catch((error) => console.error('Error:', error));
-  };
+    const token = sessionStorage.getItem('token'); // 
+    fetch('/api/users', {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}` //   
+      }
+    })
+    .then((res) => {
+      if (!res.ok) {
+        throw new Error(`HTTP error! Status: ${res.status}`);
+      }
+      return res.json();
+    })
+    .then((data) => setUserList(data))
+    .catch((error) => {
+      console.error('Error fetching users:', error.message);
+    });
+};
+
 
   useEffect(() => {
     getAllUsers();
   }, []);
 
   const addUser = (user) => {
-    fetch('/users', {
+    fetch('/api/users', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -29,7 +43,7 @@ function UserPage() {
     })
       .then((response) => response.json())
       .then((data) => {
-        setUsers([...users, data]);
+        setUserList([...userList, data]);
       })
       .catch((error) => console.error('Error:', error));
   };
@@ -44,7 +58,7 @@ function UserPage() {
     })
       .then((response) => response.json())
       .then((data) => {
-        setUsers(users.map((u) => (u.id === data.id ? data : u)));
+        setUserList(userList.map((u) => (u.id === data.id ? data : u)));
         setEditingUser(null);
       })
       .catch((error) => console.error('Error:', error));
@@ -55,7 +69,7 @@ function UserPage() {
       method: 'DELETE',
     })
       .then(() => {
-        setUsers(users.filter((user) => user.id !== id));
+        setUserList(userList.filter((user) => user.id !== id));
       })
       .catch((error) => console.error('Error:', error));
   };

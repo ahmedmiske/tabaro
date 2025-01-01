@@ -3,7 +3,8 @@ import UserForm from '../components/UserForm';
 import './addUserPage.css';
 import Title from '../components/Title';
 
-function AddUserserPage() {
+function AddUserPage() {
+  
   const [users, setUsers] = useState([]);
  
 
@@ -12,12 +13,13 @@ function AddUserserPage() {
   }, []);
 
   const addUser = (user) => {
-    fetch('/users', {
+    fetch('/api/users', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${sessionStorage.getItem('token')}`  //     token
       },
-      body: JSON.stringify(user),
+      body: JSON.stringify(user)
     })
       .then((response) => response.json())
       .then((data) => {
@@ -37,4 +39,4 @@ function AddUserserPage() {
   );
 }
 
-export default AddUserserPage;
+export default AddUserPage;

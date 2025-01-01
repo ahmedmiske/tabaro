@@ -16,6 +16,9 @@
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
 }
 
+#userType{
+ border: 2px solid gray;
+}
 .user-form input[type="text"],
 .user-form input[type="tel"],
 .user-form input[type="email"] {
