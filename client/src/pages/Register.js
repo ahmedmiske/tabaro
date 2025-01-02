@@ -6,7 +6,7 @@ function Register() {
   const [users, setUsers] = useState([]);
 
   const addUser = (user) => {
-    fetch('/users', {
+    fetch('/api/users', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

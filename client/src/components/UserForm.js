@@ -90,15 +90,16 @@ function UserForm({ addUser, editingUser, updateUser }) {
       setError('كلمتا المرور غير متطابقتين');
       return;
     }
-    if (!isPhoneVerified) {
-      setError('يرجى التحقق من الهاتف قبل المتابعة');
-      return;
-    }
+    // if (!isPhoneVerified) {
+    //   setError('يرجى التحقق من الهاتف قبل المتابعة');
+    //   return;
+    // }
 
     fetch('/api/users', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${sessionStorage.getItem('token')}`
       },
       body: JSON.stringify(user)
     })

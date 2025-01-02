@@ -9,7 +9,7 @@ function UserPage() {
   const [editingUser, setEditingUser] = useState(null);
 
   const getAllUsers = () => {
-    fetch('/users')
+    fetch('/api/users')
       .then((res) => res.json())
       .then((data) => setUsers(data))
       .catch((error) => console.error('Error:', error));
@@ -20,7 +20,7 @@ function UserPage() {
   }, []);
 
   const addUser = (user) => {
-    fetch('/users', {
+    fetch('/api/users', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

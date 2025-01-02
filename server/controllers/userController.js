@@ -7,13 +7,22 @@ const { generateToken } = require('../utils/otpUtils');
 // @access  Public
 const registerUser = asyncHandler(async (req, res) => {
     const user = req.user;
-    if(!user) throw new Error("should register phone number first");
+    if (!user) throw new Error("should register phone number first");
     const { name, email, password } = req.body;
 
-    user.name = name;
+    user.firstName = firstName;
+    user.lastName = lastName;
     user.email = email;
+    user.type = userType;
+    user.username = username;
     user.password = password;
-
+    user.institutionName = institutionName;
+    user.institutionLicenseNumber = institutionLicenseNumber;
+    user.institutionAddress = institutionAddress;
+    user.institutionEstablishmentDate = institutionEstablishmentDate;
+    user.institutionWebsite = institutionWebsite;
+    user.address = address;
+    
     try {
         const updatedUser = await user.save();
         res.status(201).json(updatedUser);
