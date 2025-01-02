@@ -11,6 +11,7 @@ function UserList({ onEdit, onDelete }) {
   const navigate = useNavigate(); // استخدام useNavigate للتوجيه
 
   const getAllUsers = () => {
+<<<<<<< HEAD
     const token = sessionStorage.getItem('token');
 
     fetch('/api/users', {
@@ -36,6 +37,11 @@ function UserList({ onEdit, onDelete }) {
         navigate('/login'); // إعادة التوجيه إلى صفحة تسجيل الدخول
       }
     });
+=======
+    fetch('/api/users')
+      .then((res) => res.json())
+      .then((data) => setUserList(data));
+>>>>>>> 5c80fed0b3a2bb3daedce0d843125982af0cebb8
   };
 
   useEffect(() => {

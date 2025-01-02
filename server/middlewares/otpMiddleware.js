@@ -17,7 +17,13 @@ const client = useTwilio ? twilio(accountSid, authToken) : null;
 
 const sendOTPMiddleware = asyncHandler(async (req, res, next) => {
     const { phoneNumber } = req.body;
-    checkPhoneNumber(phoneNumber);
+    try {
+        checkPhoneNumber(phoneNumber);
+    }
+    catch (error) {
+        res.status(400);
+        return next(error);
+    }
 
     if (!useTwilio) {
         console.log("Twilio is disabled");

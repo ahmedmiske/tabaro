@@ -21,14 +21,14 @@ function Login() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          loginInput: loginInput, // استخدام loginInput هنا
+          loginInput: loginInput, // استخدام loginInput هنا للإشارة إلى اسم المستخدم أو رقم الهاتف
           password: password
         })
       });
       const data = await response.json();
       if (response.ok) {
         localStorage.setItem('token', data.token);
-        navigate('/'); // إذا كان هناك مسار للوحة التحكم أو الصفحة الرئيسية
+        navigate('/dashboard'); // تغيير المسار إلى لوحة التحكم أو أي صفحة تريد الانتقال إليها بعد الدخول
       } else {
         setError(data.message || 'Authentication failed');
       }

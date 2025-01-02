@@ -100,7 +100,9 @@ function UserForm({ addUser, editingUser, updateUser }) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${sessionStorage.getItem('token')}`  //     token
+
+        'Authorization': `Bearer ${sessionStorage.getItem('token')}`
+      
       },
       body: JSON.stringify(user)
     })

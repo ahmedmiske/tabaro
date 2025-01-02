@@ -9,6 +9,7 @@ function UserPage() {
   const [editingUser, setEditingUser] = useState(null);
 
   const getAllUsers = () => {
+<<<<<<< HEAD
     const token = sessionStorage.getItem('token'); // 
     fetch('/api/users', {
       headers: {
@@ -28,6 +29,13 @@ function UserPage() {
     });
 };
 
+=======
+    fetch('/api/users')
+      .then((res) => res.json())
+      .then((data) => setUsers(data))
+      .catch((error) => console.error('Error:', error));
+  };
+>>>>>>> 5c80fed0b3a2bb3daedce0d843125982af0cebb8
 
   useEffect(() => {
     getAllUsers();
