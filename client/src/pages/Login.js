@@ -28,7 +28,7 @@ function Login() {
       const data = await response.json();
       if (response.ok) {
         localStorage.setItem('token', data.token);
-        navigate('/users'); // إذا كان هناك مسار للوحة التحكم أو الصفحة الرئيسية
+        navigate('/'); // إذا كان هناك مسار للوحة التحكم أو الصفحة الرئيسية
       } else {
         setError(data.message || 'Authentication failed');
       }
