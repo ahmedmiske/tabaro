@@ -72,6 +72,7 @@ const authUser = asyncHandler(async (req, res) => {
 const getUsers = asyncHandler(async (req, res) => {
     const users = await User.find({});
     res.json(users);
+    console.log('this is users',users);
 });
 
 module.exports = { registerUser, authUser, getUsers };
