@@ -11,7 +11,7 @@ function UserList({ onEdit, onDelete }) {
   const navigate = useNavigate(); // استخدام useNavigate للتوجيه
 
   const getAllUsers = () => {
-<<<<<<< HEAD
+// <<<<<<< HEAD
     const token = sessionStorage.getItem('token');
 
     fetch('/api/users', {
@@ -23,7 +23,6 @@ function UserList({ onEdit, onDelete }) {
     .then((res) => {
       if (!res.ok) {
         if (res.status === 401) {
-          // إذا كان الخطأ 401 (غير مصرح)، قم بإعادة التوجيه إلى صفحة تسجيل الدخول
           throw new Error('Unauthorized. Redirecting to login.');
         }
         throw new Error(`HTTP error! Status: ${res.status}`);
@@ -34,14 +33,14 @@ function UserList({ onEdit, onDelete }) {
     .catch((error) => {
       console.error('Error fetching users:', error.message);
       if (error.message.includes('Unauthorized')) {
-        navigate('/login'); // إعادة التوجيه إلى صفحة تسجيل الدخول
+       console.error('this is not authorized', error.message);
       }
     });
-=======
-    fetch('/api/users')
-      .then((res) => res.json())
-      .then((data) => setUserList(data));
->>>>>>> 5c80fed0b3a2bb3daedce0d843125982af0cebb8
+// // =======
+//     fetch('/api/users')
+//       .then((res) => res.json())
+//       .then((data) => setUserList(data));
+// // >>>>>>> 5c80fed0b3a2bb3daedce0d843125982af0cebb8
   };
 
   useEffect(() => {
@@ -87,7 +86,7 @@ function UserList({ onEdit, onDelete }) {
               <td>{user.firstName}</td>
               <td>{user.lastName}</td>
               <td>{user.phoneNumber}</td>
-              <td>{user.whatsapp}</td>
+              <td>test</td>
               <td>{user.address}</td>
               <td>{user.email}</td>
               <td>{user.userType}</td>

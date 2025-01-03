@@ -9,33 +9,33 @@ function UserPage() {
   const [editingUser, setEditingUser] = useState(null);
 
   const getAllUsers = () => {
-<<<<<<< HEAD
-    const token = sessionStorage.getItem('token'); // 
-    fetch('/api/users', {
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}` //   
-      }
-    })
-    .then((res) => {
-      if (!res.ok) {
-        throw new Error(`HTTP error! Status: ${res.status}`);
-      }
-      return res.json();
-    })
-    .then((data) => setUserList(data))
-    .catch((error) => {
-      console.error('Error fetching users:', error.message);
-    });
-};
+// <<<<<<< HEAD
+//     const token = sessionStorage.getItem('token'); // 
+//     fetch('/api/users', {
+//       headers: {
+//         'Content-Type': 'application/json',
+//         'Authorization': `Bearer ${token}` //   
+//       }
+//     })
+//     .then((res) => {
+//       if (!res.ok) {
+//         throw new Error(`HTTP error! Status: ${res.status}`);
+//       }
+//       return res.json();
+//     })
+//     .then((data) => setUserList(data))
+//     .catch((error) => {
+//       console.error('Error fetching users:', error.message);
+//     });
+// };
 
-=======
+// =======
     fetch('/api/users')
       .then((res) => res.json())
-      .then((data) => setUsers(data))
+      .then((data) => setUserList(data))
       .catch((error) => console.error('Error:', error));
   };
->>>>>>> 5c80fed0b3a2bb3daedce0d843125982af0cebb8
+// >>>>>>> 5c80fed0b3a2bb3daedce0d843125982af0cebb8
 
   useEffect(() => {
     getAllUsers();
