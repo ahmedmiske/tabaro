@@ -8,7 +8,7 @@ function UserList({ onEdit, onDelete }) {
   const [userList, setUserList] = useState([]);
   const [showConfirm, setShowConfirm] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
-  const navigate = useNavigate(); // استخدام useNavigate للتوجيه
+  const navigate = useNavigate(); // 
 
   const getAllUsers = () => {
 // <<<<<<< HEAD

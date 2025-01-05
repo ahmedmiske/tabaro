@@ -1,100 +1,116 @@
-import React, { useState, useEffect } from 'react';
-import UserForm from '../components/UserForm';
-import UserList from '../components/UserList';
+import React, { useEffect, useState } from 'react';
+import { Table, Button, Modal, Alert } from 'react-bootstrap';
 import './UserPage.css';
 import Title from '../components/Title';
 
-function UserPage() {
+function UserPage({ onEdit, onDelete }) {
   const [userList, setUserList] = useState([]);
-  const [editingUser, setEditingUser] = useState(null);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
+  const [error, setError] = useState('');
 
   const getAllUsers = () => {
-// <<<<<<< HEAD
-//     const token = sessionStorage.getItem('token'); // 
-//     fetch('/api/users', {
-//       headers: {
-//         'Content-Type': 'application/json',
-//         'Authorization': `Bearer ${token}` //   
-//       }
-//     })
-//     .then((res) => {
-//       if (!res.ok) {
-//         throw new Error(`HTTP error! Status: ${res.status}`);
-//       }
-//       return res.json();
-//     })
-//     .then((data) => setUserList(data))
-//     .catch((error) => {
-//       console.error('Error fetching users:', error.message);
-//     });
-// };
+    const token = localStorage.getItem('token'); //     
 
-// =======
-    fetch('/api/users')
-      .then((res) => res.json())
-      .then((data) => setUserList(data))
-      .catch((error) => console.error('Error:', error));
+    fetch('/api/users', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}` //   
+      }
+    })
+    .then((res) => {
+      if (!res.ok) {
+        throw new Error(`HTTP error! Status: ${res.status}`); // 
+      }
+      return res.json();
+    })
+    .then((data) => {
+      setUserList(data); //   
+      setError(''); //    
+    })
+    .catch((error) => {
+      console.error('Error fetching users:', error.message);
+      setError('Error fetching users: Unauthorized. Redirecting to login.'); // 
+      
+    });
   };
-// >>>>>>> 5c80fed0b3a2bb3daedce0d843125982af0cebb8
 
   useEffect(() => {
     getAllUsers();
   }, []);
 
-  const addUser = (user) => {
-    fetch('/api/users', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(user),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setUserList([...userList, data]);
-      })
-      .catch((error) => console.error('Error:', error));
+  const handleDeleteClick = (user) => {
+    setUserToDelete(user);
+    setShowConfirm(true);
   };
 
-  const updateUser = (user) => {
-    fetch(`/users/${user.id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(user),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setUserList(userList.map((u) => (u.id === data.id ? data : u)));
-        setEditingUser(null);
-      })
-      .catch((error) => console.error('Error:', error));
-  };
-
-  const deleteUser = (id) => {
-    fetch(`/users/${id}`, {
-      method: 'DELETE',
-    })
+  const confirmDelete = () => {
+    onDelete(userToDelete.id)
       .then(() => {
-        setUserList(userList.filter((user) => user.id !== id));
+        getAllUsers(); // تحديث القائمة بعد الحذف
+        setShowConfirm(false);
+        setUserToDelete(null);
       })
-      .catch((error) => console.error('Error:', error));
-  };
-
-  const editUser = (user) => {
-    setEditingUser(user);
+      .catch((error) => console.error('Error deleting user:', error));
   };
 
   return (
-    <div className="userpage-container">
-      <Title text="إدارة المستخدمين"/>
-      <div className="container-userform">
-        <UserForm addUser={addUser} editingUser={editingUser} updateUser={updateUser} />
-      </div>
-      <div className="container-userlist">
-        <UserList onEdit={editUser} onDelete={deleteUser} />
-      </div>
+    <div className="container mt-5">
+      <Title text='المستخدمين'/>
+      {error && <Alert variant="danger">{error}</Alert>}
+      <Table striped bordered hover>
+        <thead>
+          <tr>
+            <th>الاسم</th>
+            <th>الاسم العائلي</th>
+            <th>الهاتف</th>
+            <th>الواتساب</th>
+            <th>العنوان</th>
+            <th>البريد الإلكتروني</th>
+            <th>نوع المستخدم</th>
+            <th>اسم المستخدم</th>
+            <th>كلمة المرور</th>
+            <th>الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody>
+          {userList.map(user => (
+            <tr key={user.id}>
+              <td>{user.firstName}</td>
+              <td>{user.lastName}</td>
+              <td>{user.phoneNumber}</td>
+              <td>{user.username}</td>
+              <td>{user.address}</td>
+              <td>{user.email}</td>
+              <td>{user.userType}</td>
+              <td>{user.username}</td>
+              <td>{'****'}</td>
+              <td>
+                <Button variant="warning" onClick={() => onEdit(user)}>تعديل</Button>{' '}
+                <Button variant="danger" onClick={() => handleDeleteClick(user)}>حذف</Button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+
+      <Modal show={showConfirm} onHide={() => setShowConfirm(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>تأكيد الحذف</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          هل أنت متأكد أنك تريد حذف المستخدم؟
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowConfirm(false)}>
+            إلغاء
+          </Button>
+          <Button variant="danger" onClick={confirmDelete}>
+            حذف
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }

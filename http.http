@@ -18,10 +18,10 @@ Content-Type: application/json
 ### Register User
 POST http://{{host}}/api/users
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3NzE4MTFjNGJiMTAxNWNiNDAyZjIxMCIsImlhdCI6MTczNTY3NTc3MCwiZXhwIjoxNzM4MjY3NzcwfQ.Qu5X9e22atvD8zvBgHB_4GhIZcI6uFiQe6785D8gic4
+Authorization: Bearer {{admin.response.body.token}}
 
 {
-  "name": "ab",
+  "phoneNumber": "36250105",
   "email": "amedmiskeahmed@gmail.com",
   "password": "123"
 }

@@ -95,13 +95,14 @@ function UserForm({ addUser, editingUser, updateUser }) {
     //   setError('يرجى التحقق من الهاتف قبل المتابعة');
     //   return;
     // }
+    
+    const token = sessionStorage.getItem('token');
 
     fetch('/api/users', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-
-        'Authorization': `Bearer ${sessionStorage.getItem('token')}`
+        'Authorization': `Bearer ${token}`
       
       },
       body: JSON.stringify(user)
@@ -120,15 +121,16 @@ function UserForm({ addUser, editingUser, updateUser }) {
     })
     .catch((error) => {
       console.error('Error:', error);
+      console.error(token, error);
       setError('حدث خطأ أثناء إرسال البيانات');
     });
     
 
-    // if (editingUser) {
-    //   updateUser(user);
-    // } else {
-    //   addUser(user);
-    // }
+    if (editingUser) {
+      updateUser(user);
+    } else {
+      addUser(user);
+    }
   };
 
   const resetForm = () => {
