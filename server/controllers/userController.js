@@ -23,50 +23,32 @@ const registerUser = asyncHandler(async (req, res) => {
         phoneNumber
     } = req.body;
 
-    const existingUser = await User.findOne({ phoneNumber });
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-    if (existingUser) {
-        // User exists, update user info
-        const updatedUser = await User.findOneAndUpdate(
-            { phoneNumber },
-            { firstName, lastName, email, username, userType, institutionName, institutionLicenseNumber, institutionAddress, institutionEstablishmentDate, institutionWebsite, address },
-            { new: true }  // return the updated document
-        );
-        res.status(200).json({
-            _id: updatedUser._id,
-            name: updatedUser.firstName + ' ' + updatedUser.lastName,
-            email: updatedUser.email,
-            token: generateToken(updatedUser._id)
-        });
-    } else {
-        // No user exists, create new user
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
+    const newUser = new User({
+        firstName,
+        lastName,
+        email,
+        username,
+        password: hashedPassword,
+        userType,
+        institutionName,
+        institutionLicenseNumber,
+        institutionAddress,
+        institutionEstablishmentDate,
+        institutionWebsite,
+        address,
+        phoneNumber
+    });
 
-        const newUser = new User({
-            firstName,
-            lastName,
-            email,
-            username,
-            password: hashedPassword,
-            userType,
-            institutionName,
-            institutionLicenseNumber,
-            institutionAddress,
-            institutionEstablishmentDate,
-            institutionWebsite,
-            address,
-            phoneNumber
-        });
-
-        const savedUser = await newUser.save();
-        res.status(201).json({
-            _id: savedUser._id,
-            name: savedUser.firstName + ' ' + savedUser.lastName,
-            email: savedUser.email,
-            token: generateToken(savedUser._id)
-        });
-    }
+    const savedUser = await newUser.save();
+    res.status(201).json({
+        _id: savedUser._id,
+        name: savedUser.firstName + ' ' + savedUser.lastName,
+        email: savedUser.email,
+        token: generateToken(savedUser._id)
+    });
 });
 
 
@@ -104,4 +86,32 @@ const getUsers = asyncHandler(async (req, res) => {
     res.json(users);
 });
 
-module.exports = { registerUser, authUser, getUsers };
+// @desc    Update user information
+// @route   PUT /api/users/:id
+// @access  Private
+const updateUser = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.params.id);
+
+    if (user) {
+        user.firstName = req.body.firstName || user.firstName;
+        user.lastName = req.body.lastName || user.lastName;
+        // user.email = req.body.email || user.email;
+        // user.username = req.body.username || user.username;
+        // user.userType = req.body.userType || user.userType;
+        user.institutionName = req.body.institutionName || user.institutionName;
+        user.institutionLicenseNumber = req.body.institutionLicenseNumber || user.institutionLicenseNumber;
+        user.institutionAddress = req.body.institutionAddress || user.institutionAddress;
+        user.institutionEstablishmentDate = req.body.institutionEstablishmentDate || user.institutionEstablishmentDate;
+        user.institutionWebsite = req.body.institutionWebsite || user.institutionWebsite;
+        user.address = req.body.address || user.address;
+        // user.phoneNumber = req.body.phoneNumber || user.phoneNumber;
+
+        const updatedUser = await user.save();
+        res.json(updateUser);
+    } else {
+        res.status(404);
+        throw new Error('User not found');
+    }
+});
+
+module.exports = { registerUser, authUser, getUsers, updateUser };

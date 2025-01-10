@@ -52,7 +52,14 @@ const sendOTPMiddleware = asyncHandler(async (req, res, next) => {
 
 const verifyOTPMiddleware = asyncHandler(async (req, res, next) => {
     const { phoneNumber, otp } = req.body;
-    checkPhoneNumber(phoneNumber);
+
+    try {
+        checkPhoneNumber(phoneNumber);
+    }
+    catch (error) {
+        res.status(400);
+        return next(error);
+    }
 
     if (!useTwilio) {
         console.log("Twilio is disabled");

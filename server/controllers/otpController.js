@@ -9,9 +9,9 @@ const { generateToken } = require('../utils/otpUtils');
 // @access  Public
 const sendOtp = asyncHandler(async (req, res) => {
   // save user 
-  const { phoneNumber } = req.body;
+  // const { phoneNumber } = req.body;
   // const user = new User({ phoneNumber }); 
-  await User.updateOne({ phoneNumber },{phoneNumber}, {upsert: true});
+  // await User.updateOne({ phoneNumber },{phoneNumber}, {upsert: true});
   // await user.save();
   res.status(201).send({ message: 'OTP sent' });
 });
@@ -22,11 +22,11 @@ const sendOtp = asyncHandler(async (req, res) => {
 const verifyOTP = asyncHandler(async (req, res) => {
   const { phoneNumber } = req.body;
 
-  const user = await User.findOne({ phoneNumber });
-  user.status = 'verified';
-  await user.save();
+  // const user = await User.findOne({ phoneNumber });
+  // user.status = 'verified';
+  // await user.save();
 
-  const token = generateToken(user.id);
+  const token = generateToken(phoneNumber);
 
   res.send({ message: 'OTP verified', token });
 
