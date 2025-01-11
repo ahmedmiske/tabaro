@@ -35,6 +35,7 @@ function UserProfile() {
       setUserType(data.userType || 'individual'); //  
     } catch (error) {
       console.error('Error fetching user data:', error.message);
+      
     }
   };
   
