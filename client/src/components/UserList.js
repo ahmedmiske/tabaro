@@ -36,11 +36,7 @@ function UserList({ onEdit, onDelete }) {
        console.error('this is not authorized', error.message);
       }
     });
-// // =======
-//     fetch('/api/users')
-//       .then((res) => res.json())
-//       .then((data) => setUserList(data));
-// // >>>>>>> 5c80fed0b3a2bb3daedce0d843125982af0cebb8
+
   };
 
   useEffect(() => {

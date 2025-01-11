@@ -1,29 +1,49 @@
 import React from 'react';
-import { Modal, Button } from 'react-bootstrap';
+import { Form, Button } from 'react-bootstrap';
 
-const UserDetails = ({ show, handleClose, donor }) => {
-  if (!donor) return null;
+function UserDetails({ userDetails }) {
+    
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    // هنا يمكنك التعامل مع تحديث المعلومات الشخصية
+    console.log('Personal Details Updated');
+  };
+
+  const isOrganization = userDetails?.userType === 'organization'; // تحقق مما إذا كان نوع الحساب مؤسسي
 
   return (
-    <Modal show={show} onHide={handleClose}>
-      <Modal.Header closeButton>
-        <Modal.Title>تفاصيل المتبرع</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <p><strong>الاسم:</strong> {donor.firstName} {donor.lastName}</p>
-        <p><strong>الهاتف:</strong> {donor.phone}</p>
-        <p><strong>واتساب:</strong> {donor.whatsapp}</p>
-        <p><strong>العنوان:</strong> {donor.address}</p>
-        <p><strong>البريد الإلكتروني:</strong> {donor.email}</p>
-        <p><strong>نوع المستخدم:</strong> {donor.userType}</p>
-      </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
-          إغلاق
-        </Button>
-      </Modal.Footer>
-    </Modal>
+    <Form onSubmit={handleSubmit}>
+      <Form.Group>
+        <Form.Label>الاسم الأول</Form.Label>
+        <Form.Control type="text" defaultValue={userDetails?.firstName} />
+      </Form.Group>
+      <Form.Group>
+        <Form.Label>الاسم العائلي</Form.Label>
+        <Form.Control type="text" defaultValue={userDetails?.lastName} />
+      </Form.Group>
+      <Form.Group>
+        <Form.Label>العنوان</Form.Label>
+        <Form.Control type="text" defaultValue={userDetails?.address} />
+      </Form.Group>
+      {isOrganization && (
+        <>
+          <Form.Group>
+            <Form.Label>اسم المؤسسة</Form.Label>
+            <Form.Control type="text" defaultValue={userDetails?.institutionName} />
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>رقم ترخيص المؤسسة</Form.Label>
+            <Form.Control type="text" defaultValue={userDetails?.institutionLicenseNumber} />
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>عنوان المؤسسة</Form.Label>
+            <Form.Control type="text" defaultValue={userDetails?.institutionAddress} />
+          </Form.Group>
+        </>
+      )}
+      <Button variant="primary" type="submit">حفظ التعديلات</Button>
+    </Form>
   );
-};
+}
 
 export default UserDetails;

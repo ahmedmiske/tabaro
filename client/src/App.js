@@ -13,6 +13,7 @@ import Donor from './components/Donor';
 import InfoBar from './components/InfoBar';
 import './App.css';
 import UserForm from './components/UserForm';
+import UserProfile from './pages/UserProfile';
 import AddUserserPage from './pages/addUserPage';
 
 function App() {
@@ -56,11 +57,12 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/users" element={<UserPage />} />
         <Route path="/addUserPage" element={<AddUserserPage />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/profile" element={<UserProfile />} />
         <Route path="/login" element={<Login />} />
         <Route path="/donation-details/:id" element={<DonationDetails />} />
         <Route path="/campaign/:id" element={<CampaignDetails />} />
         <Route path="/donor" element={<Donor />} />
+        <Route path="/profile" element= {<UserProfile />} />
       </Routes>
       </div>
       <Footer />
