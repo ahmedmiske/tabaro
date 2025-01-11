@@ -122,4 +122,21 @@ const updateUser = asyncHandler(async (req, res) => {
     }
 });
 
-module.exports = { registerUser, authUser, getUsers, updateUser, getUser };
+// @desc    Change user password
+// @route   PUT /api/users/change-password
+// @access  Private
+const changePassword = asyncHandler(async (req, res) => {
+    const user = req.user;
+
+    if (user && await bcrypt.compare(req.body.currentPassword, user.password)) {
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(req.body.newPassword, salt);
+        await user.save();
+        res.json({ message: 'Password updated successfully' });
+    } else {
+        res.status(400);
+        throw new Error('Current password is incorrect');
+    }
+});
+
+module.exports = { registerUser, authUser, getUsers, updateUser, getUser, changePassword };
