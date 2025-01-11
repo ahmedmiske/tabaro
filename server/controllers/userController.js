@@ -139,4 +139,14 @@ const changePassword = asyncHandler(async (req, res) => {
     }
 });
 
-module.exports = { registerUser, authUser, getUsers, updateUser, getUser, changePassword };
+// @desc    Delete user profile
+// @route   DELETE /api/users/profile
+// @access  Private
+const deleteUser = asyncHandler(async (req, res) => {
+    const user = req.user;
+
+    await user.remove();
+    res.json({ message: 'User profile deleted' });
+});
+
+module.exports = { registerUser, authUser, getUsers, updateUser, getUser, changePassword, deleteUser };
