@@ -39,7 +39,8 @@ const registerUser = asyncHandler(async (req, res) => {
         institutionEstablishmentDate,
         institutionWebsite,
         address,
-        phoneNumber
+        phoneNumber,
+        status: 'verified'
     });
 
     const savedUser = await newUser.save();
@@ -86,6 +87,13 @@ const getUsers = asyncHandler(async (req, res) => {
     res.json(users);
 });
 
+// @desc    Get user profile
+// @route   GET /api/users/profile
+// @access  Private
+const getUser = asyncHandler(async (req, res) => {
+    res.json(req.user);
+});
+
 // @desc    Update user information
 // @route   PUT /api/users/:id
 // @access  Private
@@ -114,4 +122,4 @@ const updateUser = asyncHandler(async (req, res) => {
     }
 });
 
-module.exports = { registerUser, authUser, getUsers, updateUser };
+module.exports = { registerUser, authUser, getUsers, updateUser, getUser };
