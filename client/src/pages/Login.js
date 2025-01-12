@@ -28,12 +28,10 @@ function Login() {
       });
       const data = response.body;
       if (response.ok) {
-<<<<<<< HEAD
+
         localStorage.setItem('token', data.token);
         navigate('/profile'); // تغيير المسار إلى لوحة التحكم أو أي صفحة تريد الانتقال إليها بعد الدخول
-=======
-        navigate('/dashboard'); // تغيير المسار إلى لوحة التحكم أو أي صفحة تريد الانتقال إليها بعد الدخول
->>>>>>> 4f3015be34616ee4108c4183a81e3e297c1e5bd9
+
       } else {
         setError(data.message || 'Authentication failed');
       }
