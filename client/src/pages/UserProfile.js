@@ -18,24 +18,24 @@ function UserProfile() {
 
   const fetchUserData = async () => {
     try {
-      const response = await fetchWithInterceptors('/api/users/profile', { // 
+      const { body, ok, status } = await fetchWithInterceptors('/api/users/profile', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
         }
       });
   
-      if (!response.ok) {
-        console.log('Fetching user data failed, token is :');
-        throw new Error(`HTTP error! Status: ${response.status}`);
+      // Check if the fetch was successful
+      if (!ok) {
+        console.log('Fetching user data failed, status:', status);
+        throw new Error(`HTTP error! Status: ${status}`);
       }
   
-      const data = await response.json();
-      setUserDetails(data);
-      setUserType(data.userType || 'individual'); //  
+      // Assuming 'body' contains the actual user data returned from the API
+      setUserDetails(body);
+      setUserType(body.userType || 'individual'); // Adjust according to your user type handling logic
     } catch (error) {
       console.error('Error fetching user data:', error.message);
-
     }
   };
   

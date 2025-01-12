@@ -1,47 +1,59 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Form, Button } from 'react-bootstrap';
+import fetchWithInterceptors from '../services/fetchWithInterceptors';
 
-function UserDetails({ userDetails }) {
-    
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    // هنا يمكنك التعامل مع تحديث المعلومات الشخصية
-    console.log('Personal Details Updated');
+function UserDetails({ userDetails, setUserDetails }) {
+  const [formData, setFormData] = useState({
+    firstName: userDetails?.firstName || '',
+    lastName: userDetails?.lastName || '',
+    address: userDetails?.address || '',
+    institutionName: userDetails?.institutionName || '',
+    institutionLicenseNumber: userDetails?.institutionLicenseNumber || '',
+    institutionAddress: userDetails?.institutionAddress || '',
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const isOrganization = userDetails?.userType === 'organization'; // تحقق مما إذا كان نوع الحساب مؤسسي
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    try {
+      const response = await fetchWithInterceptors('/api/users/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+      });
+
+      if (response.ok) {
+        console.log('Personal details updated successfully.');
+        setUserDetails({ ...userDetails, ...formData });
+      } else {
+        throw new Error(`Failed to update details: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error updating user data:', error.message);
+    }
+  };
 
   return (
     <Form onSubmit={handleSubmit}>
       <Form.Group>
-        <Form.Label>الاسم الأول</Form.Label>
-        <Form.Control type="text" defaultValue={userDetails?.firstName} />
+        <Form.Label>First Name</Form.Label>
+        <Form.Control name="firstName" type="text" value={formData.firstName} onChange={handleChange} />
       </Form.Group>
       <Form.Group>
-        <Form.Label>الاسم العائلي</Form.Label>
-        <Form.Control type="text" defaultValue={userDetails?.lastName} />
+        <Form.Label>Last Name</Form.Label>
+        <Form.Control name="lastName" type="text" value={formData.lastName} onChange={handleChange} />
       </Form.Group>
       <Form.Group>
-        <Form.Label>العنوان</Form.Label>
-        <Form.Control type="text" defaultValue={userDetails?.address} />
+        <Form.Label>Address</Form.Label>
+        <Form.Control name="address" type="text" value={formData.address} onChange={handleChange} />
       </Form.Group>
-      {isOrganization && (
-        <>
-          <Form.Group>
-            <Form.Label>اسم المؤسسة</Form.Label>
-            <Form.Control type="text" defaultValue={userDetails?.institutionName} />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>رقم ترخيص المؤسسة</Form.Label>
-            <Form.Control type="text" defaultValue={userDetails?.institutionLicenseNumber} />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>عنوان المؤسسة</Form.Label>
-            <Form.Control type="text" defaultValue={userDetails?.institutionAddress} />
-          </Form.Group>
-        </>
-      )}
-      <Button variant="primary" type="submit">حفظ التعديلات</Button>
+      <Button variant="primary" type="submit">Save Changes</Button>
     </Form>
   );
 }
