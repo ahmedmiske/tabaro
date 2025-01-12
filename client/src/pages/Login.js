@@ -29,7 +29,7 @@ function Login() {
       const data = response.body;
       if (response.ok) {
 
-        localStorage.setItem('token', data.token);
+        // localStorage.setItem('token', data.token);
         navigate('/profile'); // تغيير المسار إلى لوحة التحكم أو أي صفحة تريد الانتقال إليها بعد الدخول
 
       } else {
