@@ -3,6 +3,7 @@ import { Form, Button, Alert, Spinner } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import './Login.css';
 import loginImg from './login.jpeg';
+import fetchWithInterceptors from '../services/fetchWithInterceptors';
 
 function Login() {
   const [loginInput, setLoginInput] = useState(''); // يمكن أن يكون اسم المستخدم أو رقم الهاتف
@@ -15,7 +16,7 @@ function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await fetch('/api/users/login', {
+      const response = await fetchWithInterceptors('/api/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -25,10 +26,14 @@ function Login() {
           password: password
         })
       });
-      const data = await response.json();
+      const data = response.body;
       if (response.ok) {
+<<<<<<< HEAD
         localStorage.setItem('token', data.token);
         navigate('/profile'); // تغيير المسار إلى لوحة التحكم أو أي صفحة تريد الانتقال إليها بعد الدخول
+=======
+        navigate('/dashboard'); // تغيير المسار إلى لوحة التحكم أو أي صفحة تريد الانتقال إليها بعد الدخول
+>>>>>>> 4f3015be34616ee4108c4183a81e3e297c1e5bd9
       } else {
         setError(data.message || 'Authentication failed');
       }

@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
 import UserForm from '../components/UserForm';
 import './Register.css';
+import fetchWithInterceptors from '../services/fetchWithInterceptors';
 
 function Register() {
   const [users, setUsers] = useState([]);
 
   const addUser = (user) => {
-    fetch('/api/users', {
+    fetchWithInterceptors('/api/users', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(user)
     })
-      .then(response => response.json())
       .then(data => {
         setUsers([...users, data]);
       })

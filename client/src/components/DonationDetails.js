@@ -4,6 +4,7 @@ import { Card, ListGroup, Button, Container, Row, Col, Carousel } from 'react-bo
 import TitleMain from './TitleMain';
 import './DonationDetails.css';
 import BackButton from './BackButton';
+import fetchWithInterceptors from '../services/fetchWithInterceptors';
 
 function DonationDetails() {
   let { id } = useParams();
@@ -12,7 +13,7 @@ function DonationDetails() {
   //get the user needed information
 
   useEffect(() => {
-    fetch(`/donations/${id}`)
+    fetchWithInterceptors(`/donations/${id}`)
       .then((res) => res.json())
       .then((data) => setDonation(data))
       .catch((error) => {

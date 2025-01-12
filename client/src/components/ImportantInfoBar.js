@@ -4,12 +4,13 @@ import { Container } from 'react-bootstrap';
 import Marquee from 'react-fast-marquee';
 
 import './ImportantInfoBar.css';
+import fetchWithInterceptors from '../services/fetchWithInterceptors';
 
 const ImportantInfoBar = ({ apiUrl = '/important-info' }) => {
   const [info, setInfo] = useState([]);
 
   useEffect(() => {
-    fetch(apiUrl)
+    fetchWithInterceptors(apiUrl)
       .then(response => response.json())
       .then(data => setInfo(data))
       .catch(error => console.error('Error fetching important info:', error));

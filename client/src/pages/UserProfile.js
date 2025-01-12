@@ -4,6 +4,7 @@ import UserDetails from '../components/UserDetails';
 import AccountDetails from '../components/AccountDetails';
 import Notifications from '../components/Notifications';
 import './UserProfile.css';
+import fetchWithInterceptors from '../services/fetchWithInterceptors';
 
 function UserProfile() {
   const [view, setView] = useState('personal');
@@ -17,11 +18,9 @@ function UserProfile() {
 
   const fetchUserData = async () => {
     try {
-      const token = sessionStorage.getItem('token');
-      const response = await fetch('/api/users/profile', { // 
+      const response = await fetchWithInterceptors('/api/users/profile', { // 
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });

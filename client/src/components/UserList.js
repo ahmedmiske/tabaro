@@ -3,6 +3,7 @@ import { Table, Button, Modal } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom'; // استيراد هوك useNavigate للتوجيه
 import './UserList.css';
 import Title from './Title';
+import fetchWithInterceptors from '../services/fetchWithInterceptors';
 
 function UserList({ onEdit, onDelete }) {
   const [userList, setUserList] = useState([]);
@@ -11,24 +12,20 @@ function UserList({ onEdit, onDelete }) {
   const navigate = useNavigate(); // 
 
   const getAllUsers = () => {
-// <<<<<<< HEAD
-    const token = sessionStorage.getItem('token');
-
-    fetch('/api/users', {
+    fetchWithInterceptors('/api/users', {
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
       }
     })
-    .then((res) => {
-      if (!res.ok) {
-        if (res.status === 401) {
-          throw new Error('Unauthorized. Redirecting to login.');
-        }
-        throw new Error(`HTTP error! Status: ${res.status}`);
-      }
-      return res.json();
-    })
+    // .then((res) => {
+    //   if (!res.ok) {
+    //     if (res.status === 401) {
+    //       throw new Error('Unauthorized. Redirecting to login.');
+    //     }
+    //     throw new Error(`HTTP error! Status: ${res.status}`);
+    //   }
+    //   return res.json();
+    // })
     .then((data) => setUserList(data))
     .catch((error) => {
       console.error('Error fetching users:', error.message);

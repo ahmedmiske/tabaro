@@ -1,5 +1,5 @@
 const express = require('express');
-const { registerUser, authUser, getUsers, updateUser, getUser, changePassword } = require('../controllers/userController');
+const { registerUser, authUser, getUsers, updateUser, getUser, changePassword, deleteUser } = require('../controllers/userController');
 const { protect, authorize, protectRegisterUser } = require('../middlewares/authMiddleware');
 const router = express.Router();
 
@@ -25,6 +25,10 @@ router.route('/profile')
     .get(
         protect, 
         getUser
+    )
+    .delete(
+        protect, 
+        deleteUser
     );
 
 router.put('/change-password', protect, changePassword);

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Form, Button } from 'react-bootstrap';
+import fetchWithInterceptors from '../services/fetchWithInterceptors';
 
 function DonationForm({ addDonation }) {
   const [type, setType] = useState('');
@@ -16,7 +17,7 @@ function DonationForm({ addDonation }) {
     formData.append('headerImage', headerImage);
 
     try {
-      const response = await fetch('/donations', {
+      const response = await fetchWithInterceptors('/donations', {
         method: 'POST',
         body: formData,
       });

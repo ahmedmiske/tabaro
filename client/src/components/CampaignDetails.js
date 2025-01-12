@@ -4,6 +4,7 @@ import { Container, Row, Col, Card, Button, Spinner, Alert } from 'react-bootstr
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './CampaignDetails.css';
 import BackButton from './BackButton';
+import fetchWithInterceptors from '../services/fetchWithInterceptors';
 
 const CampaignDetails = () => {
   const { id } = useParams();
@@ -14,7 +15,7 @@ const CampaignDetails = () => {
   useEffect(() => {
     const fetchCampaign = async () => {
       try {
-        const response = await fetch(`/campaigns/${id}`);
+        const response = await fetchWithInterceptors(`/campaigns/${id}`);
         const data = await response.json();
         setCampaign(data);
       } catch (error) {
