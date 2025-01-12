@@ -74,7 +74,7 @@ const authUser = asyncHandler(async (req, res) => {
             token: generateToken(user._id)
         });
     } else {
-        res.status(401);
+        res.status(400);
         throw new Error('Invalid email or password');
     }
 });
@@ -98,7 +98,7 @@ const getUser = asyncHandler(async (req, res) => {
 // @route   PUT /api/users/:id
 // @access  Private
 const updateUser = asyncHandler(async (req, res) => {
-    const user = await User.findById(req.params.id);
+    const user = req.user;
 
     if (user) {
         user.firstName = req.body.firstName || user.firstName;
@@ -114,8 +114,8 @@ const updateUser = asyncHandler(async (req, res) => {
         user.address = req.body.address || user.address;
         // user.phoneNumber = req.body.phoneNumber || user.phoneNumber;
 
-        const updatedUser = await user.save();
-        res.json(updateUser);
+        await user.save();
+        res.json(user);
     } else {
         res.status(404);
         throw new Error('User not found');
