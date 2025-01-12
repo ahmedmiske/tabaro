@@ -55,7 +55,7 @@ function UserProfile() {
       </Row>
       <Row>
         <Col>
-          {view === 'personal' && <UserDetails userDetails={userDetails} />}
+          {view === 'personal' &&  <UserDetails userDetails={userDetails} setUserDetails={setUserDetails} />}
           {view === 'account' && <AccountDetails userDetails={userDetails} />}
           {view === 'notifications' && <Notifications />}
         </Col>

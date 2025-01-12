@@ -1,60 +1,62 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Overlay, Popover, Badge } from 'react-bootstrap';
-import { FaBell } from 'react-icons/fa';
-import './Notifications.css';
-import fetchWithInterceptors from '../services/fetchWithInterceptors';
+import React, { useState, useEffect } from 'react';
+import { Table, Alert } from 'react-bootstrap';
+import fetchWithInterceptors from '../services/fetchWithInterceptors'; // Ensure this is correctly imported
 
-const Notifications = () => {
+function Notifications() {
   const [notifications, setNotifications] = useState([]);
-  const [show, setShow] = useState(false);
-  const [target, setTarget] = useState(null);
-  const ref = useRef(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    fetchWithInterceptors('/notifications')
-      .then(response => response.json())
-      .then(data => setNotifications(data))
-      .catch(error => console.error('Error fetching notifications:', error));
+    fetchNotifications();
   }, []);
 
-  const handleClick = (e) => {
-    setShow(!show);
-    setTarget(e.target);
+  const fetchNotifications = async () => {
+    try {
+      const { body, ok, status } = await fetchWithInterceptors('/api/users/notifications', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!ok) {
+        console.error('Fetching notifications failed, status:', status);
+        setError(`Failed to fetch notifications: ${status}`);
+        return;
+      }
+
+      setNotifications(body.notifications); // Assuming 'body.notifications' contains the notifications array
+    } catch (error) {
+      console.error('Error fetching notifications:', error.message);
+      setError('Error fetching notifications. Please try again later.');
+    }
   };
 
   return (
-    <div ref={ref} className='notifications'>
-      <FaBell className="notification-icon" onClick={handleClick} />
-      <div>
-      <Badge pill bg="danger" className="notification-count">{notifications.length}</Badge>
-      </div>
- 
-      <Overlay
-        show={show}
-        target={target}
-        placement="bottom"
-        container={ref}
-        containerPadding={20}
-      >
-        <Popover id="popover-contained" className='popover'>
-          <Popover.Header as="h3">الإشعارات</Popover.Header>
-          <Popover.Body>
-            {notifications.length > 0 ? (
-              notifications.map((notif, index) => (
-                <div key={index} className="notification-item">
-                <h6> {notif.title}</h6>
-                 <p>{notif.message}</p> 
-                </div>
-              ))
-            ) : (
-              <div>لا توجد إشعارات</div>
-            )}
-          </Popover.Body>
-        </Popover>
-      </Overlay>
-      
-    </div>
+    <>
+      {error && <Alert variant="danger">{error}</Alert>}
+      <Table striped bordered hover>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Title</th>
+            <th>Message</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {notifications.map((notification, index) => (
+            <tr key={index}>
+              <td>{index + 1}</td>
+              <td>{notification.title}</td>
+              <td>{notification.message}</td>
+              <td>{new Date(notification.date).toLocaleDateString()}</td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+    </>
   );
-};
+}
 
 export default Notifications;

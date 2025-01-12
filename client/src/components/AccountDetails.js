@@ -4,7 +4,7 @@ import { Form, Button } from 'react-bootstrap';
 function AccountDetails({ userDetails }) {
   const handleSubmit = (event) => {
     event.preventDefault();
-    // هنا يمكنك التعامل مع تحديث معلومات الحساب
+    
     console.log('Account Details Updated');
   };
 

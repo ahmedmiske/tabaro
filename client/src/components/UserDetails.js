@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Form, Button } from 'react-bootstrap';
-import fetchWithInterceptors from '../services/fetchWithInterceptors';
+import { Form, Button, Alert } from 'react-bootstrap';
+import fetchWithInterceptors from '../services/fetchWithInterceptors'; // Make sure this is correctly imported
 
 function UserDetails({ userDetails, setUserDetails }) {
   const [formData, setFormData] = useState({
@@ -11,6 +11,8 @@ function UserDetails({ userDetails, setUserDetails }) {
     institutionLicenseNumber: userDetails?.institutionLicenseNumber || '',
     institutionAddress: userDetails?.institutionAddress || '',
   });
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -30,30 +32,54 @@ function UserDetails({ userDetails, setUserDetails }) {
 
       if (response.ok) {
         console.log('Personal details updated successfully.');
-        setUserDetails({ ...userDetails, ...formData });
+        setSuccessMessage('تم تحديث المعلومات الشخصية بنجاح.');
+        setUserDetails({ ...userDetails, ...formData }); // Update local state with new user details
+        setTimeout(() => {
+          window.location.reload(); // Refresh the page to reflect the changes
+        }, 3000); // Delay the refresh for 3 seconds to allow the user to read the message
       } else {
         throw new Error(`Failed to update details: ${response.status}`);
       }
     } catch (error) {
       console.error('Error updating user data:', error.message);
+      setErrorMessage('فشل في تحديث المعلومات. يرجى المحاولة لاحقاً.');
     }
   };
 
   return (
     <Form onSubmit={handleSubmit}>
+      {successMessage && <Alert variant="success">{successMessage}</Alert>}
+      {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
       <Form.Group>
-        <Form.Label>First Name</Form.Label>
+        <Form.Label>الاسم الشخصي</Form.Label>
         <Form.Control name="firstName" type="text" value={formData.firstName} onChange={handleChange} />
       </Form.Group>
       <Form.Group>
-        <Form.Label>Last Name</Form.Label>
+        <Form.Label>الاسم العائلي</Form.Label>
         <Form.Control name="lastName" type="text" value={formData.lastName} onChange={handleChange} />
       </Form.Group>
       <Form.Group>
-        <Form.Label>Address</Form.Label>
+        <Form.Label>العنوان</Form.Label>
         <Form.Control name="address" type="text" value={formData.address} onChange={handleChange} />
       </Form.Group>
-      <Button variant="primary" type="submit">Save Changes</Button>
+      {userDetails?.userType === 'organization' && (
+        <>
+          <Form.Group>
+            <Form.Label>اسم المؤسسة</Form.Label>
+            <Form.Control name="institutionName" type="text" value={formData.institutionName} onChange={handleChange} />
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>رقم ترخيص المؤسسة</Form.Label>
+            <Form.Control name="institutionLicenseNumber" type="text" value={formData.institutionLicenseNumber} onChange={handleChange} />
+          </Form.Group>
+          <Form.Group>
+            <Form.Label>عنوان المؤسسة</Form.Label>
+            <Form.Control name="institutionAddress" type="text" value={formData.institutionAddress} onChange={handleChange} />
+          </Form.Group>
+        </>
+      )}
+      <br />
+      <Button variant="primary" type="submit">حفظ التعديلات</Button>
     </Form>
   );
 }

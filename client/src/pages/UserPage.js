@@ -17,23 +17,20 @@ function UserPage({ onEdit, onDelete }) {
         'Content-Type': 'application/json',
       }
     })
-    // .then((res) => {
-    //   if (!res.ok) {
-    //     throw new Error(`HTTP error! Status: ${res.status}`); // 
-    //   }
-    //   return res.json();
-    // })
-    .then((data) => {
-      setUserList(data); //   
-      setError(''); //    
+    .then(({ body, ok, status }) => {
+      if (!ok) {
+        throw new Error(`HTTP error! Status: ${status}`);
+      }
+      // تأكد من أن body هي مصفوفة قبل محاولة استخدامها كذلك
+      setUserList(Array.isArray(body) ? body : []);
+      setError('');
     })
     .catch((error) => {
       console.error('Error fetching users:', error.message);
-      setError('Error fetching users: Unauthorized. Redirecting to login.'); // 
-      
+      setError('Error fetching users: Unauthorized. Redirecting to login.');
     });
   };
-
+  
   useEffect(() => {
     getAllUsers();
   }, []);
