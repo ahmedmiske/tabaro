@@ -26,7 +26,7 @@ function UserProfile() {
       });
   
       if (!response.ok) {
-        console.log('Fetching user data failed, token is :',token);
+        console.log('Fetching user data failed, token is :');
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
   
