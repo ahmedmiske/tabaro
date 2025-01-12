@@ -62,7 +62,7 @@ function App() {
         <Route path="/donation-details/:id" element={<DonationDetails />} />
         <Route path="/campaign/:id" element={<CampaignDetails />} />
         <Route path="/donor" element={<Donor />} />
-        <Route path="/profile" element= {<UserProfile />} />
+        {/* <Route path="/profile" element= {<UserProfile />} /> */}
       </Routes>
       </div>
       <Footer />

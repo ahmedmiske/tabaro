@@ -28,7 +28,7 @@ function Login() {
       const data = await response.json();
       if (response.ok) {
         localStorage.setItem('token', data.token);
-        navigate('/dashboard'); // تغيير المسار إلى لوحة التحكم أو أي صفحة تريد الانتقال إليها بعد الدخول
+        navigate('/profile'); // تغيير المسار إلى لوحة التحكم أو أي صفحة تريد الانتقال إليها بعد الدخول
       } else {
         setError(data.message || 'Authentication failed');
       }

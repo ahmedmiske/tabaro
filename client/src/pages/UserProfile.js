@@ -27,6 +27,7 @@ function UserProfile() {
       });
   
       if (!response.ok) {
+        console.log('Fetching user data failed, token is :',token);
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
   
@@ -35,7 +36,7 @@ function UserProfile() {
       setUserType(data.userType || 'individual'); //  
     } catch (error) {
       console.error('Error fetching user data:', error.message);
-      
+
     }
   };
   
