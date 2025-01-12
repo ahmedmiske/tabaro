@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Form, Button, Toast, Modal } from 'react-bootstrap';
 import './UserForm.css';
+import fetchWithInterceptors from '../services/fetchWithInterceptors';
 
 function UserForm({ addUser, editingUser, updateUser }) {
   const [user, setUser] = useState({
@@ -33,22 +34,21 @@ function UserForm({ addUser, editingUser, updateUser }) {
   };
 
   const verifyOtp = (phoneNumber,otp) => {
-    fetch('/api/otp/verify-otp', {
+    fetchWithInterceptors('/api/otp/verify-otp', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({phoneNumber, otp})
     })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok', response);
-      }
-      return response.json();
-    })
+    // .then(response => {
+    //   if (!response.ok) {
+    //     throw new Error('Network response was not ok', response);
+    //   }
+    //   return response.json();
+    // })
     .then(data => {
       console.log('Success:', data);
-      sessionStorage.setItem('token', data.token);
       setShowToast(true);
       // setSentCode(true);
       setTimeout(() => setShowToast(false), 6000);
@@ -62,19 +62,21 @@ function UserForm({ addUser, editingUser, updateUser }) {
 
   const sendOtp = () => {
     
-    fetch('/api/otp/send-otp', {
+    fetchWithInterceptors('/api/otp/send-otp', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({phoneNumber: user.phoneNumber})
-    }).then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
+    })
+    // .then(response => {
+    //   if (!response.ok) {
+    //     throw new Error('Network response was not ok');
 
-      }
-      return response.json();
-    }).then(data => {
+    //   }
+    //   return response.json();
+    // })
+    .then(data => {
       console.log('Success:', data);
       // setIsPhoneVerified(true);
       setSentCode(true);
@@ -96,23 +98,19 @@ function UserForm({ addUser, editingUser, updateUser }) {
     //   return;
     // }
     
-    const token = sessionStorage.getItem('token');
-
-    fetch('/api/users', {
+    fetchWithInterceptors('/api/users', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      
+        'Content-Type': 'application/json',      
       },
       body: JSON.stringify(user)
     })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.json();
-    })
+    // .then(response => {
+    //   if (!response.ok) {
+    //     throw new Error('Network response was not ok');
+    //   }
+    //   return response.json();
+    // })
     .then(data => {
       console.log('Success:', data);
       setShowModal(true);
@@ -121,7 +119,6 @@ function UserForm({ addUser, editingUser, updateUser }) {
     })
     .catch((error) => {
       console.error('Error:', error);
-      console.error(token, error);
       setError('حدث خطأ أثناء إرسال البيانات');
     });
     

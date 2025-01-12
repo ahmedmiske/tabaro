@@ -5,6 +5,7 @@ import Title from './Title';
 import DonorFilter from './DonorFilter';
 import DonationCard from './DonationCard';
 import FindeNot from './FindeNot'; // استدعاء مكون FindeNot
+import fetchWithInterceptors from '../services/fetchWithInterceptors';
 
 function DonorListe() {
   const [donations, setDonations] = useState([]);
@@ -18,7 +19,7 @@ function DonorListe() {
   useEffect(() => {
     const fetchDonations = async () => {
       try {
-        const response = await fetch('/donations');
+        const response = await fetchWithInterceptors('/donations');
         if (!response.ok) {
           throw new Error('Failed to fetch data');
         }

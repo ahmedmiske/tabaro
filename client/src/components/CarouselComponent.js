@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Carousel } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import './CarouselComponent.css';
+import fetchWithInterceptors from '../services/fetchWithInterceptors';
 
 const CarouselComponent = () => {
   const [campaigns, setCampaigns] = useState([]);
@@ -9,7 +10,7 @@ const CarouselComponent = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch('/campaigns')
+    fetchWithInterceptors('/campaigns')
       .then(response => response.json())
       .then(data => {
         // console.log('API response:', data);  // Log the entire response

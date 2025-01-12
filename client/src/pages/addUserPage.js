@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import UserForm from '../components/UserForm';
 import './addUserPage.css';
 import Title from '../components/Title';
+import fetchWithInterceptors from '../services/fetchWithInterceptors';
 
 function AddUserPage() {
   
@@ -13,17 +14,15 @@ function AddUserPage() {
   }, []);
 
   const addUser = (user) => {
-    fetch('/api/users', {
+    fetchWithInterceptors('/api/users', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${sessionStorage.getItem('token')}`  //     token
       },
       body: JSON.stringify(user)
     })
-      .then((response) => response.json())
       .then((data) => {
-        setUsers([...users, data]);
+        setUsers([...users, data.body]);
       })
       .catch((error) => console.error('Error:', error));
   };

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Table, Button, Modal, Alert } from 'react-bootstrap';
 import './UserPage.css';
 import Title from '../components/Title';
+import fetchWithInterceptors from '../services/fetchWithInterceptors';
 
 function UserPage({ onEdit, onDelete }) {
   const [userList, setUserList] = useState([]);
@@ -10,21 +11,18 @@ function UserPage({ onEdit, onDelete }) {
   const [error, setError] = useState('');
 
   const getAllUsers = () => {
-    const token = localStorage.getItem('token'); //     
-
-    fetch('/api/users', {
+    fetchWithInterceptors('/api/users', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}` //   
       }
     })
-    .then((res) => {
-      if (!res.ok) {
-        throw new Error(`HTTP error! Status: ${res.status}`); // 
-      }
-      return res.json();
-    })
+    // .then((res) => {
+    //   if (!res.ok) {
+    //     throw new Error(`HTTP error! Status: ${res.status}`); // 
+    //   }
+    //   return res.json();
+    // })
     .then((data) => {
       setUserList(data); //   
       setError(''); //    

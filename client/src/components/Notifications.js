@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Overlay, Popover, Badge } from 'react-bootstrap';
 import { FaBell } from 'react-icons/fa';
 import './Notifications.css';
+import fetchWithInterceptors from '../services/fetchWithInterceptors';
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
@@ -10,7 +11,7 @@ const Notifications = () => {
   const ref = useRef(null);
 
   useEffect(() => {
-    fetch('/notifications')
+    fetchWithInterceptors('/notifications')
       .then(response => response.json())
       .then(data => setNotifications(data))
       .catch(error => console.error('Error fetching notifications:', error));
