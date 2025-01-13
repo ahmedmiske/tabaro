@@ -13,3 +13,18 @@
    -ms-border-radius: 5px;
    -o-border-radius: 5px;
 }
+.filter button{
+   background-color:rgb(189, 184, 184) !important;
+   border: 1px solid #eee !important;
+   border-radius: 5px !important;
+   -webkit-border-radius: 5px;
+   -moz-border-radius: 5px;
+   -ms-border-radius: 5px;
+   -o-border-radius: 5px;
+}
+
+.filter button:hover {
+   background-color: var(--color-secondary) !important;
+   
+
+}
