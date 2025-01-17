@@ -3,7 +3,7 @@ import { Form, Button, Alert, Spinner } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import './Login.css';
 import loginImg from './login.jpeg';
-import fetchWithInterceptors from '../services/fetchWithInterceptors';
+import fetchWithInterceptors from '../services/fetchWithInterceptors.js';
 
 function Login() {
   const [loginInput, setLoginInput] = useState(''); // يمكن أن يكون اسم المستخدم أو رقم الهاتف
@@ -14,32 +14,31 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+  
     setLoading(true);
+    console.log("Attempting login with:", loginInput, password); // Log the input to check it before sending
     try {
-      const response = await fetchWithInterceptors('/api/users/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          loginInput: loginInput, // استخدام loginInput هنا للإشارة إلى اسم المستخدم أو رقم الهاتف
-          password: password
-        })
-      });
-      const data = response.body;
+       const response = await fetchWithInterceptors('/api/users/login',{ method: 'POST',headers: {'Content-Type': 'application/json'}, body: JSON.stringify({loginInput: loginInput.trim(), password: password})  });
+    
+      // const data = response.json(); // Move this inside the `response.ok` check
+
       if (response.ok) {
-
-        // localStorage.setItem('token', data.token);
-        navigate('/profile'); // تغيير المسار إلى لوحة التحكم أو أي صفحة تريد الانتقال إليها بعد الدخول
-
+        console.log('Login successful:',response.body ); // Logbo successful data
+        localStorage.setItem('token', response.token);
+  
+        navigate('/profile');
       } else {
-        setError(data.message || 'Authentication failed');
+        console.error('Login failed:', response.body); // Log error message from server
+      
+        setError(response.body.message || 'Authentication failed');
       }
     } catch (error) {
-      setError('Network error');
+      console.error('Network error:', error);
+      setError('Network error. Please try again.');
     }
     setLoading(false);
   };
+
 
   return (
     <div className='login-page'>
