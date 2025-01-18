@@ -24,7 +24,6 @@ function Login() {
 
       if (response.ok) {
         console.log('Login successful:',response.body ); // Logbo successful data
-        localStorage.setItem('token', response.token);
   
         navigate('/profile');
       } else {

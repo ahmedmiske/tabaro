@@ -23,15 +23,12 @@ const registerUser = asyncHandler(async (req, res) => {
         phoneNumber
     } = req.body;
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
     const newUser = new User({
         firstName,
         lastName,
         email,
         username,
-        password: hashedPassword,
+        password, // it will be hashed in pre save
         userType,
         institutionName,
         institutionLicenseNumber,
@@ -129,8 +126,7 @@ const changePassword = asyncHandler(async (req, res) => {
     const user = req.user;
 
     if (user && await bcrypt.compare(req.body.currentPassword, user.password)) {
-        const salt = await bcrypt.genSalt(10);
-        user.password = await bcrypt.hash(req.body.newPassword, salt);
+        user.password = req.body.newPassword; // it will be hashed in pre save
         await user.save();
         res.json({ message: 'Password updated successfully' });
     } else {

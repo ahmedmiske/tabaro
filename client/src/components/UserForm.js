@@ -114,7 +114,7 @@ function UserForm({ addUser, editingUser, updateUser }) {
     .then(data => {
       console.log('Success:', data);
       setShowModal(true);
-      addUser(user);
+      // addUser(user);
       resetForm();
     })
     .catch((error) => {
@@ -123,11 +123,11 @@ function UserForm({ addUser, editingUser, updateUser }) {
     });
     
 
-    if (editingUser) {
-      updateUser(user);
-    } else {
-      addUser(user);
-    }
+    // if (editingUser) {
+    //   updateUser(user);
+    // } else {
+    //   addUser(user);
+    // }
   };
 
   const resetForm = () => {

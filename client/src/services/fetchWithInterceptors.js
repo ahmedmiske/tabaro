@@ -5,7 +5,9 @@ const fetchWithInterceptors = async (url, options = {}) => {
     // Add default headers (e.g., Authorization)
     const token = localStorage.getItem("token"); // Or sessionStorage
     if (token) {
-        defaultHeaders["Authorization"] = `Bearer ${token}`;  // Fixed missing ` and $
+
+        defaultHeaders["Authorization"] = `Bearer ${token}`;
+
     }
     
     // Merge default headers with user-provided headers
@@ -27,20 +29,26 @@ const fetchWithInterceptors = async (url, options = {}) => {
         if(
             url.includes('/verify-otp') || 
             url.includes('/login') || 
-            (options.method === 'POST' && url.includes('/users'))
+
+            ( options.method === 'POST' && url.includes('/users'))
         ){ 
-            // should check if stay logged in is checked
+            // sould check if stay logged in is checked
+
             localStorage.setItem("token", body.token);
         }
 
         // Check for non-OK responses
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`); // Fixed missing `
+
+            throw new Error(`HTTP error! status: ${response.status}`);
+
         }
 
         return {headers: response.headers, status: response.status, body, ok: response.ok};
     } catch (error) {
-        console.error("Fetch error:", error.message);
+
+        console.error("Fetch error:", error);
+
         throw error; // Propagate error to caller
     }
 };
