@@ -135,6 +135,32 @@ const changePassword = asyncHandler(async (req, res) => {
     }
 });
 
+// reset password
+// @desc    Reset user password
+// @route   PUT /api/users/reset-password
+// @access  private
+const resetPassword = asyncHandler(async (req, res) => {
+    const { phoneNumber, newPassword } = req.body;
+
+    const user = await User.findOne({ phoneNumber });
+    if (user) {
+        user.password = newPassword; // it will be hashed in pre save
+        await user.save();
+        res.json({ 
+            message: 'Password reset successfully',
+            token: generateToken(user._id),
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+        });
+    } else {
+        res.status(400);
+        throw new Error('User not found');
+    }
+
+});
+
+
 // @desc    Delete user profile
 // @route   DELETE /api/users/profile
 // @access  Private
@@ -145,4 +171,4 @@ const deleteUser = asyncHandler(async (req, res) => {
     res.json({ message: 'User profile deleted' });
 });
 
-module.exports = { registerUser, authUser, getUsers, updateUser, getUser, changePassword, deleteUser };
+module.exports = { registerUser, authUser, getUsers, updateUser, getUser, changePassword, deleteUser, resetPassword };
