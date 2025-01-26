@@ -166,7 +166,6 @@ const resetPassword = asyncHandler(async (req, res) => {
 // @access  Private
 const deleteUser = asyncHandler(async (req, res) => {
     const user = req.user;
-
     await user.remove();
     res.json({ message: 'User profile deleted' });
 });

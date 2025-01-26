@@ -13,12 +13,12 @@ function PasswordReset() {
 
   const handleSendOtp = async () => {
     try {
-      const response = await fetchWithInterceptors(`/api/send-otp`, {
+      const response = await fetchWithInterceptors(`/api/send-otp?checkExists=true`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ phoneNumber, checkExists: true })
+        body: JSON.stringify({ phoneNumber})
       });
 
       if (response.ok) {
