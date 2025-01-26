@@ -1,6 +1,7 @@
 const twilio = require('twilio');
 const { checkPhoneNumber, checkOtp } = require('../utils/otpUtils');
 const asyncHandler = require('../utils/asyncHandler');
+const User = require('../models/user');
 
 const useTwilio = process.env.USE_TWILIO === 'true';
 const accountSid = process.env.TWILIO_ACCOUNT_SID;
@@ -23,6 +24,16 @@ const sendOTPMiddleware = asyncHandler(async (req, res, next) => {
     catch (error) {
         res.status(400);
         return next(error);
+    }
+    
+    const isReset = "reset" in req.query;
+    const user = await User.findOne({ phoneNumber });
+    if (user && !isReset) {
+        res.status(400);
+        throw Error("Phone number already exists!");
+    } else if (!user && isReset) {
+        res.status(400);
+        throw Error("Phone number does not exist!");
     }
 
     if (!useTwilio) {
