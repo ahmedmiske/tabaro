@@ -4,12 +4,17 @@ import fetchWithInterceptors from '../services/fetchWithInterceptors'; // Make s
 
 function AccountDetails({ userDetails, setUserDetails }) {
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [oldPassword, setOldPassword] = useState('');
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
     console.log('Attempting to update password...');
     try {
       const response = await fetchWithInterceptors(`/api/users/change-password`, {
@@ -17,14 +22,15 @@ function AccountDetails({ userDetails, setUserDetails }) {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ oldPassword, password })
+        body: JSON.stringify({ currentPassword: oldPassword, newPassword: password })
       });
 
       if (response.ok) {
         console.log('Password updated successfully.');
         setSuccess(true);
         setError('');
-        setTimeout(() => setSuccess(false), 5000); // Hide the success message after 5 seconds
+        setTimeout(() => setSuccess(false), 10000); // Hide the success message after 5 seconds
+        window.location.reload(); // Refresh the page to reflect the changes
       } else {
         throw new Error(`Failed to update password: ${response.status}`);
       }
@@ -62,6 +68,16 @@ function AccountDetails({ userDetails, setUserDetails }) {
           placeholder="Enter new password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+      </Form.Group>
+      <Form.Group>
+        <Form.Label>Confirm New Password</Form.Label>
+        <Form.Control
+          type="password"
+          placeholder="Confirm new password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
           required
         />
       </Form.Group>
