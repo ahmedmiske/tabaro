@@ -13,30 +13,46 @@ function PasswordReset() {
 
   const handleSendOtp = async () => {
     try {
-      const response = await fetchWithInterceptors(`/api/send-otp?checkExists=true`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ phoneNumber})
-      });
+        
+        const response = await fetchWithInterceptors(`/api/otp/send-otp?reset=true`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ phoneNumber })
+        });
 
-      if (response.ok) {
-        setStep(2);
-        setError('');
-        setSuccess('OTP sent successfully. Please check your phone.');
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to send OTP');
-      }
+        if (response.ok) {
+            setStep(2);
+            setError('');
+            setSuccess('OTP sent successfully. Please check your phone.');
+        } else {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to send OTP');
+        }
     } catch (error) {
-      setError(error.message || 'Failed to send OTP. Please try again.');
+        setError(error.message || 'Failed to send OTP. Please try again.');
     }
 };
 
-  const handleVerifyOtp = () => {
-    setStep(3);
-  };
+const verifyOtp = (phoneNumber,otp) => {
+  fetchWithInterceptors('/api/otp/verify-otp', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({phoneNumber,otp})
+  })
+
+  .then(data => {
+   setStep(3);
+   console.log(data);
+  })
+  .catch((error) => {
+    setError('رمز التحقق غير صحيح');
+    console.error('Error:', error);
+  });
+};
 
   const handleResetPassword = async (event) => {
     event.preventDefault();
@@ -51,7 +67,7 @@ function PasswordReset() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ phoneNumber, otp, newPassword: password })
+        body: JSON.stringify({ phoneNumber,newPassword: password })
       });
 
       if (response.ok) {
@@ -104,7 +120,7 @@ function PasswordReset() {
               placeholder="Enter OTP"
               required
             />
-            <Button onClick={handleVerifyOtp} variant="primary">تاكيد الكود</Button>
+            <Button onClick={()=>{verifyOtp(phoneNumber,otp)}} variant="primary">تاكيد الكود</Button>
           </Form.Group>
         </Form>
       )}
