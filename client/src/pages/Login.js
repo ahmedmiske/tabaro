@@ -74,6 +74,8 @@ function Login() {
           <div className="signup-link">
             <span>ليس لديك حساب؟ </span>
             <Button variant="link" as={Link} to="/addUserPage">إنشاء حساب</Button>
+           
+            <Button variant="link" as={Link} to="/reset-password"> <span>  هل نسيت كلمة السر؟ </span> </Button>
           </div>
         </Form>
       </div>

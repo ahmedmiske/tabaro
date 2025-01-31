@@ -15,6 +15,7 @@ import './App.css';
 import UserForm from './components/UserForm';
 import UserProfile from './pages/UserProfile';
 import AddUserserPage from './pages/addUserPage';
+import PasswordReset from './components/PasswordReset';
 
 function App() {
   const location = useLocation();
@@ -62,6 +63,8 @@ function App() {
         <Route path="/donation-details/:id" element={<DonationDetails />} />
         <Route path="/campaign/:id" element={<CampaignDetails />} />
         <Route path="/donor" element={<Donor />} />
+        
+        <Route path="/reset-password" element={<PasswordReset />} />
         {/* <Route path="/profile" element= {<UserProfile />} /> */}
       </Routes>
       </div>
