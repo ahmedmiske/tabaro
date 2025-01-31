@@ -37,5 +37,10 @@ app.get('/', (req, res) => {
 app.use('/api/users', userRoutes);
 app.use('/api/otp', otpRoutes);
 
+
+if(!process.env.NODE_ENV || process.env.NODE_ENV !== 'production') {
+    require('./swagger')(app);
+}
+
 app.use(notFound);
 app.use(errorHandler);
