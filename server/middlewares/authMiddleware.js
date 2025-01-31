@@ -13,7 +13,7 @@ const protectRegisterUser = asyncHandler(async (req, res, next) => {
                 throw new Error('Not authorized, token failed');
             }
 
-            next();
+            return next();
         } catch (error) {
             res.status(401);
             throw new Error('Not authorized, token failed');
