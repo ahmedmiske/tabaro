@@ -1,0 +1,47 @@
+.donation-container {
+    max-width: 700px;
+    margin: auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    text-align: center;
+  }
+  
+  .donation-form {
+    margin-bottom: 20px;
+  }
+  
+  .donation-list {
+    margin-top: 20px;
+  }
+  
+  .donation-card {
+    margin-bottom: 15px;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: white;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .sendButton {
+    background-color: #28a745;
+    border: none;
+    color: white;
+    padding: 10px;
+    width: 100%;
+    margin-top: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .backButton {
+    background-color: #007bff;
+    border: none;
+    color: white;
+    padding: 10px;
+    width: 100%;
+    margin-top: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  

@@ -17,15 +17,7 @@ function UserList({ onEdit, onDelete }) {
         'Content-Type': 'application/json',
       }
     })
-    // .then((res) => {
-    //   if (!res.ok) {
-    //     if (res.status === 401) {
-    //       throw new Error('Unauthorized. Redirecting to login.');
-    //     }
-    //     throw new Error(`HTTP error! Status: ${res.status}`);
-    //   }
-    //   return res.json();
-    // })
+  
     .then((data) => setUserList(data))
     .catch((error) => {
       console.error('Error fetching users:', error.message);

@@ -1,0 +1,13 @@
+.addUserPage-container {
+    width: 100%;
+    border: 2px solid var(--main-color);
+    margin-bottom: 40px;
+    box-shadow: 10px 10px 10px var(--main-color-alt);
+    padding: 20px;
+    background-color: rgb(232, 230, 230);
+    border-radius:8px ;
+    -webkit-border-radius:8px ;
+    -moz-border-radius:8px ;
+    -ms-border-radius:8px ;
+    -o-border-radius:8px ;
+}

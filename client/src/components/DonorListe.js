@@ -19,7 +19,8 @@ function DonorListe() {
   useEffect(() => {
     const fetchDonations = async () => {
       try {
-        const response = await fetchWithInterceptors('/donations');
+        // إجراء الطلب
+        const response = await fetchWithInterceptors('/api/donations'); // 
         if (!response.ok) {
           throw new Error('Failed to fetch data');
         }
@@ -32,9 +33,10 @@ function DonorListe() {
         setLoading(false);
       }
     };
-
+  
     fetchDonations();
   }, []);
+  
 
   useEffect(() => {
     let filtered = donations;

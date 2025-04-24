@@ -1,74 +1,115 @@
 .login-page {
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  gap: 40px !important;
+  display: flex ;
+  gap: 20px !important;
+  justify-content: center ;
+  align-items: center ;
+  width: 100vw !important;
+  height: 60vh !important;
+  margin-top: 60px !important;
 }
 
-/* تعديل حجم الحاوية الرئيسية ليكون أعرض */
+.login-page .login-img {
+ margin-left: 40px;
+ width: 60%;
+ padding: 10px;
+ border-radius:10px ;
+ -webkit-border-radius:10px ;
+ -moz-border-radius:10px ;
+ -ms-border-radius:10px ;
+ -o-border-radius:10px ;
+}
+
+
+.login-page .login-img img {
+  max-width: 100%;
+  width: 100%;
+ }
+
+
+
 .login-page .login-container {
-  display: flex !important;
-  align-items: center !important;
+  display: flex ;
+  align-items: center ;
   flex-direction: column;
-  justify-content: center !important;
-  /* يمكنك استخدام max-width أكبر إذا أردت توسيع المساحة */
-  max-width: 100% !important; 
-  margin-right: 200px !important;
-  padding: 20px 10px !important;
-  width: 100%; /* لتأخذ المساحة المتوفرة كاملة */
-  border: 1px solid #eee !important;
-  border-radius: 8px;
+  justify-content: center;
   background-color: #f9f9f9;
+  padding:10px 20px;
+  max-width: 40% ; 
+  margin-right: 60px ;
+  margin-bottom: 100px ;
   text-align: right;
+  width: 30%; /* */
+  /* border: 1px solid #eee ; */
+  box-shadow: 10px 10px 10px var(--main-color-alt);
+  border:2px solid var(--main-color);
+  border-radius: 8px;
   -webkit-border-radius: 8px;
   -moz-border-radius: 8px;
   -ms-border-radius: 8px;
   -o-border-radius: 8px;
 }
-
-/* تكبير حجم العنوان */
-.page-loging .login-container h2 {
+/*    */
+.login-page .login-container h2 {
   text-align: center;
   margin-bottom: 20px;
-  font-size: 1.5rem; /* مثال لتكبير الخط */
+  font-size: 1.8rem; /*    */
+  color: var(--main-color-alt);
+  font-weight: bold;
 }
 
-.page-loging .login-container .form-login {
-  border: 1px solid #eee;
-  width: 100% !important; /* ملء الحاوية بالكامل */
-  max-width: 800px;      /* الحد الأقصى لعرض النموذج ليظهر بحجم كبير */
+
+.login-page .login-container .form-login {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  border: 1px solid #eee;
+  width: 100% ; /* */
+  max-width: 100%;      /*    */
   padding: 10px 0px;
-  margin: 0 auto;        /* لتمركز النموذج وسط الحاوية */
+  margin: 0 auto;        /* */
+  
 }
 
-.page-loging .login-container .form-login button[type="submit"] {
+
+
+.login-page .login-container .form-login .input {
+  width: 100% !important;
+}
+
+
+.login-page .login-container .form-login button[type="submit"] {
   width: 100%;
   margin-top: 10px;
+  background-color: var(--main-color-alt);
+  border:1px solid var(--main-color-alt);
+  font-size: 20px;
+  transition:0.3s ;
+  border-radius: 8px;
+  -webkit-transition:0.3s ;
+  -moz-transition:0.3s ;
+  -ms-transition:0.3s ;
+  -o-transition:0.3s ;
+}
+.login-page .login-container .form-login button[type="submit"]:hover {
+background-color: var(--color-secondary) ;
+  border:2px solid var(--color-primary) ;
 }
 
-.page-loging .login-container .form-login .input-login {
+/* .login-page .login-container .form-login .input-login {
   max-width: 100%;
   width: fit-content;
   margin-top: 10px;
   padding: 10px 60px !important;
-}
+} */
 
-/* img page login */
-.page-loging .page-login-img {
-  margin-left: 40px;
-  width: 100%;
-  margin-right: 0px;
-}
 
-.button-login {
+
+/* .button-login {
   max-width: fit-content +30px !important;
   width: 320px !important;
   margin-top: 20px !important;
-}
+} */
 
 /* Signup link */
 .signup-link {
@@ -76,11 +117,23 @@
   text-align: center;
 }
 
-.signup-button {
+/* .signup-button {
   color: var(--main-color-alt) !important;
   font-size: 25px;
   font-weight: bold !important;
   text-decoration: underline;
+} */
+
+.new-account .btn-new-aacount{
+  background-color: gray !important;
+  padding:10px  20px !important;
+  width: 100% !important;
+  border: none !important;
+  color: #fff !important;
+}
+.new-account .btn-new-aacount:hover{
+  background-color:var(--color-secondary) !important;
+  border: 2px solid var(--color-primary) !important;
 }
 
 /* اخفاء الصورة عند عرض الصفحة على الشاشات الصغيرة */
@@ -90,8 +143,12 @@
   }
 
   .login-page .login-container {
+    margin-bottom: 120px !important;
     margin-right: 0 !important;
     width: 80%;
-    max-width: 100% !important; /* تجعل الحاوية تمتد بكامل عرض الشاشة */
+    max-width: 80% !important; /* تجعل الحاوية تمتد بكامل عرض الشاشة */
+  }
+  footer{
+    display: none !important;
   }
 }

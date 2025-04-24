@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Form, Button, Alert, ProgressBar } from 'react-bootstrap';
 import fetchWithInterceptors from '../services/fetchWithInterceptors'; // Make sure to import your fetch service
+import './PasswordReset.css';
 
 function PasswordReset() {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -46,6 +47,7 @@ const verifyOtp = (phoneNumber,otp) => {
 
   .then(data => {
    setStep(3);
+   setSuccess('');
    console.log(data);
   })
   .catch((error) => {
@@ -83,20 +85,21 @@ const verifyOtp = (phoneNumber,otp) => {
 
   const handleBack = () => {
     if (step > 1) setStep(step - 1);
+   
   };
 
   return (
-    <div className="password-reset">
-      <h2>تجديد كلمة</h2>
-      <ProgressBar now={(step / 3) * 100} label={`Step ${step} of 3`} />
-      {step > 1 && <Button onClick={handleBack} variant="secondary" className="mb-3">العودة</Button>}
+    <div className="container">
+      <h2>تجديد كلمة المرور</h2>
+      <ProgressBar className='progress-bar' now={(step / 3) * 100} label={`الخطوة ${step} على 3`} />
+      {step > 1 && <Button onClick={handleBack} variant="secondary" className="mb-3 btn-back">العودة</Button>}
       {error && <Alert variant="danger">{error}</Alert>}
       {success && <Alert variant="success">{success}</Alert>}
 
       {step === 1 && (
-        <Form>
-          <Form.Group>
-            <Form.Label>Phone Number</Form.Label>
+        <Form className='form-reste-password'>
+          <Form.Group className='form-group' >
+            <Form.Label>رقم الهاتف</Form.Label>
             <Form.Control
               type="text"
               value={phoneNumber}
@@ -104,14 +107,14 @@ const verifyOtp = (phoneNumber,otp) => {
               placeholder="Enter your phone number"
               required
             />
-            <Button onClick={handleSendOtp} variant="primary">Send OTP</Button>
+            <Button onClick={handleSendOtp} variant="primary">ارسال otp</Button>
           </Form.Group>
         </Form>
       )}
 
       {step === 2 && (
-        <Form>
-          <Form.Group>
+        <Form className='form-reste-password'>
+          <Form.Group className='form-group'>
             <Form.Label>OTP</Form.Label>
             <Form.Control
               type="text"
@@ -126,8 +129,8 @@ const verifyOtp = (phoneNumber,otp) => {
       )}
 
       {step === 3 && (
-        <Form onSubmit={handleResetPassword}>
-          <Form.Group>
+        <Form className='form-reste-password' onSubmit={handleResetPassword}>
+          <Form.Group className='form-group step3'>
             <Form.Label>كلمة السر الجديدة</Form.Label>
             <Form.Control
               type="password"
@@ -137,7 +140,7 @@ const verifyOtp = (phoneNumber,otp) => {
               required
             />
           </Form.Group>
-          <Form.Group>
+          <Form.Group className='form-group step3'>
             <Form.Label>تأكيد كلمة السر</Form.Label>
             <Form.Control
               type="password"

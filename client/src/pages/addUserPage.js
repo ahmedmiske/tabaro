@@ -23,6 +23,8 @@ function AddUserPage() {
     })
       .then((data) => {
         setUsers([...users, data.body]);
+        // Redirect to dashboard page 
+       
       })
       .catch((error) => console.error('Error:', error));
   };

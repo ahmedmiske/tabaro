@@ -16,6 +16,9 @@ import UserForm from './components/UserForm';
 import UserProfile from './pages/UserProfile';
 import AddUserserPage from './pages/addUserPage';
 import PasswordReset from './components/PasswordReset';
+import DonationComponent from './components/DonationComponent';
+import DonationRequestForm from './components/DonationRequestForm';
+import DonorListe from './components/DonorListe';
 
 function App() {
   const location = useLocation();
@@ -62,8 +65,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/donation-details/:id" element={<DonationDetails />} />
         <Route path="/campaign/:id" element={<CampaignDetails />} />
-        <Route path="/donor" element={<Donor />} />
-        
+        <Route path="/donation" element={<DonationRequestForm />} />
+        <Route path="/donations" element={<DonorListe />} />
         <Route path="/reset-password" element={<PasswordReset />} />
         {/* <Route path="/profile" element= {<UserProfile />} /> */}
       </Routes>

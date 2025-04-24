@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Form, Button, Toast, Modal } from 'react-bootstrap';
 import './UserForm.css';
@@ -150,7 +149,14 @@ function UserForm({ addUser, editingUser, updateUser }) {
   };
 
   const handleNext = () => {
-    setStep(step + 1);
+    if(!user.userType){
+      setError('يرجى تحديد نوع الحساب');
+      console.log('user.userType is no valid');
+      return;
+    } else{
+      setStep(step + 1);
+    }
+   
   };
 
   const handlePrev = () => setStep(step - 1);
@@ -169,19 +175,13 @@ function UserForm({ addUser, editingUser, updateUser }) {
           <div className="info-section">
             <h3>اختر نوع الحساب</h3>
             <Form.Group controlId="userType">
-              <Form.Label>نوع الحساب</Form.Label>
-              <Form.Control
-                as="select"
-                name="userType"
-                value={user.userType}
-                onChange={handleChange}
-                required
-              >
-                 <option value="">اختر نوع الحساب</option>
-                 <option value="individual">حساب فردي</option>
-                 <option value="institutional">حساب مؤسسي</option>
-               </Form.Control>
-             </Form.Group>
+        <Form.Label>نوع الحساب</Form.Label>
+        <Form.Control as="select" name="userType" value={user.userType} onChange={handleChange} required>
+          <option value="" disabled>اختر نوع الحساب</option>
+          <option value="individual">حساب فردي</option>
+          <option value="institutional">حساب مؤسسي</option>
+        </Form.Control>
+      </Form.Group>
             <Button variant="primary sendButton" onClick={handleNext}>
               التالي
             </Button>
@@ -398,7 +398,10 @@ function UserForm({ addUser, editingUser, updateUser }) {
         <Modal.Header closeButton>
           <Modal.Title>تم التسجيل بنجاح</Modal.Title>
         </Modal.Header>
-        <Modal.Body>تم تسجيل بياناتك بنجاح في النظام.</Modal.Body>
+        <Modal.Body>تم تسجيل بياناتك بنجاح في النظام.
+          يمكنك تسجيل الدخول با��تخدام ا��م المستخدم وكلمة المرور المستخدمة.
+        </Modal.Body>
+        
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowModal(false)}>إغلاق</Button>
         </Modal.Footer>

@@ -1,0 +1,139 @@
+.donation-form-container {
+  max-width: 600px;
+  width: 60vw;
+  margin: 100px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  text-align: right;
+}
+
+.donation-form-container h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+label {
+  font-size: 16px;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 5px;
+  display: block;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+  text-align: center;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* تحسين تصميم خيارات التبرع */
+.type-options-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.donation-type-form .type-check-group {
+  text-align: center;
+  display: flex;
+  align-items: center;
+  width: 30%;
+
+};
+
+.type-check-group input {
+  width: 20px;
+  height: 20px;
+  border: #218838 1px solid;
+  border-radius: 100%;
+}
+
+.type-check-group label {
+  width: fit-content;
+  font-size: 14px;
+  font-weight: normal;
+  color: #444;
+  
+  
+}
+
+/* تحسين تصميم الخيارات في الشاشات الصغيرة */
+@media (max-width: 768px) {
+  .donation-form-container {
+      max-width: 100%;
+      padding: 15px;
+  }
+
+  .type-check-group {
+    width: 100%;
+  }
+
+  .options-container, .action-buttons {
+    flex-direction: column;
+  }
+
+  .option-group, .action-buttons button {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+}
+
+.file-upload {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+.file-upload input {
+  width: 100%;
+  margin-bottom: 5px;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.action-buttons button {
+  width: 48%;
+  padding: 12px;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  transition: 0.3s;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+}
+
+.sendButton, .backButton {
+  background: #28a745;
+  color: white;
+}
+
+.sendButton:hover, .backButton:hover {
+  background: #218838;
+}

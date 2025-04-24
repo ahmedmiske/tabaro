@@ -48,7 +48,7 @@ function Login() {
         <h2>تسجيل الدخول</h2>
         <Form onSubmit={handleSubmit} className='form-login'>
           {error && <Alert variant="danger">{error}</Alert>}
-          <Form.Group controlId="loginInput">
+          <Form.Group controlId="loginInput" className='input' >
             <Form.Label>اسم المستخدم أو رقم الهاتف</Form.Label>
             <Form.Control
               type="text"
@@ -58,7 +58,7 @@ function Login() {
               required
             />
           </Form.Group>
-          <Form.Group controlId="password">
+          <Form.Group controlId="password" className='input'>
             <Form.Label>كلمة المرور</Form.Label>
             <Form.Control
               type="password"
@@ -72,11 +72,15 @@ function Login() {
             {loading ? <Spinner animation="border" size="sm" /> : 'تسجيل الدخول'}
           </Button>
           <div className="signup-link">
-            <span>ليس لديك حساب؟ </span>
-            <Button variant="link" as={Link} to="/addUserPage">إنشاء حساب</Button>
+            
            
             <Button variant="link" as={Link} to="/reset-password"> <span>  هل نسيت كلمة السر؟ </span> </Button>
           </div>
+          <div className="new-account">
+           <Button variant="primary" as={Link} to="/addUserPage" className='btn-new-aacount'>إنشاء حساب</Button>
+          {/* <span>ليس لديك حساب؟ </span> */}
+          </div>
+         
         </Form>
       </div>
     </div>
