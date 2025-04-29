@@ -20,6 +20,17 @@
 .form-group {
   margin-bottom: 15px;
 }
+.contact-donation {
+  display:flex;
+  flex-direction: column;
+}
+.contact-method{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  border: 1px solid #218838;
+}
 
 label {
   font-size: 16px;

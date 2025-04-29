@@ -6,12 +6,16 @@ import fetchWithInterceptors from '../services/fetchWithInterceptors';
 const DonationRequestForm = () => {
   const [donation, setDonation] = useState({
     category: '',
-    types: [],
+    type: '',
     description: '',
-    isRequester: true,
-    requesterName: '',
-    requesterContact: '',
-    proofDocuments: []
+    amount: '',
+    deadline: '',
+    isUrgent: false,
+    bloodType: '',
+    proofDocuments: [],
+    date: new Date().toISOString(),
+    paymentMethods: [],
+    contactMethods: []
   });
 
   const categories = {
@@ -22,77 +26,70 @@ const DonationRequestForm = () => {
     "الإعلانات الاجتماعية": ["البحث عن مفقود", "إيجاد ممتلكات ضائعة", "إعلانات تبادل المساعدات"]
   };
 
+  const paymentOptions = ["Bankily", "Masrifi", "Sadad", "Cash"];
+  const contactOptions = ["phone", "whatsapp"];
+  const bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+  const socialAds = ["البحث عن مفقود", "إيجاد ممتلكات ضائعة", "إعلانات تبادل المساعدات"];
+
+  const canDonateFinancially = () => {
+    return donation.type && donation.type !== "تبرع بالدم" && !socialAds.includes(donation.type);
+  };
+
   const handleChange = (e) => {
-    setDonation({ ...donation, [e.target.name]: e.target.value });
+    const { name, value, type, checked } = e.target;
+    setDonation({
+      ...donation,
+      [name]: type === 'checkbox' ? checked : value
+    });
   };
 
   const handleCategoryChange = (e) => {
-    setDonation({ ...donation, category: e.target.value, types: [] });
-  };
-
-  const handleTypeChange = (e) => {
-    const selectedType = e.target.value;
-    setDonation((prevState) => ({
-      ...prevState,
-      types: prevState.types.includes(selectedType)
-        ? prevState.types.filter((type) => type !== selectedType)
-        : [...prevState.types, selectedType],
-    }));
+    setDonation({
+      ...donation,
+      category: e.target.value,
+      type: ''
+    });
   };
 
   const handleFileUpload = (e) => {
-    // استخراج الملفات من الحدث الناتج عن اختيار الملفات
-    const newFiles = Array.from(e.target.files);
-  
-    // تحديث الحالة بإضافة الملفات الجديدة إلى القائمة الحالية
-    setDonation((prevState) => ({
-      ...prevState,
-      proofDocuments: [...prevState.proofDocuments, ...newFiles]
+    const files = Array.from(e.target.files);
+    setDonation(prev => ({
+      ...prev,
+      proofDocuments: [...prev.proofDocuments, ...files]
     }));
   };
 
   const handleRemoveFile = (index) => {
-    setDonation((prevState) => ({
-      ...prevState,
-      proofDocuments: prevState.proofDocuments.filter((_, idx) => idx !== index)
+    setDonation(prev => ({
+      ...prev,
+      proofDocuments: prev.proofDocuments.filter((_, i) => i !== index)
     }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    // تحويل البيانات والملفات إلى FormData إذا كان الأمر يتطلب إرسال ملفات
     const formData = new FormData();
-    formData.append('category', donation.category);
-    formData.append('types', JSON.stringify(donation.types)); // حيث أنها array
-    formData.append('description', donation.description);
-    formData.append('isRequester', donation.isRequester);
-    formData.append('requesterName', donation.requesterName);
-    formData.append('requesterContact', donation.requesterContact);
-  
-    // إضافة الملفات
-    donation.proofDocuments.forEach((file, index) => {
-      formData.append(`proofDocuments[${index}]`, file);
+
+    Object.entries(donation).forEach(([key, value]) => {
+      if (key === "proofDocuments") {
+        value.forEach((file, index) => {
+          formData.append(`proofDocuments[${index}]`, file);
+        });
+      } else if (key === "paymentMethods" || key === "contactMethods") {
+        formData.append(key, JSON.stringify(value));
+      } else {
+        formData.append(key, value);
+      }
     });
-  
-    // 
+
     fetchWithInterceptors('/api/donationRequests', {
       method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(Object.fromEntries(formData)) //   
+      body: formData
     })
-    .then(response => response.json())
-    .then(data => {
-      console.log('Success:', data);
-    })
-    .catch((error) => {
-      console.error('Error:', error);
-    });
+      .then(res => res.json())
+      .then(data => console.log("Success:", data))
+      .catch(err => console.error("Error:", err));
   };
-  
 
   return (
     <div className="donation-form-container">
@@ -101,73 +98,168 @@ const DonationRequestForm = () => {
         <Form.Group>
           <Form.Label>اختر المجال</Form.Label>
           <Form.Control as="select" name="category" value={donation.category} onChange={handleCategoryChange} required>
-            <option value="">-- اختر المجال --</option>
-            {Object.keys(categories).map((category) => (
-              <option key={category} value={category}>{category}</option>
+            <option value="">-- اختر --</option>
+            {Object.keys(categories).map(c => (
+              <option key={c} value={c}>{c}</option>
             ))}
           </Form.Control>
         </Form.Group>
 
         {donation.category && (
-          <Form.Group className="donation-type-form">
+          <Form.Group>
             <Form.Label>اختر نوع التبرع</Form.Label>
-            <div className="type-options-container">
-              {categories[donation.category].map((type, index) => (
-                <div key={type} className="type-check-group">
-                  <Form.Check
-                    className="type-check"
-                    type="checkbox"
-                    label={type}
-                    value={type}
-                    checked={donation.types.includes(type)}
-                    onChange={handleTypeChange}
-                  />
-                </div>
+            <Form.Control as="select" name="type" value={donation.type} onChange={handleChange} required>
+              <option value="">-- اختر النوع --</option>
+              {categories[donation.category].map(t => (
+                <option key={t} value={t}>{t}</option>
               ))}
-            </div>
+            </Form.Control>
           </Form.Group>
         )}
 
         <Form.Group>
-          <Form.Label>وصف الحالة</Form.Label>
+          <Form.Label>الوصف</Form.Label>
           <Form.Control as="textarea" name="description" value={donation.description} onChange={handleChange} required />
         </Form.Group>
 
-        <Form.Group>
-          <Form.Check
-            type="checkbox"
-            label="أنا صاحب الطلب"
-            checked={donation.isRequester}
-            onChange={() => setDonation({ ...donation, isRequester: !donation.isRequester })}
-          />
-        </Form.Group>
-
-        {!donation.isRequester && (
+        {canDonateFinancially() && (
           <>
             <Form.Group>
-              <Form.Label>اسم صاحب الطلب</Form.Label>
-              <Form.Control type="text" name="requesterName" value={donation.requesterName} onChange={handleChange} required={!donation.isRequester} />
+              <Form.Label>المبلغ المطلوب</Form.Label>
+              <Form.Control type="number" name="amount" value={donation.amount} onChange={handleChange} />
             </Form.Group>
+
             <Form.Group>
-              <Form.Label>وسيلة التواصل</Form.Label>
-              <Form.Control type="text" name="requesterContact" value={donation.requesterContact} onChange={handleChange} required={!donation.isRequester} />
+              <Form.Label>اختر وسائل الدفع</Form.Label>
+              {paymentOptions.map((method) => {
+                const selected = donation.paymentMethods.find((m) => m.method === method);
+                return (
+                  <div key={method} className="mb-2">
+                    <Form.Check
+                      type="checkbox"
+                      label={method}
+                      checked={!!selected}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setDonation((prev) => {
+                          const current = [...prev.paymentMethods];
+                          if (checked) {
+                            current.push({ method, phone: '' });
+                          } else {
+                            return {
+                              ...prev,
+                              paymentMethods: current.filter((m) => m.method !== method)
+                            };
+                          }
+                          return { ...prev, paymentMethods: current };
+                        });
+                      }}
+                    />
+                    {selected && (
+                      <Form.Control
+                        className="mt-1"
+                        type="text"
+                        placeholder={`رقم هاتف ${method}`}
+                        value={selected.phone}
+                        onChange={(e) => {
+                          const phone = e.target.value;
+                          setDonation((prev) => ({
+                            ...prev,
+                            paymentMethods: prev.paymentMethods.map((m) =>
+                              m.method === method ? { ...m, phone } : m
+                            )
+                          }));
+                        }}
+                      />
+                    )}
+                  </div>
+                );
+              })}
             </Form.Group>
           </>
         )}
 
-        <Form.Group className='file-upload'>
-          <Form.Label>تحميل الوثائق الداعمة (اختياري)</Form.Label>
+        {donation.type === "تبرع بالدم" && (
+          <Form.Group>
+            <Form.Label>فصيلة الدم</Form.Label>
+            <Form.Control as="select" name="bloodType" value={donation.bloodType} onChange={handleChange}>
+              <option value="">اختر الفصيلة</option>
+              {bloodTypes.map(b => <option key={b} value={b}>{b}</option>)}
+            </Form.Control>
+          </Form.Group>
+        )}
+
+        {/* وسائل التواصل */}
+        <Form.Group className='contact-donation' >
+          <Form.Label>وسائل التواصل</Form.Label>
+          {contactOptions.map((method) => {
+            const selected = donation.contactMethods.find((m) => m.method === method);
+            return (
+              <div key={method} className="mb-2 ">
+                <Form.Check
+                  type="checkbox"
+                  label={method === "phone" ? "هاتف" : "واتساب"}
+                  checked={!!selected}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setDonation((prev) => {
+                      const current = [...prev.contactMethods];
+                      if (checked) {
+                        current.push({ method, number: '' });
+                      } else {
+                        return {
+                          ...prev,
+                          contactMethods: current.filter((m) => m.method !== method)
+                        };
+                      }
+                      return { ...prev, contactMethods: current };
+                    });
+                  }}
+                />
+                {selected && (
+                  <Form.Control
+                    className="mt-1"
+                    type="text"
+                    placeholder={`رقم ${method === "phone" ? "الهاتف" : "الواتساب"}`}
+                    value={selected.number}
+                    onChange={(e) => {
+                      const number = e.target.value;
+                      setDonation((prev) => ({
+                        ...prev,
+                        contactMethods: prev.contactMethods.map((m) =>
+                          m.method === method ? { ...m, number } : m
+                        )
+                      }));
+                    }}
+                  />
+                )}
+              </div>
+            );
+          })}
+        </Form.Group>
+
+        <Form.Group>
+          <Form.Label>الموعد النهائي</Form.Label>
+          <Form.Control type="date" name="deadline" value={donation.deadline} onChange={handleChange} />
+        </Form.Group>
+
+        <Form.Group>
+          <Form.Check type="checkbox" label="طلب مستعجل" name="isUrgent" checked={donation.isUrgent} onChange={handleChange} />
+        </Form.Group>
+
+        <Form.Group>
+          <Form.Label>وثائق داعمة</Form.Label>
           <Form.Control type="file" multiple onChange={handleFileUpload} />
           <ListGroup>
-            {donation.proofDocuments.map((file, index) => (
-              <ListGroupItem key={index}>
-                {file.name} <Button variant="danger" size="sm" onClick={() => handleRemoveFile(index)}>حذف</Button>
+            {donation.proofDocuments.map((file, idx) => (
+              <ListGroupItem key={idx}>
+                {file.name} <Button variant="danger" size="sm" onClick={() => handleRemoveFile(idx)}>حذف</Button>
               </ListGroupItem>
             ))}
           </ListGroup>
         </Form.Group>
 
-        <Button type="submit" variant="primary">إرسال الطلب</Button>
+        <Button type="submit" variant="primary">إرسال</Button>
       </Form>
     </div>
   );
