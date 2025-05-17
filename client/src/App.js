@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import SocialMedia from './components/SocialMedia';
 import DonationDetails from './components/DonationDetails';
 import CampaignDetails from './components/CampaignDetails'; 
+import BloodDonationForm from './components/BloodDonationForm';
 import Donor from './components/Donor';
 import InfoBar from './components/InfoBar';
 import './App.css';
@@ -66,6 +67,7 @@ function App() {
         <Route path="/donation-details/:id" element={<DonationDetails />} />
         <Route path="/campaign/:id" element={<CampaignDetails />} />
         <Route path="/donation" element={<DonationRequestForm />} />
+        <Route path="/bloodDonation" element={<BloodDonationForm />} />
         <Route path="/donations" element={<DonorListe />} />
         <Route path="/reset-password" element={<PasswordReset />} />
         {/* <Route path="/profile" element= {<UserProfile />} /> */}
