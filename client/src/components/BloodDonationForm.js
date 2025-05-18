@@ -63,7 +63,10 @@ const BloodDonationForm = () => {
 
     fetchWithInterceptors('/api/bloodDonations', {
       method: 'POST',
-      body: formData
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(bloodDonation)
     })
       .then(res => res.json())
       .then(data => console.log("Blood donation request submitted:", data))

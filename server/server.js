@@ -35,6 +35,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/users', userRoutes);
+app.use('/api/blood-requests', require('./routes/bloodRequestRoute'));
 app.use('/api/otp', otpRoutes);
 
 
