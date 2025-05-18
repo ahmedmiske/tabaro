@@ -75,15 +75,13 @@ const BloodDonationForm = () => {
     <div className='section-title'>
        <h2>طلب تبرع بالدم</h2>
     </div>
-
-      
       <Form onSubmit={handleSubmit}>
         <Form.Group>
           <Form.Label>فصيلة الدم</Form.Label>
           <Form.Control as="select" name="bloodType" value={bloodDonation.bloodType} onChange={handleChange} required>
-            <option value="">-- اختر الفصيلة --</option>
+            <option  className="list-bloodtype" value="">-- اختر الفصيلة --</option>
             {bloodTypes.map(type => (
-              <option key={type} value={type}>{type}</option>
+              <option  className="list-bloodtype" key={type} value={type}>{type}</option>
             ))}
           </Form.Control>
         </Form.Group>

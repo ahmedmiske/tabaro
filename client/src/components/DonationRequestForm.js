@@ -79,7 +79,7 @@ const DonationRequestForm = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
   
-    // تحقق من أرقام الهاتف
+    //    
     let hasError = false;
     const newPaymentErrors = {};
     const newContactErrors = {};

@@ -1,4 +1,3 @@
-
 .donation-form-container {
   max-width: 700px;
   margin: 80px auto;
@@ -87,15 +86,12 @@ input.is-invalid {
   font-size: 13px;
 }
 
-
-.input-phone:invalid, 
-.input-phone:invalid:focus, 
+.input-phone:invalid,
+.input-phone:invalid:focus,
 .input-phone:invalid:hover {
   box-shadow: none !important;
   outline: none !important;
 }
-
-
 
 .file-upload {
   display: flex;
@@ -133,7 +129,14 @@ button[type="submit"]:hover {
   display: flex;
   justify-content: space-between;
   margin-top: 20px;
+  border: #28a745 1px solid;
+  border-radius: 10px;
 }
+
+.action-buttons button {
+  margin: 10px;
+}
+
 .progress-container {
   position: relative;
   width: 100%;
@@ -148,10 +151,6 @@ button[type="submit"]:hover {
   background: #28a745;
   height: 100%;
   transition: width 0.3s ease;
-  -webkit-transition: width 0.3s ease;
-  -moz-transition: width 0.3s ease;
-  -ms-transition: width 0.3s ease;
-  -o-transition: width 0.3s ease;
 }
 
 .progress-text {
@@ -165,27 +164,48 @@ button[type="submit"]:hover {
   color: #333;
 }
 
+/* خصائص خاصة بنموذج التبرع بالدم */
 .blood-form {
-  width: 80%;
+  width: 60%;
+  margin: 80px auto;
+  padding: 25px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  text-align: right;
   display: flex;
   flex-direction: column;
 }
+
 .blood-form .section-title {
   color: #b71c1c !important;
 }
 
+.blood-form .section-title h2 {
+  color: #b71c1c !important;
+  font-size: 25px;
+}
 
+/* تحسين عرض الخيارات داخل قائمة فصيلة الدم */
+select[name="bloodType"] option {
+  padding: 10px 15px !important;
+  border: #1d643b 1px solid;
+  text-align: right;
+  font-size: 15px;
+}
+.blood-form button  .list-bloodtype {
+   padding: 10px 15px !important;
+   border: #1d643b 1px solid;
+}
 .blood-form button[type="submit"] {
   background-color: #d32f2f;
   max-width: 80%;
-  margin: 20px 40px !important;
+  margin: 20px auto !important;
 }
 
 .blood-form button[type="submit"]:hover {
   background-color: #b71c1c;
 }
-
-
 
 @media (max-width: 768px) {
   .donation-form-container {
