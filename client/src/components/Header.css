@@ -1,5 +1,6 @@
 
-.header { background-color: var(--main-color-fundo); 
+.header { 
+  background-color: var(--main-color-fundo); 
   position: fixed;
    width: 100%;
    top: 0; 
@@ -29,7 +30,8 @@ margin: 5px 15px;
 font-size: 20px !important;
 position: relative;
 color: black !important;
-background-color: var(--main-color);
+border: var(--main-color) 1px solid;
+background-color: rgb(234, 243, 234);
 padding: 10px 10px;
 min-width: 100px;
 text-align: center;
@@ -48,7 +50,7 @@ background-color: var(--color-primary);
 transition: var(--main-transition);
 }
 
-.header .nav-link\:hover::before {
+.header .nav-link:hover::before {
 left: 0;
 opacity: 1;
 }

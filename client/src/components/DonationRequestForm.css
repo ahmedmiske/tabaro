@@ -207,6 +207,7 @@ select[name="bloodType"] option {
   background-color: #b71c1c;
 }
 
+
 @media (max-width: 768px) {
   .donation-form-container {
     width: 95%;
