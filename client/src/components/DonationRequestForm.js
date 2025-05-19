@@ -120,7 +120,10 @@ const DonationRequestForm = () => {
   
     fetchWithInterceptors('/api/donationRequests', {
       method: 'POST',
-      body: formData
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(donation)
     })
       .then(res => res.json())
       .then(data => console.log("Success:", data))
