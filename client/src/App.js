@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
+import 'react-toastify/dist/ReactToastify.css';
 import Header from './components/Header';
 import UserPage from './pages/UserPage';
 import Footer from './components/Footer';
@@ -70,8 +71,10 @@ function App() {
         <Route path="/bloodDonation" element={<BloodDonationForm />} />
         <Route path="/donations" element={<DonorListe />} />
         <Route path="/reset-password" element={<PasswordReset />} />
+         
         {/* <Route path="/profile" element= {<UserProfile />} /> */}
       </Routes>
+      
       </div>
       <Footer />
     </div>
