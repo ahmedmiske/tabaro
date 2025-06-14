@@ -1,14 +1,25 @@
+const http = require('http');
 const dotenv = require('dotenv');
 const express = require('express');
+const { Server } = require('socket.io');
 const mongoose = require('mongoose');
 const cors = require('cors');  // إضافة حزمة cors
 const { userRoutes } = require('./routes/userRoute');
 const { notFound, errorHandler } = require('./middlewares/errorMiddleware');
 const logger = require('./middlewares/logger');
 const { otpRoutes } = require('./routes/otpRoute');
+const setupSocket = require('./socket');
 
 dotenv.config();
 const app = express();
+const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: {
+    origin: '*', // يمكنك تحديد مصدر معين بدلاً من استخدام * للسماح بجميع المصادر
+    // methods: ['GET', 'POST'],
+  },
+});
 
 // استخدام CORS
 app.use(cors()); // هذا سيسمح بجميع طلبات CORS من أي مصدر
@@ -18,7 +29,7 @@ mongoose.connect(process.env.MONGO_URI)
     .then(() => {
         console.log('MongoDB connected');
         const PORT = process.env.PORT || 5000;
-        app.listen(PORT, () => {
+        server.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);
         });
     })
@@ -45,3 +56,7 @@ if(!process.env.NODE_ENV || process.env.NODE_ENV !== 'production') {
 
 app.use(notFound);
 app.use(errorHandler);
+
+setupSocket(io);
+
+app.set('io', io); // Make io available in the app

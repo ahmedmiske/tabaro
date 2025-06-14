@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Navbar, Nav, Button } from 'react-bootstrap';
 import './Header.css';
+import Notifications from './Notifications'; // Ensure this path is correct
 // import InfoBar from './InfoBar';
 
 function Header() {
@@ -11,6 +12,12 @@ return (
 <Navbar.Brand className="logo"> <img src="../logo.png" alt="logo" /> 
  </Navbar.Brand> 
 
+    <div className="notifications">
+        <span className="notification-icon">🔔</span>
+        {/* Optionally show count */}
+        {/* <span className="notification-count">{unreadCount}</span> */}
+        {/* <Notifications /> */}
+    </div>
     <Button variant="outline-primary auth-button " as={Link} to="/addUserPage">
       انشاء حساب
     </Button>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Alert } from 'react-bootstrap';
 import fetchWithInterceptors from '../services/fetchWithInterceptors'; // Ensure this is correctly imported
+import socket from '../socket'; // Import the socket instance
 
 function Notifications() {
   const [notifications, setNotifications] = useState([]);
@@ -8,6 +9,17 @@ function Notifications() {
 
   useEffect(() => {
     fetchNotifications();
+
+    // Listen for real-time notifications
+    const handleNotification = (notification) => {
+      setNotifications((prev) => [notification, ...prev]);
+    };
+    socket.on('notification', handleNotification);
+
+    // Cleanup on unmount
+    return () => {
+      socket.off('notification', handleNotification);
+    };
   }, []);
 
   const fetchNotifications = async () => {
@@ -55,6 +67,21 @@ function Notifications() {
           ))}
         </tbody>
       </Table>
+      {/* add button to call /api/users/notifications_test api to test real time notification */}
+      <button
+        onClick={async () => {
+          try {
+            const response = await fetchWithInterceptors('/api/users/notifications_test');
+            if (!response.ok) {
+              throw new Error('Failed to send test notification');
+            }
+            console.log('Test notification sent successfully');
+          } catch (error) {
+            console.error('Error sending test notification:', error.message);
+          }
+        }}
+      >Test Notification
+      </button>
     </>
   );
 }
