@@ -1,6 +1,7 @@
 const express = require('express');
 const { registerUser, authUser, getUsers, updateUser, getUser, changePassword, deleteUser, resetPassword } = require('../controllers/userController');
 const { protect, authorize, protectRegisterUser } = require('../middlewares/authMiddleware');
+const { getUserNotifications, markNotificationAsRead } = require('../controllers/notificationController');
 const router = express.Router();
 
 /**
@@ -212,5 +213,76 @@ router.put('/change-password', protect, changePassword);
  *         description: Bad request
  */
 router.put('/reset-password', protectRegisterUser, resetPassword);
+
+/**
+ * @swagger
+ * tags:
+ *  name: Notifications
+ *  description: API for managing user notifications
+ */
+
+/**
+ * @swagger
+ * /notifications:
+ *   get:
+ *     summary: Get user notifications
+ *     security:
+ *       - bearerAuth: []
+ *     tags: [Notifications]
+ *     responses:
+ *       200:
+ *         description: A list of user notifications
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/notifications', protect, getUserNotifications);
+/**
+ * @swagger
+ * /notifications/{id}:
+ *   put:
+ *     summary: Mark a notification as read
+ *     security:
+ *       - bearerAuth: []
+ *     tags: [Notifications]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the notification to mark as read
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Notification marked as read successfully
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Notification not found
+ *       500:
+ *         description: Internal server error
+ */
+router.put('/notifications/:id', protect, markNotificationAsRead);
+
+router.get('/notifications_test', protect, async (req, res) => {
+    // Emit a test notification to the user
+    const io = req.app.get('io');
+    // const notif = await Notification.create({
+    //     userId: req.user._id,
+    //     type: 'test',
+    //     title: 'Test Notification',
+    //     message: 'This is a test notification',
+    //     date: new Date(),
+    // });
+    io.to(req.user._id.toString()).emit('notification', {
+        type: 'message',
+        title: 'New Message',
+        message: `New message from ${req.user._id}`,
+        // messageId: message._id,
+        date: new Date(),
+        });
+    res.json({ message: 'Test notification sent' });
+});
 
 module.exports.userRoutes = router;

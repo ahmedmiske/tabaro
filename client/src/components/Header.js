@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Navbar, Nav, Button, NavDropdown } from 'react-bootstrap';
 import { FaHome, FaBullhorn, FaDonate, FaHandHoldingHeart, FaTint, FaBullseye, FaUserShield, FaPlus, FaSignInAlt } from 'react-icons/fa';
 import './Header.css';
+// import InfoBar from './InfoBar';
 
 function Header() {
   return (
