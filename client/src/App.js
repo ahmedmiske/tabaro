@@ -67,7 +67,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/donation-details/:id" element={<DonationDetails />} />
         <Route path="/campaign/:id" element={<CampaignDetails />} />
-        <Route path="/donation" element={<DonationRequestForm />} />
+        <Route path="/donation-requests" element={<DonationRequestForm />} />
         <Route path="/bloodDonation" element={<BloodDonationForm />} />
         <Route path="/donations" element={<DonorListe />} />
         <Route path="/reset-password" element={<PasswordReset />} />
