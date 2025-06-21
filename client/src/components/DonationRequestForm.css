@@ -208,6 +208,28 @@ select[name="bloodType"] option {
 }
 
 
+/* يضمن أن يتم تطبيق التنسيق المخصص بدل bootstrap */
+.prog-step.progress-bar-custom.progress {
+  height: 16px !important;
+  border-radius: 20px !important;
+  overflow: hidden !important;
+  background-color: #d1e7dd !important;
+   /* الخلفية الفارغة */
+  -webkit-border-radius: 20px !important;
+  -moz-border-radius: 20px !important;
+  -ms-border-radius: 20px !important;
+  -o-border-radius: 20px !important;
+}
+
+.prog-step.progress-bar-custom .progress-bar {
+  background-color: #28a745 !important; /* اللون الأساسي */
+  font-weight: bold;
+  font-size: 13px;
+  color: white;
+  text-align: center;
+}
+
+
 @media (max-width: 768px) {
   .donation-form-container {
     width: 95%;

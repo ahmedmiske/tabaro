@@ -1,4 +1,227 @@
+/* حاوية النموذج */
+.donation-form-container {
+  max-width: 700px;
+  margin: 20px auto !important;
+  padding: 30px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  text-align: right;
+  font-family: 'Cairo', sans-serif;
+}
+
+/* عنوان النموذج */
+.donation-form-container h2 {
+  text-align: center;
+  color: #222;
+  margin-bottom: 25px;
+  font-size: 26px;
+  font-weight: bold;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 25px;
+  margin-bottom: 15px;
+  color: #1d643b;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 5px;
+}
+
+/* عناصر الإدخال */
+.form-group {
+  margin-bottom: 20px;
+}
+
+label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 5px;
+  display: block;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  text-align: right;
+  background-color: #f9f9f9;
+  transition: border 0.2s ease;
+}
+
+/* تعطيل الحدود الحمراء الافتراضية */
+input:invalid,
+select:invalid,
+textarea:invalid {
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* خيار Checkbox */
+.form-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+/* أخطاء */
+input.is-invalid {
+  border-color: #dc3545 !important;
+}
+
+.text-danger {
+  color: #dc3545;
+  font-size: 13px;
+}
+
+/* رفع ملفات */
+.file-upload {
+  margin-top: 10px;
+}
+
+.file-upload input[type="file"] {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+/* قائمة عرض الملفات */
+ul.uploaded-files {
+  list-style: none;
+  padding: 0;
+  margin-top: 10px;
+}
+
+ul.uploaded-files li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #f0f4f7;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  border: #b1d5c3 2px solid !important;
+  margin-top: 30px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.button-prev,
+.button-next,
+.button-submit {
+  flex: 1 1 48%;
+  padding: 12px;
+  border: none;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 6px;
+  transition: background 0.3s ease;
+}
+
+.button-prev {
+  background-color: #a0b5c8;
+  color: white;
+}
+
+.button-next {
+  background-color: #007bff;
+  color: white;
+}
+
+.button-submit {
+  background-color: #28a745;
+  color: white;
+}
+
+
+
+/* نموذج التبرع بالدم */
 .blood-form {
-    margin-top: 0 !important;
-    border: blue 1px solid;
+  width: 100%;
+  padding: 30px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  text-align: right;
+}
+
+select[name="bloodType"] option {
+  padding: 10px;
+  font-size: 15px;
+  text-align: right;
+}
+
+/* الشريط التدريجي */
+.prog-step-container {
+  background-color: #d1e7dd;
+  padding: 10px;
+  border-radius: 16px;
+  margin-bottom: 20px;
+}
+
+.prog-step-container .progress-bar {
+  background-color: #28a745 !important;
+  font-weight: bold;
+  font-size: 18px;
+  text-align: center;
+  color: white !important;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+}
+
+/* استجابة للشاشات الصغيرة */
+@media (max-width: 768px) {
+  .donation-form-container {
+    width: 95%;
+    padding: 15px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px;
+  }
+
+
+  .button-submit {
+    width: 100%;
+    margin: auto;
+  }
+}
+
+  
+@media (max-width: 576px) {
+  .action-buttons {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    border: none !important; /* إزالة الحدود التجريبية */
+  }
+
+  .action-buttons .button-prev,
+  .action-buttons .button-next,
+  .action-buttons .button-submit {
+    width: 100% !important;
+    margin: 0 !important;
+  }
 }

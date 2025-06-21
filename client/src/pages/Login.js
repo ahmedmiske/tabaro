@@ -6,7 +6,7 @@ import loginImg from './login.jpeg';
 import fetchWithInterceptors from '../services/fetchWithInterceptors.js';
 
 function Login() {
-  const [loginInput, setLoginInput] = useState(''); // يمكن أن يكون اسم المستخدم أو رقم الهاتف
+  const [loginInput, setLoginInput] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -14,30 +14,24 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
     setLoading(true);
-    console.log("Attempting login with:", loginInput, password); // Log the input to check it before sending
     try {
-       const response = await fetchWithInterceptors('/api/users/login',{ method: 'POST',headers: {'Content-Type': 'application/json'}, body: JSON.stringify({loginInput: loginInput.trim(), password: password})  });
-    
-      // const data = response.json(); // Move this inside the `response.ok` check
+      const response = await fetchWithInterceptors('/api/users/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ loginInput: loginInput.trim(), password })
+      });
 
       if (response.ok) {
-        console.log('Login successful:',response.body ); // Logbo successful data
-  
         navigate('/profile');
       } else {
-        console.error('Login failed:', response.body); // Log error message from server
-      
-        setError(response.body.message || 'Authentication failed');
+        setError(response.body?.message || 'فشل تسجيل الدخول');
       }
     } catch (error) {
-      console.error('Network error:', error);
-      setError('Network error. Please try again.');
+      setError('خطأ في الشبكة. حاول مرة أخرى.');
     }
     setLoading(false);
   };
-
 
   return (
     <div className='login-page'>
@@ -47,40 +41,56 @@ function Login() {
       <div className="login-container">
         <h2>تسجيل الدخول</h2>
         <Form onSubmit={handleSubmit} className='form-login'>
-          {error && <Alert variant="danger">{error}</Alert>}
-          <Form.Group controlId="loginInput" className='input' >
+          {error && (
+            <Alert variant="danger" className="w-100 text-center" dismissible onClose={() => setError('')}>
+              ❌ {error}
+            </Alert>
+          )}
+
+          <Form.Group controlId="loginInput" className='input'>
             <Form.Label>اسم المستخدم أو رقم الهاتف</Form.Label>
-            <Form.Control
-              type="text"
-              value={loginInput}
-              onChange={(e) => setLoginInput(e.target.value)}
-              placeholder="أدخل اسم المستخدم أو رقم الهاتف"
-              required
-            />
+            <div className="input-with-icon">
+              <Form.Control
+                type="text"
+                value={loginInput}
+                onChange={(e) => setLoginInput(e.target.value)}
+                placeholder="أدخل اسم المستخدم أو رقم الهاتف"
+                required
+              />
+            </div>
           </Form.Group>
+
           <Form.Group controlId="password" className='input'>
             <Form.Label>كلمة المرور</Form.Label>
-            <Form.Control
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="أدخل كلمة المرور"
-              required
-            />
+            <div className="input-with-icon">
+              <Form.Control
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="أدخل كلمة المرور"
+                required
+              />
+            </div>
           </Form.Group>
-          <Button variant="primary" type="submit" disabled={loading}>
-            {loading ? <Spinner animation="border" size="sm" /> : 'تسجيل الدخول'}
+
+          <Button variant="primary" type="submit" disabled={loading} className="mt-2 w-100">
+            {loading ? (
+              <>
+                <Spinner animation="border" size="sm" className="ms-2" /> جاري الدخول...
+              </>
+            ) : (
+              'تسجيل الدخول'
+            )}
           </Button>
-          <div className="signup-link">
-            
-           
-            <Button variant="link" as={Link} to="/reset-password"> <span>  هل نسيت كلمة السر؟ </span> </Button>
+
+          <div className="signup-link d-flex justify-content-between w-100 mt-3">
+            <Link to="/reset-password" className="text-decoration-none text-danger">
+              هل نسيت كلمة السر؟
+            </Link>
+            <Link to="/addUserPage" className="btn btn-outline-secondary btn-sm">
+              إنشاء حساب جديد
+            </Link>
           </div>
-          <div className="new-account">
-           <Button variant="primary" as={Link} to="/addUserPage" className='btn-new-aacount'>إنشاء حساب</Button>
-          {/* <span>ليس لديك حساب؟ </span> */}
-          </div>
-         
         </Form>
       </div>
     </div>

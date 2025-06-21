@@ -1,13 +1,46 @@
-.addUserPage-container {
-    width: 100%;
-    border: 2px solid var(--main-color);
-    margin-bottom: 40px;
-    box-shadow: 10px 10px 10px var(--main-color-alt);
-    padding: 20px;
-    background-color: rgb(232, 230, 230);
-    border-radius:8px ;
-    -webkit-border-radius:8px ;
-    -moz-border-radius:8px ;
-    -ms-border-radius:8px ;
-    -o-border-radius:8px ;
+.signup-layout {
+  display: flex;
+  justify-content: space-between;
+  width: 80vw;
+  min-height: 100vh;
+  margin-top: 0;
+  font-family: 'Cairo', sans-serif;
+  direction: rtl;
+}
+
+.signup-form-section {
+  flex: 1;
+  background-color: #f9f9f9;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.signup-section {
+  flex: 1;
+  background: linear-gradient(to bottom right, #0aba36, #388a52);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.verse p {
+  font-size: 26px;
+  font-weight: bold;
+  line-height: 2;
+  padding: 20px;
+  max-width: 80%;
+}
+
+@media (max-width: 768px) {
+  .signup-layout {
+    flex-direction: column;
+  }
+
+  .signup-section {
+    display: none;
+  }
 }

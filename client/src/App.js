@@ -58,17 +58,18 @@ function App() {
       {/* <InfoBar /> */}
       <Header />
       <SocialMedia />
+      
       <div className="container">
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/users" element={<UserPage />} />
-        <Route path="/addUserPage" element={<AddUserserPage />} />
+        <Route path="/add-user" element={<AddUserserPage />} />
         <Route path="/profile" element={<UserProfile />} />
         <Route path="/login" element={<Login />} />
         <Route path="/donation-details/:id" element={<DonationDetails />} />
         <Route path="/campaign/:id" element={<CampaignDetails />} />
         <Route path="/donation-requests" element={<DonationRequestForm />} />
-        <Route path="/bloodDonation" element={<BloodDonationForm />} />
+        <Route path="/blood-donation" element={<BloodDonationForm />} />
         <Route path="/donations" element={<DonorListe />} />
         <Route path="/reset-password" element={<PasswordReset />} />
          

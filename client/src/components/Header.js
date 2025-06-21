@@ -9,12 +9,20 @@ function Header() {
   return (
     <>
       <Navbar expand="xl" className="header">
-        <Navbar.Brand className="logo">
-          <img src="../logo.png" alt="logo" />
-        </Navbar.Brand>
+      
 
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end navabar-nav">
+            {/* أزرار الحساب */}
+          <div className='login'>
+             <Button variant="outline-primary auth-button" as={Link} to="/add-user">
+                <FaPlus className="auth-icon" /> انشاء حساب
+             </Button>
+             <Button variant="outline-primary auth-button" as={Link} to="/login">
+                <FaSignInAlt className="auth-icon" /> تسجيل الدخول
+             </Button>
+          </div>
+
           <Nav className='nav-header'>
 
             <Nav.Link as={Link} to="/" className="link-nav">
@@ -34,7 +42,7 @@ function Header() {
               </NavDropdown.Item>
             </NavDropdown>
 
-            <Nav.Link as={Link} to="/bloodDonation" className="link-nav">
+            <Nav.Link as={Link} to="/blood-donation" className="link-nav">
               <FaTint className="nav-icon blood-icon" /> التبرع بالدم
             </Nav.Link>
 
@@ -47,17 +55,12 @@ function Header() {
             </Nav.Link>
           </Nav>
 
-          {/* أزرار الحساب */}
-          <div className='login'>
-             <Button variant="outline-primary auth-button" as={Link} to="/addUserPage">
-                <FaPlus className="auth-icon" /> انشاء حساب
-             </Button>
-             <Button variant="outline-primary auth-button" as={Link} to="/login">
-                <FaSignInAlt className="auth-icon" /> تسجيل الدخول
-             </Button>
-          </div>
+         
           
         </Navbar.Collapse>
+          <Navbar.Brand className="logo">
+          <img src="../logo.png" alt="logo" />
+        </Navbar.Brand>
       </Navbar>
     </>
   );

@@ -1,41 +1,34 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import UserForm from '../components/UserForm';
 import './addUserPage.css';
-import Title from '../components/Title';
-import fetchWithInterceptors from '../services/fetchWithInterceptors';
+import TitleMain from '../components/TitleMain';
 
 function AddUserPage() {
-  
-  const [users, setUsers] = useState([]);
- 
-
-  useEffect(() => {
-    
-  }, []);
+  const [formSubmitted, setFormSubmitted] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   const addUser = (user) => {
-    fetchWithInterceptors('/api/users', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(user)
-    })
-      .then((data) => {
-        setUsers([...users, data.body]);
-        // Redirect to dashboard page 
-       
-      })
-      .catch((error) => console.error('Error:', error));
+    // عملية إرسال البيانات
   };
- 
+
   return (
-    <div className="addUserPage-container">
-      <Title text=" إنشاء حساب جديد"/>
-      <div className="container-userform">
-        <UserForm addUser={addUser}  />
+    <div className="signup-layout">
+      {/* ✅ القسم الأيسر: النموذج */}
+      <div className="signup-form-section">
+        <TitleMain text2="إنشاء حساب جديد" text1="التسجيل" />
+        {formSubmitted ? (
+          <div className="alert alert-success text-center">{successMessage}</div>
+        ) : (
+          <UserForm addUser={addUser} />
+        )}
       </div>
-    
+
+      {/* ✅ القسم الأيمن: خلفية زرقاء وآية */}
+      <div className="signup-section">
+        <div className="verse">
+          <p>﴿ وَأَحْسِنُوا إِنَّ اللَّهَ يُحِبُّ الْمُحْسِنِينَ ﴾</p>
+        </div>
+      </div>
     </div>
   );
 }

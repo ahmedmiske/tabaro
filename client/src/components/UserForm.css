@@ -1,71 +1,86 @@
 .user-form {
-    border: 1px solid #ddd;
-    border-radius: 12px;
-    padding: 25px;
-    margin: 20px auto;
-    max-width: 500px;
-    text-align: right;
-    position: relative;
-    background-color: #ffffff;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s, box-shadow 0.2s;
+  width: 100%;
+  padding: 30px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  text-align: right;
+  font-family: 'Cairo', sans-serif;
 }
 
-.user-form:hover {
-    transform: scale(1.01);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+.info-section {
+  margin-bottom: 30px;
 }
 
-#userType{
- border: 2px solid gray;
+.info-section h3 {
+  font-size: 20px;
+  color: var(--main-color-alt);
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 8px;
+  margin-bottom: 15px;
 }
-.user-form input[type="text"],
-.user-form input[type="tel"],
-.user-form input[type="email"] {
-    margin-bottom: 10px ;
-    padding: 10px;
 
+.user-form .form-group {
+  margin-bottom: 20px;
 }
-.user-form .btn-userType{
-    margin: 20px auto;
+
+.user-form label {
+  font-weight: 600;
+  color: #333;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.user-form input,
+.user-form select {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+  text-align: right;
+}
+
+.backButton,
+.sendButton {
+  font-weight: bold;
+  font-size: 16px;
+  padding: 10px 20px;
+  border-radius: 6px;
+  min-width: 130px;
+}
+
+.sendButton {
+  background-color: var(--main-color-alt);
+  color: white;
+  border: none;
+}
+
+.sendButton:hover {
+  background-color: var(--color-secondary);
+  border: 2px solid var(--color-primary);
+}
+
+.backButton {
+  background-color: gray;
+  color: white;
+  border: none;
+  margin-left: 10px;
+}
+
+.backButton:hover {
+  background-color: var(--color-secondary);
+}
+
+@media (max-width: 768px) {
+  .user-form {
+    padding: 15px;
+  }
+
+  .backButton,
+  .sendButton {
     width: 100%;
-    padding: 20px auto;
-    background-color: var(--main-color);
-    font-size: 20px;
-    font-weight: bold;
-    border: none;
-}
-.user-form .btn-userType:hover{
-   
-    background-color: var(--color-secondary);
-   
-}
-
-.user-form #userType {
-    background-color: #ddd;
-    padding: 10px;
-    font-size: 20px;
-    text-align: center;
-    font-weight: bold;
-}
-.user-form .sendButton{
-    margin-right: 150px;
-    margin-top:20px ;
-    padding: 20px auto;
-    width: 100%;
-    background-color: var(--main-color);
-    font-size: 20px;
-    font-weight: bold;
-    border: none;
-
-}
-
-.user-form .sendButton:hover{
-    background-color: var(--color-secondary);
-}
-
-.user-form .backButton{
- position: absolute;
- top:28px;
- left:25px;
+    margin-top: 10px;
+  }
 }

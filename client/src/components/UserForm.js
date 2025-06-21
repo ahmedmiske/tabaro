@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Form, Button, Toast, Modal } from 'react-bootstrap';
 import './UserForm.css';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
+import ProgressStep from './ProgressStep';
 
 function UserForm({ addUser, editingUser, updateUser }) {
   const [user, setUser] = useState({
@@ -163,6 +164,7 @@ function UserForm({ addUser, editingUser, updateUser }) {
 
   return (
     <>
+    <ProgressStep  step={step} total={5} /> 
       <Toast onClose={() => setShowToast(false)} show={showToast} delay={3000} autohide style={{ position: 'fixed', top: 20, right: 20 }}>
         <Toast.Header>
           <strong className="me-auto">إشعار</strong>

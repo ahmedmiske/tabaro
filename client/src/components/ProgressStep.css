@@ -1,0 +1,48 @@
+.title-box {
+ margin-top: 0 !important;
+}
+.title-box .prog-step-container {
+  height: 80px !important;
+  padding: 10px !important;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease-in-out;
+  -webkit-transition: background-color 0.3s ease-in-out;
+  -moz-transition: background-color 0.3s ease-in-out;
+  -ms-transition: background-color 0.3s ease-in-out;
+  -o-transition: background-color 0.3s ease-in-out;
+  -webkit-border-radius: 16px;
+  -moz-border-radius: 16px;
+  -ms-border-radius: 16px;
+  -o-border-radius: 16px;
+}
+
+.title-box .prog-step-container .prog-bar-inner{
+   height: 40px !important;
+   display: flex !important;
+   align-items: center !important;
+   justify-content: center !important;
+ 
+}
+
+/* الشريط الأخضر داخل الحاوية */
+.title-box .prog-step-container .prog-bar-inner .progress-bar {
+  font-weight: bold;
+  font-size: 14px;
+  text-align: center;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+    background-color: var(--main-color) !important;
+  height: 100px !important;
+  padding: 0 8px;
+}
+
+.step{
+  color:var(--color-secondary) ;
+}

@@ -1,154 +1,146 @@
+/* ========== صفحة تسجيل الدخول - تنسيق متناسق مع باقي الموقع ========== */
+
 .login-page {
-  display: flex ;
-  gap: 20px !important;
-  justify-content: center ;
-  align-items: center ;
-  width: 100vw !important;
-  height: 60vh !important;
-  margin-top: 60px !important;
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: center;
+  min-width: 80vw;
+  min-height: 80vh;
+  margin-top: 40px;
+  gap: 20px;
 }
 
-.login-page .login-img {
- margin-left: 40px;
- width: 60%;
- padding: 10px;
- border-radius:10px ;
- -webkit-border-radius:10px ;
- -moz-border-radius:10px ;
- -ms-border-radius:10px ;
- -o-border-radius:10px ;
-}
-
-
-.login-page .login-img img {
-  max-width: 100%;
-  width: 100%;
- }
-
-
-
-.login-page .login-container {
-  display: flex ;
-  align-items: center ;
-  flex-direction: column;
+.login-img {
+  flex: 1 1 49%;
+  padding: 0px;
+  display: flex;
   justify-content: center;
-  background-color: #f9f9f9;
-  padding:10px 20px;
-  max-width: 40% ; 
-  margin-right: 60px ;
-  margin-bottom: 100px ;
+  align-items: center;
+}
+
+.login-img img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  -webkit-border-radius: 12px;
+  -moz-border-radius: 12px;
+  -ms-border-radius: 12px;
+  -o-border-radius: 12px;
+}
+
+.login-container {
+  flex: 1 1 400px;
+  background-color: #fff;
+  padding: 30px;
+  border: 1px solid var(--main-color);
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
   text-align: right;
-  width: 30%; /* */
-  /* border: 1px solid #eee ; */
-  box-shadow: 10px 10px 10px var(--main-color-alt);
-  border:2px solid var(--main-color);
+  max-width: 500px;
+  -webkit-border-radius: 12px;
+  -moz-border-radius: 12px;
+  -ms-border-radius: 12px;
+  -o-border-radius: 12px;
+}
+
+.login-container h2 {
+  text-align: center;
+  color: var(--main-color-alt);
+  margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.form-login {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-login .input label {
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.form-login input {
+  padding: 10px;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+  text-align: right;
+  -webkit-border-radius: 6px;
+  -moz-border-radius: 6px;
+  -ms-border-radius: 6px;
+  -o-border-radius: 6px;
+}
+
+.form-login button[type="submit"] {
+  background-color: var(--main-color-alt);
+  border: none;
+  color: white;
+  font-size: 17px;
+  font-weight: bold;
+  padding: 10px;
   border-radius: 8px;
+  transition: 0.3s ease-in-out;
+  -webkit-transition: 0.3s ease-in-out;
+  -moz-transition: 0.3s ease-in-out;
+  -ms-transition: 0.3s ease-in-out;
+  -o-transition: 0.3s ease-in-out;
   -webkit-border-radius: 8px;
   -moz-border-radius: 8px;
   -ms-border-radius: 8px;
   -o-border-radius: 8px;
 }
-/*    */
-.login-page .login-container h2 {
+
+.form-login button[type="submit"]:hover {
+  background-color: var(--color-secondary);
+  border: 2px solid var(--color-primary);
+}
+
+.signup-link,
+.new-account {
   text-align: center;
-  margin-bottom: 20px;
-  font-size: 1.8rem; /*    */
-  color: var(--main-color-alt);
-  font-weight: bold;
+  margin-top: 10px;
 }
 
-
-.login-page .login-container .form-login {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #eee;
-  width: 100% ; /* */
-  max-width: 100%;      /*    */
-  padding: 10px 0px;
-  margin: 0 auto;        /* */
-  
-}
-
-
-
-.login-page .login-container .form-login .input {
-  width: 100% !important;
-}
-
-
-.login-page .login-container .form-login button[type="submit"] {
+.new-account .btn-new-aacount {
+  background-color: gray;
+  color: white;
+  border: none;
   width: 100%;
-  margin-top: 10px;
-  background-color: var(--main-color-alt);
-  border:1px solid var(--main-color-alt);
-  font-size: 20px;
-  transition:0.3s ;
+  padding: 10px;
+  font-size: 16px;
   border-radius: 8px;
-  -webkit-transition:0.3s ;
-  -moz-transition:0.3s ;
-  -ms-transition:0.3s ;
-  -o-transition:0.3s ;
-}
-.login-page .login-container .form-login button[type="submit"]:hover {
-background-color: var(--color-secondary) ;
-  border:2px solid var(--color-primary) ;
-}
-
-/* .login-page .login-container .form-login .input-login {
-  max-width: 100%;
-  width: fit-content;
-  margin-top: 10px;
-  padding: 10px 60px !important;
-} */
-
-
-
-/* .button-login {
-  max-width: fit-content +30px !important;
-  width: 320px !important;
-  margin-top: 20px !important;
-} */
-
-/* Signup link */
-.signup-link {
-  margin-top: 10px;
-  text-align: center;
+  font-weight: bold;
+  transition: 0.3s;
+  -webkit-transition: 0.3s;
+  -moz-transition: 0.3s;
+  -ms-transition: 0.3s;
+  -o-transition: 0.3s;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  -ms-border-radius: 8px;
+  -o-border-radius: 8px;
 }
 
-/* .signup-button {
-  color: var(--main-color-alt) !important;
-  font-size: 25px;
-  font-weight: bold !important;
-  text-decoration: underline;
-} */
-
-.new-account .btn-new-aacount{
-  background-color: gray !important;
-  padding:10px  20px !important;
-  width: 100% !important;
-  border: none !important;
-  color: #fff !important;
-}
-.new-account .btn-new-aacount:hover{
-  background-color:var(--color-secondary) !important;
-  border: 2px solid var(--color-primary) !important;
+.new-account .btn-new-aacount:hover {
+  background-color: var(--color-secondary);
+  border: 2px solid var(--color-primary);
 }
 
-/* اخفاء الصورة عند عرض الصفحة على الشاشات الصغيرة */
 @media (max-width: 768px) {
-  .login-page .login-img {
+  .login-img {
     display: none;
   }
-
-  .login-page .login-container {
-    margin-bottom: 120px !important;
-    margin-right: 0 !important;
-    width: 80%;
-    max-width: 80% !important; /* تجعل الحاوية تمتد بكامل عرض الشاشة */
-  }
-  footer{
-    display: none !important;
+  .login-container {
+    max-width: 90%;
+    width: 100%;
+    margin: 0 auto 40px auto;
   }
 }
