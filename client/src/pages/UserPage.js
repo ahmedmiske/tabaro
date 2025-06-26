@@ -22,7 +22,7 @@ function UserPage({ onEdit, onDelete }) {
         throw new Error(`HTTP error! Status: ${status}`);
       }
       // تأكد من أن body هي مصفوفة قبل محاولة استخدامها كذلك
-      setUserList(Array.isArray(body) ? body : []);
+      setUserList(Array.isArray(body.result) ? body.result : []);
       setError('');
     })
     .catch((error) => {
