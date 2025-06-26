@@ -7,6 +7,7 @@ const {
   deleteBloodRequest,
 } = require('../controllers/bloodRequestController');
 const { protect } = require('../middlewares/authMiddleware');
+const { upload } = require('../utils/multipartParser');
 
 const router = express.Router();
 
@@ -64,7 +65,11 @@ const router = express.Router();
  */
 router.route('/')
   .get(protect, getBloodRequests)
-  .post(protect, createBloodRequest);
+  .post(
+    protect,
+    upload.array('files', 5), // Accept up to 5 files with field name 'files'
+    createBloodRequest
+  );
 
 /**
  * @swagger

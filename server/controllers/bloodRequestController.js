@@ -6,15 +6,32 @@ const asyncHandler = require('../utils/asyncHandler');
 // @access  Private
 const createBloodRequest = asyncHandler(async (req, res) => {
   const { bloodType, location, deadline, description, isUrgent, contactMethods } = req.body;
+  
+  // Parse contactMethods if sent as JSON string
+  let parsedContactMethods = [];
+  if (contactMethods) {
+    try {
+      parsedContactMethods = typeof contactMethods === 'string' ? JSON.parse(contactMethods) : contactMethods;
+    } catch (e) {
+      return res.status(400).json({ message: 'Invalid contactMethods format.' });
+    }
+  }
+
+  // Parse files from multer
+  let files = [];
+  if (req.files && Array.isArray(req.files)) {
+    files = req.files.map(file => file.filename);
+  }
 
   const bloodRequest = new BloodRequest({
     bloodType,
     location,
     deadline,
     description,
-    isUrgent,
+    isUrgent: isUrgent === 'true' || isUrgent === true,
     userId: req.user._id,
-    contactMethods,
+    contactMethods: parsedContactMethods,
+    files,
   });
 
   const createdBloodRequest = await bloodRequest.save();

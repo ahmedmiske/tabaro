@@ -1,7 +1,9 @@
 const fetchWithInterceptors = async (url, options = {}) => {
-    const defaultHeaders = {
-        "Content-Type": "application/json",
-    };
+    const defaultHeaders = {};
+    // Only set Content-Type if not sending FormData
+    if (!(options.body instanceof FormData)) {
+        defaultHeaders["Content-Type"] = "application/json";
+    }
     // Add default headers (e.g., Authorization)
     const token = localStorage.getItem("token"); // Or sessionStorage
     if (token) {
