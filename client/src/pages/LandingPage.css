@@ -1,78 +1,127 @@
 .landing-page {
   background: url('./tabarou.png') no-repeat center center;
   background-size: cover;
+  font-family:'IBM Plex Sans Arabic SemiBold';
+  width: 100vw;
+  height: 100vh;
   margin: 0;
   padding: 0;
   position: fixed;
   top: 40px;
   left: 0;
-  /* z-index: -100; */
-  width: 100vw;
-  height: 100vh;
   animation: moveBackground 15s infinite alternate;
   -webkit-animation: moveBackground 15s infinite alternate;
 }
 
 @keyframes moveBackground {
-  0% {
-    background-position: center bottom;
-  }
-  50% {
-    background-position: center center;
-  }
-  100% {
-    background-position: center top;
-  }
+  0% { background-position: center bottom; }
+  50% { background-position: center center; }
+  100% { background-position: center top; }
 }
 
-.landing-page .container-landing {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+.container-landing {
   max-width: 100%;
-  gap: 25px;
-
-}
-.landing-page .container-landing .carousel-landing{
-  border: 1px solid red;
-  padding: 40px;
-}
-
-.landing-page .container-landing .card-landing {
-  background-color: green !important;
-  display: flex;
-  flex-direction: column;
-  color: white !important;
-  max-width: 50vw;
-  border-radius: 10px;
   padding: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  gap: 25px;
+  flex-direction: column;
 }
 
-.landing-page .container-landing .card-landing .link-card {
-  display: flex;
-  justify-content: space-around;
-  margin-top: 20px;
+.card-landing {
+  background: var(--main-color);
+  border-radius: 12px;
+  color: white;
+  max-width: 600px;
   width: 100%;
+  text-align: center;
+  padding: 30px 25px;
+  -webkit-border-radius:;
+  -moz-border-radius:;
+  -ms-border-radius:;
+  -o-border-radius:;
 }
 
-.landing-page .container-landing .card-landing .btn-go {
-  color: white !important;
-  padding: 10px 20px;
-  border: none;
+.landing-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.highlight {
+  color: var(--color-secondary);
+}
+
+.lead-text {
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+}
+
+.link-card {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 25px;
+}
+
+.btn-go {
+  font-weight: bold;
+  padding: 12px 25px;
   border-radius: 8px;
-  cursor: pointer;
+  font-size: 17px;
+  transition: var(--main-transition);
   width: 200px;
-  font-size: 20px;
-  transition: background-color 0.3s ease-in-out;
-  -webkit-border-radius: 8px;
-  -moz-border-radius: 8px;
-  -ms-border-radius: 8px;
-  -o-border-radius: 8px;
+  color: white !important;
+  border: none;
+  -webkit-transition: var(--main-transition);
+  -moz-transition: var(--main-transition);
+  -ms-transition: var(--main-transition);
+  -o-transition: var(--main-transition);
+  -webkit-border-radius:;
+  -moz-border-radius:;
+  -ms-border-radius:;
+  -o-border-radius:;
 }
 
-.landing-page .container-landing .card-landing .btn-go:hover {
-  background-color:var(--color-secondary) !important;
+.btn-main {
+  background-color: var(--color-primary);
+}
 
+.btn-secondary {
+  background-color: #555;
+}
+
+.btn-go:hover {
+  opacity: 0.9;
+  transform: scale(1.05);
+  -webkit-transform: scale(1.05);
+  -moz-transform: scale(1.05);
+  -ms-transform: scale(1.05);
+  -o-transform: scale(1.05);
+}
+
+/* ✅ دعم الهواتف الصغيرة */
+@media (max-width: 768px) {
+  .card-landing {
+    padding: 20px 15px;
+    max-width: 95%;
+  }
+
+  .landing-title {
+    font-size: 1.6rem;
+  }
+
+  .lead-text {
+    font-size: 1rem;
+  }
+
+  .btn-go {
+    width: 100%;
+    font-size: 16px;
+  }
+
+  .link-card {
+    flex-direction: column;
+    gap: 10px;
+  }
 }

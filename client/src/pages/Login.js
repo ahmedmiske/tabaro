@@ -87,7 +87,7 @@ function Login() {
             <Link to="/reset-password" className="text-decoration-none text-danger">
               هل نسيت كلمة السر؟
             </Link>
-            <Link to="/addUserPage" className="btn btn-outline-secondary btn-sm">
+            <Link to="/add-user" className="btn btn-outline-secondary btn-sm">
               إنشاء حساب جديد
             </Link>
           </div>

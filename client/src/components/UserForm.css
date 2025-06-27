@@ -1,128 +1,72 @@
 .user-form {
-  padding: 20px;
-  background-color: #fefefe;
-  border: 1px solid var(--main-color);
+  max-width: 700px;
+  width: 39vw;
+  margin: auto;
+  padding: 30px;
+  background-color: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.08);
-  direction: rtl;
-  font-family: 'Cairo', sans-serif;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  text-align: right;
 }
 
-/* الأقسام */
 .info-section {
   margin-bottom: 20px;
 }
 
-.info-section h4 {
-  color: var(--main-color-alt);
-  margin-bottom: 15px;
+.user-form h4 {
+  color: var(--main-color);
+  margin-bottom: 20px;
   font-weight: bold;
-  font-size: 20px;
-}
-
-/* الحقول */
-.user-form .form-group {
-  margin-bottom: 15px;
 }
 
 .user-form .form-control {
+  margin-bottom: 15px;
   text-align: right;
-  border-radius: 6px;
-  font-size: 15px;
-  padding: 10px;
 }
 
-/* زر "التالي" */
-.button-next {
-  background-color: var(--main-color);
-  color: white;
+.action-buttons button {
+  min-width: 120px;
   font-weight: bold;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  transition: var(--main-transition);
 }
 
-.button-next:hover {
-  background-color: var(--main-color-alt);
-}
-
-/* زر "السابق" */
 .button-prev {
-  background-color: #ccc;
-  color: #000;
-  font-weight: bold;
-  border: 1px solid #aaa;
-  padding: 10px 20px;
-  border-radius: 8px;
-  transition: var(--main-transition);
+  background-color: #6c757d;
+  color: white;
+  border: none;
 }
 
-.button-prev:hover {
-  background-color: #b0b0b0;
+.button-next {
+  background-color: var(--main-color-alt);
+  color: white;
+  border: none;
 }
 
-/* زر الإرسال النهائي */
 .button-submit {
-  background-color: var(--color-primary);
+  background-color: var(--color-secondary);
   color: white;
-  font-weight: bold;
+  border: none;
+}
+
+.success-message-box {
+  background-color: #e6fff3;
+  border: 1px solid #b2f5d6;
+  padding: 30px;
+  border-radius: 10px;
+  text-align: center;
+  max-width: 600px;
+  margin: 40px auto;
+}
+
+.go-login-button {
+  margin-top: 20px;
+  background-color: var(--main-color-alt);
+  border: none;
+  color: white;
+  font-size: 16px;
   padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  transition: var(--main-transition);
-}
-
-.button-submit:hover {
-  background-color: var(--main-color-alt);
-}
-
-/* زر إرسال رمز التحقق */
-.sendButton {
-  background-color: var(--main-color);
-  color: white;
-  border: none;
-  padding: 8px 16px;
   border-radius: 6px;
-  font-weight: bold;
-  transition: var(--main-transition);
 }
 
-.sendButton:hover {
-  background-color: var(--main-color-alt);
-}
-
-/* زر "السابق" في حالة disabled */
-.button-prev:disabled {
-  background-color: #e0e0e0;
-  color: #888;
-  cursor: not-allowed;
-}
-
-/* مكون التنبيهات */
-.alert {
-  font-size: 14px;
-  margin-bottom: 20px;
-  text-align: right;
-}
-
-/* تخطيط تنسيق تقدم الخطوات */
-.progress-container {
-  margin-bottom: 25px;
-}
-
-/* تحسين التوست */
-.toast {
-  z-index: 9999;
-}
-
-/* استجابة للجوال */
-@media (max-width: 768px) {
-  .user-form {
-    padding: 15px;
-  }
-
-  .info-section h4 {
-    font-size: 18px;
-  }
+.go-login-button:hover {
+  background-color: var(--color-secondary);
 }

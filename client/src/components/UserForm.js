@@ -12,6 +12,7 @@ function UserForm() {
     userType: '', username: '', password: '', confirmPassword: '',
     institutionName: '', institutionLicenseNumber: '', institutionAddress: ''
   });
+
   const [step, setStep] = useState(1);
   const [error, setError] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
@@ -19,6 +20,7 @@ function UserForm() {
   const [showToast, setShowToast] = useState(false);
   const [showValidationAlert, setShowValidationAlert] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
 
   const navigate = useNavigate();
 
@@ -94,6 +96,7 @@ function UserForm() {
         </div>
       ) : (
         <Form onSubmit={handleSubmit} className="user-form">
+          {/* الخطوة 1 */}
           {step === 1 && (
             <div className="info-section">
               <h4>اختيار نوع الحساب</h4>
@@ -108,6 +111,7 @@ function UserForm() {
             </div>
           )}
 
+          {/* الخطوة 2 */}
           {step === 2 && (
             <div className="info-section">
               <h4>التحقق من رقم الهاتف</h4>
@@ -130,6 +134,7 @@ function UserForm() {
             </div>
           )}
 
+          {/* الخطوة 3 */}
           {step === 3 && (
             <div className="info-section">
               {user.userType === 'individual' ? (
@@ -151,6 +156,7 @@ function UserForm() {
             </div>
           )}
 
+          {/* الخطوة 4 */}
           {step === 4 && (
             <div className="info-section">
               <h4>معلومات الحساب</h4>
@@ -161,26 +167,34 @@ function UserForm() {
             </div>
           )}
 
-          {step === 5 && (
-            <Alert variant="info" className="text-center">
-              ✅ أنت على وشك إرسال البيانات. يرجى التأكد من صحتها.
-            </Alert>
-          )}
+          {/* الأزرار */}
+          <div className="action-buttons mt-4 d-flex flex-column align-items-center gap-3">
+            {step === 5 && !confirmed && (
+              <>
+                <Alert variant="info" className="confirmation-alert w-100 text-center">
+                  ✅ <strong>أنت على وشك إرسال البيانات.</strong> يرجى التأكد من صحتها قبل المتابعة.
+                </Alert>
+                <Button className="button-next" onClick={() => setConfirmed(true)}>
+                  التالي <FaArrowLeft className="me-2" />
+                </Button>
+              </>
+            )}
 
-          <div className="action-buttons mt-3 d-flex gap-3 justify-content-between">
-            {step > 1 && step < 5 && (
+            {step === 5 && confirmed && (
+              <Button className="button-submit" type="submit">
+                <FaCheck className="ms-2" /> تسجيل
+              </Button>
+            )}
+
+            {step > 1 && step < 6 && (
               <Button className="button-prev" onClick={() => setStep(step - 1)}>
                 <FaArrowRight className="ms-2" /> السابق
               </Button>
             )}
+
             {step < 5 && (
               <Button className="button-next" onClick={() => validateStep() && setStep(step + 1)}>
                 التالي <FaArrowLeft className="me-2" />
-              </Button>
-            )}
-            {step === 5 && (
-              <Button className="button-submit" type="submit">
-                <FaCheck className="ms-2" /> تسجيل
               </Button>
             )}
           </div>
@@ -188,9 +202,7 @@ function UserForm() {
       )}
 
       <Toast onClose={() => setShowToast(false)} show={showToast} delay={3000} autohide style={{ position: 'fixed', top: 20, right: 20 }}>
-        <Toast.Header>
-          <strong className="me-auto">تم التحقق</strong>
-        </Toast.Header>
+        <Toast.Header><strong className="me-auto">تم التحقق</strong></Toast.Header>
         <Toast.Body>✅ تم التحقق من رقم الهاتف بنجاح.</Toast.Body>
       </Toast>
     </>
