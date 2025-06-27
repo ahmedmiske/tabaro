@@ -75,9 +75,24 @@ const BloodDonationMultiStepForm = () => {
     }
 
     const formData = new FormData();
-    formData.append('data', JSON.stringify(bloodDonation));
-    supportDocs.forEach((file, idx) => {
-      formData.append(`files`, file); // you can use unique names if needed
+    Object.entries(bloodDonation).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        value.forEach((item, idx) => {
+          if (typeof item === 'object') {
+            formData.append(`contactMethods[${idx}][method]`, item.method);
+            formData.append(`contactMethods[${idx}][number]`, item.number);
+          } else {
+            formData.append(key, item);
+          }
+        });
+      } else {
+        formData.append(key, value);
+      }
+    });
+
+    // Append files
+    supportDocs.forEach((file) => {
+      formData.append('files', file);
     });
 
     fetchWithInterceptors('/api/blood-requests', {

@@ -39,6 +39,7 @@ mongoose.connect(process.env.MONGO_URI)
     });
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true, limit: '30mb' }));
 app.use(logger);
 
 app.get('/', (req, res) => {

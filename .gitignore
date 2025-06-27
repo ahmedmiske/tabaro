@@ -70,3 +70,6 @@ jspm_packages
 
 # vscode settings
 .vscode
+
+# misc
+uploads

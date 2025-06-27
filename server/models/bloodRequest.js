@@ -41,6 +41,10 @@ const bloodRequestSchema = new mongoose.Schema({
     type: Number,
     default: 1, // Assuming 1 represents an active request
   },
+  files: {
+    type: [String], // or [Object] if you want to store more info per file
+    default: [],
+  },
 }, {
   timestamps: true,
 });
