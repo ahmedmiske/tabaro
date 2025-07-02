@@ -3,11 +3,11 @@
 }
 
 :root {
-  --main-color: #4CAF50; /* Green */
-  --main-color-alt: #2E7D32; /* Darker Green */
-  --main-color-fundo: #EFEFEF; /* Light Grey */
-  --color-primary: #1E88E5; /* Blue */
-  --color-secondary: #FF7043; /* Orange */
+  --main-color: #4CAF50;
+  --main-color-alt: #2E7D32;
+  --main-color-fundo: #EFEFEF;
+  --color-primary: #1E88E5;
+  --color-secondary: #FF7043;
   --main-transition: 0.3s;
 }
 
@@ -15,46 +15,27 @@ html {
   scroll-behavior: smooth;
 }
 
-/* body {
-  font-family: 'Cairo', sans-serif;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background-color: var(--main-color-fundo);
-} */
-
-/* .app {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background-color: #F5F5F5;
-} */
-
-
-
 body {
   font-family: 'Cairo', sans-serif;
   margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  min-height: 80vh;
+  min-height: 100vh;
   background-color: var(--main-color-fundo);
   margin-bottom: 80px;
 }
 
-.app {
+.page-app {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #F5F5F5;
 }
 
-.container {
+.page-wrapper {
+  width: 100%;
+  padding: 0 40px 80px 40px;
+  margin:0 ;
   flex: 1;
-  padding-top: 60px; /* Space for fixed header */
-  padding-bottom: 60px; /* Space for fixed footer */
-}
 
+}

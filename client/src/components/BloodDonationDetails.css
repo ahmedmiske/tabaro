@@ -1,0 +1,38 @@
+.blood-details-container {
+  padding: 40px 20px;
+  background-color: var(--main-color-fundo);
+  min-height: 80vh;
+}
+.blood-details-container .fas {
+    margin-left: 10px;
+}
+.details-card {
+  max-width: 800px;
+  margin: 0 auto;
+  border-radius: 10px;
+}
+li {
+    list-style: none;
+}
+.details-card .card-header{
+    background-color: var(--color-secondary);
+}
+.details-card .fa-tint {
+    font-size: 30px;
+}
+
+.docs-preview img {
+  border: 1px solid #ccc;
+  margin: 5px;
+  border-radius: 5px;
+}
+
+.docs-preview {
+  gap: 15px;
+}
+
+.doc-box {
+  width: 120px;
+  min-height: 160px;
+  background-color: #fafafa;
+}

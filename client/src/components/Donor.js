@@ -1,5 +1,5 @@
 import React from 'react';
-import DonorListe from './DonorListe';
+import DonorListe from './BloodDonationListe';
 
 function Donor() {
   return (

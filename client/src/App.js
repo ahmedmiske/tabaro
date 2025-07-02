@@ -7,6 +7,7 @@ import Footer from './components/Footer';
 import LandingPage from './pages/LandingPage';
 import Register from './pages/Register';
 import Login from './pages/Login';
+import BloodDonationList from './components/BloodDonationListe';
 import SocialMedia from './components/SocialMedia';
 import DonationDetails from './components/DonationDetails';
 import CampaignDetails from './components/CampaignDetails'; 
@@ -18,9 +19,9 @@ import UserForm from './components/UserForm';
 import UserProfile from './pages/UserProfile';
 import AddUserserPage from './pages/addUserPage';
 import PasswordReset from './components/PasswordReset';
-import DonationComponent from './components/DonationComponent';
 import DonationRequestForm from './components/DonationRequestForm';
-import DonorListe from './components/DonorListe';
+import DonorListe from './components/BloodDonationListe';
+import BloodDonationDetails from './components/BloodDonationDetails';
 
 function App() {
   const location = useLocation();
@@ -54,29 +55,28 @@ function App() {
   }, [location]);
 
   return (
-    <div>
-      {/* <InfoBar /> */}
+    <div className='page-app'>
       <Header />
       <SocialMedia />
       
-      <div className="container">
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/users" element={<UserPage />} />
-        <Route path="/add-user" element={<AddUserserPage />} />
-        <Route path="/profile" element={<UserProfile />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/donation-details/:id" element={<DonationDetails />} />
-        <Route path="/campaign/:id" element={<CampaignDetails />} />
-        <Route path="/donation-requests" element={<DonationRequestForm />} />
-        <Route path="/blood-donation" element={<BloodDonationForm />} />
-        <Route path="/donations" element={<DonorListe />} />
-        <Route path="/reset-password" element={<PasswordReset />} />
-         
-        {/* <Route path="/profile" element= {<UserProfile />} /> */}
-      </Routes>
-      
+      <div className="page-wrapper">
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/users" element={<UserPage />} />
+          <Route path="/add-user" element={<AddUserserPage />} />
+          <Route path="/profile" element={<UserProfile />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/donation-details/:id" element={<DonationDetails />} />
+          <Route path="/bloodDonation-details/:id" element={<BloodDonationDetails />} />
+          <Route path="/campaign/:id" element={<CampaignDetails />} />
+          <Route path="/donation-requests" element={<DonationRequestForm />} />
+          <Route path="/blood-donation" element={<BloodDonationForm />} />
+          <Route path="/donations" element={<DonorListe />} />
+          <Route path="/blood-donations" element={<BloodDonationList />} />
+          <Route path="/reset-password" element={<PasswordReset />} />
+        </Routes>
       </div>
+
       <Footer />
     </div>
   );
