@@ -90,7 +90,8 @@ function BloodDonationListe() {
                 onClick={() => setPage(prev => Math.max(prev - 1, 1))}
                 disabled={page === 1}
               >
-                ⬅️ السابقة
+                   ➡️ 
+             السابقة
               </Button>
               <span className="align-self-center">الصفحة {page} من {totalPages}</span>
               <Button
@@ -98,7 +99,7 @@ function BloodDonationListe() {
                 onClick={() => setPage(prev => prev + 1)}
                 disabled={page === totalPages}
               >
-                التالية ➡️
+              ⬅️  التالية 
               </Button>
             </div>
           </>

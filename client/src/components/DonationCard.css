@@ -6,6 +6,7 @@
   display: flex;
   transition: transform 0.3s ease;
   padding: 5px;
+   border: 1px solid #e7e7e7 !important;
 }
 
 .donation-card:hover {
@@ -21,7 +22,7 @@
   flex-direction: column;
   justify-content: space-between;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  border: none;
+ 
   border-radius: 8px;
   overflow: hidden;
 }

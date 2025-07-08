@@ -1,5 +1,8 @@
 .donation-container {
   width: 100% !important;
+  background-color: linear-gradient(to bottom, #f0f4f3, #ffffff) !important;
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 30px 20px;
   background-color: var(--main-color-fundo);
   box-shadow: 0 0 15px rgba(128, 128, 128, 0.3);
@@ -18,15 +21,20 @@
   border: 2px solid var(--main-color-alt);
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   border-radius: 8px;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  -ms-border-radius: 8px;
+  -o-border-radius: 8px;
 }
 
 /* الشبكة */
 .donation-grid {
+   background-color: (to bottom, #f0f4f3, #ffffff) !important;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 20px;
-  border-top: 3px solid var(--main-color-alt);
+  border-top: 4px solid var(--main-color-alt);
   padding: 20px 10px;
   background-color: var(--main-color-fundo);
   border-radius: 8px;

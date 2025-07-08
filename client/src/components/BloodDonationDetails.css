@@ -3,36 +3,94 @@
   background-color: var(--main-color-fundo);
   min-height: 80vh;
 }
-.blood-details-container .fas {
-    margin-left: 10px;
-}
+
 .details-card {
   max-width: 800px;
   margin: 0 auto;
   border-radius: 10px;
 }
-li {
-    list-style: none;
-}
-.details-card .card-header{
-    background-color: var(--color-secondary);
-}
-.details-card .fa-tint {
-    font-size: 30px;
+
+.details-card .card-header {
+  background-color: var(--color-secondary);
 }
 
-.docs-preview img {
-  border: 1px solid #ccc;
-  margin: 5px;
-  border-radius: 5px;
+.details-card .fa-tint {
+  font-size: 30px;
+}
+
+.blood-details-container .fas {
+  margin-left: 10px;
+}
+
+li {
+  list-style: none;
 }
 
 .docs-preview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
   gap: 15px;
+  margin-top: 15px;
 }
 
 .doc-box {
-  width: 120px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
   min-height: 160px;
-  background-color: #fafafa;
+  transition: transform 0.2s;
 }
+
+.doc-box:hover {
+  transform: scale(1.02);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.preview-modal {
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 80vw;
+  margin: 0 auto;
+  padding: 20px;  
+  background-color: var(--main-color-fundo);
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(128, 128, 128, 0.3);
+  max-height: 60vh;
+}
+  .modal-content {
+    background-color: var(--main-color-fundo);
+    border-radius: 10px;
+  }
+
+  .modal-header {
+    border-bottom: none;
+    display: flex;
+    justify-content: center;  
+    align-items: center;
+    background-color: var(--color-secondary);
+    text-align: center;
+  }
+  .model-title {
+    color: #fff;
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0;
+    text-align: center;
+  }
+
+  .modal-body {
+    padding: 20px;
+  }
+
+  .modal-footer {
+    border-top: none;
+    justify-content: center;
+  }
+.preview-modal .modal-dialog {
+    max-width: 90%;
+    width: 100%;
+  }

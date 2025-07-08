@@ -52,6 +52,11 @@ app.use('/api/users', userRoutes);
 app.use('/api/blood-requests', require('./routes/bloodRequestRoute'));
 app.use('/api/otp', otpRoutes);
 
+const messageRoutes = require('./routes/messageRoute');
+app.use('/api/messages', messageRoutes);
+
+
+
 
 if(!process.env.NODE_ENV || process.env.NODE_ENV !== 'production') {
     require('./swagger')(app);

@@ -1,0 +1,60 @@
+/* ChatBox.css */
+.chat-box-container {
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 15px;
+  background-color: #fff;
+  max-width: 600px;
+  margin: 30px auto;
+  display: flex;
+  flex-direction: column;
+  height: 400px;
+}
+
+.messages-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.message {
+  padding: 8px 12px;
+  margin: 6px 0;
+  border-radius: 10px;
+  max-width: 70%;
+}
+
+.sent {
+  background-color: #d1f5d3;
+  align-self: flex-end;
+  text-align: right;
+}
+
+.received {
+  background-color: #f1f1f1;
+  align-self: flex-start;
+  text-align: left;
+}
+
+.input-area {
+  display: flex;
+  gap: 10px;
+}
+
+.input-area input {
+  flex: 1;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.input-area button {
+  padding: 8px 15px;
+  background-color: var(--main-color);
+  color: white;
+  border: none;
+  border-radius: 6px;
+}

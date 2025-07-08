@@ -131,3 +131,14 @@ Authorization: Bearer {{user.response.body.token}}
 ### Delete a blood request
 DELETE http://{{host}}/api/blood-requests/{{bloodRequest.response.body._id}}
 Authorization: Bearer {{user.response.body.token}}
+
+### Send a message
+POST http://localhost:5000/api/messages
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3OTYyODVjZmU1NzI1ODYxMWRlYzkzZCIsImlhdCI6MTc1MjAwMDI1MywiZXhwIjoxNzU0NTkyMjUzfQ.QvUuk8yfR_gBbMh11FjbHRzGAwGrW-VQaspLC6nOHaY
+
+{
+  "sender": "664a3db7bb028265c2a510d4",
+  "recipient": "664a3db7bb028265c2a510d7",
+  "content": "Hello, this is a test message!"
+}
