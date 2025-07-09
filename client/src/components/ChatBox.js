@@ -1,70 +1,103 @@
 // components/ChatBox.jsx
-import React, { useEffect, useState } from 'react';
-import fetchWithInterceptors from '../services/fetchWithInterceptors';
-import { useParams } from 'react-router-dom';
+import React, { useEffect, useState, useRef } from 'react';
+import socket from '../socket';
 import './ChatBox.css';
 
-const ChatBox = ({ currentUserId, recipientId }) => {
-  const { id: donationId } = useParams(); // donation ID for context if needed
+const ChatBox = ({ recipientId }) => {
+  // ✅ Use recipientId prop to identify the chat recipient
   const [messages, setMessages] = useState([]);
   const [newMsg, setNewMsg] = useState('');
+  const [typing, setTyping] = useState(false);
 
-  // Load messages between current user and recipient
-  const loadMessages = async () => {
-    try {
-      const res = await fetchWithInterceptors(
-        `/api/messages?user1=${currentUserId}&user2=${recipientId}`
-      );
-      if (res.ok) setMessages(res.body);
-    } catch (err) {
-      console.error('Error loading chat messages:', err);
-    }
+  const messagesEndRef = useRef(null);
+ // Get current user from localStorage
+  const user = JSON.parse(localStorage.getItem('user'));
+  const currentUserId = user?._id;
+  const currentUserName = user?.firstName + ' ' + user?.lastName;
+  // ✅ Format date as dd/MM/yyyy HH:mm
+  const formatDateTime = (dateString) => {
+    const date = new Date(dateString);
+    const pad = (n) => n.toString().padStart(2, '0');
+    return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
   };
 
-  // Send a new message
-  const sendMessage = async () => {
-    if (!newMsg.trim()) return;
-
-    try {
-      const res = await fetchWithInterceptors('/api/messages', {
-        method: 'POST',
-        body: JSON.stringify({
-          sender: currentUserId,
-          recipient: recipientId,
-          content: newMsg,
-        }),
-      });
-
-      if (res.ok) {
-        setMessages((prev) => [...prev, res.body]); // append new message
-        setNewMsg('');
-      }
-    } catch (err) {
-      console.error('Error sending message:', err);
-    }
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   useEffect(() => {
-    loadMessages(); // initial fetch
-  }, []);
+    socket.on('receiveMessage', (message) => {
+      setMessages(prev => [...prev, message]);
+    });
 
-  return (
+    socket.on('messageSent', (message) => {
+      setMessages(prev => [...prev, message]);
+    });
+
+    socket.on('typing', ({ senderId }) => {
+      if (senderId === recipientId) {
+        setTyping(true);
+        setTimeout(() => setTyping(false), 2000);
+      }
+    });
+
+    return () => {
+      socket.off('receiveMessage');
+      socket.off('messageSent');
+      socket.off('typing');
+    };
+  }, [recipientId]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const sendMessage = () => {
+    if (!newMsg.trim()) return;
+
+    socket.emit('sendMessage', {
+      recipientId,
+      content: newMsg
+    });
+
+    setNewMsg('');
+  };
+
+  const handleTyping = () => {
+    socket.emit('typing', { recipientId });
+  };
+
+   if (!currentUserId) {
+    return <p className="text-danger">⚠️ لا يمكن بدء المحادثة: المستخدم غير معروف</p>;
+  }
+
+ return (
     <div className="chat-box-container">
       <div className="messages-area">
-        {messages.map((msg, index) => (
+        {messages.map((msg, i) => (
           <div
-            key={index}
+            key={i}
             className={`message ${msg.sender === currentUserId ? 'sent' : 'received'}`}
           >
-            {msg.content}
+            <div className="sender-name fw-bold mb-1">
+              {msg.sender === currentUserId ? 'أنت' : msg.senderName || 'المستخدم'}
+            </div>
+            <div>{msg.content}</div>
+            <div className="timestamp text-muted small mt-1">
+              {formatDateTime(msg.timestamp)}
+            </div>
           </div>
         ))}
+        {typing && <div className="text-muted">...يكتب الآن</div>}
+        <div ref={messagesEndRef} />
       </div>
-      <div className="input-area">
+
+      <div className="input-area mt-2">
         <input
           type="text"
           value={newMsg}
           onChange={(e) => setNewMsg(e.target.value)}
+          onKeyDown={handleTyping}
           placeholder="أكتب رسالتك هنا..."
         />
         <button onClick={sendMessage}>إرسال</button>
@@ -73,4 +106,7 @@ const ChatBox = ({ currentUserId, recipientId }) => {
   );
 };
 
+
 export default ChatBox;
+// This component handles the chat box functionality including sending and receiving messages,
+// displaying messages with timestamps, and showing typing status.

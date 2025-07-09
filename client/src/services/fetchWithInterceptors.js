@@ -27,17 +27,25 @@ const fetchWithInterceptors = async (url, options = {}) => {
             // Optionally trigger a logout or token refresh flow here
         }
 
-        // save token
-        if(
-            url.includes('/verify-otp') || 
-            url.includes('/login') || 
+      // Save token
+if (
+  url.includes('/verify-otp') ||
+  url.includes('/login') ||
+  (options.method === 'POST' && url.includes('/users'))
+) {
+  // ✅ Save token
+  localStorage.setItem("token", body.token);
 
-            ( options.method === 'POST' && url.includes('/users'))
-        ){ 
-            // sould check if stay logged in is checked
+  // ✅ Also save user object (for ChatBox and other components)
+  if (body.user) {
+    localStorage.setItem("user", JSON.stringify({
+      _id: body.user._id,
+      firstName: body.user.firstName,
+      lastName: body.user.lastName
+    }));
+  }
+}
 
-            localStorage.setItem("token", body.token);
-        }
 
         // Check for non-OK responses
         if (!response.ok) {

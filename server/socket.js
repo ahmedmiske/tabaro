@@ -1,10 +1,13 @@
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 const Message = require('./models/message');
+const User = require('./models/user'); // ⬅️ تأكد من وجود هذا
 
 const setupSocket = (io) => {
   io.use((socket, next) => {
     const token = socket.handshake.auth.token;
     if (!token) return next(new Error('Authentication error'));
+
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       socket.userId = decoded.id;
@@ -15,58 +18,54 @@ const setupSocket = (io) => {
   });
 
   io.on('connection', (socket) => {
-    console.log(`User ${socket.userId} connected`);
-
-    // test sending notification
-    // socket.emit('notification', {
-    //   type: 'test',
-    //   title: 'Test Notification',
-    //   message: 'This is a test notification',
-    //   date: new Date(),
-    // });
-
-    
-    
-    // Join a private room based on user ID
+    console.log(`✅ User ${socket.userId} connected`);
     socket.join(socket.userId);
 
-    // Handle sending messages
     socket.on('sendMessage', async ({ recipientId, content }) => {
       try {
+        if (
+          !mongoose.Types.ObjectId.isValid(socket.userId) ||
+          !mongoose.Types.ObjectId.isValid(recipientId)
+        ) {
+          return socket.emit('error', { message: 'Invalid user ID' });
+        }
+
         const message = new Message({
           sender: socket.userId,
           recipient: recipientId,
           content,
+          timestamp: new Date(), // ⬅️ Use current date for timestamp
+          read: false // ⬅️ Default to unread
         });
+
         await message.save();
 
-        // Send message to recipient's room
-        io.to(recipientId).emit('receiveMessage', message);
-        // Send notification to recipient
-        io.to(recipientId).emit('notification', {
-          type: 'message',
-          title: 'New Message',
-          message: `New message from ${socket.userId}`,
-          messageId: message._id,
-          date: new Date(),
-        });
+        // ⬅️ Populate sender name (firstName + lastName)
+        const sender = await User.findById(socket.userId).select('firstName lastName');
 
-        // Acknowledge to sender
-        socket.emit('messageSent', message);
+        const messageWithName = {
+          ...message._doc,
+          senderName: sender ? `${sender.firstName} ${sender.lastName}` : 'مستخدم'
+        };
+
+        io.to(recipientId).emit('receiveMessage', messageWithName);
+        socket.emit('messageSent', messageWithName);
       } catch (error) {
-        socket.emit('error', { message: 'Failed to send message' });
+        console.error('❌ Error:', error);
+        socket.emit('error', { message: 'Message failed' });
       }
     });
 
-    // Handle typing indicator
     socket.on('typing', ({ recipientId }) => {
       socket.to(recipientId).emit('typing', { senderId: socket.userId });
     });
 
     socket.on('disconnect', () => {
-      console.log(`User ${socket.userId} disconnected`);
+      console.log(`🔴 User ${socket.userId} disconnected`);
     });
   });
 };
 
 module.exports = setupSocket;
+// This code sets up a Socket.IO server that handles real-time messaging between users.
+// It authenticates users using JWT, allows sending messages, and emits typing events.

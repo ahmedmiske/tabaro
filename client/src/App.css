@@ -3,6 +3,18 @@
 }
 
 :root {
+  --font-family: 'Cairo', sans-serif;
+  --font-family-alt: 'Roboto', sans-serif;
+  --font-family-mono: 'Courier New', monospace;
+  --font-size: 16px;
+  --font-size-small: 14px;
+  --font-size-large: 18px;  
+  --font-weight-normal: 400;
+  --font-weight-bold: 700;
+  --font-weight-bolder: 900;
+  --line-height: 1.5;
+  --main-color-hover: #66BB6A;
+  --main-color-active: #388E3C;
   --main-color: #4CAF50;
   --main-color-alt: #2E7D32;
   --main-color-fundo: #EFEFEF;
