@@ -55,6 +55,17 @@ const setupSocket = (io) => {
         socket.emit('error', { message: 'Message failed' });
       }
     });
+    
+
+    socket.on('donationIntent', ({ recipientId, donationId }) => {
+        io.to(recipientId).emit('donationIntentNotification', {
+        title: '🩸 شخص يريد التبرع',
+        message: `أحد المستخدمين أبدى نيته بالتبرع لحالتك`,
+        donationId,
+        date: new Date(),
+        });
+    });
+
 
     socket.on('typing', ({ recipientId }) => {
       socket.to(recipientId).emit('typing', { senderId: socket.userId });
