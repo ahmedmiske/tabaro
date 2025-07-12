@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import 'react-toastify/dist/ReactToastify.css';
+import { AuthProvider } from './AuthContext'; // Import the AuthProvider
 import Header from './components/Header';
 import UserPage from './pages/UserPage';
 import Footer from './components/Footer';
@@ -55,11 +56,12 @@ function App() {
   }, [location]);
 
   return (
-    <div className='page-app'>
-      <Header />
-      <SocialMedia />
+    <AuthProvider>
+      <div className='page-app'>
+         <Header />
+          <SocialMedia />
       
-      <div className="page-wrapper">
+       <div className="page-wrapper">
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/users" element={<UserPage />} />
@@ -79,6 +81,7 @@ function App() {
 
       <Footer />
     </div>
+    </AuthProvider>
   );
 }
 

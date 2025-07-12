@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Card, Button, Spinner, ListGroup, Image, Modal, Alert } from 'react-bootstrap';
+import {
+  Card, Button, Spinner, ListGroup, Image,
+  Modal, Toast, ToastContainer
+} from 'react-bootstrap';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import ChatBox from '../components/ChatBox';
-import socket from '../socket'; // استخدم سوكيت الإشعارات
+import socket from '../socket';
 import './BloodDonationDetails.css';
 
 const BloodDonationDetails = () => {
@@ -12,11 +15,11 @@ const BloodDonationDetails = () => {
   const [loading, setLoading] = useState(true);
 
   const [showChat, setShowChat] = useState(false);
-  const [donationAlert, setDonationAlert] = useState(false); // إشعار بعد الضغط على زر التبرع
-
+  const [showToast, setShowToast] = useState(false); // ✅ Toast بدلاً من Alert
   const [showModal, setShowModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedType, setSelectedType] = useState('');
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const currentUser = JSON.parse(localStorage.getItem('user'));
   const currentUserId = currentUser?._id;
@@ -36,14 +39,13 @@ const BloodDonationDetails = () => {
   const handleNotifyDonor = () => {
     if (!donation?.userId?._id) return;
 
-    // إشعار مباشر باستخدام socket
     socket.emit('sendMessage', {
       recipientId: donation.userId._id,
       content: `🩸 يريد ${currentUser.firstName} التبرع لك. سيتم التواصل معك قريبا.`
     });
 
-    setDonationAlert(true);
-    setTimeout(() => setDonationAlert(false), 4000);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 4000);
   };
 
   useEffect(() => {
@@ -126,28 +128,24 @@ const BloodDonationDetails = () => {
             )}
           </ListGroup>
 
-          {/* إشعار بعد الضغط على "تبرع الآن" */}
-          {donationAlert && (
-            <Alert variant="success" className="text-center mt-3">
-              ✅ تم إشعار صاحب الطلب، سيتم التواصل معك قريبًا.
-            </Alert>
-          )}
-
-          {/* الأزرار السفلية */}
           <div className="text-center mt-4 d-flex gap-3 justify-content-center flex-wrap">
             <Link to="/donations" className="btn btn-outline-secondary">
               <i className="fas fa-arrow-right ms-2"></i>العودة
             </Link>
-            <Button variant="info" onClick={handleNotifyDonor}>
-              <i className="fas fa-hand-holding-heart ms-2"></i>تبرع الآن
-            </Button>
-            <Button variant={showChat ? 'danger' : 'success'} onClick={() => setShowChat(!showChat)}>
-              <i className="fas fa-comments ms-2"></i>{showChat ? 'إغلاق المحادثة' : 'تحدث مع صاحب الطلب'}
-            </Button>
+
+            {donation.userId?._id !== currentUserId && (
+              <>
+                <Button variant="info" onClick={() => setShowConfirmModal(true)}>
+                  <i className="fas fa-hand-holding-heart ms-2"></i>تبرع الآن
+                </Button>
+                <Button variant={showChat ? 'danger' : 'success'} onClick={() => setShowChat(!showChat)}>
+                  <i className="fas fa-comments ms-2"></i>{showChat ? 'إغلاق المحادثة' : 'تحدث مع صاحب الطلب'}
+                </Button>
+              </>
+            )}
           </div>
 
-          {/* مربع المحادثة */}
-          {showChat && (
+          {showChat && donation.userId?._id !== currentUserId && (
             <div className="mt-4">
               <h5 className="text-center mb-3">محادثة مع {donation.userId?.firstName}</h5>
               <ChatBox recipientId={donation.userId?._id} />
@@ -156,7 +154,7 @@ const BloodDonationDetails = () => {
         </Card.Body>
       </Card>
 
-      {/* المعاينة */}
+      {/* 🟡 Modal: معاينة الوثائق */}
       <Modal show={showModal} onHide={closePreview} centered size="lg" className='preview-modal'>
         <Modal.Header closeButton>
           <Modal.Title>معاينة الوثيقة</Modal.Title>
@@ -172,10 +170,42 @@ const BloodDonationDetails = () => {
           <Button variant="secondary" onClick={closePreview}>إغلاق</Button>
         </Modal.Footer>
       </Modal>
+
+      {/* ✅ Modal: تأكيد التبرع */}
+      <Modal show={showConfirmModal} onHide={() => setShowConfirmModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>تأكيد التبرع</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p className="mb-2">✅ سيتم إشعار صاحب الطلب بأنكم مستعدون للتبرع.</p>
+          <p className="mb-2">💬 يمكنكم التواصل معًا لتوضيح كيفية التبرع.</p>
+          <p className="fw-bold">هل ترغب في المتابعة؟</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowConfirmModal(false)}>لا</Button>
+          <Button variant="primary" onClick={() => {
+            handleNotifyDonor();
+            setShowConfirmModal(false);
+          }}>نعم</Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* ✅ Toast: إشعار التبرع */}
+      <ToastContainer position="bottom-start" className="p-3">
+        <Toast bg="success" show={showToast} onClose={() => setShowToast(false)} delay={4000} autohide>
+          <Toast.Header>
+            <i className="fas fa-check-circle text-success me-2"></i>
+            <strong className="me-auto">تم الإشعار</strong>
+          </Toast.Header>
+          <Toast.Body className="text-white">
+            تم إشعار صاحب الطلب، سيتم التواصل معك قريبًا.
+          </Toast.Body>
+        </Toast>
+      </ToastContainer>
     </div>
   );
 };
 
 export default BloodDonationDetails;
 // This component displays the details of a blood donation request.
-// It includes the blood type, urgency, location, contact methods, and supporting documents.
+// It allows users to view the request details, chat with the requester, and notify them of

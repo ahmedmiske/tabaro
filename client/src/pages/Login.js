@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import './Login.css';
 import loginImg from './login.jpeg';
 import fetchWithInterceptors from '../services/fetchWithInterceptors.js';
+import { useAuth } from '../AuthContext'; // ✅ إضافة السياق
 
 function Login() {
   const [loginInput, setLoginInput] = useState('');
@@ -11,6 +12,7 @@ function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth(); // ✅ استخدام دالة login من السياق
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -23,7 +25,13 @@ function Login() {
       });
 
       if (response.ok) {
-        navigate('/profile');
+        const user = response.body?.user;
+        if (user) {
+          login(user);            // ✅ تحديث السياق لتحديث الحالة في جميع المكونات
+          navigate('/profile');  // ✅ التوجيه بعد تسجيل الدخول
+        } else {
+          setError('البيانات غير مكتملة. الرجاء المحاولة لاحقًا.');
+        }
       } else {
         setError(response.body?.message || 'فشل تسجيل الدخول');
       }
