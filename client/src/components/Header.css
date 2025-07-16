@@ -110,6 +110,14 @@
   opacity: 0;
   pointer-events: none;
   transform: translateY(10px);
+  -webkit-transition: all 0.3s ease-in-out;
+  -moz-transition: all 0.3s ease-in-out;
+  -ms-transition: all 0.3s ease-in-out;
+  -o-transition: all 0.3s ease-in-out;
+  -webkit-transform: translateY(10px);
+  -moz-transform: translateY(10px);
+  -ms-transform: translateY(10px);
+  -o-transform: translateY(10px);
 }
 
 .header .nav-item:hover .dropdown-menu {
@@ -117,6 +125,10 @@
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0);
+  -webkit-transform: translateY(0);
+  -moz-transform: translateY(0);
+  -ms-transform: translateY(0);
+  -o-transform: translateY(0);
 }
 
 .header .dropdown-item {
@@ -127,6 +139,10 @@
   color: black !important;
   padding: 10px 20px;
   transition: background-color 0.3s ease;
+  -webkit-transition: background-color 0.3s ease;
+  -moz-transition: background-color 0.3s ease;
+  -ms-transition: background-color 0.3s ease;
+  -o-transition: background-color 0.3s ease;
 }
 
 .header .dropdown-item:hover {
@@ -166,6 +182,34 @@
 .navbar-nav {
   direction: rtl;
 }
+
+.active-link {
+  background-color: #007bff;
+  color: white !important;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+/* تلوين الرابط أو الزر النشط */
+.nav-link.active-link,
+.auth-button.active-link {
+  background-color: var(--color-secondary) !important;
+  color: white !important;
+  border: 2px solid var(--main-color-alt) !important;
+  border-radius: 8px;
+  font-weight: bold;
+}
+/* تمييز كل العناصر النشطة */
+.nav-link.active-link,
+.auth-button.active-link,
+.dropdown-item.active-link {
+  background-color: #007bff !important;
+  color: white !important;
+  font-weight: bold;
+  border-radius: 8px;
+  border: 2px solid #0056b3 !important;
+}
+
 
 /* ========== الأيقونات ========== */
 .nav-icon { font-size: 18px; }

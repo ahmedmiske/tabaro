@@ -1,0 +1,92 @@
+.blood-list-offer-container {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: var(--main-color-fundo);
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.blood-list-offer-container h2 {
+  color: var(--main-color);
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.blood-list-offer-container .table {
+  margin-top: 20px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.blood-list-offer-container .table th {
+  background-color: var(--main-color);
+  color: white;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.blood-list-offer-container .table td {
+  vertical-align: middle;
+  text-align: center;
+}
+
+/* ✅ تأثير hover على الصف */
+.blood-list-offer-container .clickable-row {
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.blood-list-offer-container .clickable-row:hover {
+  background-color: #f2f2f2;
+}
+
+/* ✅ تحسين الشارات */
+.blood-list-offer-container .table td .badge {
+  font-size: 0.9rem;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+/* ✅ تحسين أزرار الإجراءات */
+.blood-list-offer-container .action-buttons .btn {
+  padding: 4px 10px;
+  font-size: 14px;
+  margin: 0 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 5px;
+}
+
+/* ✅ ألوان عند hover/active للأزرار */
+.blood-list-offer-container .action-buttons .btn:hover {
+  background-color: var(--main-color-hover);
+  color: white;
+}
+
+.blood-list-offer-container .action-buttons .btn:active {
+  background-color: var(--main-color-active);
+}
+
+.blood-list-offer-container .action-buttons .btn:focus {
+  box-shadow: 0 0 0 2px rgba(72, 201, 176, 0.5);
+}
+
+/* ✅ تلوين مخصص للحالة */
+.blood-list-offer-container .status-badge.pending {
+  background-color: #f0ad4e;
+  color: white;
+}
+
+.blood-list-offer-container .status-badge.accepted {
+  background-color: #5cb85c;
+  color: white;
+}
+
+.blood-list-offer-container .status-badge.rejected {
+  background-color: #d9534f;
+  color: white;
+}

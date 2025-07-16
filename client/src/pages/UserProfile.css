@@ -1,30 +1,69 @@
-.filter{
-   display: flex;
-   gap: 40px !important;
-   border: 2px solid #ccc;
-   align-items: center;
-   justify-content: space-around;
-   max-width: fit-content;
-   margin: auto;
+.user-profile-container {
+  direction: rtl !important;
+  margin-top: 30px;
+  width: 100vw !important;
+  min-width: 800px !important;
+  margin: 0 auto;
+  padding: 10px;
+
+}
+
+.user-profile-container  .user-profile-layout {
+
+  direction: rtl !important;
+  display: flex;
+  flex-direction: row !important;
+   justify-content: flex-start;
+   align-items: flex-start;
    padding: 20px;
-   border-radius: 5px;
-   -webkit-border-radius: 5px;
-   -moz-border-radius: 5px;
-   -ms-border-radius: 5px;
-   -o-border-radius: 5px;
+   flex-wrap: nowrap;
+  gap: 5px;
+  margin: 0 auto;
+  width: 100%;
 }
-.filter button{
-   background-color:rgb(189, 184, 184) !important;
-   border: 1px solid #eee !important;
-   border-radius: 5px !important;
-   -webkit-border-radius: 5px;
-   -moz-border-radius: 5px;
-   -ms-border-radius: 5px;
-   -o-border-radius: 5px;
+.sidebar {
+  padding: 20px;
+  border-right: 5px solid var(--color-secondary);
+  min-height: 100vh;
+  background-color:  #dfe2e2;
 }
 
-.filter button:hover {
-   background-color: var(--color-secondary) !important;
-   
-
+.main-content {
+   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
+.donation-offers {
+   border-top: 5px solid var(--main-color-fundo);
+}
+
+.menu .menu-button {
+   background-color: white;
+   color: #000;
+   border: none;
+  text-align: right;
+  padding: 10px;
+  border-radius: 5px;
+  font-weight: bold;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+}
+
+.menu .menu-button:hover {
+  background-color: var(--color-secondary);
+  color: white;
+}
+
+.menu .menu-button.active {
+  background-color: var(--main-color);
+  color: white;
+}
+
+.content-area {
+  padding: 20px;
+}
+
+/* ✅ كروت الإشعارات */

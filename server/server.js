@@ -9,6 +9,7 @@ const { notFound, errorHandler } = require('./middlewares/errorMiddleware');
 const logger = require('./middlewares/logger');
 const { otpRoutes } = require('./routes/otpRoute');
 const setupSocket = require('./socket');
+const donationConfirmationRoutes = require('./routes/donationConfirmationRoutes');
 
 dotenv.config();
 const app = express();
@@ -47,6 +48,11 @@ app.use(logger);
 app.get('/', (req, res) => {
     res.send('API is running...');
 });
+
+app.use('/api/donation-confirmations', donationConfirmationRoutes);
+// User and authentication routes
+
+
 
 app.use('/api/users', userRoutes);
 app.use('/api/blood-requests', require('./routes/bloodRequestRoute'));

@@ -57,7 +57,7 @@ const DonationCard = ({ donation }) => {
 
         {/* الأزرار */}
         <Card.Footer className="d-flex justify-content-between">
-          <Link to={`/bloodDonation-details/${donation._id}`}>
+          <Link to={`/blood-donation-details/${donation._id}`}>
             <button className="btn-details">
               <i className="fas fa-eye me-1"></i> تفاصيل
             </button>

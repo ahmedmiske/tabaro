@@ -69,7 +69,7 @@ function App() {
           <Route path="/profile" element={<UserProfile />} />
           <Route path="/login" element={<Login />} />
           <Route path="/donation-details/:id" element={<DonationDetails />} />
-          <Route path="/bloodDonation-details/:id" element={<BloodDonationDetails />} />
+          <Route path="/blood-donation-details/:id" element={<BloodDonationDetails />} />
           <Route path="/campaign/:id" element={<CampaignDetails />} />
           <Route path="/donation-requests" element={<DonationRequestForm />} />
           <Route path="/blood-donation" element={<BloodDonationForm />} />
