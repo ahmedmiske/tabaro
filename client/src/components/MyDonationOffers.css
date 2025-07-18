@@ -1,9 +1,9 @@
 .my-donation-offers {
   direction: rtl;
   padding: 2rem;
+  background-color: #f9f9f9;
   border-radius: 12px;
-  background-color: #fefefe;
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   margin-bottom: 2rem;
 }
 
@@ -11,23 +11,50 @@
   color: #007bff;
   font-weight: bold;
   text-align: center;
-  border-bottom: 2px solid #e0e0e0;
   padding-bottom: 0.5rem;
   margin-bottom: 1.5rem;
-  font-size: 1.4rem;
+  border-bottom: 2px solid #e0e0e0;
+  font-size: 1.5rem;
+}
+
+.my-donation-offers .filter-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.my-donation-offers .form-select {
+  font-size: 0.9rem;
+  padding: 0.4rem 0.75rem;
+  width: auto;
+  min-width: 180px;
+  text-align: center;
 }
 
 .my-donation-offers table {
   border: none;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  -ms-border-radius: 8px;
+  -o-border-radius: 8px;
 }
 
 .my-donation-offers table th {
-  background-color: #f0f2f5;
+  background-color: var(--main-color-alt);
+  color: white;
   text-align: center;
   vertical-align: middle;
-  font-size: 0.9rem;
-  color: #555;
+  
+  font-weight: 600;
+  font-size: 0.95rem;
   padding: 0.75rem;
+}
+
+.my-donation-offers table tr {
+  border-bottom: 1px solid #dee2e6;
 }
 
 .my-donation-offers table td {
@@ -35,60 +62,48 @@
   text-align: center;
   font-size: 0.9rem;
   padding: 0.65rem;
+  border: none;
+  border-top: 1px solid #dee2e6;
+  border-left: 1px solid #dee2e6;
+  color: #333;
+  position: relative;
+  transition: background-color 0.2s ease-in-out;
+  -webkit-transition: background-color 0.2s ease-in-out;
 }
 
 .my-donation-offers .clickable-row:hover {
-  background-color: #eef4ff;
+  background-color: #eef6ff;
   transition: background-color 0.2s ease-in-out;
   cursor: pointer;
+  -webkit-transition: background-color 0.2s ease-in-out;
+  -moz-transition: background-color 0.2s ease-in-out;
+  -ms-transition: background-color 0.2s ease-in-out;
+  -o-transition: background-color 0.2s ease-in-out;
 }
 
 .my-donation-offers .btn-sm {
-  font-size: 0.75rem;
-  padding: 0.3rem 0.6rem;
-  margin: 0 2px;
+  font-size: 0.8rem;
+  padding: 0.35rem 0.6rem;
 }
 
 .my-donation-offers .badge {
   font-size: 0.75rem;
   padding: 0.35em 0.6em;
 }
+
 .my-donation-offers .badge-success {
-  background-color: #28a745;
-} 
+  background-color: #28a745 !important;
+}
+
 .my-donation-offers .badge-danger {
-  background-color: #dc3545;
+  background-color: #dc3545 !important;
 }
+
 .my-donation-offers .badge-warning {
-  background-color: #ffc107;
+  background-color: #ffc107 !important;
+  color: #212529 !important;
 }
+
 .my-donation-offers .badge-info {
-  background-color: #17a2b8;
-}
-.my-donation-offers .badge-secondary {
-  background-color: #6c757d;
-}
-.my-donation-offers .badge-primary {
-  background-color: #007bff;
-}
-.my-donation-offers .toast-container {
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
-  z-index: 1050; /* Bootstrap's default z-index for toasts */
-}
-.my-donation-offers .toast {
-  background-color: #28a745; /* لون الخلفية للتوست */
-  color: white; /* لون النص داخل التوست */
-  border-radius: 8px; /* زوايا دائرية للتوست */
-}
-.my-donation-offers .toast-body {
-  font-size: 0.9rem; /* حجم الخط داخل التوست */
-  padding: 10px; /* حشوة داخلية للتوست */
-}
-.my-donation-offers .toast-header {
-  background-color: #28a745; /* لون رأس التوست */
-  color: white; /* لون النص في رأس التوست */
-  font-weight: bold; /* جعل النص في رأس التوست عريض */
-  padding: 10px; /* حشوة داخلية لرأس التوست */
+  background-color: #17a2b8 !important;
 }

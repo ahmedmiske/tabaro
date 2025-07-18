@@ -93,18 +93,18 @@ const MyDonationOffers = () => {
       <h5 className="text-center mb-3">
         <i className="fas fa-hand-holding-heart me-2"></i>عروضي على طلبات التبرع
       </h5>
-       <div className="d-flex justify-content-end mb-3">
-  <select
-    className="form-select w-auto"
-    value={filterStatus}
-    onChange={(e) => setFilterStatus(e.target.value)}
-  >
-    <option value="">جميع الحالات</option>
-    <option value="pending">قيد الانتظار</option>
-    <option value="accepted">تم القبول</option>
-    <option value="rejected">مرفوض</option>
-    <option value="fulfilled">تم التنفيذ</option>
-  </select>
+       <div className="filter-wrapper">
+             <select
+               className="form-select w-auto"
+               value={filterStatus}
+               onChange={(e) => setFilterStatus(e.target.value)}
+             >
+             <option value="">جميع الحالات</option>
+            <option value="pending">قيد الانتظار</option>
+            <option value="accepted">تم القبول</option>
+            <option value="rejected">مرفوض</option>
+            <option value="fulfilled">تم التنفيذ</option>
+       </select>
 </div>
 
       <Table striped bordered hover responsive>
