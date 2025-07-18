@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+// ✅ مخطط لطرق التواصل المرتبطة بالطلب
 const contactMethodSchema = new mongoose.Schema({
   method: {
     type: String,
@@ -11,6 +12,7 @@ const contactMethodSchema = new mongoose.Schema({
   },
 });
 
+// ✅ مخطط طلب التبرع بالدم
 const bloodRequestSchema = new mongoose.Schema({
   bloodType: {
     type: String,
@@ -39,16 +41,17 @@ const bloodRequestSchema = new mongoose.Schema({
   contactMethods: [contactMethodSchema],
   status: {
     type: Number,
-    default: 1, // Assuming 1 represents an active request
+    default: 1, // 1 = نشط
   },
   files: {
-    type: [String], // or [Object] if you want to store more info per file
+    type: [String],
     default: [],
   },
 }, {
   timestamps: true,
 });
 
+// ✅ تسجيل الموديل تحت اسم 'BloodRequest'
 const BloodRequest = mongoose.model('BloodRequest', bloodRequestSchema);
 
 module.exports = BloodRequest;

@@ -86,9 +86,10 @@ const DonationOffers = () => {
                   offer.status === 'rejected' ? 'danger' :
                   'warning'
                 }>
-                  {offer.status === 'pending' ? 'قيد الانتظار' :
-                   offer.status === 'accepted' ? 'تم القبول' :
-                   'مرفوض'}
+                 {offer.status === 'pending' && 'قيد الانتظار'}
+                    {offer.status === 'accepted' && 'تم القبول'}
+                    {offer.status === 'rejected' && 'مرفوض'}
+                 {!['pending', 'accepted', 'rejected'].includes(offer.status) && 'غير معروف'}
                 </Badge>
               </td>
               <td className="action-buttons">

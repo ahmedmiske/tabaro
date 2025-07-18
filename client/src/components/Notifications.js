@@ -4,16 +4,16 @@ import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import './Notifications.css';
 
 function Notifications() {
-  const [offers, setOffers] = useState([]);
+  const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const { body, ok } = await fetchWithInterceptors('/api/donation-confirmations/mine');
-        if (ok) setOffers(body);
+        const { body, ok } = await fetchWithInterceptors('/api/notifications');
+        if (ok) setNotifications(body);
       } catch (error) {
-        console.error('فشل في جلب إشعارات التبرع:', error.message);
+        console.error('فشل في جلب الإشعارات:', error.message);
       } finally {
         setLoading(false);
       }
@@ -28,44 +28,41 @@ function Notifications() {
 
   return (
     <div className="notifications-container">
-      <h2 className="title-liste-notification mb-4"><i className="fas fa-bell me-2"></i>إشعارات التبرع المستلمة</h2>
-      {offers.length === 0 ? (
-        <p className="text-muted">لا توجد عروض تبرع بعد.</p>
+      <h2 className="title-liste-notification mb-4">
+        <i className="fas fa-bell me-2"></i>جميع الإشعارات
+      </h2>
+      {notifications.length === 0 ? (
+        <p className="text-muted">لا توجد إشعارات بعد.</p>
       ) : (
         <Row xs={1} md={2} className="row-notifications g-4">
-          {offers.map((offer, idx) => (
+          {notifications.map((notification, idx) => (
             <Col key={idx}>
-              <Card className="notification-card shadow-sm border-0">
-                
-                <Card.Body >
-                  <div className="d-flex  flex-column mb-2">
-                    <div className='notificacion-title'>
-                      <strong>💌 عرض تبرع من:</strong>{''}
-                      <div>
-                          <span className="donor-name">{offer.donor?.firstName} {offer.donor?.lastName}</span>
-                      </div> 
+              <Card className={`notification-card shadow-sm border-0 ${notification.read ? '' : 'unread'}`}>
+                <Card.Body>
+                  <div className="d-flex flex-column mb-2">
+                    <div className="notificacion-title">
+                      <strong>{notification.title}</strong>
                     </div>
-                    <div className='notification-status'>
-                      <span className={`status-badge status-${offer.status}`}>
-                      {offer.status === 'initiated' && '⏳ قيد الانتظار'}
-                      {offer.status === 'accepted' && '✅ تم القبول'}
-                      {offer.status === 'fulfilled' && '🎉 تم التبرع'}
-                      {offer.status === 'rated' && '⭐ تم التقييم'}
-                    </span>
+                    <div className="notification-message text-muted">
+                      {notification.message}
                     </div>
-                 
                   </div>
 
-                  <div className="mb-2"><i className="far fa-comment-dots me-2 text-muted"></i>الرسالة: {offer.message}</div>
-                  <div className="mb-2"><i className="far fa-calendar-alt me-2 text-muted"></i>التاريخ: {new Date(offer.proposedTime).toLocaleDateString()}</div>
-                  <Button
-                    size="sm"
-                    variant="outline-success"
-                    href={`/blood-donation-details/${offer.requestId}`}
-                    className="mt-2"
-                  >
-                    <i className="fas fa-eye me-1"></i>عرض تفاصيل الطلب
-                  </Button>
+                  <div className="mb-2">
+                    <i className="far fa-calendar-alt me-2 text-muted"></i>
+                    {new Date(notification.date).toLocaleDateString()}
+                  </div>
+
+                  {notification.referenceId && (
+                    <Button
+                      size="sm"
+                      variant="outline-primary"
+                      href={`/blood-donation-details/${notification.referenceId}`}
+                      className="mt-2"
+                    >
+                      <i className="fas fa-eye me-1"></i>تفاصيل الطلب
+                    </Button>
+                  )}
                 </Card.Body>
               </Card>
             </Col>
@@ -77,5 +74,5 @@ function Notifications() {
 }
 
 export default Notifications;
-// This component fetches and displays donation offers sent to the user.
-// It shows the donor's name, message, proposed time, and status of each offer.
+// This component displays a list of notifications for the user.
+// It fetches notifications from the server and displays them in a card format.

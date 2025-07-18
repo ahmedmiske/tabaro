@@ -1,0 +1,78 @@
+/* ====== حاوية جدول العروض ====== */
+.blood-list-offer-container {
+  background-color: #fdfdfd;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  margin-bottom: 50px;
+  direction: rtl;
+}
+
+.blood-list-offer-container h2 {
+  color: #2c3e50;
+  font-weight: bold;
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 10px;
+  margin-bottom: 25px;
+  font-size: 1.5rem;
+}
+
+/* ====== جدول العرض ====== */
+.blood-list-offer-container table {
+  font-size: 0.95rem;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.blood-list-offer-container th {
+  background-color: #2980b9;
+  color: white;
+  font-weight: bold;
+}
+
+.blood-list-offer-container td {
+  background-color: #fefefe;
+  color: #333;
+}
+
+/* ====== شارة الحالة ====== */
+.badge.bg-success {
+  background-color: #27ae60 !important;
+}
+
+.badge.bg-info {
+  background-color: #3498db !important;
+}
+
+.badge.bg-warning {
+  background-color: #f39c12 !important;
+  color: #fff !important;
+}
+
+/* ====== زر قبول التبرع ====== */
+.blood-list-offer-container .btn-success {
+  font-size: 0.85rem;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.blood-list-offer-container .btn-success:hover {
+  background-color: #1e8449;
+}
+
+/* ====== استجابة للأجهزة ====== */
+@media (max-width: 768px) {
+  .blood-list-offer-container {
+    padding: 15px;
+  }
+
+  .blood-list-offer-container table {
+    font-size: 0.85rem;
+  }
+
+  .blood-list-offer-container h2 {
+    font-size: 1.3rem;
+  }
+}

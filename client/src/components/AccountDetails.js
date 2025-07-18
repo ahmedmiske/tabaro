@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Form, Button, InputGroup, FormControl, Alert } from 'react-bootstrap';
-import fetchWithInterceptors from '../services/fetchWithInterceptors'; // Make sure to import your fetch service
-
+import fetchWithInterceptors from '../services/fetchWithInterceptors';
+import './AccountDetails.css';
 function AccountDetails({ userDetails, setUserDetails }) {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -12,10 +12,9 @@ function AccountDetails({ userDetails, setUserDetails }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (password !== confirmPassword) {
-      setError('Passwords do not match.');
+      setError('كلمة المرور الجديدة وتأكيدها غير متطابقين.');
       return;
     }
-    console.log('Attempting to update password...');
     try {
       const response = await fetchWithInterceptors(`/api/users/change-password`, {
         method: 'PUT',
@@ -26,62 +25,70 @@ function AccountDetails({ userDetails, setUserDetails }) {
       });
 
       if (response.ok) {
-        console.log('Password updated successfully.');
         setSuccess(true);
         setError('');
-        setTimeout(() => setSuccess(false), 10000); // Hide the success message after 5 seconds
-        window.location.reload(); // Refresh the page to reflect the changes
+        setTimeout(() => setSuccess(false), 10000);
+        window.location.reload();
       } else {
-        throw new Error(`Failed to update password: ${response.status}`);
+        throw new Error(`فشل في تحديث كلمة المرور: ${response.status}`);
       }
     } catch (error) {
       console.error('Error updating password:', error.message);
-      setError('Error updating password. Please try again.');
+      setError('حدث خطأ أثناء تحديث كلمة المرور. حاول مرة أخرى.');
       setSuccess(false);
     }
   };
 
   return (
-    <Form onSubmit={handleSubmit}>
-      {success && <Alert variant="success">Password updated successfully.</Alert>}
+    <Form onSubmit={handleSubmit} dir="rtl">
+      <div className="account-details-header">
+        <h4><i className="fas fa-user-cog me-2"></i>تحديث معلومات الحساب</h4>
+      </div>
+
+      {success && <Alert variant="success">تم تحديث كلمة المرور بنجاح.</Alert>}
       {error && <Alert variant="danger">{error}</Alert>}
+
       <Form.Group>
-        <Form.Label>Username</Form.Label>
+        <Form.Label>اسم المستخدم</Form.Label>
         <InputGroup>
           <FormControl type="text" value={userDetails?.username} readOnly />
         </InputGroup>
       </Form.Group>
+
       <Form.Group>
-        <Form.Label>Old Password</Form.Label>
+        <Form.Label>كلمة المرور القديمة</Form.Label>
         <Form.Control
           type="password"
-          placeholder="Enter old password"
+          placeholder="أدخل كلمة المرور القديمة"
           value={oldPassword}
           onChange={(e) => setOldPassword(e.target.value)}
           required
         />
       </Form.Group>
+
       <Form.Group>
-        <Form.Label>New Password</Form.Label>
+        <Form.Label>كلمة المرور الجديدة</Form.Label>
         <Form.Control
           type="password"
-          placeholder="Enter new password"
+          placeholder="أدخل كلمة المرور الجديدة"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
         />
       </Form.Group>
+
       <Form.Group>
-        <Form.Label>Confirm New Password</Form.Label>
+        <Form.Label>تأكيد كلمة المرور الجديدة</Form.Label>
         <Form.Control
           type="password"
-          placeholder="Confirm new password"
+          placeholder="أعد إدخال كلمة المرور الجديدة"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
         />
       </Form.Group>
-      <Button variant="primary" type="submit">Save Changes</Button>
+
+      <Button variant="primary" type="submit">حفظ التغييرات</Button>
     </Form>
   );
 }

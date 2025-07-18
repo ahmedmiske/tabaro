@@ -1,5 +1,6 @@
 const BloodRequest = require('../models/bloodRequest');
 const asyncHandler = require('../utils/asyncHandler');
+const User = require('../models/user'); // ⬅️ ضروري حتى تعمل populate مع userId
 
 // @desc    Create a new blood request
 // @route   POST /api/blood-requests

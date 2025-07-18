@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
 import fetchWithInterceptors from '../services/fetchWithInterceptors'; // Make sure this is correctly imported
-
+import './UserDetails.css';
 function UserDetails({ userDetails, setUserDetails }) {
   const [formData, setFormData] = useState({
     firstName: userDetails?.firstName || '',
@@ -47,7 +47,13 @@ function UserDetails({ userDetails, setUserDetails }) {
   };
 
   return (
-    <Form onSubmit={handleSubmit}>
+    <>
+   
+    <div className="user-details-header">
+      <h4><i className="fas fa-id-card me-2"></i>تحديث المعلومات الشخصية</h4>
+    </div>
+
+    <Form onSubmit={handleSubmit} dir="rtl">
       {successMessage && <Alert variant="success">{successMessage}</Alert>}
       {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
       <Form.Group>
@@ -81,6 +87,7 @@ function UserDetails({ userDetails, setUserDetails }) {
       <br />
       <Button variant="primary" type="submit">حفظ التعديلات</Button>
     </Form>
+     </>
   );
 }
 

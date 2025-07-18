@@ -56,18 +56,19 @@ const DonationCard = ({ donation }) => {
         </ListGroup>
 
         {/* الأزرار */}
-        <Card.Footer className="d-flex justify-content-between">
-          <Link to={`/blood-donation-details/${donation._id}`}>
-            <button className="btn-details">
-              <i className="fas fa-eye me-1"></i> تفاصيل
-            </button>
-          </Link>
-          <Link to={`/bloodDonation-details/${donation._id}`}>
-            <button className="btn-donate">
-              <i className="fas fa-hand-holding-heart me-1"></i> ساهم بإنقاذ حياة
-            </button>
-          </Link>
-        </Card.Footer>
+    <Card.Footer className="d-flex justify-content-between">
+  <Link to={`/blood-donation-details/${donation._id}`}>
+    <button className="btn-details">
+      <i className="fas fa-eye me-1"></i> تفاصيل
+    </button>
+  </Link>
+  <Link to={`/blood-donation-details/${donation._id}`}>
+    <button className="btn-donate">
+      <i className="fas fa-hand-holding-heart me-1"></i> ساهم بإنقاذ حياة
+    </button>
+  </Link>
+</Card.Footer>
+        {/* نهاية الأزرار */}
       </Card>
     </div>
   );

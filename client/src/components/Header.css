@@ -4,6 +4,7 @@
   position: fixed;
   width: 100%;
   max-height: 100px;
+  margin-bottom: 5px;
   top: 0; 
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.5); 
   z-index: 1000;
@@ -11,6 +12,10 @@
   justify-content: space-between !important;
   align-items: center;
   padding: 10px 20px;
+  transition: background-color 0.3s ease-in-out;
+  -webkit-transition: background-color 0.3s ease-in-out;
+  -moz-transition: background-color 0.3s ease-in-out;
+  
 }
 
 .header .logo {
@@ -184,7 +189,7 @@
 }
 
 .active-link {
-  background-color: #007bff;
+  background-color:var(--color-secondary) !important;
   color: white !important;
   border-radius: 8px;
   font-weight: bold;
@@ -203,11 +208,11 @@
 .nav-link.active-link,
 .auth-button.active-link,
 .dropdown-item.active-link {
-  background-color: #007bff !important;
+  background-color: var(--color-secondary) !important;
   color: white !important;
   font-weight: bold;
   border-radius: 8px;
-  border: 2px solid #0056b3 !important;
+  border: 2px solid var(--main-color-alt) !important;
 }
 
 
@@ -297,7 +302,15 @@
     box-shadow: 0 0 20px rgba(0,0,0,0.15);
     width: 100%;
     transition: all 0.4s ease;
-  }
+    -webkit-transition: all 0.4s ease;
+    -moz-transition: all 0.4s ease;
+    -ms-transition: all 0.4s ease;
+    -o-transition: all 0.4s ease;
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    -ms-border-radius: 8px;
+    -o-border-radius: 8px;
+}
 
   .navbar-collapse .nav-header,
   .navbar-collapse .login {

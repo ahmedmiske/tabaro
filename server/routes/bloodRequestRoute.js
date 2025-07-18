@@ -64,7 +64,7 @@ const router = express.Router();
  *         description: Blood request created successfully
  */
 router.route('/')
-  .get(protect, getBloodRequests)
+  .get(getBloodRequests)
   .post(
     protect,
     upload.array('files', 5), // Accept up to 5 files with field name 'files'

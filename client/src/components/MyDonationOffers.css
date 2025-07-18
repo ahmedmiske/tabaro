@@ -1,0 +1,94 @@
+.my-donation-offers {
+  direction: rtl;
+  padding: 2rem;
+  border-radius: 12px;
+  background-color: #fefefe;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 2rem;
+}
+
+.my-donation-offers h5 {
+  color: #007bff;
+  font-weight: bold;
+  text-align: center;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 1.4rem;
+}
+
+.my-donation-offers table {
+  border: none;
+}
+
+.my-donation-offers table th {
+  background-color: #f0f2f5;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 0.9rem;
+  color: #555;
+  padding: 0.75rem;
+}
+
+.my-donation-offers table td {
+  vertical-align: middle;
+  text-align: center;
+  font-size: 0.9rem;
+  padding: 0.65rem;
+}
+
+.my-donation-offers .clickable-row:hover {
+  background-color: #eef4ff;
+  transition: background-color 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.my-donation-offers .btn-sm {
+  font-size: 0.75rem;
+  padding: 0.3rem 0.6rem;
+  margin: 0 2px;
+}
+
+.my-donation-offers .badge {
+  font-size: 0.75rem;
+  padding: 0.35em 0.6em;
+}
+.my-donation-offers .badge-success {
+  background-color: #28a745;
+} 
+.my-donation-offers .badge-danger {
+  background-color: #dc3545;
+}
+.my-donation-offers .badge-warning {
+  background-color: #ffc107;
+}
+.my-donation-offers .badge-info {
+  background-color: #17a2b8;
+}
+.my-donation-offers .badge-secondary {
+  background-color: #6c757d;
+}
+.my-donation-offers .badge-primary {
+  background-color: #007bff;
+}
+.my-donation-offers .toast-container {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 1050; /* Bootstrap's default z-index for toasts */
+}
+.my-donation-offers .toast {
+  background-color: #28a745; /* لون الخلفية للتوست */
+  color: white; /* لون النص داخل التوست */
+  border-radius: 8px; /* زوايا دائرية للتوست */
+}
+.my-donation-offers .toast-body {
+  font-size: 0.9rem; /* حجم الخط داخل التوست */
+  padding: 10px; /* حشوة داخلية للتوست */
+}
+.my-donation-offers .toast-header {
+  background-color: #28a745; /* لون رأس التوست */
+  color: white; /* لون النص في رأس التوست */
+  font-weight: bold; /* جعل النص في رأس التوست عريض */
+  padding: 10px; /* حشوة داخلية لرأس التوست */
+}
