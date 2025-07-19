@@ -1,0 +1,99 @@
+.chat-item:hover {
+  background-color: #f5f9ff;
+  cursor: pointer;
+}
+
+.chat-list-page h4 {
+  color: #007bff;
+}
+.chat-list-page .chat-item {
+  padding: 10px;
+  border-bottom: 1px solid #dee2e6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}   
+.chat-list-page .chat-item .chat-info {
+  flex-grow: 1;
+  margin-right: 10px;
+}
+.chat-list-page .chat-item .chat-info h5 {
+  margin: 0;
+  font-size: 1rem;
+  color: #333;
+}
+.chat-list-page .chat-item .chat-info p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+.chat-list-page .chat-item .chat-info .timestamp {
+  font-size: 0.8rem;
+  color: #999;
+}
+.chat-list-page .chat-item .chat-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.chat-list-page .chat-item .chat-actions button {
+  background-color: transparent;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.chat-list-page .chat-item .chat-actions button:hover {
+  text-decoration: underline;
+}
+.chat-list-page .chat-item .chat-actions button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+.chat-list-page .chat-item .chat-actions button i {
+  margin-right: 5px;
+}
+.chat-list-page .chat-item .chat-actions button:disabled {
+  color: #ccc;
+  cursor: not-allowed;
+}
+.chat-list-page .chat-item .chat-actions button:disabled:hover {
+  text-decoration: none;
+}
+.chat-list-page .chat-item .chat-actions button:disabled:focus {
+  box-shadow: none;
+}
+
+
+.chat-list-page .chat-item .chat-actions .delete-button {
+  color: #dc3545;
+}
+.chat-list-page .chat-item .chat-actions .delete-button:hover {
+  text-decoration: underline;
+}
+.chat-list-page .chat-item .chat-actions .delete-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
+}
+.chat-list-page .chat-item .chat-actions .delete-button i {
+  margin-right: 5px;
+}
+.chat-list-page .chat-item .chat-actions .delete-button:disabled {
+  color: #ccc;
+  cursor: not-allowed;
+}
+.chat-list-page .chat-item .chat-actions .delete-button:disabled:hover {
+  text-decoration: none;
+}
+.chat-list-page .chat-item .chat-actions .delete-button:disabled:focus {
+  box-shadow: none;
+}
+.chat-list-page .chat-item .chat-actions .delete-button i {
+  color: #dc3545;
+}
+.chat-list-page .chat-item .chat-actions .delete-button:hover i {
+  color: #c82333;
+}
+.chat-list-page .chat-item .chat-actions .delete-button:focus i {
+  color: #c82333;
+}

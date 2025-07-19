@@ -50,7 +50,51 @@ const getMessagesWithUser = async (req, res) => {
     res.status(500).json({ message: 'Error retrieving messages.' });
   }
 };
-
-module.exports = { sendMessage, getMessagesWithUser };
 // @desc    Get recent threads for the current user
-// @route   GET /api/messages/threads       
+// @route   GET /api/messages/threads 
+const getRecentThreads = async (req, res) => {
+  const currentUserId = req.user._id;
+
+  try {
+    const messages = await Message.find({
+      $or: [
+        { sender: currentUserId },
+        { recipient: currentUserId }
+      ]
+    }).sort({ updatedAt: -1 }); // الأحدث أولاً
+
+    // أنشئ قائمة من المحادثات مع مستخدمين مختلفين
+    const threadsMap = new Map();
+
+    messages.forEach((msg) => {
+      const otherUser = msg.sender.equals(currentUserId) ? msg.recipient : msg.sender;
+      if (!threadsMap.has(otherUser.toString())) {
+        threadsMap.set(otherUser.toString(), msg);
+      }
+    });
+
+    // اجلب معلومات المستخدمين المرتبطين بالمحادثات
+    const populatedMessages = await Promise.all(
+      [...threadsMap.values()].map(async (msg) => {
+        await msg.populate('sender', 'firstName lastName');
+        await msg.populate('recipient', 'firstName lastName');
+        return msg;
+      })
+    );
+
+    res.json(populatedMessages);
+  } catch (err) {
+    console.error('❌ فشل في جلب المحادثات:', err.message);
+    res.status(500).json({ message: 'فشل في جلب المحادثات' });
+  }
+};
+
+module.exports = {
+  sendMessage,
+  getMessagesWithUser,
+  getRecentThreads
+};
+// This file defines the controller functions for handling messages in the application.
+// It includes functions for sending messages, retrieving messages with a specific user, and getting recent threads
+
+       

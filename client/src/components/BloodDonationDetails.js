@@ -53,14 +53,17 @@ const BloodDonationDetails = () => {
         })
       });
 
-      if (res.ok) {
-        socket.emit('sendMessage', {
-          recipientId: donation.userId._id,
-          content: `🩸 ${currentUser.firstName} عرض التبرع لك. يرجى الموافقة من حسابك لتفعيل التواصل.`
-        });
-        setDonationStatus('initiated');
-        setShowToast(true);
-      }
+   if (res.ok) {
+  socket.emit('sendMessage', {
+    recipientId: donation.userId._id,
+    content: `🩸 ${currentUser.firstName} ${currentUser.lastName} عرض التبرع لك لطلب فصيلة ${donation.bloodType}`,
+    requestId: donation._id // ✅ مهم لربط الرسالة بالطلب
+  });
+
+  setDonationStatus('initiated');
+  setShowToast(true);
+}
+
     } catch (err) {
       console.error('فشل إرسال عرض التبرع:', err);
     }

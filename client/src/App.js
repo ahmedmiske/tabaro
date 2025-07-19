@@ -23,6 +23,9 @@ import PasswordReset from './components/PasswordReset';
 import DonationRequestForm from './components/DonationRequestForm';
 import DonorListe from './components/BloodDonationListe';
 import BloodDonationDetails from './components/BloodDonationDetails';
+import NotificationsPage from './pages/NotificationsPage';
+import ChatPage from './pages/ChatPage';
+import ChatList from './pages/ChatList';
 
 function App() {
   const location = useLocation();
@@ -76,6 +79,9 @@ function App() {
           <Route path="/donations" element={<DonorListe />} />
           <Route path="/blood-donations" element={<BloodDonationList />} />
           <Route path="/reset-password" element={<PasswordReset />} />
+          <Route path="/chat/:recipientId" element={<ChatPage />} />
+          <Route path="/messages" element={<ChatList />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
         </Routes>
       </div>
 

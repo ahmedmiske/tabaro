@@ -10,6 +10,7 @@ const logger = require('./middlewares/logger');
 const { otpRoutes } = require('./routes/otpRoute');
 const setupSocket = require('./socket');
 const donationConfirmationRoutes = require('./routes/donationConfirmationRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 dotenv.config();
 const app = express();
@@ -25,6 +26,7 @@ const io = new Server(server, {
 // استخدام CORS
 app.use(cors()); // هذا سيسمح بجميع طلبات CORS من أي مصدر
 
+app.use('/api/notifications', notificationRoutes); // ✅
 // Database connection
 mongoose.connect(process.env.MONGO_URI)
     .then(() => {

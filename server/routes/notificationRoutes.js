@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const notificationController = require('../controllers/notificationController');
-const { getUnreadNotificationCount } = require('../controllers/notificationController');
 
-const auth = require('../middleware/auth'); // تأكد من توفر مصادقة المستخدم
+const { protect } = require('../middlewares/authMiddleware');
 
-router.get('/', auth, notificationController.getUserNotifications);
-router.get('/unread-count', auth, notificationController.getUnreadNotificationCount);
-router.get('/notifications/unread-count', protect, getUnreadNotificationCount);
+router.get('/', protect, notificationController.getUserNotifications);
+router.get('/unread-count', protect, notificationController.getUnreadNotificationCount);
+router.patch('/:id/read', protect, notificationController.markNotificationAsRead);
+
 
 
 module.exports = router;

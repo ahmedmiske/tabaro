@@ -142,15 +142,16 @@ const MyDonationOffers = () => {
       <td>
         {offer.status === 'accepted' && (
           <Button
-            variant="outline-primary"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/chat/${offer.request?.user?._id}`);
-            }}
-          >
+             variant="outline-primary"
+             size="sm"
+             onClick={(e) => {
+             e.stopPropagation();
+             navigate(`/chat/${offer.request?.user?._id}`);
+             }}
+           >
             <i className="fas fa-comments"></i> دردشة
           </Button>
+
         )}
         {offer.status === 'pending' && (
           <Button
