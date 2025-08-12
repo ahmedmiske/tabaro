@@ -1,52 +1,46 @@
 const User = require('../models/user');
 const asyncHandler = require('../utils/asyncHandler');
 const { generateToken } = require('../utils/otpUtils');
-const bcrypt = require('bcryptjs');  // Ensure you are using bcryptjs which is more commonly used in Node environments
+const bcrypt = require('bcryptjs');
+const path = require('path');
 
-// @desc    Register a new user
-// @route   POST /api/users
-// @access  Public
+// @desc Register a new user
+// @route POST /api/users
+// @access Public
 const registerUser = asyncHandler(async (req, res) => {
-    const {
-        firstName,
-        lastName,
-        email,
-        password,
-        username,
-        userType,
-        institutionName,
-        institutionLicenseNumber,
-        institutionAddress,
-        institutionEstablishmentDate,
-        institutionWebsite,
-        address,
-        phoneNumber
-    } = req.body;
+  const {
+    firstName, lastName, email, password, username, userType,
+    institutionName, institutionLicenseNumber, institutionAddress,
+    institutionEstablishmentDate, institutionWebsite, address, phoneNumber
+  } = req.body;
 
-    const newUser = new User({
-        firstName,
-        lastName,
-        email,
-        username,
-        password, // it will be hashed in pre save
-        userType,
-        institutionName,
-        institutionLicenseNumber,
-        institutionAddress,
-        institutionEstablishmentDate,
-        institutionWebsite,
-        address,
-        phoneNumber,
-        status: 'verified'
-    });
+  const profileImage = req.file?.filename; // ✅ استخرج اسم الملف من multer
 
-    const savedUser = await newUser.save();
-    res.status(201).json({
-        _id: savedUser._id,
-        name: savedUser.firstName + ' ' + savedUser.lastName,
-        email: savedUser.email,
-        token: generateToken(savedUser._id)
-    });
+  const newUser = new User({
+    firstName,
+    lastName,
+    email,
+    username,
+    password,
+    userType,
+    institutionName,
+    institutionLicenseNumber,
+    institutionAddress,
+    institutionEstablishmentDate,
+    institutionWebsite,
+    address,
+    phoneNumber,
+    profileImage, // ✅ أضف الصورة إلى البيانات
+    status: 'verified'
+  });
+
+  const savedUser = await newUser.save();
+  res.status(201).json({
+    _id: savedUser._id,
+    name: savedUser.firstName + ' ' + savedUser.lastName,
+    email: savedUser.email,
+    token: generateToken(savedUser._id)
+  });
 });
 
 
@@ -55,32 +49,32 @@ const registerUser = asyncHandler(async (req, res) => {
 // @route   POST /api/users/login
 // @access  Public
 const authUser = asyncHandler(async (req, res) => {
-    const { loginInput, password } = req.body;  // loginInput can be username or phoneNumber
-    const user = await User.findOne({
-        $or: [
-            { username: loginInput },
-            { phoneNumber: loginInput }
-        ]
-    });
-    if (user && await bcrypt.compare(password, user.password)) {
-      res.json({
+  const { loginInput, password } = req.body;
+
+  const user = await User.findOne({
+    $or: [{ username: loginInput }, { phoneNumber: loginInput }]
+  });
+
+  if (user && await bcrypt.compare(password, user.password)) {
+    res.json({
       token: generateToken(user._id),
-  user: {
-    _id: user._id,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    username: user.username,
-      phoneNumber: user.phoneNumber,
-      email: user.email,
-      userType: user.userType
-       }
+      user: {
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        username: user.username,
+        phoneNumber: user.phoneNumber,
+        email: user.email,
+        userType: user.userType,
+        profileImage: user.profileImage || '' // ✅ 
+      }
     });
-    } else {
-        res.status(400);
-        throw new Error('Invalid email or password');
-        
-    }
+  } else {
+    res.status(400);
+    throw new Error('Invalid email or password');
+  }
 });
+
 
 // @desc    Get all users
 // @route   GET /api/users

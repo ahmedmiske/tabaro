@@ -12,6 +12,7 @@ function UserForm() {
     userType: '', username: '', password: '', confirmPassword: '',
     institutionName: '', institutionLicenseNumber: '', institutionAddress: ''
   });
+  const [profileImage, setProfileImage] = useState(null);
 
   const [step, setStep] = useState(1);
   const [error, setError] = useState('');
@@ -26,6 +27,10 @@ function UserForm() {
 
   const handleChange = (e) => {
     setUser({ ...user, [e.target.name]: e.target.value });
+  };
+
+  const handleFileChange = (e) => {
+    setProfileImage(e.target.files[0]);
   };
 
   const sendOtp = () => {
@@ -67,10 +72,17 @@ function UserForm() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const formData = new FormData();
+    Object.keys(user).forEach((key) => {
+      formData.append(key, user[key]);
+    });
+    if (profileImage) {
+      formData.append('profileImage', profileImage);
+    }
+
     fetchWithInterceptors('/api/users', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(user)
+      body: formData
     })
       .then(() => setShowSuccessMessage(true))
       .catch(() => setError('حدث خطأ أثناء إرسال البيانات'));
@@ -96,7 +108,6 @@ function UserForm() {
         </div>
       ) : (
         <Form onSubmit={handleSubmit} className="user-form">
-          {/* الخطوة 1 */}
           {step === 1 && (
             <div className="info-section">
               <h4>اختيار نوع الحساب</h4>
@@ -111,7 +122,6 @@ function UserForm() {
             </div>
           )}
 
-          {/* الخطوة 2 */}
           {step === 2 && (
             <div className="info-section">
               <h4>التحقق من رقم الهاتف</h4>
@@ -134,7 +144,6 @@ function UserForm() {
             </div>
           )}
 
-          {/* الخطوة 3 */}
           {step === 3 && (
             <div className="info-section">
               {user.userType === 'individual' ? (
@@ -144,6 +153,7 @@ function UserForm() {
                   <Form.Group><Form.Label>الاسم العائلي</Form.Label><Form.Control name="lastName" value={user.lastName} onChange={handleChange} /></Form.Group>
                   <Form.Group><Form.Label>البريد الإلكتروني</Form.Label><Form.Control name="email" value={user.email} onChange={handleChange} /></Form.Group>
                   <Form.Group><Form.Label>العنوان</Form.Label><Form.Control name="address" value={user.address} onChange={handleChange} /></Form.Group>
+                  <Form.Group><Form.Label>الصورة الشخصية (اختياري)</Form.Label><Form.Control type="file" accept="image/*" onChange={handleFileChange} /></Form.Group>
                 </>
               ) : (
                 <>
@@ -156,7 +166,6 @@ function UserForm() {
             </div>
           )}
 
-          {/* الخطوة 4 */}
           {step === 4 && (
             <div className="info-section">
               <h4>معلومات الحساب</h4>
@@ -167,7 +176,6 @@ function UserForm() {
             </div>
           )}
 
-          {/* الأزرار */}
           <div className="action-buttons mt-4 d-flex flex-column align-items-center gap-3">
             {step === 5 && !confirmed && (
               <>
@@ -210,3 +218,5 @@ function UserForm() {
 }
 
 export default UserForm;
+// This component implements a multi-step user registration form with phone verification.
+// It includes fields for personal or institutional information, phone number verification, and account details.

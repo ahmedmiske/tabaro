@@ -5,6 +5,7 @@ const {
   getBloodRequestById,
   updateBloodRequest,
   deleteBloodRequest,
+  getMyRequestsWithOffers,
 } = require('../controllers/bloodRequestController');
 const { protect } = require('../middlewares/authMiddleware');
 const { upload } = require('../utils/multipartParser');
@@ -14,9 +15,25 @@ const router = express.Router();
 /**
  * @swagger
  * tags:
- *  name: BloodRequests
- *  description: API for managing blood requests
+ *   name: BloodRequests
+ *   description: API for managing blood requests
  */
+
+/**
+ * @swagger
+ * /blood-requests/mine-with-offers:
+ *   get:
+ *     summary: Get my blood requests with received offers
+ *     security:
+ *       - bearerAuth: []
+ *     tags: [BloodRequests]
+ *     responses:
+ *       200:
+ *         description: A list of my blood requests with offers
+ *       401:
+ *         description: Unauthorized
+ */
+router.get('/mine-with-offers', protect, getMyRequestsWithOffers);
 
 /**
  * @swagger
@@ -35,7 +52,7 @@ const router = express.Router();
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:
@@ -51,31 +68,27 @@ const router = express.Router();
  *               isUrgent:
  *                 type: boolean
  *               contactMethods:
+ *                 type: string
+ *               files:
  *                 type: array
  *                 items:
- *                   type: object
- *                   properties:
- *                     method:
- *                       type: string
- *                     number:
- *                       type: string
+ *                   type: string
+ *                   format: binary
  *     responses:
  *       201:
  *         description: Blood request created successfully
  */
 router.route('/')
   .get(getBloodRequests)
-  .post(
-    protect,
-    upload.array('files', 5), // Accept up to 5 files with field name 'files'
-    createBloodRequest
-  );
+  .post(protect, upload.array('files', 5), createBloodRequest);
 
 /**
  * @swagger
  * /blood-requests/{id}:
  *   get:
  *     summary: Get a blood request by ID
+ *     security:
+ *       - bearerAuth: []
  *     tags: [BloodRequests]
  *     parameters:
  *       - in: path
@@ -83,7 +96,6 @@ router.route('/')
  *         required: true
  *         schema:
  *           type: string
- *         description: The blood request ID
  *     responses:
  *       200:
  *         description: Blood request details
@@ -100,34 +112,6 @@ router.route('/')
  *         required: true
  *         schema:
  *           type: string
- *         description: The blood request ID
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               bloodType:
- *                 type: string
- *               location:
- *                 type: string
- *               deadline:
- *                 type: string
- *                 format: date
- *               description:
- *                 type: string
- *               isUrgent:
- *                 type: boolean
- *               contactMethods:
- *                 type: array
- *                 items:
- *                   type: object
- *                   properties:
- *                     method:
- *                       type: string
- *                     number:
- *                       type: string
  *     responses:
  *       200:
  *         description: Blood request updated successfully
@@ -146,7 +130,6 @@ router.route('/')
  *         required: true
  *         schema:
  *           type: string
- *         description: The blood request ID
  *     responses:
  *       200:
  *         description: Blood request deleted successfully
@@ -161,3 +144,5 @@ router.route('/:id')
   .delete(protect, deleteBloodRequest);
 
 module.exports = router;
+// This route handles all operations related to blood requests, including creating, retrieving, updating, and deleting requests.
+// It also includes functionality to fetch a user's own requests along with any donation offers made against them

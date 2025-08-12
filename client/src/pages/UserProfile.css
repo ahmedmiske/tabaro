@@ -65,5 +65,28 @@
 .content-area {
   padding: 20px;
 }
+.user-profile-imag {
+  border-bottom: 4px solid var(--color-secondary);
+  display: flex;
+  align-items:center;
+  justify-content:flex-start;
+  margin-bottom: 20px;
+  padding: 0 0 10px;
+
+}
+.user-avatar {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  margin-right: 10px;
+  box-sizing: border-box;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+}
+
+.user-avatar.rounded-circle {
+  border-radius: 50%;
+}
 
 /* ✅ كروت الإشعارات */

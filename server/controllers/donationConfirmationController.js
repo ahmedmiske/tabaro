@@ -4,33 +4,52 @@ const Notification = require('../models/Notification');
 
 
 // ⏺️ إنشاء عرض تبرع (من قبل المتبرع)
+
 // ⏺️ إنشاء عرض تبرع
 exports.createDonationConfirmation = async (req, res) => {
   try {
     const { requestId, message, method, proposedTime } = req.body;
     const donor = req.user._id;
 
-    console.log('📦 البيانات:', {
+    console.log('📦 البيانات المستلمة من العميل:', {
       donor,
       requestId,
       message,
       method,
       proposedTime
-      
     });
 
     const request = await BloodRequest.findById(requestId);
+
     if (!request) {
+      console.warn('❌ الطلب غير موجود في قاعدة البيانات');
       return res.status(404).json({ message: 'طلب التبرع غير موجود' });
     }
 
     const recipientId = request.userId;
 
-    const existing = await DonationConfirmation.findOne({ donor, requestId });
-    if (existing) {
-      return res.status(400).json({ message: 'تم إرسال عرض بالفعل لهذا الطلب.' });
+    console.log('🔍 التحقق من هوية المستخدم:');
+    console.log('   🧍‍♂️ معرف المتبرع (من التوكن):', String(donor));
+    console.log('   📌 معرف صاحب الطلب:', String(recipientId));
+    console.log('   هل هو نفس الشخص؟', String(donor) === String(recipientId));
+
+    // ✅ منع صاحب الطلب من تقديم عرض
+    if (String(donor) === String(recipientId)) {
+      console.warn('🚫 المستخدم يحاول التبرع لنفس طلبه');
+      return res.status(400).json({ message: 'لا يمكنك إرسال عرض على طلبك الخاص.' });
     }
 
+    // 🔍 تحقق من وجود عرض سابق غير مرفوض
+    const existing = await DonationConfirmation.findOne({ donor, requestId });
+    if (existing) {
+      console.log('⚠️ يوجد عرض سابق:', existing.status);
+    }
+
+    if (existing && ['pending', 'accepted', 'fulfilled'].includes(existing.status)) {
+      return res.status(400).json({ message: 'لديك عرض سبق وتمت معالجته لهذا الطلب.' });
+    }
+
+    // ✅ إنشاء عرض جديد
     const confirmation = await DonationConfirmation.create({
       donor,
       recipientId,
@@ -41,14 +60,15 @@ exports.createDonationConfirmation = async (req, res) => {
       proposedTime
     });
 
+    console.log('✅ تم إنشاء عرض التبرع:', confirmation._id);
+
     res.status(201).json({ message: 'تم إرسال عرض التبرع بنجاح', confirmation });
 
   } catch (err) {
-    console.error('❌ خطأ أثناء إنشاء عرض التبرع:', err.message);
+    console.error('❌ خطأ أثناء إنشاء عرض التبرع:', err);
     res.status(500).json({ message: 'خطأ في السيرفر', error: err.message });
   }
 };
-
 
 
 // ✅ قبول التبرع من قبل صاحب الطلب
@@ -211,4 +231,59 @@ exports.getOffersByRequestId = async (req, res) => {
   }
 };
 
+// ❌ رفض عرض التبرع من طرف صاحب الطلب
+exports.rejectDonationConfirmation = async (req, res) => {
+  try {
+    const confirmation = await DonationConfirmation.findById(req.params.id);
+
+    if (!confirmation) {
+      return res.status(404).json({ message: 'العرض غير موجود' });
+    }
+
+    if (String(confirmation.recipientId) !== String(req.user._id)) {
+      return res.status(403).json({ message: 'غير مصرح لك برفض هذا العرض' });
+    }
+
+    if (confirmation.status !== 'pending') {
+      return res.status(400).json({ message: 'لا يمكن رفض عرض تم معالجته بالفعل' });
+    }
+
+    confirmation.status = 'rejected';
+    await confirmation.save();
+
+    res.status(200).json({ message: 'تم رفض العرض بنجاح' });
+  } catch (err) {
+    console.error('❌ خطأ في رفض العرض:', err.message);
+    res.status(500).json({ message: 'حدث خطأ أثناء الرفض', error: err.message });
+  }
+};
+
 // ❌ إلغاء التبرع
+// ❌ إلغاء التبرع (إذا لم يتم قبوله بعد)
+exports.cancelDonationConfirmation = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const confirmation = await DonationConfirmation.findById(id);
+
+    if (!confirmation) {
+      return res.status(404).json({ message: 'العرض غير موجود' });
+    }
+
+    if (String(confirmation.donor) !== String(req.user._id)) {
+      return res.status(403).json({ message: 'غير مصرح لك بإلغاء هذا العرض' });
+    }
+
+    if (confirmation.status !== 'pending') {
+      return res.status(400).json({ message: 'لا يمكن إلغاء العرض بعد قبوله أو تنفيذه' });
+    }
+
+    await confirmation.deleteOne();
+
+    res.status(200).json({ message: '✅ تم إلغاء العرض بنجاح' });
+  } catch (err) {
+    console.error('❌ خطأ أثناء إلغاء العرض:', err.message);
+    res.status(500).json({ message: 'حدث خطأ أثناء الإلغاء', error: err.message });
+  }
+};
+// ✅ جلب جميع العروض التي أرسلها المستخدم
+

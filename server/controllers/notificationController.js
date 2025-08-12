@@ -1,11 +1,13 @@
 const Notification = require('../models/Notification');
 
 // ✅ جلب جميع الإشعارات الخاصة بالمستخدم
+// ✅ جلب جميع الإشعارات الخاصة بالمستخدم مع referenceId و type
 exports.getUserNotifications = async (req, res) => {
   try {
-    const userId = req.user._id;
-
-    const notifications = await Notification.find({ userId }).sort({ date: -1 });
+    const notifications = await Notification.find({ userId: req.user._id })
+      .populate('sender', 'firstName lastName profileImage')
+      .sort({ date: -1 })
+      .select('title message read type referenceId sender date');
 
     res.status(200).json(notifications);
   } catch (err) {
@@ -49,6 +51,8 @@ exports.getUnreadNotificationCount = async (req, res) => {
     res.status(500).json({ message: 'فشل في جلب العدد' });
   }
 };
+
+
 
 // This controller handles user notifications.
 // It includes methods to fetch all notifications for a user and to get the count of unread notifications

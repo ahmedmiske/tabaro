@@ -46,6 +46,10 @@ function Notifications() {
                     <div className="notification-message text-muted">
                       {notification.message}
                     </div>
+                    <div className='notification-send '>
+                      <p> المرسل</p>
+                       {notification.userId}
+                    </div>
                   </div>
 
                   <div className="mb-2">

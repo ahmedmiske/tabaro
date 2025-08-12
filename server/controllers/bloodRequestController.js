@@ -1,14 +1,14 @@
 const BloodRequest = require('../models/bloodRequest');
+const DonationConfirmation = require('../models/DonationConfirmation');
 const asyncHandler = require('../utils/asyncHandler');
-const User = require('../models/user'); // ⬅️ ضروري حتى تعمل populate مع userId
+const User = require('../models/user');
 
 // @desc    Create a new blood request
 // @route   POST /api/blood-requests
 // @access  Private
 const createBloodRequest = asyncHandler(async (req, res) => {
   const { bloodType, location, deadline, description, isUrgent, contactMethods } = req.body;
-  
-  // Parse contactMethods if sent as JSON string
+
   let parsedContactMethods = [];
   if (contactMethods) {
     try {
@@ -18,7 +18,6 @@ const createBloodRequest = asyncHandler(async (req, res) => {
     }
   }
 
-  // Parse files from multer
   let files = [];
   if (req.files && Array.isArray(req.files)) {
     files = req.files.map(file => file.filename);
@@ -39,27 +38,35 @@ const createBloodRequest = asyncHandler(async (req, res) => {
   res.status(201).json(createdBloodRequest);
 });
 
-// @desc    Get all blood requests
-// @route   GET /api/blood-requests
+// @desc    Get blood requests by status (active or inactive)
+// @route   GET /api/blood-requests?status=active|inactive
 // @access  Public
 const getBloodRequests = asyncHandler(async (req, res) => {
-  const page = Number(req.query.page) || 1;
-  const limit = Number(req.query.limit) || 10;
-  const skip = (page - 1) * limit;
+  const statusFilter = req.query.status;
+  const now = new Date();
 
-  const total = await BloodRequest.countDocuments();
-  const bloodRequests = await BloodRequest.find()
+  let filter = {};
+
+  if (statusFilter === 'active') {
+    filter.deadline = { $gte: now }; // نشط فقط إذا لم يصل بعد للموعد
+  } else if (statusFilter === 'inactive') {
+    filter.deadline = { $lt: now }; // غير نشط إذا تجاوزنا الموعد
+  }
+
+  const bloodRequests = await BloodRequest.find(filter)
     .populate('userId', 'firstName lastName')
-    .skip(skip)
-    .limit(limit);
+    .sort({ deadline: 1 })
+    .lean();
 
-  res.json({
-    result: bloodRequests,
-    page,
-    pages: Math.ceil(total / limit),
-    total,
-  });
+  // وضع علامة isActive لتأكيد الفكرة في الواجهة
+  for (let req of bloodRequests) {
+    req.isActive = new Date(req.deadline) >= now;
+  }
+
+  res.json(bloodRequests);
 });
+
+
 
 // @desc    Get a single blood request by ID
 // @route   GET /api/blood-requests/:id
@@ -122,10 +129,45 @@ const deleteBloodRequest = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc    Get my requests with donation offers
+// @route   GET /api/blood-requests/mine-with-offers?status=active|inactive
+// @access  Private
+const getMyRequestsWithOffers = asyncHandler(async (req, res) => {
+  const statusFilter = req.query.status;
+  const now = new Date();
+  const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
+
+  let requests = await BloodRequest.find({ userId: req.user._id })
+    .populate('userId', 'firstName lastName')
+    .lean();
+
+  for (let request of requests) {
+    const offers = await DonationConfirmation.find({ requestId: request._id })
+      .populate('donor', 'firstName lastName')
+      .lean();
+
+    request.offers = offers;
+
+    const deadline = new Date(request.deadline);
+    request.isActive = deadline >= twoDaysAgo;
+  }
+
+  if (statusFilter === 'active') {
+    requests = requests.filter(r => r.isActive);
+  } else if (statusFilter === 'inactive') {
+    requests = requests.filter(r => !r.isActive);
+  }
+
+  res.json(requests);
+});
+
 module.exports = {
   createBloodRequest,
   getBloodRequests,
   getBloodRequestById,
   updateBloodRequest,
   deleteBloodRequest,
+  getMyRequestsWithOffers,
 };
+// This controller handles blood request operations such as creating, fetching, updating, and deleting requests.
+// It also includes functionality to get a user's requests along with any donation offers they have received.

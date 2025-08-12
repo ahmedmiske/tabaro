@@ -11,6 +11,7 @@ const { otpRoutes } = require('./routes/otpRoute');
 const setupSocket = require('./socket');
 const donationConfirmationRoutes = require('./routes/donationConfirmationRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
+const path = require('path');
 
 dotenv.config();
 const app = express();
@@ -76,3 +77,5 @@ app.use(errorHandler);
 setupSocket(io);
 
 app.set('io', io); // Make io available in the app
+
+app.use('/uploads/profileImages', express.static(path.join(__dirname, 'uploads/profileImages')));

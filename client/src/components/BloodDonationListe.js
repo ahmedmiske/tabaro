@@ -23,7 +23,7 @@ function BloodDonationListe() {
   const fetchDonations = async () => {
     setLoading(true);
     try {
-      const res = await fetchWithInterceptors(`/api/blood-requests?page=${page}&limit=${PAGE_SIZE}`);
+      const res = await fetchWithInterceptors(`/api/blood-requests?status=active&page=${page}&limit=${PAGE_SIZE}`);
       if (!res.ok) throw new Error('فشل في جلب البيانات');
       const data = res.body.result || res.body;
       setDonations(data);

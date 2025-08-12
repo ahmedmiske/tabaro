@@ -1,5 +1,6 @@
 // Controller functions for handling messages
 const Message = require('../models/message');
+const Notification = require('../models/Notification');
 
 // @desc    Send a new message
 // @route   POST /api/messages
@@ -8,25 +9,40 @@ const sendMessage = async (req, res) => {
   try {
     const { recipient, content } = req.body;
 
-    // Validate inputs
     if (!recipient || !content) {
       return res.status(400).json({ message: 'Recipient and content are required.' });
     }
 
-    // Create and save the message
+    // 1️⃣ إنشاء الرسالة
     const message = new Message({
-      sender: req.user._id, // from auth middleware
+      sender: req.user._id,
       recipient,
       content,
     });
 
     await message.save();
+
+    // 2️⃣ إنشاء إشعار للمُستلم
+    const notification = new Notification({
+      userId: recipient,             // المستلم الصحيح
+      sender: req.user._id,          // ✅  ما  لا يكون  
+      title: '💬 رسالة جديدة',
+      message: content,
+      type: 'message',
+      referenceId: req.user._id
+    });
+    console.log('🔔 Notification will be saved with sender:', req.user._id);
+
+    await notification.save();
+    console.log('🔔 Notification created with sender:', req.user._id);
     res.status(201).json(message);
   } catch (error) {
-    console.error('Failed to send message:', error);
+    console.error('❌ Failed to send message:', error);
     res.status(500).json({ message: 'Server error while sending message.' });
   }
 };
+
+
 
 // @desc    Get all messages between two users
 // @route   GET /api/messages/:userId

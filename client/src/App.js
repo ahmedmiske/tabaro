@@ -26,6 +26,8 @@ import BloodDonationDetails from './components/BloodDonationDetails';
 import NotificationsPage from './pages/NotificationsPage';
 import ChatPage from './pages/ChatPage';
 import ChatList from './pages/ChatList';
+import MyRequestDetails from './pages/MyRequestDetails';
+import About from './components/About';
 
 function App() {
   const location = useLocation();
@@ -82,6 +84,8 @@ function App() {
           <Route path="/chat/:recipientId" element={<ChatPage />} />
           <Route path="/messages" element={<ChatList />} />
           <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="/my-request-details/:id" element={<MyRequestDetails />} />
+          <Route path="/about" element={<About />} />
         </Routes>
       </div>
 

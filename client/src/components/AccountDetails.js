@@ -40,9 +40,10 @@ function AccountDetails({ userDetails, setUserDetails }) {
   };
 
   return (
+    <div className='container-account-details'>
     <Form onSubmit={handleSubmit} dir="rtl">
       <div className="account-details-header">
-        <h4><i className="fas fa-user-cog me-2"></i>تحديث معلومات الحساب</h4>
+        <h5><i className="fas fa-user-cog me-2"></i>تحديث معلومات الحساب</h5>
       </div>
 
       {success && <Alert variant="success">تم تحديث كلمة المرور بنجاح.</Alert>}
@@ -90,6 +91,7 @@ function AccountDetails({ userDetails, setUserDetails }) {
 
       <Button variant="primary" type="submit">حفظ التغييرات</Button>
     </Form>
+    </div>
   );
 }
 

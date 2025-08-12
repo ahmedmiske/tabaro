@@ -24,15 +24,18 @@ function Login() {
         body: JSON.stringify({ loginInput: loginInput.trim(), password })
       });
 
-      if (response.ok) {
-        const user = response.body?.user;
-        if (user) {
-          login(user);            // ✅ تحديث السياق لتحديث الحالة في جميع المكونات
-          navigate('/profile');  // ✅ التوجيه بعد تسجيل الدخول
-        } else {
-          setError('البيانات غير مكتملة. الرجاء المحاولة لاحقًا.');
-        }
-      } else {
+     if (response.ok) {
+  const user = response.body?.user;
+  const token = response.body?.token;
+
+  if (user && token) {
+    login({ ...user, token }); // ✅ أرسل التوكن مع المستخدم
+    navigate('/profile');
+  } else {
+    setError('البيانات غير مكتملة. الرجاء المحاولة لاحقًا.');
+  }
+}
+ else {
         setError(response.body?.message || 'فشل تسجيل الدخول');
       }
     } catch (error) {

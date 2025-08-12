@@ -1,16 +1,14 @@
 .landing-page {
   background: url('./tabarou.png') no-repeat center center;
   background-size: cover;
-  font-family:'IBM Plex Sans Arabic SemiBold';
-  width: 100vw;
+  font-family: 'IBM Plex Sans Arabic SemiBold, sans-serif';
+  width: 100%;
   height: 100vh;
-  margin: 0;
-  padding: 0;
-  position: fixed;
-  top: 40px;
-  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   animation: moveBackground 15s infinite alternate;
-  -webkit-animation: moveBackground 15s infinite alternate;
+  font-size: 1.2rem;
 }
 
 @keyframes moveBackground {
@@ -20,28 +18,35 @@
 }
 
 .container-landing {
-  max-width: 100%;
-  padding: 20px;
-  gap: 25px;
-  flex-direction: column;
+  max-width: 800px;
+  padding: 0;
 }
 
 .card-landing {
-  background: var(--main-color);
-  border-radius: 12px;
-  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.92);
+  border-radius: 15px;
+  padding: 20px auto;
+  opacity: 0.95;
+  width: 800px;
   max-width: 600px;
-  width: 100%;
-  text-align: center;
-  padding: 30px 25px;
-  -webkit-border-radius:;
-  -moz-border-radius:;
-  -ms-border-radius:;
-  -o-border-radius:;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease, background-color 0.3s ease;
+  -webkit-border-radius: 15px;
+  -moz-border-radius: 15px;
+  -ms-border-radius: 15px;
+  -o-border-radius: 15px;
+  -webkit-transition: box-shadow 0.3s ease, background-color 0.3s ease;
+  -moz-transition: box-shadow 0.3s ease, background-color 0.3s ease;
+  -ms-transition: box-shadow 0.3s ease, background-color 0.3s ease;
+  -o-transition: box-shadow 0.3s ease, background-color 0.3s ease;
 }
 
 .landing-title {
-  font-size: 2rem;
+  font-size: 2.4rem;
   font-weight: bold;
   margin-bottom: 20px;
 }
@@ -51,77 +56,69 @@
 }
 
 .lead-text {
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   margin-bottom: 10px;
 }
 
 .link-card {
   display: flex;
-  flex-direction: row;
   justify-content: center;
-  flex-wrap: wrap;
-  gap: 15px;
-  margin-top: 25px;
+  gap: 10px;
+  margin-top: 20px;
 }
 
-.btn-go {
-  font-weight: bold;
-  padding: 12px 25px;
+.go-landing, .log-landing {
+  padding: 12px 20px;
+  font-size: 1rem;
   border-radius: 8px;
-  font-size: 17px;
-  transition: var(--main-transition);
-  width: 200px;
-  color: white !important;
+  font-weight: bold;
   border: none;
-  -webkit-transition: var(--main-transition);
-  -moz-transition: var(--main-transition);
-  -ms-transition: var(--main-transition);
-  -o-transition: var(--main-transition);
-  -webkit-border-radius:;
-  -moz-border-radius:;
-  -ms-border-radius:;
-  -o-border-radius:;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  -ms-border-radius: 8px;
+  -o-border-radius: 8px;
 }
 
-.btn-main {
-  background-color: var(--color-primary);
+.go-landing {
+  background-color: var(--main-color-alt);
+  color: white;
 }
 
-.btn-secondary {
+.go-landing:hover {
+  background-color: var(--color-secondary);
+}
+
+.log-landing {
   background-color: #555;
+  color: white;
 }
 
-.btn-go:hover {
+.log-landing:hover {
   opacity: 0.9;
-  transform: scale(1.05);
-  -webkit-transform: scale(1.05);
-  -moz-transform: scale(1.05);
-  -ms-transform: scale(1.05);
-  -o-transform: scale(1.05);
 }
 
-/* ✅ دعم الهواتف الصغيرة */
-@media (max-width: 768px) {
-  .card-landing {
-    padding: 20px 15px;
-    max-width: 95%;
-  }
-
-  .landing-title {
-    font-size: 1.6rem;
-  }
-
-  .lead-text {
-    font-size: 1rem;
-  }
-
-  .btn-go {
-    width: 100%;
-    font-size: 16px;
-  }
-
-  .link-card {
-    flex-direction: column;
-    gap: 10px;
-  }
+.scroll-down {
+  display: block;
+  margin-top: 20px;
+  font-size: 2rem;
+  color: var(--color-primary, #1e88e5);
+  animation: bounce 1.5s infinite;
+  -webkit-animation: bounce 1.5s infinite;
 }
+
+.about-section{
+  padding: 0px;
+  text-align: center;
+  background-color: #f8f9fa;
+  font-size: 1.2rem;
+  line-height: 1.6;
+  color: #333;
+  font-family: 'Arial', sans-serif;
+  width: 100vw;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(8px); }
+}
+

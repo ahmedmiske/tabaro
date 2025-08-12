@@ -1,41 +1,39 @@
 const express = require('express');
+const multer = require('multer');
+const path = require('path');
 const {
-  registerUser,
-  authUser,
-  getUsers,
-  updateUser,
-  getUser,
-  changePassword,
-  deleteUser,
-  resetPassword
+  registerUser, authUser, getUsers, updateUser, getUser,
+  changePassword, deleteUser, resetPassword
 } = require('../controllers/userController');
 
 const {
-  protect,
-  authorize,
-  protectRegisterUser
+  protect, authorize, protectRegisterUser
 } = require('../middlewares/authMiddleware');
 
 const {
-  getUserNotifications,
-  markNotificationAsRead,
-  getUnreadNotificationCount
+  getUserNotifications, markNotificationAsRead, getUnreadNotificationCount
 } = require('../controllers/notificationController');
 
 const router = express.Router();
 
-/**
- * @swagger
- * tags:
- *  name: Users
- *  description: API for users in the system
- */
+// ✅ إعداد التخزين للصور
+const storage = multer.diskStorage({
+  destination(req, file, cb) {
+    cb(null, 'uploads/profileImages/');
+  },
+  filename(req, file, cb) {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  }
+});
+const upload = multer({ storage });
 
-router.post('/login', authUser);
-
+// ✅ تسجيل مستخدم جديد مع رفع صورة
 router.route('/')
-  .post(protectRegisterUser, registerUser)
+  .post(upload.single('profileImage'), registerUser)
   .get(protect, authorize('admin'), getUsers);
+
+// باقي الراوتر كما هو...
+router.post('/login', authUser);
 
 router.route('/profile')
   .put(protect, updateUser)
@@ -45,25 +43,10 @@ router.route('/profile')
 router.put('/change-password', protect, changePassword);
 router.put('/reset-password', protectRegisterUser, resetPassword);
 
-/**
- * إشعارات المستخدم
- */
+// إشعارات
 router.get('/notifications', protect, getUserNotifications);
 router.put('/notifications/:id', protect, markNotificationAsRead);
-router.get('/notifications/unread-count', protect, getUnreadNotificationCount); // ✅ تمت إضافته
-
-/**
- * اختبار إرسال إشعار عبر WebSocket
- */
-router.get('/notifications_test', protect, async (req, res) => {
-  const io = req.app.get('io');
-  io.to(req.user._id.toString()).emit('notification', {
-    type: 'message',
-    title: 'New Message',
-    message: `New message from ${req.user._id}`,
-    date: new Date()
-  });
-  res.json({ message: 'Test notification sent' });
-});
+router.get('/notifications/unread-count', protect, getUnreadNotificationCount);
 
 module.exports.userRoutes = router;
+// This code defines the user routes for the application.

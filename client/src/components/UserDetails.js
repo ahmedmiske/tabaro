@@ -47,10 +47,10 @@ function UserDetails({ userDetails, setUserDetails }) {
   };
 
   return (
-    <>
+    <div className='container-user-details'>
    
     <div className="user-details-header">
-      <h4><i className="fas fa-id-card me-2"></i>تحديث المعلومات الشخصية</h4>
+      <h5><i className="fas fa-id-card me-2"></i>تحديث المعلومات الشخصية</h5>
     </div>
 
     <Form onSubmit={handleSubmit} dir="rtl">
@@ -87,7 +87,7 @@ function UserDetails({ userDetails, setUserDetails }) {
       <br />
       <Button variant="primary" type="submit">حفظ التعديلات</Button>
     </Form>
-     </>
+     </div>
   );
 }
 

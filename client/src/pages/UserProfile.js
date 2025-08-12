@@ -2,15 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Button, Row, Col, Container, Badge } from 'react-bootstrap';
 import UserDetails from '../components/UserDetails';
 import AccountDetails from '../components/AccountDetails';
-import Notifications from '../components/Notifications';
-import DonationOffers from '../components/DonationOffers';
-import fetchWithInterceptors from '../services/fetchWithInterceptors';
+import NotificationsPage from './NotificationsPage';
 import MyDonationOffers from '../components/MyDonationOffers';
+import MyRequestsWithOffers from '../components/MyRequestsWithOffers';
+import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import './UserProfile.css';
 
 function UserProfile() {
   const [view, setView] = useState('personal');
-  const [userType, setUserType] = useState('individual');
   const [userDetails, setUserDetails] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -24,7 +23,6 @@ function UserProfile() {
       const { body, ok } = await fetchWithInterceptors('/api/users/profile');
       if (!ok) throw new Error('فشل في جلب بيانات المستخدم');
       setUserDetails(body);
-      setUserType(body.userType || 'individual');
     } catch (err) {
       console.error('Error fetching user data:', err.message);
     }
@@ -41,57 +39,54 @@ function UserProfile() {
 
   const handleViewChange = (newView) => {
     setView(newView);
-    if (newView === 'notifications') setUnreadCount(0); // تصفير العداد عند الدخول لعرضها
+    if (newView === 'notifications') setUnreadCount(0);
   };
 
   return (
     <Container className="user-profile-container mt-4">
       <Row className="user-profile-layout">
-        {/* ✅ القائمة الجانبية على اليمين */}
         <Col md={3} className="sidebar order-md-1">
+          <div className=" mb-4">
+            <h4>الملف الشخصي</h4>
+            {userDetails && (
+              <div className="user-profile-imag">
+                <img
+                  src={userDetails.profileImage ? `/uploads/profileImages/${userDetails.profileImage}` : '/default-avatar.png'}
+                  alt="الصورة الشخصية"
+                  className="user-avatar rounded-circle"
+                />
+                <div className="mt-2 fw-bold">
+                  {userDetails.firstName} {userDetails.lastName}
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className="menu d-grid gap-2">
-            <Button
-              className={`menu-button ${view === 'personal' ? 'active' : ''}`}
-              onClick={() => handleViewChange('personal')}
-            >
+            <Button className={`menu-button ${view === 'personal' ? 'active' : ''}`} onClick={() => handleViewChange('personal')}>
               معلومات شخصية
             </Button>
-
-            <Button
-              className={`menu-button ${view === 'account' ? 'active' : ''}`}
-              onClick={() => handleViewChange('account')}
-            >
+            <Button className={`menu-button ${view === 'account' ? 'active' : ''}`} onClick={() => handleViewChange('account')}>
               معلومات الحساب
             </Button>
-             <Button
-              className={`menu-button ${view === 'offers' ? 'active' : ''}`}
-              onClick={() => handleViewChange('offers')}
-            >
-            عروضي للتبرع
-           </Button>
-
-
-            <Button
-              className={`menu-button ${view === 'notifications' ? 'active' : ''}`}
-              onClick={() => handleViewChange('notifications')}
-            >
-              الإشعارات{' '}
-              {unreadCount > 0 && <Badge bg="danger">{unreadCount}</Badge>}
+            <Button className={`menu-button ${view === 'offers' ? 'active' : ''}`} onClick={() => handleViewChange('offers')}>
+              عروضي للتبرع
+            </Button>
+            <Button className={`menu-button ${view === 'myrequests' ? 'active' : ''}`} onClick={() => handleViewChange('myrequests')}>
+              طلباتي مع العروض
+            </Button>
+            <Button className={`menu-button ${view === 'notifications' ? 'active' : ''}`} onClick={() => handleViewChange('notifications')}>
+              الإشعارات {unreadCount > 0 && <Badge bg="danger">{unreadCount}</Badge>}
             </Button>
           </div>
         </Col>
 
-        {/* ✅ محتوى الصفحة على اليسار */}
-        <Col md={8} className="main-content order-md-2">
-          {view === 'personal' && (
-            <UserDetails userDetails={userDetails} setUserDetails={setUserDetails} />
-          )}
+        <Col md={9} className="main-content order-md-2">
+          {view === 'personal' && <UserDetails userDetails={userDetails} setUserDetails={setUserDetails} />}
           {view === 'account' && <AccountDetails userDetails={userDetails} />}
           {view === 'offers' && <MyDonationOffers />}
-          {view === 'notifications' && <Notifications />}
-
-       
-
+          {view === 'myrequests' && <MyRequestsWithOffers />}
+          {view === 'notifications' && <NotificationsPage />}
         </Col>
       </Row>
     </Container>
@@ -99,5 +94,3 @@ function UserProfile() {
 }
 
 export default UserProfile;
-// This component represents the user profile page.
-// It allows users to view and edit their personal information, account details, and notifications.

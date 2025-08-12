@@ -1,12 +1,13 @@
-import io from 'socket.io-client';
+import { io } from 'socket.io-client';
 
 const socket = io('http://localhost:5000', {
-  auth: {
-    token: localStorage.getItem('token'), // Set token after login
-  },
+  autoConnect: false //   
 });
-socket.on('connectedToRoom', (roomId) => {
-  console.log(`✅ تم الانضمام إلى الغرفة: ${roomId}`);
-});
+
+// 
+export const connectSocket = (token) => {
+  socket.auth = { token };
+  socket.connect();
+};
 
 export default socket;
