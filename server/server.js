@@ -3,79 +3,78 @@ const dotenv = require('dotenv');
 const express = require('express');
 const { Server } = require('socket.io');
 const mongoose = require('mongoose');
-const cors = require('cors');  // إضافة حزمة cors
+const cors = require('cors');
+const path = require('path');
+const fs = require('fs');
+
 const { userRoutes } = require('./routes/userRoute');
 const { notFound, errorHandler } = require('./middlewares/errorMiddleware');
 const logger = require('./middlewares/logger');
 const { otpRoutes } = require('./routes/otpRoute');
 const setupSocket = require('./socket');
-const donationConfirmationRoutes = require('./routes/donationConfirmationRoutes');
+
+const donationConfirmationRoutes = require('./routes/donationConfirmationRoutes'); // الدم
+const donationRequestRoutes = require('./routes/donationRequestRoute');           // الطلبات العامة
 const notificationRoutes = require('./routes/notificationRoutes');
-const path = require('path');
+const messageRoutes = require('./routes/messageRoute');
+const donationRequestConfirmationRoutes = require('./routes/donationRequestConfirmationRoutes');
 
 dotenv.config();
+
 const app = express();
 const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: '*' } });
 
-const io = new Server(server, {
-  cors: {
-    origin: '*', // يمكنك تحديد مصدر معين بدلاً من استخدام * للسماح بجميع المصادر
-    // methods: ['GET', 'POST'],
-  },
-});
+// ✅ اجعله متاحًا مبكرًا لكل الكنترولرز
+app.set('io', io);
 
-// استخدام CORS
-app.use(cors()); // هذا سيسمح بجميع طلبات CORS من أي مصدر
-
-app.use('/api/notifications', notificationRoutes); // ✅
-// Database connection
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => {
-        console.log('MongoDB connected');
-        const PORT = process.env.PORT || 5000;
-        server.listen(PORT, () => {
-            console.log(`Server running on port ${PORT}`);
-        });
-    })
-    .catch(err => {
-        console.error('Failed to connect to MongoDB', err);
-        process.exit(1); // Exit the process with a failure code
-    });
-
-app.use(express.json());
+// Middlewares
+app.use(cors());
+app.use(express.json({ limit: '30mb' }));
 app.use(express.urlencoded({ extended: true, limit: '30mb' }));
-app.use('/uploads', express.static('uploads'));
-
 app.use(logger);
 
-app.get('/', (req, res) => {
-    res.send('API is running...');
-});
+// تحضير uploads
+const uploadsDir = path.join(__dirname, '..', 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+app.use('/uploads', express.static(uploadsDir));
 
-app.use('/api/donation-confirmations', donationConfirmationRoutes);
-// User and authentication routes
+// صحّة السيرفر
+app.get('/', (req, res) => res.send('API is running...'));
 
-
-
+// Routes
 app.use('/api/users', userRoutes);
-app.use('/api/blood-requests', require('./routes/bloodRequestRoute'));
 app.use('/api/otp', otpRoutes);
-
-const messageRoutes = require('./routes/messageRoute');
+app.use('/api/blood-requests', require('./routes/bloodRequestRoute'));
 app.use('/api/messages', messageRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/donation-confirmations', donationConfirmationRoutes);
+app.use('/api/donationRequests', donationRequestRoutes);
+app.use('/api/donation-request-confirmations', donationRequestConfirmationRoutes);
 
-
-
-
-if(!process.env.NODE_ENV || process.env.NODE_ENV !== 'production') {
-    require('./swagger')(app);
+// Swagger في التطوير فقط
+if (!process.env.NODE_ENV || process.env.NODE_ENV !== 'production') {
+  require('./swagger')(app);
 }
 
+// Errors
 app.use(notFound);
 app.use(errorHandler);
 
+// Socket.IO
 setupSocket(io);
 
-app.set('io', io); // Make io available in the app
-
-app.use('/uploads/profileImages', express.static(path.join(__dirname, 'uploads/profileImages')));
+// DB + Server
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log('MongoDB connected');
+    const PORT = process.env.PORT || 5000;
+    server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  })
+  .catch(err => {
+    console.error('Failed to connect to MongoDB', err);
+    process.exit(1);
+  });

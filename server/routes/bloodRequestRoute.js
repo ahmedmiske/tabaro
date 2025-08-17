@@ -1,148 +1,129 @@
+// server/routes/bloodRequestRoute.js
 const express = require('express');
+const path = require('path');
+const fs = require('fs');
+const mongoose = require('mongoose');
+
+const { upload } = require('../middlewares/upload');
+const { protect } = require('../middlewares/authMiddleware');
+
 const {
   createBloodRequest,
   getBloodRequests,
   getBloodRequestById,
   updateBloodRequest,
   deleteBloodRequest,
-  getMyRequestsWithOffers,
 } = require('../controllers/bloodRequestController');
-const { protect } = require('../middlewares/authMiddleware');
-const { upload } = require('../utils/multipartParser');
 
 const router = express.Router();
+const isObjectId = (v) => mongoose.Types.ObjectId.isValid(v);
+
+/** يقبل docs و files — حتى لا يظهر MulterError: Unexpected field */
+const uploadDocs = upload.fields([
+  { name: 'docs',  maxCount: 5 },
+  { name: 'files', maxCount: 5 },
+]);
 
 /**
- * @swagger
- * tags:
- *   name: BloodRequests
- *   description: API for managing blood requests
+ * GET /api/blood-requests
+ * ترقيم صفحات + فلاتر خفيفة
+ * أمثلة:
+ *   ?status=active&page=1&limit=12
+ *   ?bloodType=O%2B&isUrgent=true
  */
+router.get('/', async (req, res, next) => {
+  try {
+    const {
+      status = 'all',
+      page   = 1,
+      limit  = 12,
+      bloodType,
+      isUrgent,
+    } = req.query;
+
+    const p = Math.max(parseInt(page, 10) || 1, 1);
+    const l = Math.min(Math.max(parseInt(limit, 10) || 12, 1), 100);
+
+    const filter = {};
+    if (status === 'active') filter.deadline = { $gte: new Date() };
+    if (status === 'inactive') filter.deadline = { $lt: new Date() };
+    if (bloodType) filter.bloodType = bloodType;
+    if (isUrgent !== undefined) filter.isUrgent = String(isUrgent) === 'true';
+
+    // نفوّض إلى الكنترولر لضمان إخراج موحّد
+    req.query.page = String(p);
+    req.query.limit = String(l);
+    req._extraFilter = filter; // نمرّر فلتر إضافي اختياري
+    return getBloodRequests(req, res, next);
+  } catch (e) {
+    next(e);
+  }
+});
 
 /**
- * @swagger
- * /blood-requests/mine-with-offers:
- *   get:
- *     summary: Get my blood requests with received offers
- *     security:
- *       - bearerAuth: []
- *     tags: [BloodRequests]
- *     responses:
- *       200:
- *         description: A list of my blood requests with offers
- *       401:
- *         description: Unauthorized
+ * POST /api/blood-requests
+ * إنشاء طلب (يدعم رفع متعدد عبر docs/files)
  */
-router.get('/mine-with-offers', protect, getMyRequestsWithOffers);
+router.post('/', protect, uploadDocs, createBloodRequest);
 
 /**
- * @swagger
- * /blood-requests:
- *   get:
- *     summary: Get all blood requests
- *     tags: [BloodRequests]
- *     responses:
- *       200:
- *         description: A list of blood requests
- *   post:
- *     summary: Create a new blood request
- *     security:
- *       - bearerAuth: []
- *     tags: [BloodRequests]
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             properties:
- *               bloodType:
- *                 type: string
- *               location:
- *                 type: string
- *               deadline:
- *                 type: string
- *                 format: date
- *               description:
- *                 type: string
- *               isUrgent:
- *                 type: boolean
- *               contactMethods:
- *                 type: string
- *               files:
- *                 type: array
- *                 items:
- *                   type: string
- *                   format: binary
- *     responses:
- *       201:
- *         description: Blood request created successfully
+ * GET /api/blood-requests/:id
+ * طلب واحد
  */
-router.route('/')
-  .get(getBloodRequests)
-  .post(protect, upload.array('files', 5), createBloodRequest);
+router.get('/:id', getBloodRequestById);
 
 /**
- * @swagger
- * /blood-requests/{id}:
- *   get:
- *     summary: Get a blood request by ID
- *     security:
- *       - bearerAuth: []
- *     tags: [BloodRequests]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Blood request details
- *       404:
- *         description: Blood request not found
- *   put:
- *     summary: Update a blood request
- *     security:
- *       - bearerAuth: []
- *     tags: [BloodRequests]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Blood request updated successfully
- *       403:
- *         description: Unauthorized
- *       404:
- *         description: Blood request not found
- *   delete:
- *     summary: Delete a blood request
- *     security:
- *       - bearerAuth: []
- *     tags: [BloodRequests]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Blood request deleted successfully
- *       403:
- *         description: Unauthorized
- *       404:
- *         description: Blood request not found
+ * PUT /api/blood-requests/:id
+ * تحديث (يمكن إضافة وثائق جديدة بنفس حقول الرفع)
  */
-router.route('/:id')
-  .get(protect, getBloodRequestById)
-  .put(protect, updateBloodRequest)
-  .delete(protect, deleteBloodRequest);
+router.put('/:id', protect, uploadDocs, updateBloodRequest);
+
+/**
+ * DELETE /api/blood-requests/:id
+ * حذف
+ */
+router.delete('/:id', protect, deleteBloodRequest);
+
+/**
+ * GET /api/blood-requests/:id/docs
+ * قائمة الوثائق الخاصة بطلب
+ */
+router.get('/:id/docs', async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    if (!isObjectId(id)) return res.status(400).json({ message: 'Invalid id' });
+
+    const BloodRequest = require('../models/bloodRequest');
+    const doc = await BloodRequest.findById(id).select('documents');
+    if (!doc) return res.status(404).json({ message: 'Not found' });
+
+    return res.json(doc.documents || []);
+  } catch (e) {
+    next(e);
+  }
+});
+
+/**
+ * GET /api/blood-requests/docs/file/:filename
+ * تقديم الملف نفسه بشكل آمن (inline للصور/PDF)
+ */
+router.get('/docs/file/:filename', (req, res) => {
+  // منع path traversal
+  const safeName = path.basename(req.params.filename || '');
+  const filePath = path.join(__dirname, '../../uploads/blood-requests', safeName);
+
+  if (!safeName || !fs.existsSync(filePath)) {
+    return res.status(404).json({ message: 'File not found' });
+  }
+
+  // تعيين نوع المحتوى
+  const ext = path.extname(safeName).toLowerCase();
+  if (ext === '.pdf') res.type('application/pdf');
+  if (ext === '.jpg' || ext === '.jpeg') res.type('image/jpeg');
+  if (ext === '.png') res.type('image/png');
+
+  res.setHeader('Content-Disposition', `inline; filename="${safeName}"`);
+  return res.sendFile(filePath);
+});
 
 module.exports = router;
-// This route handles all operations related to blood requests, including creating, retrieving, updating, and deleting requests.
-// It also includes functionality to fetch a user's own requests along with any donation offers made against them

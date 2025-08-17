@@ -28,6 +28,12 @@ import ChatPage from './pages/ChatPage';
 import ChatList from './pages/ChatList';
 import MyRequestDetails from './pages/MyRequestDetails';
 import About from './components/About';
+import DonationRequestList from './components/DonationRequestList';
+import DonationRequestDetails from './components/DonationRequestDetails';
+import { connectSocket } from './socket';
+const token = localStorage.getItem('token');
+if (token) connectSocket(token);
+
 
 function App() {
   const location = useLocation();
@@ -77,8 +83,10 @@ function App() {
           <Route path="/blood-donation-details/:id" element={<BloodDonationDetails />} />
           <Route path="/campaign/:id" element={<CampaignDetails />} />
           <Route path="/donation-requests" element={<DonationRequestForm />} />
+          <Route path="/donations" element={<DonationRequestList />} />
+          <Route path="/donations/:id" element={<DonationRequestDetails />} />
           <Route path="/blood-donation" element={<BloodDonationForm />} />
-          <Route path="/donations" element={<DonorListe />} />
+          <Route path="/donor-list" element={<DonorListe />} />
           <Route path="/blood-donations" element={<BloodDonationList />} />
           <Route path="/reset-password" element={<PasswordReset />} />
           <Route path="/chat/:recipientId" element={<ChatPage />} />

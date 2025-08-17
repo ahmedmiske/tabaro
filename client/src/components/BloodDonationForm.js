@@ -8,7 +8,7 @@ import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import TitleMain from './TitleMain';
 import ProgressStep from './ProgressStep';
 
-const BloodDonationMultiStepForm = () => {
+const BloodDonationForm = () => {
   const [step, setStep] = useState(1);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
@@ -362,4 +362,4 @@ const BloodDonationMultiStepForm = () => {
   );
 };
 
-export default BloodDonationMultiStepForm;
+export default BloodDonationForm;
