@@ -147,109 +147,100 @@ const DonationRequestForm = () => {
       scanStore(sessionStorage)
     );
   };
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  let hasError = false;
+  const newPaymentErrors = {};
+  const newContactErrors = {};
 
-    let hasError = false;
-    const newPaymentErrors = {};
-    const newContactErrors = {};
+  donation.paymentMethods.forEach(({ method, phone }) => {
+    if (isFinancial && !validatePhoneNumber(phone)) { newPaymentErrors[method] = true; hasError = true; }
+  });
+  donation.contactMethods.forEach(({ method, number }) => {
+    if (number && !validatePhoneNumber(number)) { newContactErrors[method] = true; hasError = true; }
+  });
+  setErrors({ paymentPhones: newPaymentErrors, contactNumbers: newContactErrors });
 
-    donation.paymentMethods.forEach(({ method, phone }) => {
-      if (isFinancial && !validatePhoneNumber(phone)) { newPaymentErrors[method] = true; hasError = true; }
-    });
-    donation.contactMethods.forEach(({ method, number }) => {
-      if (number && !validatePhoneNumber(number)) { newContactErrors[method] = true; hasError = true; }
-    });
-    setErrors({ paymentPhones: newPaymentErrors, contactNumbers: newContactErrors });
+  if (!donation.place) { hasError = true; alert('الرجاء اختيار/كتابة اسم المكان.'); }
+  if (isFinancial && !(Number(donation.amount) > 0)) { hasError = true; alert('الرجاء إدخال المبلغ المطلوب.'); }
+  if (isFinancial && !donation.paymentMethods.length) { hasError = true; alert('اختر وسيلة دفع واحدة على الأقل.'); }
+  if (!contactsValid) { hasError = true; }
 
-    if (!donation.place) { hasError = true; alert('الرجاء اختيار/كتابة اسم المكان.'); }
-    if (isFinancial && !(Number(donation.amount) > 0)) { hasError = true; alert('الرجاء إدخال المبلغ المطلوب.'); }
-    if (isFinancial && !donation.paymentMethods.length) { hasError = true; alert('اختر وسيلة دفع واحدة على الأقل.'); }
-    if (!contactsValid) { hasError = true; }
+  if (hasError) return;
 
-    if (hasError) return;
+  // ✅ نرسل contactMethods/paymentMethods كـ JSON (مثل التبرع بالدم)
+  const fd = new FormData();
+  fd.append('category', donation.category);
+  fd.append('type', donation.type);
+  fd.append('description', donation.description || '');
+  fd.append('place', donation.place || '');
+  fd.append('deadline', donation.deadline || '');
+  fd.append('isUrgent', donation.isUrgent ? 'true' : 'false');
+  fd.append('amount', donation.amount || '');
+  fd.append('bloodType', donation.bloodType || '');
 
-    // ✅ FormData بأسلوب bloodDonation + الملفات باسم files
-    const fd = new FormData();
-    fd.append('category', donation.category);
-    fd.append('type', donation.type);
-    fd.append('description', donation.description || '');
-    fd.append('place', donation.place || '');
-    fd.append('deadline', donation.deadline || '');
-    fd.append('isUrgent', donation.isUrgent ? 'true' : 'false');
-    fd.append('amount', donation.amount || '');
-    fd.append('bloodType', donation.bloodType || '');
+  // نرشّح العناصر الفارغة فقط للاحتياط
+  const cleanContacts = donation.contactMethods
+    .filter(x => x && (x.method || x.number));
+  const cleanPayments = donation.paymentMethods
+    .filter(x => x && (x.method || x.phone));
 
-    donation.contactMethods.forEach((item, i) => {
-      fd.append(`contactMethods[${i}][method]`, item.method);
-      fd.append(`contactMethods[${i}][number]`, item.number);
-    });
+  fd.append('contactMethods', JSON.stringify(cleanContacts));
+  fd.append('paymentMethods', JSON.stringify(cleanPayments));
 
-    donation.paymentMethods.forEach((item, i) => {
-      fd.append(`paymentMethods[${i}][method]`, item.method);
-      fd.append(`paymentMethods[${i}][phone]`, item.phone);
-    });
+  donation.proofDocuments.forEach(file => fd.append('files', file));
 
-    donation.proofDocuments.forEach(file => fd.append('files', file));
+  try {
+    setSubmitting(true);
 
-    try {
-      setSubmitting(true);
+    const token =
+      localStorage.getItem('token') ||
+      localStorage.getItem('authToken') ||
+      localStorage.getItem('accessToken') ||
+      sessionStorage.getItem('token') || '';
 
-      // 🟢 حاول إيجاد التوكن من أي مفتاح
-      const token =
-        localStorage.getItem('token') ||
-        localStorage.getItem('authToken') ||
-        localStorage.getItem('accessToken') ||
-        sessionStorage.getItem('token') ||
-        findAnyJWT() || '';
-
-      if (!token) {
-        alert('غير مصرّح. سجّل الدخول.');
-        setSubmitting(false);
-        return;
-      }
-
-      let userId = '';
-      try {
-        const u = JSON.parse(localStorage.getItem('user') || '{}');
-        userId = u?._id || '';
-      } catch {}
-
-      // إرسال مباشر (نمرّر كل الهيدرز الشائعة)
-      const resp = await fetch('/api/donationRequests', {
-        method: 'POST',
-        body: fd,
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'x-auth-token': token,
-          'x-access-token': token,
-          ...(userId ? { 'X-UserId': userId } : {}),
-        },
-        // credentials: 'include', // فعّلها فقط إذا كان التوثيق بالكوكي HttpOnly وبضبط CORS
-      });
-
-      const ct = resp.headers.get('content-type') || '';
-      const body = ct.includes('application/json') ? await resp.json() : await resp.text();
-
-      if (!resp.ok) {
-        const msg = (body && body.message) ? body.message : `HTTP error! status: ${resp.status}`;
-        throw new Error(msg);
-      }
-
-      const created = body?.data;
-      localStorage.removeItem('donationRequestDraft');
-
-      if (created?._id) navigate(`/donations/${created._id}`);
-      else alert(body?.message || 'تم إنشاء الطلب بنجاح');
-
-    } catch (err) {
-      console.error(err);
-      alert(err.message || 'حدث خطأ أثناء الإرسال');
-    } finally {
+    if (!token) {
+      alert('غير مصرّح. سجّل الدخول.');
       setSubmitting(false);
+      return;
     }
-  };
+
+    let userId = '';
+    try { userId = (JSON.parse(localStorage.getItem('user') || '{}')._id) || ''; } catch {}
+
+    const resp = await fetch('/api/donationRequests', {
+      method: 'POST',
+      body: fd, // لا تضع Content-Type يدوياً
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'x-auth-token': token,
+        'x-access-token': token,
+        ...(userId ? { 'X-UserId': userId } : {}),
+      },
+    });
+
+    const ct = resp.headers.get('content-type') || '';
+    const body = ct.includes('application/json') ? await resp.json() : await resp.text();
+
+    if (!resp.ok) {
+      const msg = (body && body.message) ? body.message : `HTTP error! status: ${resp.status}`;
+      throw new Error(msg);
+    }
+
+    const created = body?.data;
+    localStorage.removeItem('donationRequestDraft');
+
+    if (created?._id) navigate(`/donations/${created._id}`);
+    else alert(body?.message || 'تم إنشاء الطلب بنجاح');
+  } catch (err) {
+    console.error(err);
+    alert(err.message || 'حدث خطأ أثناء الإرسال');
+  } finally {
+    setSubmitting(false);
+  }
+};
+
 
   const renderFilePreview = (file) => {
     if (!file) return null;

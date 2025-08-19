@@ -10,11 +10,11 @@ const toDate = (v) => {
   return isNaN(d.getTime()) ? null : d;
 };
 
-// contactMethods[0][method] => [{method, number}, ...]
+// contactMethods[0][method] => [{method, number}, ...]  (أسلوب الأقواس)
 function parseBracketArray(body, root, fields) {
   const re = new RegExp(`^${root}\\[(\\d+)\\]\\[(${fields.join('|')})\\]$`);
   const map = new Map(); // index => obj
-  for (const [key, val] of Object.entries(body)) {
+  for (const [key, val] of Object.entries(body || {})) {
     const m = key.match(re);
     if (!m) continue;
     const idx = Number(m[1]);
@@ -23,11 +23,34 @@ function parseBracketArray(body, root, fields) {
     obj[f] = val;
     map.set(idx, obj);
   }
-  // فلترة العناصر الفارغة أو التي لا تحتوي أي قيمة مفيدة
   return Array.from(map.keys())
     .sort((a,b)=>a-b)
     .map(k => map.get(k))
     .filter(o => Object.values(o).some(v => String(v || '').trim() !== ''));
+}
+
+// JSON أو مصفوفة جاهزة (مثل التبرع بالدم)
+function parseJsonArray(candidate, fields) {
+  try {
+    const arr = typeof candidate === 'string' ? JSON.parse(candidate) : candidate;
+    if (!Array.isArray(arr)) return [];
+    return arr
+      .map((raw) => {
+        const o = {};
+        fields.forEach((f) => { o[f] = (raw && raw[f]) ? String(raw[f]).trim() : ''; });
+        return o;
+      })
+      .filter((o) => fields.some((f) => String(o[f] || '').trim() !== ''));
+  } catch {
+    return [];
+  }
+}
+
+// Flex: جرّب JSON أولاً، ثم الأقواس
+function parseFlexible(body, root, fields) {
+  const jsonParsed = parseJsonArray(body?.[root], fields);
+  if (jsonParsed.length) return jsonParsed;
+  return parseBracketArray(body, root, fields);
 }
 
 // استخراج مسارات الملفات من multer بأي شكل
@@ -52,15 +75,12 @@ exports.createDonationRequest = async (req, res) => {
 
     const { category, type, description, place, deadline, isUrgent, amount, bloodType } = req.body;
 
-    if (!category || !type) {
-      return res.status(400).json({ message: 'الرجاء تحديد المجال والنوع.' });
-    }
-    if (!place) {
-      return res.status(400).json({ message: 'الرجاء تحديد الموقع (اسم المكان).' });
-    }
+    if (!category || !type) return res.status(400).json({ message: 'الرجاء تحديد المجال والنوع.' });
+    if (!place) return res.status(400).json({ message: 'الرجاء تحديد الموقع (اسم المكان).' });
 
-    const contactMethods = parseBracketArray(req.body, 'contactMethods', ['method', 'number']);
-    const paymentMethods = parseBracketArray(req.body, 'paymentMethods', ['method', 'phone']);
+    // ✅ الآن نقبل JSON أو أقواس (مثل الدم)
+    const contactMethods = parseFlexible(req.body, 'contactMethods', ['method', 'number']);
+    const paymentMethods = parseFlexible(req.body, 'paymentMethods', ['method', 'phone']);
     const proofDocuments = extractFiles(req);
 
     const doc = await DonationRequest.create({
@@ -76,10 +96,9 @@ exports.createDonationRequest = async (req, res) => {
       contactMethods,
       paymentMethods,
       proofDocuments,
-      date: new Date()
+      date: new Date(),
     });
 
-    // أعِد المستند مُعبّأً مباشرةً
     const populated = await DonationRequest.findById(doc._id)
       .populate({ path: 'userId', select: PUBLISHER_SELECT });
 
@@ -111,7 +130,7 @@ exports.listDonationRequests = async (req, res) => {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(_limit)
-        .populate({ path: 'userId', select: PUBLISHER_SELECT }), // 👈 populate خفيف
+        .populate({ path: 'userId', select: PUBLISHER_SELECT }),
       DonationRequest.countDocuments(q)
     ]);
 
@@ -134,10 +153,9 @@ exports.listDonationRequests = async (req, res) => {
 exports.getDonationRequest = async (req, res) => {
   try {
     const doc = await DonationRequest.findById(req.params.id)
-      .populate({ path: 'userId', select: PUBLISHER_SELECT }); // 👈 مهم للواجهة
+      .populate({ path: 'userId', select: PUBLISHER_SELECT });
 
     if (!doc) return res.status(404).json({ message: 'طلب التبرع غير موجود' });
-
     res.json({ data: doc });
   } catch (error) {
     console.error('❌ Get DonationRequest:', error);
@@ -152,19 +170,18 @@ exports.updateDonationRequest = async (req, res) => {
     const fields = ['category','type','description','place','deadline','isUrgent','amount','bloodType'];
     for (const f of fields) if (f in req.body) data[f] = req.body[f];
 
-    // تحويل الأنواع
     if ('amount'   in data) data.amount   = toNum(data.amount);
     if ('deadline' in data) data.deadline = toDate(data.deadline);
     if ('isUrgent' in data) data.isUrgent = toBool(data.isUrgent);
     if ('place'    in data) data.place    = String(data.place || '').trim();
 
-    // مصفوفات بالأقواس
-    const contactMethods = parseBracketArray(req.body, 'contactMethods', ['method','number']);
-    const paymentMethods = parseBracketArray(req.body, 'paymentMethods', ['method','phone']);
+    // مرن: JSON أو أقواس
+    const contactMethods = parseFlexible(req.body, 'contactMethods', ['method','number']);
+    const paymentMethods = parseFlexible(req.body, 'paymentMethods', ['method','phone']);
     if (contactMethods.length) data.contactMethods = contactMethods;
     if (paymentMethods.length) data.paymentMethods = paymentMethods;
 
-    // ملفات جديدة؟ ندمج مع القديمة
+    // ملفات جديدة؟ ندمج
     const newFiles = extractFiles(req);
     if (newFiles.length) {
       const current = await DonationRequest.findById(req.params.id).select('proofDocuments');

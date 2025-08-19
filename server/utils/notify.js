@@ -1,11 +1,8 @@
+// server/utils/notify.js
 const Notification = require('../models/Notification');
 
-/**
- * إرسال إشعار إلى مستخدم + دفع Socket (إن وُجد)
- * مع منع التكرار القريب: لا تنشئ نفس (userId,type,referenceId) خلال آخر 2 دقيقة
- */
 exports.notifyUser = async ({
-  app,
+  app,                // لارسال socket لاحقًا
   userId,
   sender,
   title = '',
@@ -13,48 +10,40 @@ exports.notifyUser = async ({
   type = 'system',
   referenceId = null,
   meta = null,
-  dedupeWindowMs = 2 * 60 * 1000, // دقيقتان
 }) => {
+  // upsert: لو موجود بنفس (userId/type/referenceId) يحدثه، وإلا ينشئ جديد
+  const doc = await Notification.findOneAndUpdate(
+    { userId, type, referenceId },
+    {
+      $setOnInsert: {
+        userId,
+        sender,
+        title,
+        message,
+        type,
+        referenceId,
+        meta,
+        read: false,
+      },
+      $set: { updatedAt: new Date() },
+    },
+    { new: true, upsert: true }
+  );
+
+  // بث سوكِت (اختياري)
   try {
-    if (!userId) return null;
-
-    const since = new Date(Date.now() - dedupeWindowMs);
-
-    const duplicate = await Notification.findOne({
-      userId,
-      type,
-      ...(referenceId ? { referenceId } : {}),
-      createdAt: { $gte: since },
-    });
-
-    if (duplicate) return duplicate;
-
-    const notif = await Notification.create({
-      userId,
-      sender,
-      title,
-      message,
-      type,
-      referenceId,
-      meta,
-    });
-
-    // ادفع عبر Socket.IO (إن كان مهيأ)
-    const io = app?.get?.('io');
-    if (io) {
-      io.to(String(userId)).emit('notification', {
-        _id: notif._id,
-        title: notif.title,
-        message: notif.message,
-        type: notif.type,
-        referenceId: notif.referenceId,
-        createdAt: notif.createdAt,
+    const io = app.get('io');
+    if (io && userId) {
+      io.to(String(userId)).emit('notification:new', {
+        _id: doc._id,
+        title: doc.title,
+        message: doc.message,
+        type: doc.type,
+        referenceId: doc.referenceId,
+        createdAt: doc.createdAt,
       });
     }
+  } catch (_) {}
 
-    return notif;
-  } catch (err) {
-    console.error('notifyUser error:', err?.message || err);
-    return null;
-  }
+  return doc;
 };

@@ -12,12 +12,13 @@ const { notFound, errorHandler } = require('./middlewares/errorMiddleware');
 const logger = require('./middlewares/logger');
 const { otpRoutes } = require('./routes/otpRoute');
 const setupSocket = require('./socket');
-
 const donationConfirmationRoutes = require('./routes/donationConfirmationRoutes'); // الدم
 const donationRequestRoutes = require('./routes/donationRequestRoute');           // الطلبات العامة
 const notificationRoutes = require('./routes/notificationRoutes');
 const messageRoutes = require('./routes/messageRoute');
 const donationRequestConfirmationRoutes = require('./routes/donationRequestConfirmationRoutes');
+const DonationRequestConfirmation = require('./models/DonationRequestConfirmation');
+const { notifyUser } = require('./utils/notify');
 
 dotenv.config();
 
@@ -36,6 +37,7 @@ app.use(logger);
 
 // تحضير uploads
 const uploadsDir = path.join(__dirname, '..', 'uploads');
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
@@ -51,13 +53,60 @@ app.use('/api/blood-requests', require('./routes/bloodRequestRoute'));
 app.use('/api/messages', messageRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/donation-confirmations', donationConfirmationRoutes);
-app.use('/api/donationRequests', donationRequestRoutes);
 app.use('/api/donation-request-confirmations', donationRequestConfirmationRoutes);
+app.use('/api/donationRequests', require('./routes/donationRequestRoute'));
 
 // Swagger في التطوير فقط
 if (!process.env.NODE_ENV || process.env.NODE_ENV !== 'production') {
   require('./swagger')(app);
 }
+
+async function scanOverdueConfirmations(app) {
+  const now = new Date();
+  const list = await DonationRequestConfirmation.find({
+    status: 'pending_verification',
+    reminderDueAt: { $lte: now },
+    overdue: false,
+  }).select('requestId donor');
+
+  for (const c of list) {
+    try {
+      // أرسل تذكيرًا للطرفين بتوثيق العملية
+      await notifyUser({
+        app,
+        userId: c.donor,
+        title: 'تذكير توثيق التبرع',
+        message: 'مرّت 48 ساعة دون توثيق التبرع. يرجى إتمام التوثيق لتجنّب تعليق النشر.',
+        type: 'verification_reminder',
+        referenceId: c._id,
+      });
+
+      // نحاول معرفة صاحب الطلب لرسالة مماثلة
+      // (توفير userId مباشرة إن أردت، أو استعلام خفيف)
+      const reqDoc = await mongoose.model('DonationRequest').findById(c.requestId).select('userId');
+      if (reqDoc?.userId) {
+        await notifyUser({
+          app,
+          userId: reqDoc.userId,
+          title: 'تذكير توثيق التبرع',
+          message: 'مرّت 48 ساعة دون توثيق التبرع. يرجى إتمام التوثيق لتجنّب تعليق النشر.',
+          type: 'verification_reminder',
+          referenceId: c._id,
+        });
+      }
+
+      c.overdue = true;
+      await c.save();
+    } catch (e) {
+      console.error('overdue reminder error:', e);
+    }
+  }
+}
+
+// شغّل فحصًا كل ساعة
+setInterval(() => scanOverdueConfirmations(app), 60 * 60 * 1000);
+
+
 
 // Errors
 app.use(notFound);
@@ -65,6 +114,7 @@ app.use(errorHandler);
 
 // Socket.IO
 setupSocket(io);
+
 
 // DB + Server
 mongoose

@@ -69,20 +69,14 @@ module.exports = function setupSocket(io) {
       io.to(String(recipientId)).emit('typing', { senderId: currentUserId });
     });
 // socket.js (داخل io.on('connection', ...) بدل المعالج القديم)
-socket.on('sendMessage', async ({
-  recipientId,
-  content,
-  requestId,
-  offerId,
-  type,           // "message" | "offer" | "offer-blood" | "blood" | ...
-  clientMsgId,    // (اختياري) مُعرّف يولده الفرونت لمنع التكرار
-} = {}) => {
+// server/socket.js  (المقطع الخاص بـ sendMessage)
+
+socket.on('sendMessage', async ({ recipientId, content, requestId, offerId, type } = {}) => {
   try {
-    // تحقق المعرّفات
     if (!isValidId(recipientId)) {
       return socket.emit('error', { message: 'Invalid recipient ID' });
     }
-    if (String(recipientId) === String(currentUserId)) {
+    if (recipientId === currentUserId) {
       return socket.emit('error', { message: 'لا يمكنك مراسلة نفسك' });
     }
 
@@ -93,25 +87,6 @@ socket.on('sendMessage', async ({
     const safeRequestId = isValidId(requestId) ? requestId : undefined;
     const safeOfferId   = isValidId(offerId)   ? offerId   : undefined;
 
-    // (اختياري) منع تكرار نفس الرسالة سريعًا عبر clientMsgId
-    if (clientMsgId) {
-      const dup = await Message.findOne({
-        sender: currentUserId,
-        recipient: recipientId,
-        'meta.clientMsgId': clientMsgId,
-      }).select('_id');
-      if (dup) {
-        // أعد آخر نسخة تم بثّها بدون تكرار إشعار
-        const sender = await User.findById(currentUserId).select('firstName lastName profileImage');
-        const senderName = sender ? `${sender.firstName || ''} ${sender.lastName || ''}`.trim() || 'مستخدم' : 'مستخدم';
-        const senderProfileImage = sender?.profileImage || '';
-        const enriched = { _id: dup._id, content: body, sender: currentUserId, recipient: recipientId, senderName, senderProfileImage };
-        socket.emit('messageSent', enriched);
-        return;
-      }
-    }
-
-    // إنشاء الرسالة
     const message = await Message.create({
       sender: currentUserId,
       recipient: recipientId,
@@ -120,70 +95,35 @@ socket.on('sendMessage', async ({
       read: false,
       requestId: safeRequestId,
       offerId: safeOfferId,
-      meta: { clientMsgId: clientMsgId || undefined, kind: type || 'message' },
     });
 
-    // معلومات المرسل لإغناء الرسالة
     const sender = await User.findById(currentUserId).select('firstName lastName profileImage');
     const senderName = sender ? `${sender.firstName || ''} ${sender.lastName || ''}`.trim() || 'مستخدم' : 'مستخدم';
     const senderProfileImage = sender?.profileImage || '';
 
-    // تطبيع نوع الإشعار والعنوان حسب النوع الوارد من الفرونت
-    let notifType  = 'message';
-    let notifTitle = '💬 رسالة جديدة';
-    if (type === 'offer' || type === 'donation') {
-      notifType  = 'donation_request_confirmation';
-      notifTitle = '🤝 تأكيد تبرع جديد';
-    } else if (type === 'offer-blood' || type === 'blood') {
-      notifType  = 'blood_donation_confirmation';
-      notifTitle = '🩸 تأكيد تبرع بالدم';
-    }
-
-    const referenceId = safeOfferId || safeRequestId || message._id;
-
-    // منع تكرار الإشعار (إذا أُرسل نفس النوع لنفس المرجع خلال آخر دقيقتين)
-    const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
-    const existingNotif = await Notification.findOne({
-      userId: recipientId,
-      type: notifType,
-      referenceId: referenceId,
-      createdAt: { $gte: twoMinutesAgo },
-    }).select('_id');
-
-    if (!existingNotif) {
-      await Notification.create({
+    // 👇 لا تُنشئ Notification عند type === 'offer' (الإشعار سيأتي من كنترولر تأكيد التبرع)
+    if (type !== 'offer') {
+      await notifyUser({
+        app: socket.server, // أو req.app في الكنترولر؛ هنا `io` يمكن الوصول إليه عبر server.set('io', io)
         userId: recipientId,
         sender: currentUserId,
-        title: notifTitle,
+        title: '💬 رسالة جديدة',
         message: body.length > 100 ? body.slice(0, 100) + '…' : body,
-        type: notifType,
-        referenceId,
-        read: false,
-        // ميتاداتا لتسهيل الربط في الواجهة
-        meta: {
-          requestId: safeRequestId || null,
-          offerId: safeOfferId || null,
-          kind: type || 'message',
-          via: 'socket',
-        },
+        type: 'message',
+        referenceId: message._id, // اربطه بالرسالة
       });
     }
 
-    const enriched = {
-      ...message.toObject(),
-      senderName,
-      senderProfileImage,
-    };
-
-    // بثّ الرسالة للمستلم وللمُرسل
+    const enriched = { ...message.toObject(), senderName, senderProfileImage };
     io.to(String(recipientId)).emit('receiveMessage', enriched);
     socket.emit('messageSent', enriched);
-
   } catch (error) {
     console.error('sendMessage error:', error);
     socket.emit('error', { message: 'فشل في إرسال الرسالة' });
   }
 });
+
+
 
     socket.on('markRead', async ({ messageIds = [] } = {}) => {
       try {
