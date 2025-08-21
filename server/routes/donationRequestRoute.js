@@ -1,8 +1,8 @@
+// server/routes/donationRequestRoute.js
 const express = require('express');
 const router = express.Router();
 
 const { protect } = require('../middlewares/authMiddleware');
-const { upload } = require('../middlewares/upload');
 const {
   createDonationRequest,
   listDonationRequests,
@@ -11,13 +11,16 @@ const {
   deleteDonationRequest,
 } = require('../controllers/donationRequestController');
 
-// يدعم رفع متعدد باسم الحقل 'files' مثل الفورم
-const uploadReqDocs = upload.fields([{ name: 'files', maxCount: 10 }]);
+/* استخدم الـ uploader الصحيح من middleware */
+const { uploadDonationReq } = require('../middlewares/upload');
+
+/* اسم الحقل في الـ FormData = 'files' */
+const uploadReqDocs = uploadDonationReq.fields([{ name: 'files', maxCount: 10 }]);
 
 router.get('/', listDonationRequests);
 router.get('/:id', getDonationRequest);
 
-router.post('/', protect, uploadReqDocs, createDonationRequest);
+router.post('/',  protect, uploadReqDocs, createDonationRequest);
 router.put('/:id', protect, uploadReqDocs, updateDonationRequest);
 router.delete('/:id', protect, deleteDonationRequest);
 

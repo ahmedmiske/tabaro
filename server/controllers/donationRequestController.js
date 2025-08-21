@@ -1,20 +1,20 @@
+// server/controllers/donationRequestController.js
 const DonationRequest = require('../models/DonationRequest');
 
 // ===== أدوات مساعدة =====
 const toBool = (v) => v === true || v === 'true' || v === 1 || v === '1';
-const toNum  = (v) =>
-  (v === '' || v === null || v === undefined ? null : Number(v));
+const toNum  = (v) => (v === '' || v === null || v === undefined ? null : Number(v));
 const toDate = (v) => {
   if (!v) return null;
   const d = new Date(v);
   return isNaN(d.getTime()) ? null : d;
 };
 
-// contactMethods[0][method] => [{method, number}, ...]  (أسلوب الأقواس)
+// contactMethods[0][method] => [{method, number}, ...]
 function parseBracketArray(body, root, fields) {
   const re = new RegExp(`^${root}\\[(\\d+)\\]\\[(${fields.join('|')})\\]$`);
-  const map = new Map(); // index => obj
-  for (const [key, val] of Object.entries(body || {})) {
+  const map = new Map();
+  for (const [key, val] of Object.entries(body)) {
     const m = key.match(re);
     if (!m) continue;
     const idx = Number(m[1]);
@@ -29,31 +29,7 @@ function parseBracketArray(body, root, fields) {
     .filter(o => Object.values(o).some(v => String(v || '').trim() !== ''));
 }
 
-// JSON أو مصفوفة جاهزة (مثل التبرع بالدم)
-function parseJsonArray(candidate, fields) {
-  try {
-    const arr = typeof candidate === 'string' ? JSON.parse(candidate) : candidate;
-    if (!Array.isArray(arr)) return [];
-    return arr
-      .map((raw) => {
-        const o = {};
-        fields.forEach((f) => { o[f] = (raw && raw[f]) ? String(raw[f]).trim() : ''; });
-        return o;
-      })
-      .filter((o) => fields.some((f) => String(o[f] || '').trim() !== ''));
-  } catch {
-    return [];
-  }
-}
-
-// Flex: جرّب JSON أولاً، ثم الأقواس
-function parseFlexible(body, root, fields) {
-  const jsonParsed = parseJsonArray(body?.[root], fields);
-  if (jsonParsed.length) return jsonParsed;
-  return parseBracketArray(body, root, fields);
-}
-
-// استخراج مسارات الملفات من multer بأي شكل
+// استخراج مسارات الملفات حسب نوع رفع multer في الراوتر
 function extractFiles(req) {
   // upload.fields([{ name: 'files' }])
   if (req.files?.files) return req.files.files.map(f => `/uploads/donationRequests/${f.filename}`);
@@ -64,7 +40,6 @@ function extractFiles(req) {
   return [];
 }
 
-// الحقول التي نُظهرها من المستخدم (الناشر)
 const PUBLISHER_SELECT = 'firstName lastName profileImage createdAt';
 
 // ===== إنشاء =====
@@ -74,13 +49,11 @@ exports.createDonationRequest = async (req, res) => {
     if (!userId) return res.status(401).json({ message: 'غير مصرح. سجل الدخول.' });
 
     const { category, type, description, place, deadline, isUrgent, amount, bloodType } = req.body;
-
     if (!category || !type) return res.status(400).json({ message: 'الرجاء تحديد المجال والنوع.' });
     if (!place) return res.status(400).json({ message: 'الرجاء تحديد الموقع (اسم المكان).' });
 
-    // ✅ الآن نقبل JSON أو أقواس (مثل الدم)
-    const contactMethods = parseFlexible(req.body, 'contactMethods', ['method', 'number']);
-    const paymentMethods = parseFlexible(req.body, 'paymentMethods', ['method', 'phone']);
+    const contactMethods = parseBracketArray(req.body, 'contactMethods', ['method', 'number']);
+    const paymentMethods = parseBracketArray(req.body, 'paymentMethods', ['method', 'phone']);
     const proofDocuments = extractFiles(req);
 
     const doc = await DonationRequest.create({
@@ -96,7 +69,7 @@ exports.createDonationRequest = async (req, res) => {
       contactMethods,
       paymentMethods,
       proofDocuments,
-      date: new Date(),
+      date: new Date()
     });
 
     const populated = await DonationRequest.findById(doc._id)
@@ -149,7 +122,7 @@ exports.listDonationRequests = async (req, res) => {
   }
 };
 
-// ===== واحد (تفاصيل) =====
+// ===== واحد =====
 exports.getDonationRequest = async (req, res) => {
   try {
     const doc = await DonationRequest.findById(req.params.id)
@@ -175,13 +148,11 @@ exports.updateDonationRequest = async (req, res) => {
     if ('isUrgent' in data) data.isUrgent = toBool(data.isUrgent);
     if ('place'    in data) data.place    = String(data.place || '').trim();
 
-    // مرن: JSON أو أقواس
-    const contactMethods = parseFlexible(req.body, 'contactMethods', ['method','number']);
-    const paymentMethods = parseFlexible(req.body, 'paymentMethods', ['method','phone']);
+    const contactMethods = parseBracketArray(req.body, 'contactMethods', ['method','number']);
+    const paymentMethods = parseBracketArray(req.body, 'paymentMethods', ['method','phone']);
     if (contactMethods.length) data.contactMethods = contactMethods;
     if (paymentMethods.length) data.paymentMethods = paymentMethods;
 
-    // ملفات جديدة؟ ندمج
     const newFiles = extractFiles(req);
     if (newFiles.length) {
       const current = await DonationRequest.findById(req.params.id).select('proofDocuments');

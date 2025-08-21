@@ -11,11 +11,10 @@ import {
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import ChatBox from '../components/ChatBox';
 import socket, { connectSocket } from '../socket';
-// (إن أردت الإبقاء على DocumentsGallery اتركه، لكننا سنعرض شبكة وثائق محلية أكثر صلابة أدناه)
-// import DocumentsGallery from '../components/DocumentsGallery';
 import './DonationRequestDetails.css';
 
-const API_ORIGIN = process.env.REACT_APP_API_ORIGIN || 'http://localhost:5000';
+
+
 
 /* ========= Helpers ========= */
 const formatAmount = (v) => {
@@ -33,7 +32,33 @@ const daysLeft = (deadline) => {
 };
 const asTel = (num) => `tel:${num || ''}`;
 const asWA  = (num) => `https://wa.me/${String(num || '').replace(/\D/g,'')}`;
-const absolutize = (u) => (u ? (/^https?:\/\//i.test(u) ? u : `${API_ORIGIN}${u.startsWith('/') ? u : `/${u}`}`) : null);
+
+/** توحيد الوثائق (documents الحديثة + proofDocuments القديمة) */
+const API_BASE = process.env.REACT_APP_API_ORIGIN || process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
+/** دمج documents (جديدة) + proofDocuments (قديمة) */
+const makeDocs = (don) => {
+  if (Array.isArray(don?.documents) && don.documents.length) {
+    return don.documents.map(d => {
+      const raw = String(d.url || '');
+      const absolute = /^https?:\/\//i.test(raw);
+      const url = absolute ? raw : `${API_BASE}${raw.startsWith('/') ? raw : `/${raw}`}`;
+      const name = d.originalName || d.filename || url.split('/').pop();
+      return { url, name, isPdf: /\.pdf($|\?)/i.test(url) };
+    });
+  }
+  if (Array.isArray(don?.proofDocuments) && don.proofDocuments.length) {
+    return don.proofDocuments.map((v) => {
+      const s = String(v || '');
+      const absolute = /^https?:\/\//i.test(s);
+      const isAlreadyUploads = s.startsWith('/uploads/');
+      const url = absolute ? s : `${API_BASE}${(isAlreadyUploads ? s : `/uploads/donationRequests/${s}`).replace(/\/\/+/g,'/')}`;
+      const name = url.split('/').pop();
+      return { url, name, isPdf: /\.pdf($|\?)/i.test(url) };
+    });
+  }
+  return [];
+};
 
 const getCurrentUserId = () => {
   try {
@@ -93,28 +118,25 @@ const DonationRequestDetails = () => {
     [currentUser]
   );
 
-  // مفاتيح تخزين محلي لتنشيط التنبيه وإظهار التواصل بعد أول تأكيد
+  // مفاتيح تخزين محلي لعرض إشعار دائم بعد التبرع
   const LS_CONFIRMED_KEY = `dr:${id}:myConfirm`;
   const LS_BANNER_HIDE   = `dr:${id}:hideBanner`;
 
-  // تُفتح وسائل التواصل بعد أول تأكيد للمستخدم (في الجلسة الحالية أو لاحقاً)
+  // تُفتح وسائل التواصل بعد أول تأكيد للمستخدم
   const [contactForceOpen, setContactForceOpen] = useState(false);
 
-  /* Socket connect + diagnostics */
+  /* Socket connect */
   useEffect(() => {
     if (!currentToken) return;
     connectSocket(currentToken);
 
-    const onConnect = () => {};
     const onConnectError = (e) => console.error('[socket] connect_error:', e?.message || e);
     const onError = (payload) => console.error('[socket] error:', payload);
 
-    socket.on('connect', onConnect);
     socket.on('connect_error', onConnectError);
     socket.on('error', onError);
 
     return () => {
-      socket.off('connect', onConnect);
       socket.off('connect_error', onConnectError);
       socket.off('error', onError);
     };
@@ -151,17 +173,14 @@ const DonationRequestDetails = () => {
         return donorId && String(donorId) === String(currentUserId);
       });
       setExistingOffer(mine || null);
-    } catch (e) {
-      console.error('[checkExistingOffer] error', e);
-    }
+    } catch {}
   }, [id, currentUserId]);
 
   useEffect(() => {
     if (!currentUserId) return;
-    if (fetchedOfferOnce.current) return;   // يمنع التكرار في StrictMode
+    if (fetchedOfferOnce.current) return;
     fetchedOfferOnce.current = true;
 
-    // استرجاع حالة التأكيد السابقة من التخزين المحلي
     const confirmedBefore = localStorage.getItem(LS_CONFIRMED_KEY) === '1';
     if (confirmedBefore) {
       setContactForceOpen(true);
@@ -169,7 +188,6 @@ const DonationRequestDetails = () => {
         setInfoMessage('ℹ️ لقد تم إشعار صاحب الطلب بتبرعكم، ويمكنكم الآن التواصل عبر الوسائل المتاحة.');
       }
     }
-
     checkExistingOffer();
   }, [checkExistingOffer, currentUserId, LS_CONFIRMED_KEY, LS_BANNER_HIDE]);
 
@@ -180,51 +198,12 @@ const DonationRequestDetails = () => {
   const ownerId = typeof ownerRef === 'object' ? ownerRef?._id : ownerRef;
   const ownerEmbedded = typeof ownerRef === 'object' ? ownerRef : null;
 
-  const [ownerExtra, setOwnerExtra] = useState(null);
-  useEffect(() => {
-    setOwnerExtra(null);
-    const fetchOwner = async () => {
-      if (ownerEmbedded || !ownerId) return;
-      const tryFetch = async (path) => {
-        try {
-          const r = await fetchWithInterceptors(path);
-          if (r.ok) return r.body?.data ?? r.body;
-        } catch {}
-        return null;
-      };
-      let u = await tryFetch(`/api/users/${ownerId}`);
-      if (!u) u = await tryFetch(`/api/users/profile/${ownerId}`);
-      if (u) setOwnerExtra(u);
-    };
-    fetchOwner();
-  }, [ownerId, ownerEmbedded]);
-
-  const publisher = ownerEmbedded || ownerExtra;
+  const publisher = ownerEmbedded || null;
   const ownerName = publisher
     ? `${publisher.firstName || ''} ${publisher.lastName || ''}`.trim() || 'مستخدم'
     : 'مستخدم';
   const ownerJoin = publisher?.createdAt ? new Date(publisher.createdAt).toLocaleDateString('ar-MA') : null;
-  const ownerAvatar = publisher?.profileImage
-    ? absolutize(
-        publisher.profileImage.startsWith('/uploads')
-          ? publisher.profileImage
-          : `/uploads/profileImages/${publisher.profileImage}`
-      )
-    : null;
-
-  /* وثائق الطلب — تصحيح العرض (صور/PDF) */
-  const docs = useMemo(() => {
-    const arr = Array.isArray(req?.proofDocuments) ? req.proofDocuments : [];
-    return arr
-      .map((raw) => {
-        const url = absolutize(raw);
-        if (!url) return null;
-        const name = String(url).split('/').pop();
-        const isPdf = /\.pdf($|\?)/i.test(url);
-        return { url, name, isPdf };
-      })
-      .filter(Boolean);
-  }, [req]);
+  const ownerAvatar = publisher?.profileImage || null;
 
   /* Derived */
   const left = daysLeft(req?.deadline);
@@ -238,8 +217,10 @@ const DonationRequestDetails = () => {
   const phone    = contactMethods.find(c => c.method === 'phone')?.number;
   const whatsapp = contactMethods.find(c => c.method === 'whatsapp')?.number;
 
+  const docs = makeDocs(req);
+  const offerLocked = ['pending', 'accepted', 'in_progress'].includes(existingOffer?.status || '');
+
   const toggleSection = (name) => {
-    // لا نحذف رسالة المتبرّع الدائمة من التخزين المحلي
     setConfirmSuccess('');
     setReportSuccess('');
     setActiveSection((prev) => (prev === name ? null : name));
@@ -267,14 +248,13 @@ const DonationRequestDetails = () => {
   const submitConfirmation = async (e) => {
     e.preventDefault();
     if (!requireAuth()) return;
-    if (submittingConfirm) return;
 
-    // 👇 تنبيه ومنع “تبرّع ثانٍ” لنفس الطلب من نفس الحساب
-    if (existingOffer) {
-      setInfoMessage('ℹ️ لقد قمت بتأكيد تبرّع سابقًا لهذا الطلب. لا يمكنك إرسال تأكيدٍ آخر.');
-      setActiveSection(null);
+    // منع التبرع الثاني مع وجود عرض جارٍ/مقبول
+    if (offerLocked) {
+      setInfoMessage('ℹ️ لديك تأكيد سابق جارٍ أو مقبول لهذا الطلب. لا يمكن إرسال تأكيد جديد الآن.');
       return;
     }
+    if (submittingConfirm) return;
 
     setSubmittingConfirm(true);
     setConfirmSuccess('');
@@ -290,14 +270,13 @@ const DonationRequestDetails = () => {
 
       const res = await fetchWithInterceptors('/api/donation-request-confirmations', {
         method: 'POST',
-        body: fd, // لا تضبط Content-Type يدوياً
+        body: fd,
       });
       if (!res.ok) throw new Error(res.body?.message || 'تعذر إرسال التأكيد');
 
       const confirmationId =
         res.body?.data?._id || res.body?._id || res.body?.confirmation?._id || null;
 
-      // Socket notify فقط — السيرفر سينشئ أيضاً إشعارًا للمتبرّع (انظر الكنترولر بالأسفل)
       if (recipientId) {
         const donorName = (currentUser?.firstName || 'متبرّع');
         socket.emit('sendMessage', {
@@ -309,11 +288,10 @@ const DonationRequestDetails = () => {
         });
       }
 
-      // ثبّت حالة "تبرّعت سابقاً" لفتح وسائل التواصل دائماً وإظهار التنبيه في الزيارات القادمة
       localStorage.setItem(LS_CONFIRMED_KEY, '1');
       setContactForceOpen(true);
 
-      setConfirmSuccess('✅ تم إرسال تأكيد تبرعك. شكرًا لك!');
+      setConfirmSuccess('✅ تم إرسال تأكيد تبرعك. شكراً لك!');
       if (localStorage.getItem(LS_BANNER_HIDE) !== '1') {
         setInfoMessage('ℹ️ لقد تم إشعار صاحب الطلب بتبرعكم، ويمكنكم الآن التواصل عبر الوسائل المتاحة.');
       }
@@ -321,7 +299,7 @@ const DonationRequestDetails = () => {
       setConfirmMsg('');
       setConfirmAmount('');
       setEvidenceFiles([]);
-      await checkExistingOffer(); // سيصبح existingOffer موجودًا، وبالتالي سيُمنع التبرع الثاني
+      await checkExistingOffer();
       setActiveSection(null);
     } catch (e2) {
       console.error('[submitConfirmation] error:', e2);
@@ -403,14 +381,14 @@ const DonationRequestDetails = () => {
             <Badge bg={req.isUrgent ? 'danger' : 'dark'}>
               {req.isUrgent ? 'مستعجل' : 'عادي'}
             </Badge>
-            {daysLeft(req?.deadline) !== null && (
+            {left !== null && (
               <Badge bg={left < 0 ? 'dark' : left <= 3 ? 'warning' : 'info'}>
                 {left < 0 ? 'منتهي' : `تبقّى ${left} يومًا`}
               </Badge>
             )}
           </div>
 
-          {/* Publisher card (hide avatar for owner) */}
+          {/* Publisher card */}
           <div className={`publisher-card mb-3 ${isOwner ? 'no-avatar' : ''}`}>
             {!isOwner && (
               ownerAvatar ? (
@@ -422,16 +400,14 @@ const DonationRequestDetails = () => {
                 />
               ) : (
                 <div className="pub-avatar fallback">
-                  {(publisher?.firstName?.[0] || '؟').toUpperCase()}
-                  {(publisher?.lastName?.[0] || '').toUpperCase()}
+                  {(ownerName?.split(' ')[0]?.[0] || '؟').toUpperCase()}
+                  {(ownerName?.split(' ')[1]?.[0] || '').toUpperCase()}
                 </div>
               )
             )}
             <div className="flex-grow-1">
               <div className="d-flex align-items-center gap-2">
-                <div className="pub-name">
-                  {publisher ? `${publisher.firstName || ''} ${publisher.lastName || ''}`.trim() || 'مستخدم' : 'مستخدم'}
-                </div>
+                <div className="pub-name">{ownerName}</div>
                 {isOwner && <Badge bg="info">أنت صاحب الطلب</Badge>}
               </div>
               <div className="pub-meta">
@@ -456,7 +432,7 @@ const DonationRequestDetails = () => {
 
             <ListGroup.Item><strong>آخر مهلة:</strong> {fmtDate(req.deadline)}</ListGroup.Item>
 
-            {/* وسائل التواصل: تظهر للمالك أو بعد أول تأكيد (سابق أو حالي) */}
+            {/* وسائل التواصل */}
             {(isOwner || !!existingOffer || contactForceOpen) ? (
               contactMethods.length > 0 ? (
                 <ListGroup.Item>
@@ -487,10 +463,9 @@ const DonationRequestDetails = () => {
 
             <ListGroup.Item><strong>تاريخ الإنشاء:</strong> {fmtDate(req.createdAt)}</ListGroup.Item>
 
-            {/* 🔧 عرض الوثائق بطريقة ثابتة (صور/PDF) */}
             {!!docs.length && (
               <ListGroup.Item>
-                <h6 className="mb-2 fw-bold">الوثائق الداعمة</h6>
+                <strong>📎 وثائق داعمة:</strong>
                 <div className="docs-grid mt-2">
                   {docs.map((d, idx) => (
                     <div className="doc-tile" key={idx}>
@@ -518,7 +493,7 @@ const DonationRequestDetails = () => {
             )}
           </ListGroup>
 
-          {/* Persistent info banner for donor */}
+          {/* Banner */}
           {infoMessage && (
             <Alert
               variant="info"
@@ -541,7 +516,7 @@ const DonationRequestDetails = () => {
             </Alert>
           )}
 
-          {/* Icon toolbar */}
+          {/* Toolbar */}
           <div className="icon-toolbar d-flex gap-2 justify-content-center my-3">
             {!isOwner && !expired && (
               <button
@@ -550,6 +525,7 @@ const DonationRequestDetails = () => {
                 title="تأكيد التبرع"
                 onClick={() => toggleSection('confirm')}
                 aria-label="تأكيد التبرع"
+                disabled={offerLocked}
               >
                 <strong>💚</strong>
               </button>
@@ -594,7 +570,7 @@ const DonationRequestDetails = () => {
             </button>
           </div>
 
-          {/* Quick actions (owner or anyone بعد ظهور وسائل التواصل) */}
+          {/* Quick actions */}
           {(isOwner || !!existingOffer || contactForceOpen) && (
             <div className="d-flex flex-wrap gap-2 mb-3 mt-3">
               {phone && (
@@ -614,6 +590,13 @@ const DonationRequestDetails = () => {
           {activeSection === 'confirm' && !isOwner && !expired && (
             <div className="action-panel">
               <h6 className="fw-bold mb-3">تأكيد التبرع</h6>
+
+              {offerLocked && (
+                <Alert variant="warning" className="mb-3">
+                  لديك تأكيد سابق على هذا الطلب (الحالة: {existingOffer?.status || '—'}). لا يمكنك إرسال تأكيد جديد الآن.
+                </Alert>
+              )}
+
               {confirmSuccess && <Alert variant="success">{confirmSuccess}</Alert>}
 
               <Form onSubmit={submitConfirmation}>
@@ -662,8 +645,8 @@ const DonationRequestDetails = () => {
                 </Alert>
 
                 <div className="d-flex gap-2">
-                  <Button type="submit" variant="success" disabled={submittingConfirm || !!existingOffer}>
-                    {submittingConfirm ? 'جارٍ الإرسال…' : (!!existingOffer ? 'لديك تأكيد سابق' : 'إرسال التأكيد')}
+                  <Button type="submit" variant="success" disabled={submittingConfirm || offerLocked}>
+                    {submittingConfirm ? 'جارٍ الإرسال…' : 'إرسال التأكيد'}
                   </Button>
                   <Button variant="outline-secondary" onClick={() => setActiveSection(null)}>إغلاق</Button>
                 </div>

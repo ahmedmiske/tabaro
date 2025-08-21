@@ -3,14 +3,30 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
+/* الجذر الوحيد لكل الرفع */
+const UP_ROOT = path.join(__dirname, '..', 'uploads');
+
 function ensureDir(dir) {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+}
+
+/* أنشئ شجرة المجلدات مرة عند تشغيل السيرفر */
+function ensureUploadTree() {
+  ensureDir(UP_ROOT);
+  [
+    'donationRequests',              // طلبات التبرع العامة
+    'blood-requests',                // طلبات الدم
+    'donationRequestConfirmations',  // تأكيدات/عروض طلبات التبرع العامة
+    'confirmationProofs',            // أي إثباتات عامة أخرى
+    'confirmations',                 // (إن أردتها لاستخدام آخر)
+    'profileImages',                 // صور الملف الشخصي
+  ].forEach((d) => ensureDir(path.join(UP_ROOT, d)));
 }
 
 function makeStorage(subFolder) {
   return multer.diskStorage({
     destination: (req, file, cb) => {
-      const dir = path.join(__dirname, '..', 'uploads', subFolder);
+      const dir = path.join(UP_ROOT, subFolder);
       ensureDir(dir);
       cb(null, dir);
     },
@@ -18,9 +34,9 @@ function makeStorage(subFolder) {
       const ext = path.extname(file.originalname);
       const base = path
         .basename(file.originalname, ext)
-        .replace(/\s+/g, '_')
+        .replace(/\s+/g, '-')
         .slice(0, 60);
-      cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}-${base}${ext}`);
+      cb(null, `${Date.now()}-${Math.round(Math.random()*1e9)}-${base}${ext}`);
     },
   });
 }
@@ -32,22 +48,20 @@ function makeUploader(subFolder) {
   });
 }
 
-// 🔹 رافع عام (لو احتجته)
-const upload = makeUploader('misc');
-
-// 🔹 لطلبات الدم (عدّل أسماء الحقول حسب تطبيقك)
-const uploadBloodDocs = makeUploader('blood')
-  .fields([
-    { name: 'proofDocuments', maxCount: 10 },
-    { name: 'medicalReports',  maxCount: 10 },
-  ]);
-
-// 🔹 لتأكيدات التبرّع العامة (رفع متعدد بنفس اسم الحقل "files")
-const uploadConfirmationDocs = makeUploader('confirmations')
-  .array('files', 10);
+/* رافعات جاهزة حسب النوع */
+const uploadDonationReq       = makeUploader('donationRequests');
+const uploadDonationConfirm   = makeUploader('donationRequestConfirmations');
+const uploadBloodReq          = makeUploader('blood-requests');
+const uploadConfirmationProofs= makeUploader('confirmationProofs');
 
 module.exports = {
-  upload,                  // إن احتجت الاستعمال اليدوي
-  uploadBloodDocs,         // bloodRequestRoute
-  uploadConfirmationDocs,  // donationRequestConfirmationRoutes
+  // مهم: التصدير بالاسم الصحيح ليستوردها server.js
+  ensureUploadTree,
+  // رافعات
+  uploadDonationReq,
+  uploadDonationConfirm,
+  uploadBloodReq,
+  uploadConfirmationProofs,
+  // يبقى متاحًا إن احتجته
+  UP_ROOT,
 };
