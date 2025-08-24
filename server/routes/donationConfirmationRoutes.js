@@ -1,35 +1,36 @@
-const express = require('express');
+// server/routes/donationConfirmationRoutes.js
+const express = require("express");
 const router = express.Router();
-const donationConfirmationController = require('../controllers/donationConfirmationController');
-const { protect } = require('../middlewares/authMiddleware');
 
-// ⏺️ إرسال عرض تبرع (المتبرع فقط)
-router.post('/', protect, donationConfirmationController.createDonationConfirmation);
+const {
+  createDonationConfirmation,
+  acceptDonationConfirmation,
+  rejectDonationConfirmation,
+  markAsFulfilled,
+  rateDonation,
+  getMyDonationOffers,
+  getMySentOffers,
+  getOffersByRequestId,
+  cancelDonationConfirmation,
+} = require("../controllers/donationConfirmationController");
 
-// ✅ قبول التبرع (من صاحب الطلب)
-router.patch('/:id/accept', protect, donationConfirmationController.acceptDonationConfirmation);
+const { protect } = require("../middlewares/authMiddleware");
 
-// ❌ رفض التبرع (من صاحب الطلب)
-router.patch('/:id/reject', protect, donationConfirmationController.rejectDonationConfirmation);
+// إنشاء عرض تبرع (دم)
+router.post("/", protect, createDonationConfirmation);
 
-// ✔️ تأكيد أن التبرع تم فعليًا
-router.patch('/:id/fulfill', protect, donationConfirmationController.markAsFulfilled);
+// قبول/رفض/تنفيذ/تقييم (ما زالت خاصة «الدم»)
+router.patch("/:id/accept", protect, acceptDonationConfirmation);
+router.patch("/:id/reject", protect, rejectDonationConfirmation);
+router.patch("/:id/fulfill", protect, markAsFulfilled);
+router.patch("/:id/rate", protect, rateDonation);
 
-// ⭐ إرسال تقييم
-router.patch('/:id/rate', protect, donationConfirmationController.rateDonation);
+// استعلامات
+router.get("/mine", protect, getMyDonationOffers);
+router.get("/request/:requestId", protect, getOffersByRequestId);
+router.get("/sent", protect, getMySentOffers);
 
-// 📩 جلب العروض الموجهة للمستخدم الحالي
-router.get('/mine', protect, donationConfirmationController.getMyDonationOffers);
-
-// 📥 جلب العروض حسب الطلب
-router.get('/request/:requestId', protect, donationConfirmationController.getOffersByRequestId);
-
-// 📤 العروض التي قدّمها المستخدم كمُتبرع
-router.get('/sent', protect, donationConfirmationController.getMySentOffers);
-
-// ❌ إلغاء عرض التبرع (إذا لم يُقبل بعد)
-router.delete('/:id', protect, donationConfirmationController.cancelDonationConfirmation);
+// إلغاء
+router.delete("/:id", protect, cancelDonationConfirmation);
 
 module.exports = router;
-// This file defines the routes for donation confirmations, including creating, accepting, rejecting, fulfilling, rating, and fetching donation offers.
-// It uses the `protect` middleware to ensure that only authenticated users can access these routes.

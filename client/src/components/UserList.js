@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button, Modal } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom'; // استيراد هوك useNavigate للتوجيه
 import './UserList.css';
 import Title from './Title';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
@@ -9,23 +8,15 @@ function UserList({ onEdit, onDelete }) {
   const [userList, setUserList] = useState([]);
   const [showConfirm, setShowConfirm] = useState(false);
   const [userToDelete, setUserToDelete] = useState(null);
-  const navigate = useNavigate(); // 
 
-  const getAllUsers = () => {
-    fetchWithInterceptors('/api/users', {
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    })
-  
-    .then((data) => setUserList(data))
-    .catch((error) => {
+  const getAllUsers = async () => {
+    try {
+      const resp = await fetchWithInterceptors('/api/users');
+      setUserList(Array.isArray(resp.body?.result) ? resp.body.result : []);
+    } catch (error) {
       console.error('Error fetching users:', error.message);
-      if (error.message.includes('Unauthorized')) {
-       console.error('this is not authorized', error.message);
-      }
-    });
-
+      // 401/403 سيتم رميها من fetchWithInterceptors؛ لا نعيد التوجيه من هنا
+    }
   };
 
   useEffect(() => {
@@ -37,14 +28,16 @@ function UserList({ onEdit, onDelete }) {
     setShowConfirm(true);
   };
 
-  const confirmDelete = () => {
-    onDelete(userToDelete.id)
-      .then(() => {
-        getAllUsers(); // Update the list after deletion
-        setShowConfirm(false);
-        setUserToDelete(null);
-      })
-      .catch((error) => console.error('Error deleting user:', error));
+  const confirmDelete = async () => {
+    if (!userToDelete) return;
+    try {
+      await onDelete(userToDelete._id);
+      await getAllUsers();
+      setShowConfirm(false);
+      setUserToDelete(null);
+    } catch (e) {
+      console.error('Error deleting user:', e);
+    }
   };
 
   return (
@@ -56,30 +49,26 @@ function UserList({ onEdit, onDelete }) {
             <th>الاسم</th>
             <th>الاسم العائلي</th>
             <th>الهاتف</th>
-            <th>الواتساب</th>
             <th>العنوان</th>
             <th>البريد الإلكتروني</th>
             <th>نوع المستخدم</th>
             <th>اسم المستخدم</th>
-            <th>كلمة المرور</th>
             <th>الإجراءات</th>
           </tr>
         </thead>
         <tbody>
-          {userList.map(user => (
-            <tr key={user.id}>
-              <td>{user.firstName}</td>
-              <td>{user.lastName}</td>
-              <td>{user.phoneNumber}</td>
-              <td>test</td>
-              <td>{user.address}</td>
-              <td>{user.email}</td>
-              <td>{user.userType}</td>
-              <td>{user.username}</td>
-              <td>{'****'}</td>
+          {userList.map(u => (
+            <tr key={u._id}>
+              <td>{u.firstName}</td>
+              <td>{u.lastName}</td>
+              <td>{u.phoneNumber}</td>
+              <td>{u.address}</td>
+              <td>{u.email}</td>
+              <td>{u.userType}</td>
+              <td>{u.username}</td>
               <td>
-                <Button variant="warning" onClick={() => onEdit(user)}>تعديل</Button>{' '}
-                <Button variant="danger" onClick={() => handleDeleteClick(user)}>حذف</Button>
+                <Button size="sm" variant="warning" onClick={() => onEdit(u)}>تعديل</Button>{' '}
+                <Button size="sm" variant="danger" onClick={() => handleDeleteClick(u)}>حذف</Button>
               </td>
             </tr>
           ))}
@@ -87,19 +76,11 @@ function UserList({ onEdit, onDelete }) {
       </Table>
 
       <Modal show={showConfirm} onHide={() => setShowConfirm(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>تأكيد الحذف</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          هل أنت متأكد أنك تريد حذف المستخدم؟
-        </Modal.Body>
+        <Modal.Header closeButton><Modal.Title>تأكيد الحذف</Modal.Title></Modal.Header>
+        <Modal.Body>هل أنت متأكد أنك تريد حذف المستخدم؟</Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowConfirm(false)}>
-            إلغاء
-          </Button>
-          <Button variant="danger" onClick={confirmDelete}>
-            حذف
-          </Button>
+          <Button variant="secondary" onClick={() => setShowConfirm(false)}>إلغاء</Button>
+          <Button variant="danger" onClick={confirmDelete}>حذف</Button>
         </Modal.Footer>
       </Modal>
     </div>

@@ -1,11 +1,12 @@
 // Add multer for multipart/form-data handling
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const fs = require("fs");
+const path = require("path");
+
+const multer = require("multer");
 // Ensure the uploads directory exists
-const uploadDir = path.join(__dirname, '../..', 'uploads', 'blood-requests');
+const uploadDir = path.join(__dirname, "../..", "uploads", "blood-requests");
 if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
+  fs.mkdirSync(uploadDir, { recursive: true });
 }
 // Configure multer storage and file validation
 const storage = multer.diskStorage({
@@ -13,9 +14,9 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     cb(null, uniqueSuffix + path.extname(file.originalname));
-  }
+  },
 });
 
 const fileFilter = (req, file, cb) => {
@@ -25,7 +26,7 @@ const fileFilter = (req, file, cb) => {
   if (allowedTypes.test(ext)) {
     cb(null, true);
   } else {
-    cb(new Error('Only images and PDF files are allowed!'), false);
+    cb(new Error("Only images and PDF files are allowed!"), false);
   }
 };
 

@@ -1,25 +1,40 @@
-const User = require('../models/user');
-const asyncHandler = require('../utils/asyncHandler');
-const { generateToken } = require('../utils/otpUtils');
-const bcrypt = require('bcryptjs');
-const path = require('path');
+// server/controllers/userController.js
+const bcrypt = require("bcryptjs");
+const User = require("../models/user");
+const asyncHandler = require("../utils/asyncHandler");
+const { generateToken } = require("../utils/otpUtils");
 
-// @desc Register a new user
+// @desc Register a new user (بعد verify-otp)
 // @route POST /api/users
-// @access Public
+// @access Protected by protectRegisterUser
 const registerUser = asyncHandler(async (req, res) => {
   const {
-    firstName, lastName, email, password, username, userType,
-    institutionName, institutionLicenseNumber, institutionAddress,
-    institutionEstablishmentDate, institutionWebsite, address, phoneNumber
+    firstName,
+    lastName,
+    email, // ممكن يجي أو لا
+    password,
+    username,
+    userType,
+    institutionName,
+    institutionLicenseNumber,
+    institutionAddress,
+    institutionEstablishmentDate,
+    institutionWebsite,
+    address,
+    phoneNumber,
   } = req.body;
 
-  const profileImage = req.file?.filename; // ✅ استخرج اسم الملف من multer
+  if (!phoneNumber) {
+    res.status(400);
+    throw new Error("رقم الهاتف مطلوب للتسجيل");
+  }
+
+  const profileImage = req.file?.filename;
 
   const newUser = new User({
     firstName,
     lastName,
-    email,
+    email: email || null, // ✅ نخليه null لو ما جاش
     username,
     password,
     userType,
@@ -30,32 +45,33 @@ const registerUser = asyncHandler(async (req, res) => {
     institutionWebsite,
     address,
     phoneNumber,
-    profileImage, // ✅ أضف الصورة إلى البيانات
-    status: 'verified'
+    profileImage,
+    status: "verified", // مؤقتًا لحد ما نربط OTP
   });
 
   const savedUser = await newUser.save();
   res.status(201).json({
     _id: savedUser._id,
-    name: savedUser.firstName + ' ' + savedUser.lastName,
-    email: savedUser.email,
-    token: generateToken(savedUser._id)
+    name: savedUser.firstName + " " + savedUser.lastName,
+    phoneNumber: savedUser.phoneNumber,
+    email: savedUser.email, // ممكن يرجع null
+    token: generateToken(savedUser._id),
   });
 });
 
 
-
-// @desc    Auth user & get token
+// @desc    Auth user & get token (تسجيل دخول بكلمة مرور - اختياري)
 // @route   POST /api/users/login
 // @access  Public
 const authUser = asyncHandler(async (req, res) => {
   const { loginInput, password } = req.body;
 
+  // ✅ ندور بالهاتف أو اليوزرنيم فقط
   const user = await User.findOne({
-    $or: [{ username: loginInput }, { phoneNumber: loginInput }]
+    $or: [{ username: loginInput }, { phoneNumber: loginInput }],
   });
 
-  if (user && await bcrypt.compare(password, user.password)) {
+  if (user && (await bcrypt.compare(password, user.password))) {
     res.json({
       token: generateToken(user._id),
       user: {
@@ -64,123 +80,130 @@ const authUser = asyncHandler(async (req, res) => {
         lastName: user.lastName,
         username: user.username,
         phoneNumber: user.phoneNumber,
-        email: user.email,
+        email: user.email || null, // ممكن null
         userType: user.userType,
-        profileImage: user.profileImage || '' // ✅ 
-      }
+        profileImage: user.profileImage || "",
+      },
     });
   } else {
     res.status(400);
-    throw new Error('Invalid email or password');
+    throw new Error("رقم الهاتف أو كلمة المرور غير صحيحة");
   }
 });
 
 
 // @desc    Get all users
 // @route   GET /api/users
-// @access  Private
+// @access  Private (admin)
 const getUsers = asyncHandler(async (req, res) => {
-    const page = Number(req.query.page) || 1;
-    const limit = Number(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
+  const page = Math.max(1, Number(req.query.page) || 1);
+  const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 10));
+  const skip = (page - 1) * limit;
 
-    const total = await User.countDocuments({});
-    const users = await User.find({})
-        .skip(skip)
-        .limit(limit);
+  const [total, users] = await Promise.all([
+    User.countDocuments({}),
+    User.find({}).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+  ]);
 
-    res.json({
-        result: users,
-        page,
-        pages: Math.ceil(total / limit),
-        total
-    });
+  res.json({ result: users, page, pages: Math.ceil(total / limit), total });
 });
 
 // @desc    Get user profile
 // @route   GET /api/users/profile
 // @access  Private
 const getUser = asyncHandler(async (req, res) => {
-    res.json(req.user);
+  res.json(req.user);
 });
 
-// @desc    Update user information
+// @desc    Update user information (whitelist)
 // @route   PUT /api/users/:id
 // @access  Private
 const updateUser = asyncHandler(async (req, res) => {
-    const user = req.user;
+  const user = req.user;
+  if (!user) {
+    res.status(404);
+    throw new Error("User not found");
+  }
 
-    if (user) {
-        user.firstName = req.body.firstName || user.firstName;
-        user.lastName = req.body.lastName || user.lastName;
-        // user.email = req.body.email || user.email;
-        // user.username = req.body.username || user.username;
-        // user.userType = req.body.userType || user.userType;
-        user.institutionName = req.body.institutionName || user.institutionName;
-        user.institutionLicenseNumber = req.body.institutionLicenseNumber || user.institutionLicenseNumber;
-        user.institutionAddress = req.body.institutionAddress || user.institutionAddress;
-        user.institutionEstablishmentDate = req.body.institutionEstablishmentDate || user.institutionEstablishmentDate;
-        user.institutionWebsite = req.body.institutionWebsite || user.institutionWebsite;
-        user.address = req.body.address || user.address;
-        // user.phoneNumber = req.body.phoneNumber || user.phoneNumber;
+  const allowed = [
+    "firstName",
+    "lastName",
+    "institutionName",
+    "institutionLicenseNumber",
+    "institutionAddress",
+    "institutionEstablishmentDate",
+    "institutionWebsite",
+    "address",
+  ];
 
-        await user.save();
-        res.json(user);
-    } else {
-        res.status(404);
-        throw new Error('User not found');
-    }
+  for (const k of allowed) {
+    if (k in req.body) user[k] = req.body[k];
+  }
+
+  if (req.file?.filename) user.profileImage = req.file.filename;
+
+  await user.save();
+  res.json(user);
 });
 
 // @desc    Change user password
 // @route   PUT /api/users/change-password
 // @access  Private
 const changePassword = asyncHandler(async (req, res) => {
-    const user = req.user;
+  const { currentPassword, newPassword } = req.body;
+  const freshUser = await User.findById(req.user._id).select("+password");
+  if (!freshUser) {
+    res.status(404);
+    throw new Error("User not found");
+  }
 
-    if (user && await bcrypt.compare(req.body.currentPassword, user.password)) {
-        user.password = req.body.newPassword; // it will be hashed in pre save
-        await user.save();
-        res.json({ message: 'Password updated successfully' });
-    } else {
-        res.status(400);
-        throw new Error('Current password is incorrect');
-    }
+  const ok = await freshUser.matchPassword(currentPassword);
+  if (!ok) {
+    res.status(400);
+    throw new Error("Current password is incorrect");
+  }
+
+  freshUser.password = newPassword;
+  await freshUser.save();
+  res.json({ message: "Password updated successfully" });
 });
 
-// reset password
-// @desc    Reset user password
+// @desc    Reset user password (محمية بتوكن تسجيل - protectRegisterUser)
 // @route   PUT /api/users/reset-password
-// @access  private
+// @access  Private (special)
 const resetPassword = asyncHandler(async (req, res) => {
-    const { phoneNumber, newPassword } = req.body;
-
-    const user = await User.findOne({ phoneNumber });
-    if (user) {
-        user.password = newPassword; // it will be hashed in pre save
-        await user.save();
-        res.json({ 
-            message: 'Password reset successfully',
-            token: generateToken(user._id),
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-        });
-    } else {
-        res.status(400);
-        throw new Error('User not found');
-    }
-
+  const { phoneNumber, newPassword } = req.body;
+  const user = await User.findOne({ phoneNumber }).select("+password");
+  if (!user) {
+    res.status(400);
+    throw new Error("User not found");
+  }
+  user.password = newPassword;
+  await user.save();
+  res.json({
+    message: "Password reset successfully",
+    token: generateToken(user._id),
+    _id: user._id,
+    name: user.firstName + " " + (user.lastName || ""),
+    email: user.email,
+  });
 });
-
 
 // @desc    Delete user profile
 // @route   DELETE /api/users/profile
 // @access  Private
 const deleteUser = asyncHandler(async (req, res) => {
-    const user = req.user;
-    await user.remove();
-    res.json({ message: 'User profile deleted' });
+  await User.deleteOne({ _id: req.user._id });
+  res.json({ message: "User profile deleted" });
 });
 
-module.exports = { registerUser, authUser, getUsers, updateUser, getUser, changePassword, deleteUser, resetPassword };
+module.exports = {
+  registerUser,
+  authUser,
+  getUsers,
+  updateUser,
+  getUser,
+  changePassword,
+  deleteUser,
+  resetPassword,
+};

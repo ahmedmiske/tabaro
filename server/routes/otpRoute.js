@@ -1,6 +1,10 @@
-const express = require('express');
-const { sendOtp, verifyOTP } = require('../controllers/otpController');
-const { sendOTPMiddleware, verifyOTPMiddleware } = require('../middlewares/otpMiddleware');
+const express = require("express");
+
+const { sendOtp, verifyOTP } = require("../controllers/otpController");
+const {
+  sendOTPMiddleware,
+  verifyOTPMiddleware,
+} = require("../middlewares/otpMiddleware");
 
 const router = express.Router();
 
@@ -9,7 +13,7 @@ const router = express.Router();
  * tags:
  *   name: OTP
  *   description: OTP operations
-*/
+ */
 
 /**
  * @swagger
@@ -23,7 +27,7 @@ const router = express.Router();
  *           required: true
  *           description: The user's phone number
  *           example: 36363636
- * 
+ *
  *     VerifyOTPInput:
  *       allOf:
  *         - $ref: '#/components/schemas/OTPInput'
@@ -34,7 +38,7 @@ const router = express.Router();
  *               required: true
  *               description: The OTP sent to the user's phone number
  *               example: 123456
- * 
+ *
  *   requestBodies:
  *     sendOTPInput:
  *       description: Input data for sending OTP
@@ -69,11 +73,7 @@ const router = express.Router();
  *       500:
  *         description: Internal server error
  */
-router.post(
-    '/send-otp',
-    sendOTPMiddleware,
-    sendOtp
-);
+router.post("/send-otp", sendOTPMiddleware, sendOtp);
 
 /**
  * @swagger
@@ -92,10 +92,6 @@ router.post(
  *       500:
  *         description: Internal server error
  */
-router.post(
-    '/verify-otp',
-    verifyOTPMiddleware,
-    verifyOTP
-);
+router.post("/verify-otp", verifyOTPMiddleware, verifyOTP);
 
 module.exports.otpRoutes = router;

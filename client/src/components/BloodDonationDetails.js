@@ -6,9 +6,9 @@ import {
   OverlayTrigger, Tooltip
 } from 'react-bootstrap';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
-import ChatBox from '../components/ChatBox';
+import ChatBox from './ChatBox';
 import socket from '../socket';
-import DonationOffersForRequest from '../components/DonationOffersForRequest';
+import DonationOffersForRequest from './DonationOffersForRequest';
 import './BloodDonationDetails.css';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -98,8 +98,8 @@ const BloodDonationDetails = () => {
         const myOffer = offers.find(o => o.donor?._id === currentUserId);
         if (myOffer) {
           setExistingOffer(myOffer);
-          if (['pending', 'accepted', 'in_progress'].includes(myOffer.status)) {
-            setInfoMessage(`لقد أرسلت عرضًا سابقًا. الحالة: ${myOffer.status}`);
+          if (['pending', 'accepted', 'in_progress', 'announced'].includes(myOffer.status)) {
+            setInfoMessage(`لقد أعلنت/أرسلت عرضًا سابقًا. الحالة: ${myOffer.status}`);
           }
         } else {
           setExistingOffer(null);
@@ -133,7 +133,7 @@ const BloodDonationDetails = () => {
       (JSON.parse(localStorage.getItem('user') || '{}')?.token) ||
       null;
     if (!token) {
-      setInfoMessage('⚠️ تحتاج لتسجيل الدخول لإرسال عرض التبرع.');
+      setInfoMessage('⚠️ تحتاج لتسجيل الدخول لإرسال إعلان التبرع.');
       return false;
     }
     return true;
@@ -144,7 +144,6 @@ const BloodDonationDetails = () => {
     if (!requireAuth()) return;
     setSendingOffer(true);
     try {
-      // ✅ لا تمرّر headers يدويًا—الـ interceptor سيضيف Authorization و Content-Type تلقائيًا
       const res = await fetchWithInterceptors('/api/donation-confirmations', {
         method: 'POST',
         body: JSON.stringify({
@@ -156,21 +155,21 @@ const BloodDonationDetails = () => {
       });
 
       if (res.ok) {
-        setInfoMessage('✅ تم إرسال عرض التبرع بنجاح!');
+        setInfoMessage('✅ تم إعلان التبرع — يمكنك الآن متابعة التواصل والتنفيذ.');
         socket.emit('sendMessage', {
           recipientId,
-          content: `🩸 ${currentUser?.firstName || 'متبرّع'} قدّم عرض تبرع لطلب فصيلة ${donation.bloodType}`,
+          content: `🩸 ${currentUser?.firstName || 'متبرّع'} أعلن تبرعًا لطلب فصيلة ${donation.bloodType}`,
           requestId: donation._id,
           offerId: null,
           type: 'offer'
         });
 
-        setDonationStatus('initiated');
-        setInfoMessage('✅ تم إرسال العرض، بانتظار موافقة صاحب الطلب.');
+        setDonationStatus('announced');
         setShowOfferConfirm(false);
+        if (res.body?.confirmation) setExistingOffer(res.body.confirmation);
         await checkExistingOffer();
       } else {
-        setInfoMessage('⚠️ لم يتم إرسال العرض. حاول لاحقًا.');
+        setInfoMessage(res.body?.message || '⚠️ لم يتم الإعلان. حاول لاحقًا.');
       }
     } catch (err) {
       if (err?.status === 401) {
@@ -239,7 +238,8 @@ const BloodDonationDetails = () => {
 
   if (!donation) return <p className="mt-4 text-center">لا يوجد طلب.</p>;
 
-  const canShowContacts = isOwner || existingOffer?.status === 'accepted';
+  const canShowContacts =
+    isOwner || ['announced','accepted','fulfilled','rated'].includes(existingOffer?.status);
   const docs = makeDocs(donation);
 
   return (
@@ -261,13 +261,17 @@ const BloodDonationDetails = () => {
             </Badge>
             {existingOffer?.status && (
               <Badge bg="info" className="me-1">
-                حالة عرضك: {existingOffer.status}
+                حالة إعلانك/عرضك: {existingOffer.status}
               </Badge>
             )}
           </div>
         </Card.Header>
 
         <Card.Body>
+          <Alert variant="light" className="mt-0 mb-3">
+            📝 <strong>نصيحة:</strong> من الأفضل توثيق عملية التبرع داخل المنصّة (رفع إثبات/تأكيد) وإضافة تقييم بعد التنفيذ. هذا يعزّز موثوقيتك ويزيد من ظهور منشوراتك.
+          </Alert>
+
           <div className="deadline-box">
             <div className="deadline-row">
               <span className="label">⏳ آخر أجل:</span>
@@ -297,42 +301,44 @@ const BloodDonationDetails = () => {
           </div>
 
           <ListGroup variant="flush" className="mt-3">
-           <ListGroup.Item className="publisher-wrapper">
-  <div
-    className={`publisher-card hoverable ${isOwner ? 'is-owner no-avatar' : ''}`}
-    onClick={() => donation?.userId?._id && navigate(`/profile/${donation.userId._id}`)}
-    role="button"
-    tabIndex={0}
-    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && donation?.userId?._id && navigate(`/profile/${donation.userId._id}`)}
-    aria-label="فتح ملف الناشر"
-    title={isOwner ? 'أنت صاحب الطلب' : 'اضغط لمعاينة الملف الشخصي'}
-  >
+            <ListGroup.Item className="publisher-wrapper">
+              <div
+                className={`publisher-card hoverable ${isOwner ? 'is-owner no-avatar' : ''}`}
+                onClick={() => donation?.userId?._id && navigate(`/profile/${donation.userId._id}`)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && donation?.userId?._id && navigate(`/profile/${donation.userId._id}`)}
+                aria-label="فتح ملف الناشر"
+                title={isOwner ? 'أنت صاحب الطلب' : 'اضغط لمعاينة الملف الشخصي'}
+              >
+                {!isOwner && (
+                  <img
+                    src={
+                      donation?.userId?.profileImage
+                        ? `/uploads/profileImages/${donation.userId.profileImage}`
+                        : '/default-avatar.png'
+                    }
+                    alt="صورة الناشر"
+                    className="pub-avatar"
+                    onError={(e) => { e.currentTarget.src = '/default-avatar.png'; }}
+                  />
+                )}
 
-    {/* ✅ لا تُظهر الصورة إذا كنت المالك */}
-    {!isOwner && (
-      <img
-        src={donation?.userId?.profileImage || '/default-avatar.png'}
-        alt="صورة الناشر"
-        className="pub-avatar"
-        onError={(e) => { e.currentTarget.src = '/default-avatar.png'; }}
-      />
-    )}
-
-    <div className="pub-info">
-      <div className="pub-name d-flex align-items-center gap-2">
-        <span>
-          {donation.userId?.firstName || ''} {donation.userId?.lastName || ''}
-        </span>
-        {isOwner && <Badge bg="secondary">أنت</Badge>}
-      </div>
-      {!isOwner && (
-        <div className="publisher-extra">
-          <small className="text-muted">اضغط لمعاينة الملف الشخصي</small>
-        </div>
-      )}
-    </div>
-  </div>
-</ListGroup.Item>
+                <div className="pub-info">
+                  <div className="pub-name d-flex align-items-center gap-2">
+                    <span>
+                      {donation.userId?.firstName || ''} {donation.userId?.lastName || ''}
+                    </span>
+                    {isOwner && <Badge bg="secondary">أنت</Badge>}
+                  </div>
+                  {!isOwner && (
+                    <div className="publisher-extra">
+                      <small className="text-muted">اضغط لمعاينة الملف الشخصي</small>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </ListGroup.Item>
 
             <ListGroup.Item><strong>فصيلة الدم:</strong> {donation.bloodType}</ListGroup.Item>
             <ListGroup.Item>
@@ -340,8 +346,6 @@ const BloodDonationDetails = () => {
             </ListGroup.Item>
             <ListGroup.Item><strong>📍 الموقع:</strong> {donation.location || 'غير محدد'}</ListGroup.Item>
             <ListGroup.Item><strong>📅 تاريخ الإضافة:</strong> {formatDate(donation.createdAt)}</ListGroup.Item>
-
-            
 
             {canShowContacts ? (
               <ListGroup.Item>
@@ -358,7 +362,7 @@ const BloodDonationDetails = () => {
               </ListGroup.Item>
             ) : (
               <ListGroup.Item className="text-muted">
-                🛡️ سيتم عرض وسائل التواصل بعد موافقة صاحب الطلب على عرض التبرع.
+                🛡️ ستظهر وسائل التواصل بعد إعلان/إرسال التبرع أو لصاحب الطلب.
               </ListGroup.Item>
             )}
 
@@ -437,9 +441,9 @@ const BloodDonationDetails = () => {
 
           {showOfferConfirm && (
             <Alert variant="light" className="mt-4 border shadow-sm">
-              <h6 className="fw-bold">تأكيد عرض التبرع</h6>
+              <h6 className="fw-bold">تأكيد إعلان التبرع</h6>
               <p className="mb-2">
-                سيتم إشعار صاحب الطلب بعرضك. عند الموافقة ستظهر لك وسائل التواصل. هل ترغب في المتابعة؟
+                سيتم إشعار صاحب الطلب بإعلان تبرعك، وستظهر وسائل التواصل للطرفين داخل المنصّة. هل ترغب في المتابعة؟
               </p>
               <div className="d-flex gap-2 flex-wrap">
                 <Button

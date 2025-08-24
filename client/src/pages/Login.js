@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import './Login.css';
 import loginImg from './login.jpeg';
 import fetchWithInterceptors from '../services/fetchWithInterceptors.js';
-import { useAuth } from '../AuthContext'; // ✅ إضافة السياق
+import { useAuth } from '../AuthContext';
 
 function Login() {
   const [loginInput, setLoginInput] = useState('');
@@ -12,43 +12,40 @@ function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth(); // ✅ استخدام دالة login من السياق
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
     try {
       const response = await fetchWithInterceptors('/api/users/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ loginInput: loginInput.trim(), password })
       });
 
-     if (response.ok) {
-  const user = response.body?.user;
-  const token = response.body?.token;
-
-  if (user && token) {
-    login({ ...user, token }); // ✅ أرسل التوكن مع المستخدم
-    navigate('/profile');
-  } else {
-    setError('البيانات غير مكتملة. الرجاء المحاولة لاحقًا.');
-  }
-}
- else {
+      if (response.ok) {
+        const user = response.body?.user;
+        const token = response.body?.token;
+        if (user && token) {
+          login({ ...user, token });
+          navigate('/profile');
+        } else {
+          setError('البيانات غير مكتملة. الرجاء المحاولة لاحقًا.');
+        }
+      } else {
         setError(response.body?.message || 'فشل تسجيل الدخول');
       }
-    } catch (error) {
+    } catch {
       setError('خطأ في الشبكة. حاول مرة أخرى.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
     <div className='login-page'>
-      <div className="login-img">
-        <img src={loginImg} alt="Login" />
-      </div>
+      <div className="login-img"><img src={loginImg} alt="Login" /></div>
       <div className="login-container">
         <h2>تسجيل الدخول</h2>
         <Form onSubmit={handleSubmit} className='form-login'>
@@ -85,22 +82,12 @@ function Login() {
           </Form.Group>
 
           <Button variant="primary" type="submit" disabled={loading} className="mt-2 w-100">
-            {loading ? (
-              <>
-                <Spinner animation="border" size="sm" className="ms-2" /> جاري الدخول...
-              </>
-            ) : (
-              'تسجيل الدخول'
-            )}
+            {loading ? (<><Spinner animation="border" size="sm" className="ms-2" /> جاري الدخول...</>) : ('تسجيل الدخول')}
           </Button>
 
           <div className="signup-link d-flex justify-content-between w-100 mt-3">
-            <Link to="/reset-password" className="text-decoration-none text-danger">
-              هل نسيت كلمة السر؟
-            </Link>
-            <Link to="/add-user" className="btn btn-outline-secondary btn-sm">
-              إنشاء حساب جديد
-            </Link>
+            <Link to="/reset-password" className="text-decoration-none text-danger">هل نسيت كلمة السر؟</Link>
+            <Link to="/add-user" className="btn btn-outline-secondary btn-sm">إنشاء حساب جديد</Link>
           </div>
         </Form>
       </div>

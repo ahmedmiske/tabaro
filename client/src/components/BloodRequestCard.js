@@ -1,3 +1,4 @@
+// src/components/BloodRequestCard.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 import './BloodRequestCard.css';
@@ -29,7 +30,8 @@ const BloodRequestCard = ({ donation }) => {
         </div>
 
         <div className="brc-footer">
-          <Link to={`/donation-details/${donation._id}`}>
+          {/* ✅ مسار التفاصيل الصحيح */}
+          <Link to={`/blood-donation-details/${donation._id}`}>
             <button className="brc-btn-details">📋 تفاصيل الطلب / التبرع</button>
           </Link>
         </div>
@@ -39,5 +41,3 @@ const BloodRequestCard = ({ donation }) => {
 };
 
 export default BloodRequestCard;
-// This component represents a card for a blood donation request.
-// It displays the blood type, urgency status, description, deadline, and creation date.

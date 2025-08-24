@@ -1,7 +1,7 @@
 // server/controllers/bloodRequestController.js
-const BloodRequest = require('../models/bloodRequest');
-const DonationConfirmation = require('../models/DonationConfirmation');
-const asyncHandler = require('../utils/asyncHandler');
+const BloodRequest = require("../models/bloodRequest");
+const DonationConfirmation = require("../models/DonationConfirmation");
+const asyncHandler = require("../utils/asyncHandler");
 
 /** يبني documents[] من أي شكل قادم من multer (fields/array) */
 function collectDocumentsFromReq(req) {
@@ -10,7 +10,7 @@ function collectDocumentsFromReq(req) {
     ...(req.files?.files || []),
     ...(Array.isArray(req.files) ? req.files : []), // احتياط لو استخدمت upload.array
   ];
-  return list.map(f => ({
+  return list.map((f) => ({
     originalName: f.originalname,
     filename: f.filename,
     mimeType: f.mimetype,
@@ -23,8 +23,12 @@ function collectDocumentsFromReq(req) {
 function parseContactMethods(input) {
   if (!input) return [];
   if (Array.isArray(input)) return input;
-  if (typeof input === 'string') {
-    try { return JSON.parse(input); } catch { /* ignore */ }
+  if (typeof input === "string") {
+    try {
+      return JSON.parse(input);
+    } catch {
+      /* ignore */
+    }
   }
   return [];
 }
@@ -43,11 +47,11 @@ const createBloodRequest = asyncHandler(async (req, res) => {
     location,
     deadline,
     description,
-    isUrgent: isUrgent === 'true' || isUrgent === true,
+    isUrgent: isUrgent === "true" || isUrgent === true,
     userId: req.user._id,
     contactMethods,
-    documents,          // ✅ الحقل المعتمد
-    files: [],          // (اختياري) اتركه فارغًا للانسجام مع السجلات القديمة
+    documents, // ✅ الحقل المعتمد
+    files: [], // (اختياري) اتركه فارغًا للانسجام مع السجلات القديمة
   });
 
   res.status(201).json(created);
@@ -57,27 +61,27 @@ const createBloodRequest = asyncHandler(async (req, res) => {
 // @route   GET /api/blood-requests?status=active|inactive|all&page=1&limit=12
 // @access  Public
 const getBloodRequests = asyncHandler(async (req, res) => {
-  const { status = 'all' } = req.query;
+  const { status = "all" } = req.query;
   const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
   const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 12, 1), 100);
 
   const filter = {};
   const now = new Date();
-  if (status === 'active') filter.deadline = { $gte: now };
-  if (status === 'inactive') filter.deadline = { $lt: now };
+  if (status === "active") filter.deadline = { $gte: now };
+  if (status === "inactive") filter.deadline = { $lt: now };
 
   const [items, total] = await Promise.all([
     BloodRequest.find(filter)
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
-      .select('-__v')
-      .populate('userId', 'firstName lastName profileImage'),
+      .select("-__v")
+      .populate("userId", "firstName lastName profileImage"),
     BloodRequest.countDocuments(filter),
   ]);
 
   // (اختياري) لو تبي تضيف isActive بالحسبان
-  const withFlag = items.map(d => ({
+  const withFlag = items.map((d) => ({
     ...d.toObject(),
     isActive: new Date(d.deadline) >= now,
   }));
@@ -95,11 +99,13 @@ const getBloodRequests = asyncHandler(async (req, res) => {
 // @route   GET /api/blood-requests/:id
 // @access  Public
 const getBloodRequestById = asyncHandler(async (req, res) => {
-  const doc = await BloodRequest.findById(req.params.id)
-    .populate('userId', 'firstName lastName profileImage');
+  const doc = await BloodRequest.findById(req.params.id).populate(
+    "userId",
+    "firstName lastName profileImage",
+  );
 
   if (!doc) {
-    return res.status(404).json({ message: 'Blood request not found' });
+    return res.status(404).json({ message: "Blood request not found" });
   }
   res.json(doc);
 });
@@ -109,16 +115,17 @@ const getBloodRequestById = asyncHandler(async (req, res) => {
 // @access  Private
 const updateBloodRequest = asyncHandler(async (req, res) => {
   const br = await BloodRequest.findById(req.params.id);
-  if (!br) return res.status(404).json({ message: 'Blood request not found' });
+  if (!br) return res.status(404).json({ message: "Blood request not found" });
   if (String(br.userId) !== String(req.user._id))
-    return res.status(403).json({ message: 'Not authorized' });
+    return res.status(403).json({ message: "Not authorized" });
 
   const { bloodType, location, deadline, description, isUrgent } = req.body;
   if (bloodType !== undefined) br.bloodType = bloodType;
   if (location !== undefined) br.location = location;
   if (deadline !== undefined) br.deadline = deadline;
   if (description !== undefined) br.description = description;
-  if (isUrgent !== undefined) br.isUrgent = (isUrgent === 'true' || isUrgent === true);
+  if (isUrgent !== undefined)
+    br.isUrgent = isUrgent === "true" || isUrgent === true;
 
   // contactMethods قد تأتي كسلسلة
   if (req.body.contactMethods !== undefined) {
@@ -140,12 +147,12 @@ const updateBloodRequest = asyncHandler(async (req, res) => {
 // @access  Private
 const deleteBloodRequest = asyncHandler(async (req, res) => {
   const br = await BloodRequest.findById(req.params.id);
-  if (!br) return res.status(404).json({ message: 'Blood request not found' });
+  if (!br) return res.status(404).json({ message: "Blood request not found" });
   if (String(br.userId) !== String(req.user._id))
-    return res.status(403).json({ message: 'Not authorized' });
+    return res.status(403).json({ message: "Not authorized" });
 
   await BloodRequest.deleteOne({ _id: br._id });
-  res.json({ message: 'Blood request removed' });
+  res.json({ message: "Blood request removed" });
 });
 
 // @desc    Get my requests with donation offers
@@ -157,20 +164,21 @@ const getMyRequestsWithOffers = asyncHandler(async (req, res) => {
   const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
 
   let requests = await BloodRequest.find({ userId: req.user._id })
-    .populate('userId', 'firstName lastName profileImage')
+    .populate("userId", "firstName lastName profileImage")
     .lean();
 
   // جمع العروض لكل طلب
   for (let request of requests) {
     const offers = await DonationConfirmation.find({ requestId: request._id })
-      .populate('donor', 'firstName lastName profileImage')
+      .populate("donor", "firstName lastName profileImage")
       .lean();
     request.offers = offers;
     request.isActive = new Date(request.deadline) >= twoDaysAgo;
   }
 
-  if (statusFilter === 'active') requests = requests.filter(r => r.isActive);
-  if (statusFilter === 'inactive') requests = requests.filter(r => !r.isActive);
+  if (statusFilter === "active") requests = requests.filter((r) => r.isActive);
+  if (statusFilter === "inactive")
+    requests = requests.filter((r) => !r.isActive);
 
   res.json(requests);
 });

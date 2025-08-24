@@ -1,195 +1,270 @@
-import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
-import { Link } from 'react-router-dom';
-import socket from '../socket';
-import './ChatBox.css';
+// src/components/ChatBox.js
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import PropTypes from 'prop-types';
+import { Form, Button, Spinner } from 'react-bootstrap';
+import { connectSocket, getSocket } from '../socket';
 
-function getCurrentUser() {
-  // 1) حاول تقرأ user من localStorage
-  let user = null;
-  try { user = JSON.parse(localStorage.getItem('user') || 'null'); } catch { user = null; }
-
-  // 2) لو مافيش _id، فكّ الـ JWT وخُد id
-  const token =
-    localStorage.getItem('token') ||
-    localStorage.getItem('authToken') ||
-    sessionStorage.getItem('token');
-
-  if ((!user || !user._id) && token && token.split('.').length === 3) {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const id = payload?.id || payload?._id || payload?.userId;
-      if (id) user = { ...(user || {}), _id: id };
-    } catch {/* ignore */}
+const fmtTime = (d) => {
+  try {
+    return new Date(d).toLocaleTimeString('ar-MA', { hour: '2-digit', minute: '2-digit' });
+  } catch {
+    return '';
   }
-  return user;
-}
+};
 
-const ChatBox = ({ recipientId }) => {
-  const [messages, setMessages] = useState([]);
-  const [newMsg, setNewMsg] = useState('');
-  const [typing, setTyping] = useState(false);
+const ChatBox = ({ recipientId, className = '' }) => {
+  const [messages, setMessages] = useState([]);  // [{_id?, tempId?, content, sender, recipient, timestamp, pending?, senderName, senderProfileImage}]
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
 
-  const messagesEndRef = useRef(null);
-  const typingTickRef = useRef(0);
+  const listRef = useRef(null);
+  const knownIdsRef = useRef(new Set());   // _id القادم من DB
+  const knownTempRef = useRef(new Set());  // tempId للرسائل التفاؤلية
+  const typingTimeoutRef = useRef(null);
+  const typingSentAtRef = useRef(0);
 
-  const user = useMemo(getCurrentUser, []);
-  const currentUserId = user?._id;
+  // token الحالي
+  const token = useMemo(() => {
+    const u = JSON.parse(localStorage.getItem('user') || '{}');
+    return u?.token || localStorage.getItem('token') || localStorage.getItem('authToken') || null;
+  }, []);
 
-  const formatDateTime = (dateString) => {
-    if (!dateString) return '';
-    const d = new Date(dateString);
-    const p = (n) => String(n).padStart(2, '0');
-    return `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`;
+  // scroll لأسفل عند ورود رسائل
+  const scrollToBottom = () => {
+    const el = listRef.current;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
   };
+  useEffect(scrollToBottom, [messages]);
 
-  const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, []);
-
-  const upsertMessage = useCallback((msg) => {
-    setMessages((prev) => {
-      const id = msg._id || msg.id || msg.tempId || `${msg.sender}-${msg.timestamp}-${(msg.content||'').slice(0,6)}`;
-      const i = prev.findIndex(m => (m._id || m.id || m.tempId) === id);
-      if (i >= 0) {
-        const next = prev.slice(); next[i] = { ...prev[i], ...msg }; return next;
-      }
-      return [...prev, msg];
-    });
-  }, []);
-
-  const isSameConversation = useCallback((msg) => {
-    const s = msg.sender || msg.senderId;
-    const r = msg.recipient || msg.recipientId;
-    return (
-      String(s) === String(currentUserId) && String(r) === String(recipientId)
-    ) || (
-      String(s) === String(recipientId) && String(r) === String(currentUserId)
-    );
-  }, [currentUserId, recipientId]);
-
+  // اتصال socket + الاشتراكات
   useEffect(() => {
-    if (!recipientId || !currentUserId) return;
+    if (!token || !recipientId) return;
+    const s = connectSocket(token);
 
-    socket.emit('loadMessages', { recipientId, currentUserId, limit: 50 });
+    // طلب التاريخ
+    s.emit('loadMessages', { recipientId, limit: 100 });
 
-    const onChatHistory = (msgs = []) => setMessages(msgs.filter(isSameConversation));
-    const onReceive = (msg) => { if (isSameConversation(msg)) upsertMessage(msg); };
-    const onSent    = (msg) => { if (isSameConversation(msg)) upsertMessage(msg); };
-    const onTyping  = ({ senderId }) => {
-      if (String(senderId) === String(recipientId)) {
-        setTyping(true);
-        const t = setTimeout(() => setTyping(false), 2000);
-        return () => clearTimeout(t);
+    const onHistory = (list) => {
+      const normalized = (Array.isArray(list) ? list : []).map((m) => {
+        if (m._id) knownIdsRef.current.add(String(m._id));
+        return m;
+      });
+      setMessages(normalized);
+      setLoading(false);
+    };
+
+    const onReceive = (msg) => {
+      // منع التكرار
+      if (msg?._id && knownIdsRef.current.has(String(msg._id))) return;
+      if (msg?.tempId && knownTempRef.current.has(String(msg.tempId))) return;
+
+      // استبدال التفاؤلي إذا جاء tempId مطابق
+      if (msg?.tempId) {
+        setMessages((prev) => {
+          const i = prev.findIndex((x) => x.tempId === msg.tempId);
+          if (i !== -1) {
+            const next = [...prev];
+            knownTempRef.current.delete(String(msg.tempId));
+            if (msg._id) knownIdsRef.current.add(String(msg._id));
+            next[i] = { ...msg, pending: false };
+            return next;
+          }
+          if (msg._id) knownIdsRef.current.add(String(msg._id));
+          return [...prev, { ...msg, pending: false }];
+        });
+        return;
+      }
+
+      if (msg?._id) knownIdsRef.current.add(String(msg._id));
+      setMessages((prev) => [...prev, { ...msg, pending: false }]);
+    };
+
+    const onSent = (msg) => {
+      // تأكيد للمرسل ليستبدل التفاؤلي
+      if (msg?.tempId) {
+        setMessages((prev) => {
+          const i = prev.findIndex((x) => x.tempId === msg.tempId);
+          if (i !== -1) {
+            const next = [...prev];
+            knownTempRef.current.delete(String(msg.tempId));
+            if (msg._id) knownIdsRef.current.add(String(msg._id));
+            next[i] = { ...msg, pending: false };
+            return next;
+          }
+          if (msg._id) knownIdsRef.current.add(String(msg._id));
+          return [...prev, { ...msg, pending: false }];
+        });
+      } else if (msg?._id && !knownIdsRef.current.has(String(msg._id))) {
+        knownIdsRef.current.add(String(msg._id));
+        setMessages((prev) => [...prev, { ...msg, pending: false }]);
       }
     };
 
-    socket.on('chatHistory', onChatHistory);
-    socket.on('receiveMessage', onReceive);
-    socket.on('messageSent', onSent);
-    socket.on('typing', onTyping);
+    const onTyping = () => {
+      setIsTyping(true);
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = setTimeout(() => setIsTyping(false), 1200);
+    };
+
+    const onError = (payload) => {
+      console.warn('[socket:error]', payload?.message || payload);
+    };
+
+    s.on('chatHistory', onHistory);
+    s.on('receiveMessage', onReceive);
+    s.on('messageSent', onSent);
+    s.on('typing', onTyping);
+    s.on('error', onError);
 
     return () => {
-      socket.off('chatHistory', onChatHistory);
-      socket.off('receiveMessage', onReceive);
-      socket.off('messageSent', onSent);
-      socket.off('typing', onTyping);
+      s.off('chatHistory', onHistory);
+      s.off('receiveMessage', onReceive);
+      s.off('messageSent', onSent);
+      s.off('typing', onTyping);
+      s.off('error', onError);
     };
-  }, [recipientId, currentUserId, isSameConversation, upsertMessage]);
+  }, [token, recipientId]);
 
-  useEffect(() => { scrollToBottom(); }, [messages, scrollToBottom]);
-
-  const sendMessage = useCallback(() => {
-    const content = newMsg.trim();
-    if (!content || !recipientId || !currentUserId) return;
-
-    const tempId = `tmp-${Date.now()}`;
-    upsertMessage({
-      tempId,
-      sender: currentUserId,
-      recipient: recipientId,
-      content,
-      timestamp: new Date().toISOString(),
-      senderName: user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'أنت',
-      senderProfileImage: user?.profileImage
-    });
-
-    socket.emit('sendMessage', { recipientId, content, tempId });
-    setNewMsg('');
-  }, [newMsg, recipientId, currentUserId, user, upsertMessage]);
-
-  const handleTyping = useCallback(() => {
+  // إرسال مؤشر الكتابة (rate-limit)
+  const sendTyping = () => {
     const now = Date.now();
-    if (now - typingTickRef.current > 1200 && recipientId && currentUserId) {
-      typingTickRef.current = now;
-      socket.emit('typing', { recipientId, senderId: currentUserId });
+    if (now - typingSentAtRef.current > 800) {
+      typingSentAtRef.current = now;
+      const s = getSocket();
+      if (s?.connected && recipientId) s.emit('typing', { recipientId });
     }
-  }, [recipientId, currentUserId]);
-
-  const onInputKeyDown = useCallback((e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault(); sendMessage(); return;
-    }
-    handleTyping();
-  }, [sendMessage, handleTyping]);
-
-  const getAvatarUrl = (msg) => {
-    if (msg.senderProfileImage) return `/uploads/profileImages/${msg.senderProfileImage}`;
-    const name = msg.senderName
-      || (msg.senderDetails ? `${msg.senderDetails.firstName} ${msg.senderDetails.lastName}` : 'User');
-    return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`;
   };
 
-  // ✅ لو المستخدم غير معروف: أعرض دعوة لتسجيل الدخول
-  if (!currentUserId) {
-    return (
-      <div className="chat-box-container">
-        <p className="text-danger mb-2">⚠️ لا يمكن بدء المحادثة: المستخدم غير معروف</p>
-        <Link to="/login" className="btn btn-primary btn-sm">تسجيل الدخول</Link>
-      </div>
-    );
-  }
+  // إرسال رسالة
+  const sendMessage = (e) => {
+    e?.preventDefault?.();
+    const text = input.trim();
+    if (!text || sending) return;
+
+    const s = getSocket();
+    if (!s?.connected) return;
+
+    const tempId = `tmp_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    knownTempRef.current.add(tempId);
+
+    const me = JSON.parse(localStorage.getItem('user') || '{}');
+    const optimistic = {
+      tempId,
+      sender: me?._id || 'me',
+      recipient: recipientId,
+      content: text,
+      timestamp: new Date().toISOString(),
+      pending: true,
+      senderName: `${me?.firstName || ''} ${me?.lastName || ''}`.trim() || 'أنا',
+      senderProfileImage: me?.profileImage || '',
+    };
+
+    setMessages((prev) => [...prev, optimistic]);
+    setInput('');
+    setSending(true);
+
+    s.emit('sendMessage', {
+      recipientId,
+      content: text,
+      type: 'chat',
+    });
+
+    // fallback لإزالة pending إن لم يصل تأكيد
+    setTimeout(() => {
+      setMessages((prev) =>
+        prev.map((m) => (m.tempId === tempId ? { ...m, pending: false } : m)),
+      );
+    }, 8000);
+
+    setSending(false);
+  };
 
   return (
-    <div className="chat-box-container">
-      <div className="messages-area">
-        {messages.map((msg) => {
-          const key = msg._id || msg.id || msg.tempId;
-          const isSent = String(msg.sender) === String(currentUserId);
-          const time = msg.timestamp || msg.createdAt || msg.updatedAt;
-          return (
-            <div key={key} className={`message-bubble ${isSent ? 'sent' : 'received'}`}>
-              <div className="bubble-content">
-                <div className="bubble-header">
-                  <img src={getAvatarUrl(msg)} alt="avatar" className="bubble-avatar" />
-                  <div className="bubble-name">
-                    {isSent ? 'أنت'
-                      : msg.senderName
-                      || (msg.senderDetails ? `${msg.senderDetails.firstName} ${msg.senderDetails.lastName}` : 'مستخدم')}
-                  </div>
-                </div>
-                <div className="bubble-message">{msg.content}</div>
-                <div className="bubble-time">{formatDateTime(time)}</div>
-              </div>
-            </div>
-          );
-        })}
-        {typing && <div className="text-muted mt-2">...يكتب الآن</div>}
-        <div ref={messagesEndRef} />
+    <div className={`chatbox card shadow-sm ${className}`} dir="rtl">
+      <div className="card-header bg-white d-flex align-items-center justify-content-between">
+        <div className="fw-bold">
+          <i className="fas fa-comments ms-2 text-primary" />
+          المحادثة
+        </div>
+        {isTyping && <small className="text-muted">يكتب الآن…</small>}
       </div>
 
-      <div className="input-area mt-2">
-        <textarea
-          rows={1}
-          value={newMsg}
-          onChange={(e) => setNewMsg(e.target.value)}
-          onKeyDown={onInputKeyDown}
-          onInput={handleTyping}
-          placeholder="اكتب رسالتك هنا... (Enter للإرسال، Shift+Enter لسطر جديد)"
-        />
-        <button onClick={sendMessage} disabled={!newMsg.trim()}>إرسال</button>
+      <div
+        ref={listRef}
+        className="card-body p-2"
+        style={{ height: 360, overflowY: 'auto', background: '#fafafa' }}
+      >
+        {loading ? (
+          <div className="text-center py-5">
+            <Spinner animation="border" />
+            <div className="mt-2 text-muted">جارٍ تحميل المحادثة…</div>
+          </div>
+        ) : messages.length === 0 ? (
+          <div className="text-center text-muted py-5">ابدأ المحادثة…</div>
+        ) : (
+          messages.map((m) => {
+            const myId = (JSON.parse(localStorage.getItem('user') || '{}')._id);
+            const mine = m.sender === myId;
+            return (
+              <div
+                key={m._id || m.tempId}
+                className={`d-flex mb-2 ${mine ? 'justify-content-end' : 'justify-content-start'}`}
+              >
+                {!mine && (
+                  <img
+                    src={m.senderProfileImage || '/default-avatar.png'}
+                    alt=""
+                    style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', marginInlineEnd: 8 }}
+                    onError={(e) => { e.currentTarget.src = '/default-avatar.png'; }}
+                  />
+                )}
+                <div
+                  className={`p-2 rounded-3 ${mine ? 'bg-primary text-white' : 'bg-white border'}`}
+                  style={{ maxWidth: '76%' }}
+                >
+                  {!mine && <div className="small text-muted mb-1">{m.senderName || 'مستخدم'}</div>}
+                  <div style={{ whiteSpace: 'pre-wrap' }}>{m.content}</div>
+                  <div className={`small mt-1 ${mine ? 'text-white-50' : 'text-muted'}`}>
+                    {fmtTime(m.timestamp)}
+                    {m.pending && <span className="ms-2">…إرسال</span>}
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      <div className="card-footer bg-white">
+        <Form onSubmit={sendMessage} className="d-flex gap-2">
+          <Form.Control
+            as="textarea"
+            rows={1}
+            className="flex-grow-1"
+            style={{ resize: 'none' }}
+            placeholder="اكتب رسالتك…"
+            value={input}
+            onChange={(e) => {
+              setInput(e.target.value);
+              sendTyping();
+            }}
+          />
+          <Button type="submit" variant="success" disabled={!input.trim()} title="إرسال">
+            {sending ? <Spinner size="sm" /> : <i className="fas fa-paper-plane" />}
+          </Button>
+        </Form>
       </div>
     </div>
   );
 };
 
+ChatBox.propTypes = {
+  recipientId: PropTypes.string.isRequired,
+  className: PropTypes.string,
+};
+
 export default ChatBox;
+// client/src/components/Header.js

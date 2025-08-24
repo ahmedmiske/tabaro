@@ -4,7 +4,7 @@ import { Card, Button, Form, Spinner, Badge, Row } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import Title from './Title';
 import FindeNot from './FindeNot';
-import './DonationRequestList.css'; // CSS بالأسفل
+import './DonationRequestList.css';
 
 const DEFAULT_Q = { category:'', type:'', place:'', urgent:'', page:1, limit:12 };
 
@@ -38,7 +38,6 @@ const DonationRequestList = () => {
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [q.page, q.category, q.type, q.place, q.urgent]);
 
-  // قيم الفلاتر (من البيانات الحالية)
   const categories = useMemo(
     () => [...new Set(items.map(i => i.category).filter(Boolean))],
     [items]
@@ -62,7 +61,6 @@ const DonationRequestList = () => {
     <div className="donation-container py-4" dir="rtl">
       <Title text="الطلبات العامة للتبرع" />
 
-      {/* فلاتر بنفس أسلوب BloodDonationList */}
       <div className="filter">
         <Form.Select
           value={q.category}
@@ -163,7 +161,6 @@ const DonationRequestList = () => {
                 ))}
               </Row>
 
-              {/* ترقيم بنفس روح BloodDonationList */}
               <div className="pagination-controls text-center mt-4 d-flex justify-content-center gap-3">
                 <Button
                   variant="outline-secondary"

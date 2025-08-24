@@ -1,4 +1,3 @@
-// src/pages/DonationRequestForm.jsx
 import React, { useEffect, useMemo, useState } from 'react';
 import { Form, Button, ListGroup, ListGroupItem, Spinner } from 'react-bootstrap';
 import './DonationRequestForm.css';
@@ -119,128 +118,96 @@ const DonationRequestForm = () => {
     setStep(Math.max(s, 1));
   };
 
-  // 🔎 دالة تلتقط أي JWT من التخزين (حتى لو داخل JSON)
-  const findAnyJWT = () => {
-    const isJWT = (v) => typeof v === 'string' && v.includes('.') && v.split('.').length === 3;
-    const scanStore = (store) => {
-      for (let i = 0; i < store.length; i++) {
-        const k = store.key(i);
-        const val = store.getItem(k);
-        if (isJWT(val)) return val;
-        try {
-          const parsed = JSON.parse(val);
-          // ابحث داخل الكائن عن أي قيمة تبدو JWT
-          const stack = [parsed];
-          while (stack.length) {
-            const cur = stack.pop();
-            if (typeof cur === 'string' && isJWT(cur)) return cur;
-            if (cur && typeof cur === 'object') {
-              for (const v of Object.values(cur)) stack.push(v);
-            }
-          }
-        } catch { /* ignore */ }
-      }
-      return null;
-    };
-    return (
-      scanStore(localStorage) ||
-      scanStore(sessionStorage)
-    );
-  };
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  let hasError = false;
-  const newPaymentErrors = {};
-  const newContactErrors = {};
+    let hasError = false;
+    const newPaymentErrors = {};
+    const newContactErrors = {};
 
-  donation.paymentMethods.forEach(({ method, phone }) => {
-    if (isFinancial && !validatePhoneNumber(phone)) { newPaymentErrors[method] = true; hasError = true; }
-  });
-  donation.contactMethods.forEach(({ method, number }) => {
-    if (number && !validatePhoneNumber(number)) { newContactErrors[method] = true; hasError = true; }
-  });
-  setErrors({ paymentPhones: newPaymentErrors, contactNumbers: newContactErrors });
-
-  if (!donation.place) { hasError = true; alert('الرجاء اختيار/كتابة اسم المكان.'); }
-  if (isFinancial && !(Number(donation.amount) > 0)) { hasError = true; alert('الرجاء إدخال المبلغ المطلوب.'); }
-  if (isFinancial && !donation.paymentMethods.length) { hasError = true; alert('اختر وسيلة دفع واحدة على الأقل.'); }
-  if (!contactsValid) { hasError = true; }
-
-  if (hasError) return;
-
-  // ✅ نرسل contactMethods/paymentMethods كـ JSON (مثل التبرع بالدم)
-  const fd = new FormData();
-  fd.append('category', donation.category);
-  fd.append('type', donation.type);
-  fd.append('description', donation.description || '');
-  fd.append('place', donation.place || '');
-  fd.append('deadline', donation.deadline || '');
-  fd.append('isUrgent', donation.isUrgent ? 'true' : 'false');
-  fd.append('amount', donation.amount || '');
-  fd.append('bloodType', donation.bloodType || '');
-
-  // نرشّح العناصر الفارغة فقط للاحتياط
-  const cleanContacts = donation.contactMethods
-    .filter(x => x && (x.method || x.number));
-  const cleanPayments = donation.paymentMethods
-    .filter(x => x && (x.method || x.phone));
-
-  fd.append('contactMethods', JSON.stringify(cleanContacts));
-  fd.append('paymentMethods', JSON.stringify(cleanPayments));
-
-  donation.proofDocuments.forEach(file => fd.append('files', file));
-
-  try {
-    setSubmitting(true);
-
-    const token =
-      localStorage.getItem('token') ||
-      localStorage.getItem('authToken') ||
-      localStorage.getItem('accessToken') ||
-      sessionStorage.getItem('token') || '';
-
-    if (!token) {
-      alert('غير مصرّح. سجّل الدخول.');
-      setSubmitting(false);
-      return;
-    }
-
-    let userId = '';
-    try { userId = (JSON.parse(localStorage.getItem('user') || '{}')._id) || ''; } catch {}
-
-    const resp = await fetch('/api/donationRequests', {
-      method: 'POST',
-      body: fd, // لا تضع Content-Type يدوياً
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'x-auth-token': token,
-        'x-access-token': token,
-        ...(userId ? { 'X-UserId': userId } : {}),
-      },
+    donation.paymentMethods.forEach(({ method, phone }) => {
+      if (isFinancial && !validatePhoneNumber(phone)) { newPaymentErrors[method] = true; hasError = true; }
     });
+    donation.contactMethods.forEach(({ method, number }) => {
+      if (number && !validatePhoneNumber(number)) { newContactErrors[method] = true; hasError = true; }
+    });
+    setErrors({ paymentPhones: newPaymentErrors, contactNumbers: newContactErrors });
 
-    const ct = resp.headers.get('content-type') || '';
-    const body = ct.includes('application/json') ? await resp.json() : await resp.text();
+    if (!donation.place) { hasError = true; alert('الرجاء اختيار/كتابة اسم المكان.'); }
+    if (isFinancial && !(Number(donation.amount) > 0)) { hasError = true; alert('الرجاء إدخال المبلغ المطلوب.'); }
+    if (isFinancial && !donation.paymentMethods.length) { hasError = true; alert('اختر وسيلة دفع واحدة على الأقل.'); }
+    if (!contactsValid) { hasError = true; }
 
-    if (!resp.ok) {
-      const msg = (body && body.message) ? body.message : `HTTP error! status: ${resp.status}`;
-      throw new Error(msg);
+    if (hasError) return;
+
+    // ✅ نرسل contactMethods/paymentMethods كـ JSON (الكنترولر صار يدعم JSON أو الأقواس)
+    const fd = new FormData();
+    fd.append('category', donation.category);
+    fd.append('type', donation.type);
+    fd.append('description', donation.description || '');
+    fd.append('place', donation.place || '');
+    fd.append('deadline', donation.deadline || '');
+    fd.append('isUrgent', donation.isUrgent ? 'true' : 'false');
+    fd.append('amount', donation.amount || '');
+    fd.append('bloodType', donation.bloodType || '');
+
+    const cleanContacts = donation.contactMethods.filter(x => x && (x.method || x.number));
+    const cleanPayments = donation.paymentMethods.filter(x => x && (x.method || x.phone));
+
+    fd.append('contactMethods', JSON.stringify(cleanContacts));
+    fd.append('paymentMethods', JSON.stringify(cleanPayments));
+
+    donation.proofDocuments.forEach(file => fd.append('files', file));
+
+    try {
+      setSubmitting(true);
+
+      const token =
+        localStorage.getItem('token') ||
+        localStorage.getItem('authToken') ||
+        localStorage.getItem('accessToken') ||
+        sessionStorage.getItem('token') || '';
+
+      if (!token) {
+        alert('غير مصرّح. سجّل الدخول.');
+        setSubmitting(false);
+        return;
+      }
+
+      let userId = '';
+      try { userId = (JSON.parse(localStorage.getItem('user') || '{}')._id) || ''; } catch {}
+
+      const resp = await fetch('/api/donationRequests', {
+        method: 'POST',
+        body: fd, // لا تضع Content-Type يدوياً
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'x-auth-token': token,
+          'x-access-token': token,
+          ...(userId ? { 'X-UserId': userId } : {}),
+        },
+      });
+
+      const ct = resp.headers.get('content-type') || '';
+      const body = ct.includes('application/json') ? await resp.json() : await resp.text();
+
+      if (!resp.ok) {
+        const msg = (body && body.message) ? body.message : `HTTP error! status: ${resp.status}`;
+        throw new Error(msg);
+      }
+
+      const created = body?.data;
+      localStorage.removeItem('donationRequestDraft');
+
+      if (created?._id) navigate(`/donations/${created._id}`);
+      else alert(body?.message || 'تم إنشاء الطلب بنجاح');
+    } catch (err) {
+      console.error(err);
+      alert(err.message || 'حدث خطأ أثناء الإرسال');
+    } finally {
+      setSubmitting(false);
     }
-
-    const created = body?.data;
-    localStorage.removeItem('donationRequestDraft');
-
-    if (created?._id) navigate(`/donations/${created._id}`);
-    else alert(body?.message || 'تم إنشاء الطلب بنجاح');
-  } catch (err) {
-    console.error(err);
-    alert(err.message || 'حدث خطأ أثناء الإرسال');
-  } finally {
-    setSubmitting(false);
-  }
-};
-
+  };
 
   const renderFilePreview = (file) => {
     if (!file) return null;

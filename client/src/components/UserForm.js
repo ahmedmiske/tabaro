@@ -8,9 +8,17 @@ import './UserForm.css';
 
 function UserForm() {
   const [user, setUser] = useState({
-    firstName: '', lastName: '', phoneNumber: '', email: '', address: '',
-    userType: '', username: '', password: '', confirmPassword: '',
-    institutionName: '', institutionLicenseNumber: '', institutionAddress: ''
+    firstName: '', lastName: '',
+    phoneNumber: '',
+    email: '',            // اختياري
+    address: '',
+    userType: '',         // 'individual' | 'institutional'
+    username: '',
+    password: '',
+    confirmPassword: '',
+    institutionName: '',
+    institutionLicenseNumber: '',
+    institutionAddress: ''
   });
   const [profileImage, setProfileImage] = useState(null);
 
@@ -25,36 +33,41 @@ function UserForm() {
 
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setUser({ ...user, [e.target.name]: e.target.value });
+  const handleChange = (e) => setUser({ ...user, [e.target.name]: e.target.value });
+  const handleFileChange = (e) => setProfileImage(e.target.files[0]);
+
+  const sendOtp = async () => {
+    try {
+      await fetchWithInterceptors('/api/otp/send-otp', {
+        method: 'POST',
+        body: JSON.stringify({ phoneNumber: user.phoneNumber })
+      });
+      setSentCode(true);
+      setError('');
+    } catch (err) {
+      console.error('OTP Error:', err);
+      setError('تعذّر إرسال رمز التحقق');
+    }
   };
 
-  const handleFileChange = (e) => {
-    setProfileImage(e.target.files[0]);
-  };
-
-  const sendOtp = () => {
-    fetchWithInterceptors('/api/otp/send-otp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phoneNumber: user.phoneNumber })
-    })
-      .then(() => setSentCode(true))
-      .catch((error) => console.error('OTP Error:', error));
-  };
-
-  const verifyOtp = () => {
-    fetchWithInterceptors('/api/otp/verify-otp', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phoneNumber: user.phoneNumber, otp: verificationCode })
-    })
-      .then(() => {
-        setShowToast(true);
-        setTimeout(() => setShowToast(false), 3000);
-        setStep(step + 1);
-      })
-      .catch(() => setError('رمز التحقق غير صحيح'));
+  // ✅ تحقق تجريبي: الكود الصحيح 3229
+  const verifyOtp = async () => {
+    if ((verificationCode || '').trim() !== '3229') {
+      setError('رمز التحقق غير صحيح');
+      return;
+    }
+    try {
+      await fetchWithInterceptors('/api/otp/verify-otp', {
+        method: 'POST',
+        body: JSON.stringify({ phoneNumber: user.phoneNumber, otp: verificationCode })
+      });
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+      setStep((s) => s + 1);
+      setError('');
+    } catch {
+      setError('فشل التحقق، حاول لاحقًا');
+    }
   };
 
   const validateStep = () => {
@@ -64,28 +77,30 @@ function UserForm() {
     if (step === 3) {
       if (user.userType === 'individual' && (!user.firstName || !user.lastName)) valid = false;
       if (user.userType === 'institutional' && (!user.institutionName || !user.institutionLicenseNumber || !user.institutionAddress)) valid = false;
+      // email اختياري، لا نتحقق منه
     }
     if (step === 4 && (!user.username || !user.password || user.password !== user.confirmPassword)) valid = false;
     setShowValidationAlert(!valid);
     return valid;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData();
-    Object.keys(user).forEach((key) => {
-      formData.append(key, user[key]);
-    });
-    if (profileImage) {
-      formData.append('profileImage', profileImage);
-    }
+    const fd = new FormData();
+    Object.entries(user).forEach(([k, v]) => fd.append(k, v ?? ''));
+    if (profileImage) fd.append('profileImage', profileImage);
 
-    fetchWithInterceptors('/api/users', {
-      method: 'POST',
-      body: formData
-    })
-      .then(() => setShowSuccessMessage(true))
-      .catch(() => setError('حدث خطأ أثناء إرسال البيانات'));
+    try {
+      const response = await fetchWithInterceptors('/api/users', { method: 'POST', body: fd });
+      if (response.ok) {
+        setShowSuccessMessage(true);
+        setError('');
+      } else {
+        setError(response.body?.message || 'حدث خطأ أثناء إرسال البيانات');
+      }
+    } catch (err) {
+      setError('حدث خطأ أثناء إرسال البيانات');
+    }
   };
 
   return (
@@ -113,11 +128,11 @@ function UserForm() {
               <h4>اختيار نوع الحساب</h4>
               <Form.Group>
                 <Form.Label>نوع الحساب</Form.Label>
-                <Form.Control as="select" name="userType" value={user.userType} onChange={handleChange}>
+                <Form.Select name="userType" value={user.userType} onChange={handleChange}>
                   <option value="">-- اختر --</option>
                   <option value="individual">فرد</option>
                   <option value="institutional">مؤسسة</option>
-                </Form.Control>
+                </Form.Select>
               </Form.Group>
             </div>
           )}
@@ -151,7 +166,7 @@ function UserForm() {
                   <h4>المعلومات الشخصية</h4>
                   <Form.Group><Form.Label>الاسم الشخصي</Form.Label><Form.Control name="firstName" value={user.firstName} onChange={handleChange} /></Form.Group>
                   <Form.Group><Form.Label>الاسم العائلي</Form.Label><Form.Control name="lastName" value={user.lastName} onChange={handleChange} /></Form.Group>
-                  <Form.Group><Form.Label>البريد الإلكتروني</Form.Label><Form.Control name="email" value={user.email} onChange={handleChange} /></Form.Group>
+                  <Form.Group><Form.Label>البريد الإلكتروني (اختياري)</Form.Label><Form.Control name="email" value={user.email} onChange={handleChange} /></Form.Group>
                   <Form.Group><Form.Label>العنوان</Form.Label><Form.Control name="address" value={user.address} onChange={handleChange} /></Form.Group>
                   <Form.Group><Form.Label>الصورة الشخصية (اختياري)</Form.Label><Form.Control type="file" accept="image/*" onChange={handleFileChange} /></Form.Group>
                 </>
@@ -218,5 +233,3 @@ function UserForm() {
 }
 
 export default UserForm;
-// This component implements a multi-step user registration form with phone verification.
-// It includes fields for personal or institutional information, phone number verification, and account details.

@@ -1,38 +1,42 @@
-// server/middlewares/authMiddelwere.js
-const jwt = require('jsonwebtoken');
-const asyncHandler = require('../utils/asyncHandler');
-const User = require('../models/user');
+// server/middlewares/authMiddleware.js
+const jwt = require("jsonwebtoken");
+
+const User = require("../models/user");
+const asyncHandler = require("../utils/asyncHandler");
 
 // استعماله حصراً أثناء تسجيل المستخدم عبر OTP
 const protectRegisterUser = asyncHandler(async (req, res, next) => {
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
     try {
-      const token = req.headers.authorization.split(' ')[1];
+      const token = req.headers.authorization.split(" ")[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       if (!decoded.id || decoded.id !== req.body.phoneNumber) {
         res.status(401);
-        throw new Error('Not authorized, token failed');
+        throw new Error("Not authorized, token failed");
       }
       return next();
-    } catch (error) {
+    } catch {
       res.status(401);
-      throw new Error('Not authorized, token failed');
+      throw new Error("Not authorized, token failed");
     }
   }
   res.status(401);
-  throw new Error('Not authorized, no token');
+  throw new Error("Not authorized, no token");
 });
 
 // يحمي جميع المسارات الأخرى
 const protect = asyncHandler(async (req, res, next) => {
-  const auth = req.headers.authorization || '';
-  if (!auth.startsWith('Bearer ')) {
+  const auth = req.headers.authorization || "";
+  if (!auth.startsWith("Bearer ")) {
     res.status(401);
-    throw new Error('Not authorized, no token');
+    throw new Error("Not authorized, no token");
   }
 
   try {
-    const token = auth.split(' ')[1];
+    const token = auth.split(" ")[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // ندعم أكثر من اسم محتمل داخل الـ JWT
@@ -41,11 +45,15 @@ const protect = asyncHandler(async (req, res, next) => {
       decoded._id ||
       decoded.userId ||
       decoded.phoneNumber ||
-      (decoded.user && (decoded.user._id || decoded.user.id || decoded.user.userId || decoded.user.phoneNumber));
+      (decoded.user &&
+        (decoded.user._id ||
+          decoded.user.id ||
+          decoded.user.userId ||
+          decoded.user.phoneNumber));
 
     if (!idLike) {
       res.status(401);
-      throw new Error('Invalid token payload');
+      throw new Error("Invalid token payload");
     }
 
     const isPhone = /^\d{6,15}$/.test(String(idLike));
@@ -55,14 +63,14 @@ const protect = asyncHandler(async (req, res, next) => {
 
     if (!user) {
       res.status(401);
-      throw new Error('User not found');
+      throw new Error("User not found");
     }
 
     req.user = user;
     next();
-  } catch (error) {
+  } catch {
     res.status(401);
-    throw new Error('Not authorized, token failed');
+    throw new Error("Not authorized, token failed");
   }
 });
 
@@ -71,11 +79,11 @@ const authorize = (...roles) => {
   return (req, res, next) => {
     if (!req.user) {
       res.status(401);
-      throw new Error('Not authorized');
+      throw new Error("Not authorized");
     }
     if (!roles.includes(req.user.role)) {
       res.status(403);
-      throw new Error('Not authorized');
+      throw new Error("Not authorized");
     }
     next();
   };

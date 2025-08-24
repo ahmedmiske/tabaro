@@ -1,13 +1,14 @@
 // server/utils/notify.js
-const Notification = require('../models/Notification');
+const Notification = require("../models/Notification");
 
 exports.notifyUser = async ({
-  app,                // لارسال socket لاحقًا
+  app,
+  io, // 👈 يمكن تمرير io مباشرة أو app لاستخراجه
   userId,
   sender,
-  title = '',
-  message = '',
-  type = 'system',
+  title = "",
+  message = "",
+  type = "system",
   referenceId = null,
   meta = null,
 }) => {
@@ -30,11 +31,11 @@ exports.notifyUser = async ({
     { new: true, upsert: true }
   );
 
-  // بث سوكِت (اختياري)
+  // بث سوكِت (يدعم io مباشرة أو استخراجها من app)
   try {
-    const io = app.get('io');
-    if (io && userId) {
-      io.to(String(userId)).emit('notification:new', {
+    const ioInstance = io || (app && app.get ? app.get("io") : null);
+    if (ioInstance && userId) {
+      ioInstance.to(String(userId)).emit("notification:new", {
         _id: doc._id,
         title: doc.title,
         message: doc.message,
@@ -43,7 +44,10 @@ exports.notifyUser = async ({
         createdAt: doc.createdAt,
       });
     }
-  } catch (_) {}
+  } catch (error) {
+    // سجل الخطأ بدل ترك الكتلة فارغة (يرضي ESLint ويُسهّل التتبع)
+    console.error("notifyUser socket emit failed:", error);
+  }
 
   return doc;
 };
