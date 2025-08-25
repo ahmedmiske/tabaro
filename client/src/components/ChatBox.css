@@ -1,63 +1,108 @@
+/* الحاوية العامة */
 .chatbox-container {
-  border: 1px solid #eee;
-  border-radius: 14px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  max-width: 980px;      /* ← أوسع */
+  width: 92vw;
+  margin: 24px auto;
+  border-radius: 16px;
+}
+
+/* منطقة الرسائل */
+.messages-scroll {
+  height: 60vh;          /* ارتفاع مريح */
   min-height: 360px;
-  max-height: 70vh;
-  background: #fff;
-}
-
-.chatbox-messages {
-  padding: 12px;
   overflow-y: auto;
-  flex: 1;
-  background: #fafafa;
+  background: #f7faf9;
+  border-radius: 12px;
 }
 
-.msg-row {
-  display: flex;
-  margin-bottom: 8px;
-}
-.msg-row.mine { justify-content: flex-start; }
-.msg-row.theirs { justify-content: flex-end; }
-
-.msg-bubble {
-  max-width: 80%;
+/* الفقاعة */
+.bubble {
+  max-width: 78%;
   padding: 10px 12px;
   border-radius: 14px;
-  background: #e9f7ef; /* mine */
-  color: #0b4123;
+  position: relative;
+  box-shadow: 0 1px 2px rgba(0,0,0,.05);
 }
-.msg-row.theirs .msg-bubble {
-  background: #e6f0ff;
-  color: #142850;
+.bubble.mine {
+  background: #dff6ff;
+  color: #083b55;
 }
-
-.msg-text {
+.bubble.theirs {
+  background: #ffffff;
+  border: 1px solid #e8eceb;
+}
+.bubble-name {
+  font-weight: 700;
+  color: var(--main-color-alt, #157347);
+  margin-bottom: 4px;
+}
+.bubble-message {
   white-space: pre-wrap;
-  word-wrap: break-word;
+  line-height: 1.6;
+  border-bottom: 1px dashed #e6ecea;
+  padding-bottom: 8px;
 }
-
-.msg-meta {
-  margin-top: 4px;
-  font-size: 12px;
-  color: #6c757d;
-}
-
-.msg-meta .state.error { color: #d63384; }
-
-.chatbox-input {
+.bubble-meta {
   display: flex;
+  align-items: center;
   gap: 8px;
-  padding: 10px;
-  border-top: 1px solid #eee;
-  background: #fff;
+  margin-top: 6px;
+  font-size: .82rem;
+  color: #78827c;
 }
-.chatbox-input textarea.form-control {
+.bubble-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-inline-end: 8px;
+  border: 2px solid #4caf50;
+}
+
+/* مؤشرات الوصول */
+.tick {
+  margin-inline-start: 6px;
+  user-select: none;
+}
+.tick-sent { color: #9aa5a1; }       /* ✓ رمادية (مُرسلة/قيد الإرسال) */
+.tick-delivered { color: #2b8a3e; }  /* ✓✓ خضراء (وصلت للسيرفر/الطرف الآخر) */
+
+/* حقل الإدخال */
+.send-input {
+  resize: none;
+  border-radius: 10px;
+  min-height: 44px;
+  max-height: 120px;
+}
+.send-input:focus {
+  box-shadow: 0 0 0 2px var(--main-color, #4caf50);
+  border-color: var(--main-color, #4caf50);
+}
+.chat {
+display: flex;
+gap: 8px;
+align-items: center;
+width: 100%;
+}
+
+.chat .chat-text {
+  border-radius: 10px;
+  min-height: 44px;
+  max-height: 120px;
+  width: 50%;
   resize: none;
 }
-.chatbox-input .btn-send {
-  min-width: 44px;
+
+.chat-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  width: 44px;
+  border-radius: 50%;
+  
+  -webkit-border-radius:;
+  -moz-border-radius:;
+  -ms-border-radius:;
+  -o-border-radius:;
 }

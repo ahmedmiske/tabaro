@@ -1,37 +1,38 @@
-// src/components/ChatBox.js
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Form, Button, Spinner } from 'react-bootstrap';
-import { connectSocket, getSocket } from '../socket';
+import { Form, Button, Spinner, Alert } from 'react-bootstrap';
+import { connectSocket, getSocket, waitUntilConnected } from '../socket';
+import './ChatBox.css';
 
 const fmtTime = (d) => {
   try {
     return new Date(d).toLocaleTimeString('ar-MA', { hour: '2-digit', minute: '2-digit' });
-  } catch {
-    return '';
-  }
+  } catch { return ''; }
 };
 
 const ChatBox = ({ recipientId, className = '' }) => {
-  const [messages, setMessages] = useState([]);  // [{_id?, tempId?, content, sender, recipient, timestamp, pending?, senderName, senderProfileImage}]
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [error, setError] = useState('');
 
   const listRef = useRef(null);
-  const knownIdsRef = useRef(new Set());   // _id القادم من DB
-  const knownTempRef = useRef(new Set());  // tempId للرسائل التفاؤلية
+  const knownIdsRef = useRef(new Set());
+  const knownTempRef = useRef(new Set());
   const typingTimeoutRef = useRef(null);
   const typingSentAtRef = useRef(0);
+  const historyRequestedRef = useRef(false);
+  const reconnectTimerRef = useRef(null);
 
-  // token الحالي
+  // token
   const token = useMemo(() => {
     const u = JSON.parse(localStorage.getItem('user') || '{}');
     return u?.token || localStorage.getItem('token') || localStorage.getItem('authToken') || null;
   }, []);
 
-  // scroll لأسفل عند ورود رسائل
+  // scroll to bottom
   const scrollToBottom = () => {
     const el = listRef.current;
     if (!el) return;
@@ -39,13 +40,55 @@ const ChatBox = ({ recipientId, className = '' }) => {
   };
   useEffect(scrollToBottom, [messages]);
 
-  // اتصال socket + الاشتراكات
+  const requestHistory = async () => {
+    if (historyRequestedRef.current) return;
+    historyRequestedRef.current = true;
+
+    const s = await waitUntilConnected(4000);
+    if (!s) {
+      setError('تعذّر الاتصال بالخادم. تحقّق من تسجيل الدخول أو إعداد عنوان الخادم.');
+      setLoading(false);
+      return;
+    }
+    s.emit('loadMessages', { recipientId, limit: 100 });
+  };
+
+  // الاشتراكات
   useEffect(() => {
-    if (!token || !recipientId) return;
+    setLoading(true);
+    setError('');
+    knownIdsRef.current.clear();
+    knownTempRef.current.clear();
+    historyRequestedRef.current = false;
+
+    if (!token || !recipientId) {
+      setError('بيانات غير مكتملة لبدء المحادثة.');
+      setLoading(false);
+      return;
+    }
+
     const s = connectSocket(token);
 
-    // طلب التاريخ
-    s.emit('loadMessages', { recipientId, limit: 100 });
+    const onConnect = () => {
+      setError('');
+      requestHistory();
+    };
+    const onConnectError = (err) => {
+      // رسائل أوضح (مثلاً Authentication error من السيرفر)
+      setError(err?.message || 'تعذّر الاتصال.');
+      setLoading(false);
+    };
+    const onDisconnect = () => {
+      setError('انقطع الاتصال… جارِ إعادة المحاولة');
+      setLoading(true);
+    };
+    const onReconnect = () => {
+      setError('');
+      setLoading(true);
+      historyRequestedRef.current = false;
+      clearTimeout(reconnectTimerRef.current);
+      reconnectTimerRef.current = setTimeout(requestHistory, 300);
+    };
 
     const onHistory = (list) => {
       const normalized = (Array.isArray(list) ? list : []).map((m) => {
@@ -54,14 +97,13 @@ const ChatBox = ({ recipientId, className = '' }) => {
       });
       setMessages(normalized);
       setLoading(false);
+      setError('');
     };
 
     const onReceive = (msg) => {
-      // منع التكرار
       if (msg?._id && knownIdsRef.current.has(String(msg._id))) return;
       if (msg?.tempId && knownTempRef.current.has(String(msg.tempId))) return;
 
-      // استبدال التفاؤلي إذا جاء tempId مطابق
       if (msg?.tempId) {
         setMessages((prev) => {
           const i = prev.findIndex((x) => x.tempId === msg.tempId);
@@ -83,7 +125,6 @@ const ChatBox = ({ recipientId, className = '' }) => {
     };
 
     const onSent = (msg) => {
-      // تأكيد للمرسل ليستبدل التفاؤلي
       if (msg?.tempId) {
         setMessages((prev) => {
           const i = prev.findIndex((x) => x.tempId === msg.tempId);
@@ -109,26 +150,37 @@ const ChatBox = ({ recipientId, className = '' }) => {
       typingTimeoutRef.current = setTimeout(() => setIsTyping(false), 1200);
     };
 
-    const onError = (payload) => {
-      console.warn('[socket:error]', payload?.message || payload);
+    const onServerError = (payload) => {
+      setError(payload?.message || 'حدث خطأ في المحادثة.');
+      setLoading(false);
     };
 
+    s.on('connect', onConnect);
+    s.on('connect_error', onConnectError);
+    s.on('disconnect', onDisconnect);
+    s.on('reconnect', onReconnect);
     s.on('chatHistory', onHistory);
     s.on('receiveMessage', onReceive);
     s.on('messageSent', onSent);
     s.on('typing', onTyping);
-    s.on('error', onError);
+    s.on('error', onServerError);
+
+    if (s.connected) requestHistory();
 
     return () => {
+      clearTimeout(reconnectTimerRef.current);
+      s.off('connect', onConnect);
+      s.off('connect_error', onConnectError);
+      s.off('disconnect', onDisconnect);
+      s.off('reconnect', onReconnect);
       s.off('chatHistory', onHistory);
       s.off('receiveMessage', onReceive);
       s.off('messageSent', onSent);
       s.off('typing', onTyping);
-      s.off('error', onError);
+      s.off('error', onServerError);
     };
   }, [token, recipientId]);
 
-  // إرسال مؤشر الكتابة (rate-limit)
   const sendTyping = () => {
     const now = Date.now();
     if (now - typingSentAtRef.current > 800) {
@@ -138,7 +190,6 @@ const ChatBox = ({ recipientId, className = '' }) => {
     }
   };
 
-  // إرسال رسالة
   const sendMessage = (e) => {
     e?.preventDefault?.();
     const text = input.trim();
@@ -166,13 +217,8 @@ const ChatBox = ({ recipientId, className = '' }) => {
     setInput('');
     setSending(true);
 
-    s.emit('sendMessage', {
-      recipientId,
-      content: text,
-      type: 'chat',
-    });
+    s.emit('sendMessage', { recipientId, content: text, type: 'chat', tempId });
 
-    // fallback لإزالة pending إن لم يصل تأكيد
     setTimeout(() => {
       setMessages((prev) =>
         prev.map((m) => (m.tempId === tempId ? { ...m, pending: false } : m)),
@@ -183,7 +229,7 @@ const ChatBox = ({ recipientId, className = '' }) => {
   };
 
   return (
-    <div className={`chatbox card shadow-sm ${className}`} dir="rtl">
+    <div className={`chatbox chatbox-container card shadow-sm ${className}`} dir="rtl">
       <div className="card-header bg-white d-flex align-items-center justify-content-between">
         <div className="fw-bold">
           <i className="fas fa-comments ms-2 text-primary" />
@@ -192,16 +238,16 @@ const ChatBox = ({ recipientId, className = '' }) => {
         {isTyping && <small className="text-muted">يكتب الآن…</small>}
       </div>
 
-      <div
-        ref={listRef}
-        className="card-body p-2"
-        style={{ height: 360, overflowY: 'auto', background: '#fafafa' }}
-      >
+      <div ref={listRef} className="card-body p-2 messages-area">
         {loading ? (
           <div className="text-center py-5">
             <Spinner animation="border" />
             <div className="mt-2 text-muted">جارٍ تحميل المحادثة…</div>
           </div>
+        ) : error ? (
+          <Alert variant="warning" className="mx-auto" style={{ maxWidth: 520 }}>
+            {error}
+          </Alert>
         ) : messages.length === 0 ? (
           <div className="text-center text-muted py-5">ابدأ المحادثة…</div>
         ) : (
@@ -211,7 +257,7 @@ const ChatBox = ({ recipientId, className = '' }) => {
             return (
               <div
                 key={m._id || m.tempId}
-                className={`d-flex mb-2 ${mine ? 'justify-content-end' : 'justify-content-start'}`}
+                className={`chatbox-messages d-flex mb-2 ${mine ? 'justify-content-end' : 'justify-content-start'}`}
               >
                 {!mine && (
                   <img
@@ -229,7 +275,7 @@ const ChatBox = ({ recipientId, className = '' }) => {
                   <div style={{ whiteSpace: 'pre-wrap' }}>{m.content}</div>
                   <div className={`small mt-1 ${mine ? 'text-white-50' : 'text-muted'}`}>
                     {fmtTime(m.timestamp)}
-                    {m.pending && <span className="ms-2">…إرسال</span>}
+                    {m.pending ? <span className="ms-2">…إرسال</span> : <span className="ms-2">✓</span>}
                   </div>
                 </div>
               </div>
@@ -247,9 +293,12 @@ const ChatBox = ({ recipientId, className = '' }) => {
             style={{ resize: 'none' }}
             placeholder="اكتب رسالتك…"
             value={input}
-            onChange={(e) => {
-              setInput(e.target.value);
-              sendTyping();
+            onChange={(e) => { setInput(e.target.value); sendTyping(); }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+              }
             }}
           />
           <Button type="submit" variant="success" disabled={!input.trim()} title="إرسال">
@@ -267,4 +316,3 @@ ChatBox.propTypes = {
 };
 
 export default ChatBox;
-// client/src/components/Header.js
