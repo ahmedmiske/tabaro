@@ -16,6 +16,7 @@
   --main-color-hover: #66BB6A;
   --main-color-active: #388E3C;
   --main-color: #4CAF50;
+  --color-border:  #dfe2e2;
   --main-color-alt: #2E7D32;
   --main-color-fundo: #EFEFEF;
   --color-primary: #1E88E5;
@@ -46,7 +47,7 @@ body {
 
 .page-wrapper {
   width: 100%;
-  padding: 0 40px 80px 40px;
+  padding: 0 ;
   margin:0 ;
   flex: 1;
 

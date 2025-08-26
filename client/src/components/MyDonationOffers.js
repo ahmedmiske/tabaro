@@ -89,7 +89,7 @@ const MyDonationOffers = () => {
   if (offers.length === 0) return <p>لم تقم بإرسال أي عروض تبرع بعد.</p>;
 
   return (
-    <div className="my-donation-offers mt-4">
+    <div className="my-donation-offers ">
       <h5 className="text-center mb-3">
         <i className="fas fa-hand-holding-heart me-2"></i>عروضي على طلبات التبرع
       </h5>

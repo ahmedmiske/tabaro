@@ -1,3 +1,4 @@
+// src/components/Header.jsx
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -7,7 +8,7 @@ import {
   FaHome, FaBullhorn, FaDonate, FaHandHoldingHeart, FaTint,
   FaBullseye, FaUserShield, FaPlus, FaSignInAlt, FaUserCircle, FaBell
 } from 'react-icons/fa';
-import socket from '../socket'; // ✅ من frontend
+import { getSocket } from '../socket';
 import { useAuth } from '../AuthContext';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import './Header.css';
@@ -26,40 +27,40 @@ function Header() {
     navigate('/');
   };
 
-  // ✅ جلب عدد الإشعارات غير المقروءة
+  // جلب عدد الإشعارات غير المقروءة
   useEffect(() => {
     const fetchUnread = async () => {
       try {
-        const res = await fetchWithInterceptors('/api/users/notifications/unread-count');
+        const res = await fetchWithInterceptors('/api/notifications/unread-count');
         if (res.ok) setUnreadCount(res.body?.count || 0);
       } catch (err) {
         console.error('❌ فشل في جلب الإشعارات:', err.message);
       }
     };
-
     if (user) fetchUnread();
   }, [user]);
 
-  // ✅ استقبال رسالة جديدة عبر socket
+  // استقبال رسالة جديدة عبر socket
   useEffect(() => {
     if (!user) return;
-
     const currentUserId = user._id;
+    const s = getSocket();
+    if (!s) return; // الاتصال يُنشأ في App
 
-    socket.on('receiveMessage', (message) => {
-      if (message.sender === currentUserId) return;
-      console.log('📥 Received message:', message); 
+    const handler = (message) => {
+      if (message.sender === currentUserId) return; // تجاهل رسائلك
       setNewMessage(message);
       setShowToast(true);
       setTimeout(() => setShowToast(false), 5000);
-    });
+    };
 
-    return () => socket.off('receiveMessage');
+    s.on('receiveMessage', handler);
+    return () => s.off('receiveMessage', handler);
   }, [user]);
 
   return (
     <>
-      {/* ✅ Toast للرسائل الجديدة */}
+      {/* Toast للرسائل الجديدة */}
       <ToastContainer position="bottom-start" className="p-3">
         <Toast
           bg="info"
@@ -101,26 +102,16 @@ function Header() {
                   {user.firstName} 👋 مرحبًا
                 </span>
 
-                {/* ✅ زر الجرس */}
-               <Button
-  as={Link}
-  to="/notifications"
-  className="position-relative"
->
-  <FaBell />
-  {(unreadCount > 0 || newMessage) && (
-    <Badge pill bg="danger" className="position-absolute top-0 start-100 translate-middle">
-      {unreadCount + (newMessage ? 1 : 0)}
-    </Badge>
-  )}
-</Button>
+                <Button as={Link} to="/notifications" className="position-relative">
+                  <FaBell />
+                  {(unreadCount > 0 || newMessage) && (
+                    <Badge pill bg="danger" className="position-absolute top-0 start-100 translate-middle">
+                      {unreadCount + (newMessage ? 1 : 0)}
+                    </Badge>
+                  )}
+                </Button>
 
-
-                <Button
-                  variant="outline-secondary auth-button"
-                  as={Link}
-                  to="/profile"
-                >
+                <Button variant="outline-secondary auth-button" as={Link} to="/profile">
                   <FaUserCircle className="auth-icon" /> الصفحة الشخصية
                 </Button>
                 <Button variant="outline-danger auth-button" onClick={handleLogout}>
@@ -142,6 +133,9 @@ function Header() {
             <NavDropdown title={<><FaDonate className="nav-icon" /> التبرعات</>} id="donation-dropdown" className="link-nav">
               <NavDropdown.Item as={Link} to="/donation-requests">
                 <FaHandHoldingHeart className="nav-icon" /> طلب تبرع
+              </NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/donations">
+                <FaHandHoldingHeart className="nav-icon" />  طلبات التبرع
               </NavDropdown.Item>
               <NavDropdown.Item as={Link} to="/donation-offers">
                 <FaHandHoldingHeart className="nav-icon" /> عرض تبرع
@@ -181,5 +175,3 @@ function Header() {
 }
 
 export default Header;
-// This component represents the header of the application.
-// It includes navigation links, user authentication buttons, and a notification system.

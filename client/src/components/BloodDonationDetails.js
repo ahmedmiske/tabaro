@@ -1,78 +1,45 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+// src/pages/BloodDonationDetails.jsx
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
-  Card, Button, Spinner, ListGroup, Image,
-  Modal, Toast, ToastContainer
+  Card, Button, Spinner, ListGroup, Badge, Alert, ProgressBar,
+  OverlayTrigger, Tooltip
 } from 'react-bootstrap';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
-import ChatBox from '../components/ChatBox';
+import ChatBox from './ChatBox';
 import socket from '../socket';
-import DonationOffersForRequest from '../components/DonationOffersForRequest';
+import DonationOffersForRequest from './DonationOffersForRequest';
 import './BloodDonationDetails.css';
+
+const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 const BloodDonationDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+
   const [donation, setDonation] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const [timeLeft, setTimeLeft] = useState('');
   const [donationStatus, setDonationStatus] = useState('');
   const [showChat, setShowChat] = useState(false);
-  const [showToast, setShowToast] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [selectedType, setSelectedType] = useState('');
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [timeLeft, setTimeLeft] = useState('');
+  const [existingOffer, setExistingOffer] = useState(null);
+  const [infoMessage, setInfoMessage] = useState('');
+  const [showOfferConfirm, setShowOfferConfirm] = useState(false);
+  const [sendingOffer, setSendingOffer] = useState(false);
 
-  const currentUser = JSON.parse(localStorage.getItem('user'));
+  const currentUser = useMemo(() => JSON.parse(localStorage.getItem('user') || '{}'), []);
   const currentUserId = currentUser?._id;
 
-  const openPreview = (fileUrl, type) => {
-    setSelectedFile(fileUrl);
-    setSelectedType(type);
-    setShowModal(true);
-  };
+  const initialDeadlineRef = useRef(null);
 
-  const closePreview = () => {
-    setShowModal(false);
-    setSelectedFile(null);
-    setSelectedType('');
-  };
-
-  const handleSendDonationOffer = async () => {
-    try {
-      const res = await fetchWithInterceptors('/api/donation-confirmations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          donor: currentUserId,
-          requestId: donation._id,
-          recipientId: donation.userId._id,
-          message: 'أرغب بالتبرع',
-          method: 'call',
-          proposedTime: new Date()
-        })
-      });
-
-   if (res.ok) {
-  socket.emit('sendMessage', {
-    recipientId: donation.userId._id,
-    content: `🩸 ${currentUser.firstName} ${currentUser.lastName} عرض التبرع لك لطلب فصيلة ${donation.bloodType}`,
-    requestId: donation._id // ✅ مهم لربط الرسالة بالطلب
-  });
-
-  setDonationStatus('initiated');
-  setShowToast(true);
-}
-
-    } catch (err) {
-      console.error('فشل إرسال عرض التبرع:', err);
-    }
-  };
+  const formatDate = (date) =>
+    new Date(date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
   const calculateTimeLeft = (deadline) => {
     const diff = new Date(deadline) - new Date();
+    if (isNaN(diff)) return '—';
     if (diff <= 0) return '⛔ انتهت المهلة';
-
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
     const minutes = Math.floor((diff / 1000 / 60) % 60);
@@ -80,183 +47,443 @@ const BloodDonationDetails = () => {
     return `${days}ي ${hours}س ${minutes}د ${seconds}ث`;
   };
 
-  useEffect(() => {
-    const fetchDonation = async () => {
-      try {
-        const res = await fetchWithInterceptors(`/api/blood-requests/${id}`);
-        if (res.ok) {
-          setDonation(res.body);
-          setDonationStatus(res.body.donationStatus || '');
+  const isRequestActive = (deadline) => {
+    if (!deadline) return false;
+    const now = new Date();
+    return new Date(deadline) >= now;
+  };
+
+  const active = isRequestActive(donation?.deadline);
+  const isOwner = donation?.userId?._id === currentUserId || donation?.userId === currentUserId;
+  const recipientId = typeof donation?.userId === 'object' ? donation?.userId?._id : donation?.userId;
+
+  const progressValue = React.useMemo(() => {
+    if (!donation?.createdAt || !donation?.deadline) return 0;
+    const start = new Date(donation.createdAt).getTime();
+    const end = new Date(donation.deadline).getTime();
+    const now = Date.now();
+    if (isNaN(start) || isNaN(end) || end <= start) return 0;
+    const ratio = Math.min(1, Math.max(0, (now - start) / (end - start)));
+    return Math.round(ratio * 100);
+  }, [donation?.createdAt, donation?.deadline, timeLeft]);
+
+  /** توحيد عرض الوثائق (documents الجديدة + files القديمة) */
+  const makeDocs = (don) => {
+    if (Array.isArray(don?.documents) && don.documents.length) {
+      return don.documents.map(d => {
+        const raw = String(d.url || '');
+        const absolute = /^https?:\/\//i.test(raw);
+        const url = absolute ? raw : `${API_BASE}${raw.startsWith('/') ? raw : `/${raw}`}`;
+        const name = d.originalName || d.filename || url.split('/').pop();
+        return { url, name, isPdf: /\.pdf($|\?)/i.test(url) };
+      });
+    }
+    if (Array.isArray(don?.files) && don.files.length) {
+      return don.files.map((f) => {
+        const v = String(f || '');
+        const absolute = /^https?:\/\//i.test(v);
+        const url = absolute ? v : `${API_BASE}/uploads/blood-requests/${v}`;
+        const name = url.split('/').pop();
+        return { url, name, isPdf: /\.pdf($|\?)/i.test(url) };
+      });
+    }
+    return [];
+  };
+
+  const checkExistingOffer = async () => {
+    try {
+      const res = await fetchWithInterceptors(`/api/donation-confirmations/request/${id}`);
+      if (res.ok) {
+        const offers = res.body || [];
+        const myOffer = offers.find(o => o.donor?._id === currentUserId);
+        if (myOffer) {
+          setExistingOffer(myOffer);
+          if (['pending', 'accepted', 'in_progress', 'announced'].includes(myOffer.status)) {
+            setInfoMessage(`لقد أعلنت/أرسلت عرضًا سابقًا. الحالة: ${myOffer.status}`);
+          }
+        } else {
+          setExistingOffer(null);
         }
-      } catch {
-        console.error('خطأ في جلب البيانات');
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch { /* صامت */ }
+  };
+
+  const fetchDonation = async () => {
+    setLoading(true);
+    setLoadError('');
+    try {
+      const res = await fetchWithInterceptors(`/api/blood-requests/${id}`);
+      if (res.ok) {
+        setDonation(res.body);
+        setDonationStatus(res.body?.donationStatus || '');
+        initialDeadlineRef.current = res.body?.deadline || null;
+      } else {
+        setLoadError('تعذر تحميل الطلب. حاول مجددًا.');
+      }
+    } catch {
+      setLoadError('حدث خطأ غير متوقع أثناء تحميل البيانات.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const requireAuth = () => {
+    const token =
+      localStorage.getItem('token') ||
+      (JSON.parse(localStorage.getItem('user') || '{}')?.token) ||
+      null;
+    if (!token) {
+      setInfoMessage('⚠️ تحتاج لتسجيل الدخول لإرسال إعلان التبرع.');
+      return false;
+    }
+    return true;
+  };
+
+  const handleConfirmSendDonationOffer = async () => {
+    if (!donation || !recipientId || sendingOffer) return;
+    if (!requireAuth()) return;
+    setSendingOffer(true);
+    try {
+      const res = await fetchWithInterceptors('/api/donation-confirmations', {
+        method: 'POST',
+        body: JSON.stringify({
+          requestId: donation._id,
+          message: 'أرغب بالتبرع',
+          method: 'call',
+          proposedTime: new Date()
+        })
+      });
+
+      if (res.ok) {
+        setInfoMessage('✅ تم إعلان التبرع — يمكنك الآن متابعة التواصل والتنفيذ.');
+        socket.emit('sendMessage', {
+          recipientId,
+          content: `🩸 ${currentUser?.firstName || 'متبرّع'} أعلن تبرعًا لطلب فصيلة ${donation.bloodType}`,
+          requestId: donation._id,
+          offerId: null,
+          type: 'offer'
+        });
+
+        setDonationStatus('announced');
+        setShowOfferConfirm(false);
+        if (res.body?.confirmation) setExistingOffer(res.body.confirmation);
+        await checkExistingOffer();
+      } else {
+        setInfoMessage(res.body?.message || '⚠️ لم يتم الإعلان. حاول لاحقًا.');
+      }
+    } catch (err) {
+      if (err?.status === 401) {
+        setInfoMessage('⚠️ غير مصرح. يرجى تسجيل الدخول ثم المحاولة.');
+      } else {
+        setInfoMessage('⚠️ خطأ في الإرسال. تحقق من الاتصال وحاول مجددًا.');
+      }
+    } finally {
+      setSendingOffer(false);
+    }
+  };
+
+  const handleShare = async () => {
+    const shareUrl = `${window.location.origin}/blood-donation-details/${id}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'طلب تبرع بالدم', url: shareUrl });
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        setInfoMessage('🔗 تم نسخ الرابط للمشاركة.');
+      }
+    } catch {}
+  };
+
+  const handleReport = () => {
+    setInfoMessage('📣 تم استلام بلاغك. سنراجعه قريبًا.');
+  };
+
+  useEffect(() => {
     fetchDonation();
+    checkExistingOffer();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   useEffect(() => {
     if (!donation?.deadline) return;
+    setTimeLeft(calculateTimeLeft(donation.deadline));
     const interval = setInterval(() => {
       setTimeLeft(calculateTimeLeft(donation.deadline));
     }, 1000);
     return () => clearInterval(interval);
   }, [donation?.deadline]);
 
-  if (loading) return <div className="text-center mt-5"><Spinner animation="border" /></div>;
-  if (!donation) return <p>لا يوجد طلب.</p>;
+  if (loading) {
+    return (
+      <div className="text-center mt-5">
+        <Spinner animation="border" />
+        <div className="mt-2 text-muted">جاري التحميل…</div>
+      </div>
+    );
+  }
 
-  const isOwner = donation.userId?._id === currentUserId;
+  if (loadError) {
+    return (
+      <div className="text-center mt-4">
+        <Alert variant="danger" className="d-inline-block text-start">
+          {loadError}
+          <div className="mt-2 d-flex gap-2">
+            <Button size="sm" variant="danger" onClick={fetchDonation}>إعادة المحاولة</Button>
+            <Button size="sm" variant="secondary" onClick={() => navigate(-1)}>العودة</Button>
+          </div>
+        </Alert>
+      </div>
+    );
+  }
+
+  if (!donation) return <p className="mt-4 text-center">لا يوجد طلب.</p>;
+
+  const canShowContacts =
+    isOwner || ['announced','accepted','fulfilled','rated'].includes(existingOffer?.status);
+  const docs = makeDocs(donation);
 
   return (
-    <div className="blood-details-container">
+    <div className="blood-details-container mt-4" dir="rtl">
       <Card className="details-card shadow">
+        <div className="ribbon-container">
+          {!active && <span className="ribbon ribbon-closed">غير نشط</span>}
+          {donation?.isUrgent && <span className="ribbon ribbon-urgent">مستعجل</span>}
+        </div>
+
         <Card.Header className="text-center card-header text-white">
-          <h4><i className="fas fa-tint me-2"></i>تفاصيل طلب التبرع</h4>
-        </Card.Header>
-        <Card.Body dir="rtl">
-          <ListGroup variant="flush">
-            <ListGroup.Item><strong>فصيلة الدم:</strong> {donation.bloodType}</ListGroup.Item>
-            <ListGroup.Item><strong>الحالة:</strong> {donation.isUrgent ? <span className="text-danger fw-bold">مستعجل</span> : 'عادي'}</ListGroup.Item>
-            <ListGroup.Item><strong>الموقع:</strong> {donation.location || 'غير محدد'}</ListGroup.Item>
-
-            {donation.deadline && (
-              <ListGroup.Item>
-                <strong>⏳ آخر أجل:</strong> {new Date(donation.deadline).toLocaleString()}
-                <div className="text-danger mt-2">
-                  ⏱️ الوقت المتبقي: {timeLeft}
-                </div>
-              </ListGroup.Item>
+          <h4 className="mb-0">
+            <i className="fas fa-tint ms-2"></i>
+            تفاصيل طلب التبرع بالدم
+          </h4>
+          <div className="subhead mt-1">
+            <Badge bg={active ? 'success' : 'secondary'} className="me-1">
+              {active ? 'نشط' : 'غير نشط'}
+            </Badge>
+            {existingOffer?.status && (
+              <Badge bg="info" className="me-1">
+                حالة إعلانك/عرضك: {existingOffer.status}
+              </Badge>
             )}
+          </div>
+        </Card.Header>
 
-            {isOwner || donationStatus === 'accepted' ? (
+        <Card.Body>
+          <Alert variant="light" className="mt-0 mb-3">
+            📝 <strong>نصيحة:</strong> من الأفضل توثيق عملية التبرع داخل المنصّة (رفع إثبات/تأكيد) وإضافة تقييم بعد التنفيذ. هذا يعزّز موثوقيتك ويزيد من ظهور منشوراتك.
+          </Alert>
+
+          <div className="deadline-box">
+            <div className="deadline-row">
+              <span className="label">⏳ آخر أجل:</span>
+              <Badge bg="danger" className="ms-2">{formatDate(donation.deadline)}</Badge>
+            </div>
+
+            <div className="timeleft">
+              <i className="far fa-clock ms-1" />
+              <strong>الوقت المتبقي:</strong>
+              <span className={`ms-2 ${!active ? 'text-danger' : 'text-dark fw-semibold'}`}>
+                {timeLeft}
+              </span>
+            </div>
+
+            <OverlayTrigger placement="top" overlay={<Tooltip>نسبة الوقت المنقضي منذ النشر</Tooltip>}>
+              <div>
+                <ProgressBar
+                  now={progressValue}
+                  label={`${progressValue}%`}
+                  className="time-progress"
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={progressValue}
+                />
+              </div>
+            </OverlayTrigger>
+          </div>
+
+          <ListGroup variant="flush" className="mt-3">
+            <ListGroup.Item className="publisher-wrapper">
+              <div
+                className={`publisher-card hoverable ${isOwner ? 'is-owner no-avatar' : ''}`}
+                onClick={() => donation?.userId?._id && navigate(`/profile/${donation.userId._id}`)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && donation?.userId?._id && navigate(`/profile/${donation.userId._id}`)}
+                aria-label="فتح ملف الناشر"
+                title={isOwner ? 'أنت صاحب الطلب' : 'اضغط لمعاينة الملف الشخصي'}
+              >
+                {!isOwner && (
+                  <img
+                    src={
+                      donation?.userId?.profileImage
+                        ? `/uploads/profileImages/${donation.userId.profileImage}`
+                        : '/default-avatar.png'
+                    }
+                    alt="صورة الناشر"
+                    className="pub-avatar"
+                    onError={(e) => { e.currentTarget.src = '/default-avatar.png'; }}
+                  />
+                )}
+
+                <div className="pub-info">
+                  <div className="pub-name d-flex align-items-center gap-2">
+                    <span>
+                      {donation.userId?.firstName || ''} {donation.userId?.lastName || ''}
+                    </span>
+                    {isOwner && <Badge bg="secondary">أنت</Badge>}
+                  </div>
+                  {!isOwner && (
+                    <div className="publisher-extra">
+                      <small className="text-muted">اضغط لمعاينة الملف الشخصي</small>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </ListGroup.Item>
+
+            <ListGroup.Item><strong>فصيلة الدم:</strong> {donation.bloodType}</ListGroup.Item>
+            <ListGroup.Item>
+              <strong>الحالة:</strong> {donation.isUrgent ? <span className="text-danger fw-bold">مستعجل</span> : 'عادي'}
+            </ListGroup.Item>
+            <ListGroup.Item><strong>📍 الموقع:</strong> {donation.location || 'غير محدد'}</ListGroup.Item>
+            <ListGroup.Item><strong>📅 تاريخ الإضافة:</strong> {formatDate(donation.createdAt)}</ListGroup.Item>
+
+            {canShowContacts ? (
               <ListGroup.Item>
                 <strong>📞 وسائل التواصل:</strong>
-                <ul>
-                  {donation.contactMethods?.map((method, index) => (
-                    <li key={index}>{method.method}: {method.number}</li>
-                  ))}
-                </ul>
+                {donation.contactMethods?.length ? (
+                  <ul className="mb-0 mt-2">
+                    {donation.contactMethods.map((m, i) => (
+                      <li key={i}>{m.method}: {m.number}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="text-muted">لا توجد وسائل مضافة.</div>
+                )}
               </ListGroup.Item>
             ) : (
               <ListGroup.Item className="text-muted">
-                🛡️ سيتم عرض وسائل التواصل فقط بعد موافقة صاحب الطلب على عرض التبرع.
+                🛡️ ستظهر وسائل التواصل بعد إعلان/إرسال التبرع أو لصاحب الطلب.
               </ListGroup.Item>
             )}
 
-            <ListGroup.Item><strong>تاريخ الإضافة:</strong> {new Date(donation.createdAt).toLocaleDateString()}</ListGroup.Item>
-            <ListGroup.Item><strong>الناشر:</strong> {donation.userId?.firstName} {donation.userId?.lastName}</ListGroup.Item>
-
-            {donation.files?.length > 0 && (
+            {!!docs.length && (
               <ListGroup.Item>
-                <strong>📎 الوثائق الداعمة:</strong>
-                <div className="docs-preview mt-3 d-flex flex-wrap gap-3">
-                  {donation.files.map((file, i) => {
-                    const ext = file.split('.').pop().toLowerCase();
-                    const isImage = ['jpg', 'jpeg', 'png', 'webp'].includes(ext);
-                    const fileUrl = `http://localhost:5000/uploads/blood-requests/${file}`;
-                    return (
-                      <div key={i} className="doc-box text-center border p-2 rounded shadow-sm">
-                        {isImage ? (
-                          <>
-                            <Image src={fileUrl} thumbnail width={100} height={100} />
-                            <div className="small text-muted mt-1">صورة {i + 1}</div>
-                            <Button size="sm" variant="outline-primary" onClick={() => openPreview(fileUrl, 'image')}>
-                              <i className="fas fa-eye me-1"></i>معاينة
-                            </Button>
-                          </>
+                <strong>📎 وثائق داعمة:</strong>
+                <div className="docs-grid mt-2">
+                  {docs.map((d, idx) => (
+                    <div className="doc-tile" key={idx}>
+                      <div className="doc-thumb">
+                        {d.isPdf ? (
+                          <i className="far fa-file-pdf pdf-icon-big" aria-hidden="true"></i>
                         ) : (
-                          <>
-                            <i className="fas fa-file-pdf fa-3x text-danger mb-2"></i>
-                            <div className="small text-muted mb-1">وثيقة {i + 1}</div>
-                            <div className="d-flex justify-content-center gap-2">
-                              <Button size="sm" variant="outline-primary" onClick={() => openPreview(fileUrl, 'pdf')}>
-                                <i className="fas fa-eye me-1"></i>معاينة
-                              </Button>
-                              <a href={fileUrl} download className="btn btn-sm btn-outline-success">
-                                <i className="fas fa-download me-1"></i>تحميل
-                              </a>
-                            </div>
-                          </>
+                          <img
+                            src={d.url}
+                            alt={d.name}
+                            loading="lazy"
+                            onError={(e) => { e.currentTarget.replaceWith(Object.assign(document.createElement('i'), { className: 'far fa-file generic-icon' })); }}
+                          />
                         )}
                       </div>
-                    );
-                  })}
+                      <div className="doc-name" title={d.name}>{d.name}</div>
+                      <div className="doc-actions">
+                        <a className="btn btn-sm btn-outline-primary" href={d.url} target="_blank" rel="noreferrer">عرض</a>
+                        <a className="btn btn-sm btn-outline-secondary" href={d.url} download>تنزيل</a>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </ListGroup.Item>
             )}
           </ListGroup>
 
-          <div className="text-center mt-4 d-flex gap-3 justify-content-center flex-wrap">
-            <Link to="/donations" className="btn btn-outline-secondary">العودة</Link>
+          <div className="actions-row mt-4 d-flex gap-2 justify-content-center flex-wrap">
+            <button className="btn-fab" onClick={() => navigate(-1)} title="رجوع">
+              <i className="fas fa-arrow-right" />
+            </button>
+            <button className="btn-fab" onClick={handleShare} title="مشاركة">
+              <i className="fas fa-share-nodes" />
+            </button>
+            <button className="btn-fab warning" onClick={handleReport} title="إبلاغ">
+              <i className="fas fa-flag" />
+            </button>
 
-            {!isOwner && (
-              <Button variant={showChat ? 'danger' : 'success'} onClick={() => setShowChat(!showChat)}>
-                <i className="fas fa-comments ms-2"></i>{showChat ? 'إغلاق المحادثة' : 'تحدث مع صاحب الطلب'}
-              </Button>
+            {!isOwner && recipientId && (
+              <button
+                className={`btn-fab ${showChat ? 'danger' : 'success'}`}
+                onClick={() => setShowChat(!showChat)}
+                title={showChat ? 'إغلاق المحادثة' : 'تحدث مع صاحب الطلب'}
+              >
+                <i className="fas fa-comments" />
+              </button>
             )}
 
-            {!isOwner && donationStatus !== 'accepted' && (
-              <Button variant="info" onClick={() => setShowConfirmModal(true)}>
-                <i className="fas fa-hand-holding-heart ms-2"></i>تبرع الآن
-              </Button>
+            {!isOwner && !existingOffer && active && (
+              <button
+                className="btn-fab donate"
+                onClick={() => setShowOfferConfirm(true)}
+                disabled={sendingOffer}
+                title="تبرع الآن"
+              >
+                <i className="fas fa-hand-holding-heart" />
+              </button>
+            )}
+
+            {!active && !isOwner && (
+              <OverlayTrigger placement="top" overlay={<Tooltip>الطلب منتهي</Tooltip>}>
+                <span>
+                  <button className="btn-fab donate" disabled aria-disabled title="غير متاح">
+                    <i className="fas fa-hand-holding-heart" />
+                  </button>
+                </span>
+              </OverlayTrigger>
             )}
           </div>
 
-          {showChat && (
+          {showOfferConfirm && (
+            <Alert variant="light" className="mt-4 border shadow-sm">
+              <h6 className="fw-bold">تأكيد إعلان التبرع</h6>
+              <p className="mb-2">
+                سيتم إشعار صاحب الطلب بإعلان تبرعك، وستظهر وسائل التواصل للطرفين داخل المنصّة. هل ترغب في المتابعة؟
+              </p>
+              <div className="d-flex gap-2 flex-wrap">
+                <Button
+                  variant="success"
+                  size="sm"
+                  onClick={handleConfirmSendDonationOffer}
+                  disabled={sendingOffer}
+                >
+                  {sendingOffer ? '...جارٍ التأكيد' : '✅ تأكيد'}
+                </Button>
+                <Button variant="secondary" size="sm" onClick={() => setShowOfferConfirm(false)}>
+                  إلغاء
+                </Button>
+              </div>
+            </Alert>
+          )}
+
+          {!!infoMessage && (
+            <Alert
+              variant="info"
+              className="mt-3 d-flex justify-content-between align-items-center"
+              role="status"
+            >
+              <div>{infoMessage}</div>
+              <Button variant="outline-secondary" size="sm" onClick={() => setInfoMessage('')}>×</Button>
+            </Alert>
+          )}
+
+          {showChat && recipientId && (
             <div className="mt-4">
-              <h5 className="text-center mb-3">محادثة مع {donation.userId?.firstName}</h5>
-              <ChatBox recipientId={donation.userId?._id} />
+              <h5 className="text-center mb-3">محادثة مع {donation.userId?.firstName || 'الناشر'}</h5>
+              <ChatBox recipientId={recipientId} />
             </div>
           )}
         </Card.Body>
       </Card>
 
-      {isOwner && (
-        <DonationOffersForRequest />
-      )}
-
-      <Modal show={showModal} onHide={closePreview} centered size="lg">
-        <Modal.Header closeButton><Modal.Title>معاينة الوثيقة</Modal.Title></Modal.Header>
-        <Modal.Body className="text-center">
-          {selectedType === 'image' ? (
-            <Image src={selectedFile} fluid />
-          ) : (
-            <iframe src={selectedFile} width="100%" height="500px" title="PDF Preview" />
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={closePreview}>إغلاق</Button>
-        </Modal.Footer>
-      </Modal>
-
-      <Modal show={showConfirmModal} onHide={() => setShowConfirmModal(false)} centered>
-        <Modal.Header closeButton><Modal.Title>تأكيد التبرع</Modal.Title></Modal.Header>
-        <Modal.Body>
-          <p>✅ سيتم إرسال عرضك لصاحب الطلب.</p>
-          <p>⚠️ لن تُعرض بيانات التواصل حتى يقبل صاحب الطلب عرضك.</p>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowConfirmModal(false)}>إلغاء</Button>
-          <Button variant="primary" onClick={() => {
-            handleSendDonationOffer();
-            setShowConfirmModal(false);
-          }}>تأكيد</Button>
-        </Modal.Footer>
-      </Modal>
-
-      <ToastContainer position="bottom-start" className="p-3">
-        <Toast bg="success" show={showToast} onClose={() => setShowToast(false)} delay={4000} autohide>
-          <Toast.Header><strong className="me-auto">تم الإرسال</strong></Toast.Header>
-          <Toast.Body className="text-white">تم إرسال العرض، بانتظار الموافقة.</Toast.Body>
-        </Toast>
-      </ToastContainer>
+      {isOwner && <DonationOffersForRequest />}
     </div>
   );
 };
 
 export default BloodDonationDetails;
-// This component displays the details of a specific blood donation request.
-// It allows users to view the request details, contact the requester, and send a donation offer

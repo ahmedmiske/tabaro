@@ -1,57 +1,39 @@
-const mongoose = require('mongoose');
+// server/models/bloodRequest.js
+const mongoose = require("mongoose");
 
-// ✅ مخطط لطرق التواصل المرتبطة بالطلب
-const contactMethodSchema = new mongoose.Schema({
-  method: {
-    type: String,
-    required: true,
+const DocumentSchema = new mongoose.Schema(
+  {
+    originalName: String,
+    filename: String, // الاسم على القرص
+    mimeType: String,
+    size: Number,
+    url: String, // مسار الوصول الجاهز للواجهة /uploads/...
   },
-  number: {
-    type: String,
-    required: true,
-  },
-});
+  { _id: false },
+);
 
-// ✅ مخطط طلب التبرع بالدم
-const bloodRequestSchema = new mongoose.Schema({
-  bloodType: {
-    type: String,
-    required: true,
-  },
-  location: {
-    type: String,
-    required: true,
-  },
-  deadline: {
-    type: Date,
-    required: true,
-  },
-  description: {
-    type: String,
-  },
-  isUrgent: {
-    type: Boolean,
-    default: false,
-  },
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-  },
-  contactMethods: [contactMethodSchema],
-  status: {
-    type: Number,
-    default: 1, // 1 = نشط
-  },
-  files: {
-    type: [String],
-    default: [],
-  },
-}, {
-  timestamps: true,
-});
+const BloodRequestSchema = new mongoose.Schema(
+  {
+    bloodType: { type: String, required: true },
+    isUrgent: { type: Boolean, default: false },
+    location: { type: String, default: "" },
+    deadline: { type: Date, required: true },
+    description: { type: String, default: "" },
 
-// ✅ تسجيل الموديل تحت اسم 'BloodRequest'
-const BloodRequest = mongoose.model('BloodRequest', bloodRequestSchema);
+    contactMethods: [{ method: String, number: String }],
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
 
-module.exports = BloodRequest;
+    // الحقل المعتمد لعرض الوثائق:
+    documents: { type: [DocumentSchema], default: [] },
+
+    // (اختياري) توافق للخلف — لو موجودة في سجلات قديمة
+    files: { type: [String], default: [] },
+  },
+  { timestamps: true },
+);
+
+module.exports = mongoose.model("BloodRequest", BloodRequestSchema);

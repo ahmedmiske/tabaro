@@ -1,0 +1,149 @@
+/* MyRequestsWithOffers.css */
+.my-requests-container{
+    background-color: #f8f9fa;
+    padding: 20px;
+   border: 2px solid var(--color-border);
+   border-radius: 12px;
+   box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+.my-requests-container h3 {
+  text-align: center;
+  color:var(--main-color-alt);
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+.my-requests-with-offers {
+
+}
+
+.request-card {
+    max-height: 100px;
+  min-width: 600px !important;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
+}
+
+.request-card:hover {
+min-height: fit-content;
+}
+.requests-with-offers-container {
+  border: #dc3545 1px solid !important;
+  width: 100%;
+  padding: 20px;
+  background-color: #fdfdfd;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  -webkit-border-radius: 12px;
+  -moz-border-radius: 12px;
+  -ms-border-radius: 12px;
+  -o-border-radius: 12px;
+}
+
+.requests-with-offers-container h4 {
+  margin-bottom: 20px;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+}
+
+.request-box {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
+}
+
+.request-box:hover {
+  border-color: #0d6efd;
+}
+
+.request-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.request-bloodtype {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #dc3545;
+}
+
+.request-status {
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.request-meta {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.offer-list {
+  margin-top: 10px;
+  border-top: 1px solid #eee;
+  padding-top: 12px;
+}
+
+.offer-box {
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+}
+
+.offer-box .donor-name {
+  font-weight: bold;
+  color: #0d6efd;
+}
+
+.offer-box .message {
+  font-size: 0.95rem;
+  margin-top: 4px;
+}
+
+.offer-box .actions {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+}
+
+.no-offers {
+  color: #888;
+  font-style: italic;
+  padding: 8px;
+  background-color: #fcfcfc;
+  border-radius: 5px;
+  border: 1px dashed #ccc;
+}
+
+.btn-offer {
+  font-size: 0.85rem;
+  padding: 4px 10px;
+}
+
+
+
+.request-header {
+  cursor: pointer;
+  background-color: #f8f9fa;
+}
+
+.offer-box {
+  background-color: #fdfdfd;
+  transition: background-color 0.3s ease;
+}
+
+.offer-box:hover {
+  background-color: #f1f1f1;
+}
+.request-box {
+  background-color: #f8f9fa;
+  transition: background-color 0.3s ease;
+}

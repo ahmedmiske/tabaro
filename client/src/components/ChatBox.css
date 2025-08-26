@@ -1,71 +1,108 @@
-.chat-box-container {
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  padding: 15px;
-  background-color: #fff;
-  max-width: 700px;
-  margin: 30px auto;
-  display: flex;
-  flex-direction: column;
-  height: 300px;
+/* الحاوية العامة */
+.chatbox-container {
+  max-width: 980px;      /* ← أوسع */
+  width: 92vw;
+  margin: 24px auto;
+  border-radius: 16px;
 }
 
-.messages-area {
-  flex: 1;
+/* منطقة الرسائل */
+.messages-scroll {
+  height: 60vh;          /* ارتفاع مريح */
+  min-height: 360px;
   overflow-y: auto;
-  padding: 10px;
-  border: 1px solid #eee;
-  border-radius: 6px;
-  margin-bottom: 10px;
+  background: #f7faf9;
+  border-radius: 12px;
 }
 
-.message {
-  padding: 10px;
-  margin: 10px 0;
+/* الفقاعة */
+.bubble {
+  max-width: 78%;
+  padding: 10px 12px;
+  border-radius: 14px;
+  position: relative;
+  box-shadow: 0 1px 2px rgba(0,0,0,.05);
+}
+.bubble.mine {
+  background: #dff6ff;
+  color: #083b55;
+}
+.bubble.theirs {
+  background: #ffffff;
+  border: 1px solid #e8eceb;
+}
+.bubble-name {
+  font-weight: 700;
+  color: var(--main-color-alt, #157347);
+  margin-bottom: 4px;
+}
+.bubble-message {
+  white-space: pre-wrap;
+  line-height: 1.6;
+  border-bottom: 1px dashed #e6ecea;
+  padding-bottom: 8px;
+}
+.bubble-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: .82rem;
+  color: #78827c;
+}
+.bubble-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-inline-end: 8px;
+  border: 2px solid #4caf50;
+}
+
+/* مؤشرات الوصول */
+.tick {
+  margin-inline-start: 6px;
+  user-select: none;
+}
+.tick-sent { color: #9aa5a1; }       /* ✓ رمادية (مُرسلة/قيد الإرسال) */
+.tick-delivered { color: #2b8a3e; }  /* ✓✓ خضراء (وصلت للسيرفر/الطرف الآخر) */
+
+/* حقل الإدخال */
+.send-input {
+  resize: none;
   border-radius: 10px;
-  max-width: 70%;
-  background-color: #f4f4f4;
+  min-height: 44px;
+  max-height: 120px;
+}
+.send-input:focus {
+  box-shadow: 0 0 0 2px var(--main-color, #4caf50);
+  border-color: var(--main-color, #4caf50);
+}
+.chat {
+display: flex;
+gap: 8px;
+align-items: center;
+width: 100%;
 }
 
-.sent {
-  background-color: #d1f5d3;
-  align-self: flex-end;
-  text-align: right;
+.chat .chat-text {
+  border-radius: 10px;
+  min-height: 44px;
+  max-height: 120px;
+  width: 50%;
+  resize: none;
 }
 
-.received {
-  background-color: #f1f1f1;
-  align-self: flex-start;
-  text-align: left;
-}
-
-.message-header {
+.chat-actions {
   display: flex;
-  justify-content: space-between;
-  font-size: 0.8em;
-  color: #555;
-  margin-bottom: 5px;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  width: 44px;
+  border-radius: 50%;
+  
+  -webkit-border-radius:;
+  -moz-border-radius:;
+  -ms-border-radius:;
+  -o-border-radius:;
 }
-
-.input-area {
-  display: flex;
-  gap: 10px;
-}
-
-.input-area input {
-  flex: 1;
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-
-.input-area button {
-  padding: 8px 15px;
-  background-color: var(--main-color, #28a745);
-  color: white;
-  border: none;
-  border-radius: 6px;
-}
-.input-area button:hover {
-  background-color: var(--main-color-hover, #218838);
-}       

@@ -20,18 +20,76 @@ function BloodDonationListe() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
+  // يطبع الرد ويستخرج القائمة والصفحات من أشكال متعددة
+  const extractListAndPages = (body) => {
+    let list = [];
+    let pages =
+      body?.pages ??
+      body?.totalPages ??
+      body?.pagination?.pages ??
+      body?.data?.pages ??
+      0;
+
+    if (Array.isArray(body)) {
+      list = body;
+    } else if (Array.isArray(body?.items)) {
+      list = body.items;
+    } else if (Array.isArray(body?.data)) {
+      // أحيانًا data تكون هي القائمة
+      list = body.data;
+    } else if (Array.isArray(body?.result)) {
+      list = body.result;
+    } else if (Array.isArray(body?.docs)) {
+      // mongoose-paginate-v2
+      list = body.docs;
+    } else if (Array.isArray(body?.data?.items)) {
+      // بعض الـ APIs تُعيد data:{ items: [...] }
+      list = body.data.items;
+      pages = body.data.pages ?? body.data.totalPages ?? pages;
+    }
+
+    // احسب الصفحات لو ما وصلتنا صراحة
+    if (!pages || Number.isNaN(Number(pages))) {
+      const total =
+        body?.total ??
+        body?.count ??
+        body?.totalDocs ??
+        body?.pagination?.total ??
+        list.length;
+      const limit =
+        body?.limit ??
+        body?.perPage ??
+        body?.pagination?.limit ??
+        PAGE_SIZE;
+      pages = Math.max(1, Math.ceil(Number(total) / Number(limit)));
+    }
+
+    return { list, pages: Number(pages) || 1 };
+  };
+
   const fetchDonations = async () => {
     setLoading(true);
+    setError('');
     try {
-      const res = await fetchWithInterceptors(`/api/blood-requests?page=${page}&limit=${PAGE_SIZE}`);
-      if (!res.ok) throw new Error('فشل في جلب البيانات');
-      const data = res.body.result || res.body;
-      setDonations(data);
-      setFilteredDonations(data);
-      if (res.body.pages) setTotalPages(res.body.pages);
+      const res = await fetchWithInterceptors(
+        `/api/blood-requests?status=active&page=${page}&limit=${PAGE_SIZE}`,
+        { method: 'GET' }
+      );
+
+      const { list, pages } = extractListAndPages(res.body);
+      // DEBUG مفيد مؤقتًا — احذف عند الانتهاء
+      console.log('BloodRequests payload →', res.body);
+      console.log('Extracted list length:', list.length, 'pages:', pages);
+
+      setDonations(list);
+      setFilteredDonations(list);
+      setTotalPages(pages);
     } catch (err) {
       console.error('خطأ أثناء جلب بيانات التبرع:', err);
-      setError('حدث خطأ أثناء تحميل بيانات التبرع.');
+      setError(err?.message || 'حدث خطأ أثناء تحميل بيانات التبرع.');
+      setDonations([]);
+      setFilteredDonations([]);
+      setTotalPages(1);
     } finally {
       setLoading(false);
     }
@@ -39,13 +97,23 @@ function BloodDonationListe() {
 
   useEffect(() => {
     fetchDonations();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
   useEffect(() => {
-    let filtered = [...donations];
-    if (filter) filtered = filtered.filter(d => d.bloodType === filter);
-    if (startDate) filtered = filtered.filter(d => new Date(d.createdAt) >= new Date(startDate));
-    if (endDate) filtered = filtered.filter(d => new Date(d.createdAt) <= new Date(endDate));
+    let filtered = Array.isArray(donations) ? [...donations] : [];
+
+    if (filter) filtered = filtered.filter(d => d?.bloodType === filter);
+
+    if (startDate) {
+      const s = new Date(startDate);
+      filtered = filtered.filter(d => new Date(d?.createdAt) >= s);
+    }
+    if (endDate) {
+      const e = new Date(endDate);
+      filtered = filtered.filter(d => new Date(d?.createdAt) <= e);
+    }
+
     setFilteredDonations(filtered);
   }, [filter, startDate, endDate, donations]);
 
@@ -62,11 +130,14 @@ function BloodDonationListe() {
     return <p className="text-center text-danger my-4">{error}</p>;
   }
 
-  const donationTypes = [...new Set(donations.map(d => d.bloodType))];
+  const donationTypes = Array.isArray(donations)
+    ? [...new Set(donations.map(d => d?.bloodType).filter(Boolean))]
+    : [];
 
   return (
     <div className="donation-container py-4">
       <Title text="طلبات التبرع بالدم" />
+
       <DonorFilter
         filter={filter} setFilter={setFilter}
         startDate={startDate} setStartDate={setStartDate}
@@ -75,31 +146,33 @@ function BloodDonationListe() {
       />
 
       <div className="container-card my-4">
-        {filteredDonations.length === 0 ? (
+        {Array.isArray(filteredDonations) && filteredDonations.length === 0 ? (
           <FindeNot />
         ) : (
           <>
             <Row className="donation-grid">
-              {filteredDonations.map(d => (
-                <DonationCard key={d._id} donation={d} />
+              {(filteredDonations || []).map(d => (
+                <DonationCard key={d?._id || Math.random()} donation={d} />
               ))}
             </Row>
+
             <div className="pagination-controls text-center mt-4 d-flex justify-content-center gap-3">
               <Button
                 variant="outline-secondary"
                 onClick={() => setPage(prev => Math.max(prev - 1, 1))}
-                disabled={page === 1}
+                disabled={page <= 1}
               >
-                   ➡️ 
-             السابقة
+                ➡️ السابقة
               </Button>
+
               <span className="align-self-center">الصفحة {page} من {totalPages}</span>
+
               <Button
                 variant="outline-primary"
-                onClick={() => setPage(prev => prev + 1)}
-                disabled={page === totalPages}
+                onClick={() => setPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={page >= totalPages}
               >
-              ⬅️  التالية 
+                ⬅️ التالية
               </Button>
             </div>
           </>

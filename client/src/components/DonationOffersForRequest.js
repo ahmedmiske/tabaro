@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button, Badge } from 'react-bootstrap';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
-import { useParams } from 'react-router-dom';
-import './DonationOffers.css';
+import { useParams, useNavigate } from 'react-router-dom';
+import './DonationOffersForRequest.css';
 
 const DonationOffersForRequest = () => {
   const { id: requestId } = useParams();
+  const navigate = useNavigate();
   const [offers, setOffers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedRowId, setSelectedRowId] = useState(null);
   const currentUser = JSON.parse(localStorage.getItem('user'));
 
   const fetchOffers = async () => {
@@ -21,15 +23,28 @@ const DonationOffersForRequest = () => {
     }
   };
 
+  const handleToggleDetails = (offerId) => {
+    setSelectedRowId(selectedRowId === offerId ? null : offerId);
+  };
+
   const handleAccept = async (offerId) => {
-    try {
-      await fetchWithInterceptors(`/api/donation-confirmations/${offerId}/accept`, {
-        method: 'PATCH'
-      });
-      fetchOffers();
-    } catch (err) {
-      console.error('فشل في قبول العرض', err);
-    }
+    await fetchWithInterceptors(`/api/donation-confirmations/${offerId}/accept`, { method: 'PATCH' });
+    fetchOffers();
+  };
+
+  const handleReject = async (offerId) => {
+    await fetchWithInterceptors(`/api/donation-confirmations/${offerId}/reject`, { method: 'PATCH' });
+    fetchOffers();
+  };
+
+  const handleFulfill = async (offerId) => {
+    await fetchWithInterceptors(`/api/donation-confirmations/${offerId}/fulfill`, { method: 'PATCH' });
+    fetchOffers();
+  };
+
+  const handleRate = async (offerId) => {
+    await fetchWithInterceptors(`/api/donation-confirmations/${offerId}/rate`, { method: 'PATCH' });
+    fetchOffers();
   };
 
   useEffect(() => {
@@ -47,7 +62,6 @@ const DonationOffersForRequest = () => {
           <tr>
             <th>المتبرع</th>
             <th>الرسالة</th>
-            <th>الطريقة</th>
             <th>التاريخ</th>
             <th>الحالة</th>
             <th>الإجراء</th>
@@ -55,30 +69,86 @@ const DonationOffersForRequest = () => {
         </thead>
         <tbody>
           {offers.map((offer) => (
-            <tr key={offer._id}>
-              <td>{offer.donor?.firstName} {offer.donor?.lastName}</td>
-              <td>{offer.message}</td>
-              <td>{offer.method}</td>
-              <td>{new Date(offer.createdAt).toLocaleDateString()}</td>
-              <td>
-                <Badge bg={
-                  offer.status === 'accepted' ? 'success' :
-                  offer.status === 'fulfilled' ? 'info' :
-                  'warning'
-                }>
-                  {offer.status === 'accepted' ? 'تم القبول' :
-                   offer.status === 'fulfilled' ? 'تم التنفيذ' :
-                   'قيد الانتظار'}
-                </Badge>
-              </td>
-              <td>
-                {offer.status === 'initiated' && offer.recipientId === currentUser._id && (
-                  <Button variant="success" size="sm" onClick={() => handleAccept(offer._id)}>
-                    قبول التبرع
+            <React.Fragment key={offer._id}>
+              <tr>
+                <td>
+                  {offer.donor?.firstName} {offer.donor?.lastName}
+                  <br />
+                  <Button
+                    size="sm"
+                    variant="info"
+                    onClick={() => handleToggleDetails(offer._id)}
+                    className="mt-1"
+                  >
+                    {selectedRowId === offer._id ? 'إخفاء' : 'تفاصيل'}
                   </Button>
-                )}
-              </td>
-            </tr>
+                </td>
+                <td>{offer.message}</td>
+                <td>{new Date(offer.createdAt).toLocaleDateString()}</td>
+                <td>
+                  <Badge bg={
+                    offer.status === 'accepted' ? 'success' :
+                    offer.status === 'fulfilled' ? 'info' :
+                    offer.status === 'rated' ? 'secondary' :
+                    offer.status === 'rejected' ? 'danger' :
+                    'warning'
+                  }>
+                    {offer.status === 'accepted' ? 'تم القبول' :
+                    offer.status === 'fulfilled' ? 'تم التنفيذ' :
+                    offer.status === 'rated' ? 'تم التقييم' :
+                    offer.status === 'rejected' ? 'مرفوض' :
+                    'قيد الانتظار'}
+                  </Badge>
+                </td>
+                <td>
+                  {String(offer.recipientId) === String(currentUser._id) && (
+                    <>
+                      {offer.status === 'pending' && (
+                        <>
+                          <Button variant="success" size="sm" onClick={() => handleAccept(offer._id)} className="me-2 mb-1">
+                            قبول
+                          </Button>
+                          <Button variant="danger" size="sm" onClick={() => handleReject(offer._id)}>
+                            رفض
+                          </Button>
+                        </>
+                      )}
+                      {offer.status === 'accepted' && (
+                        <Button variant="primary" size="sm" onClick={() => handleFulfill(offer._id)}>
+                          تم التنفيذ
+                        </Button>
+                      )}
+                      {offer.status === 'fulfilled' && (
+                        <Button variant="warning" size="sm" onClick={() => handleRate(offer._id)}>
+                          تقييم
+                        </Button>
+                      )}
+                    </>
+                  )}
+                </td>
+              </tr>
+
+              {selectedRowId === offer._id && (
+                <tr className="bg-light">
+                  <td colSpan="5">
+                    <strong>📄 تفاصيل المتبرع:</strong><br />
+                    الاسم: {offer.donor?.firstName} {offer.donor?.lastName} <br />
+                    الهاتف: {offer.donor?.phoneNumber || '—'} <br />
+                    البريد الإلكتروني: {offer.donor?.email || '—'} <br />
+                    العنوان: {offer.donor?.address || '—'} <br />
+                    <div className="mt-2">
+                      <Button
+                        variant="outline-primary"
+                        size="sm"
+                        onClick={() => navigate(`/chat/${offer.donor._id}`)}
+                      >
+                        💬 محادثة
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </React.Fragment>
           ))}
         </tbody>
       </Table>
@@ -87,5 +157,3 @@ const DonationOffersForRequest = () => {
 };
 
 export default DonationOffersForRequest;
-// This component displays a list of donation offers for a specific request.
-// It allows the user to accept offers and view details of each offer.

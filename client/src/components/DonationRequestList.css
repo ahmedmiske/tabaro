@@ -1,0 +1,80 @@
+.donation-container {
+  width: 100% !important;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px 20px;
+
+  /* خلفية لطيفة كما في الدم */
+  background: linear-gradient(to bottom, #f0f4f3, #ffffff);
+  background-color: var(--main-color-fundo);
+
+  box-shadow: 0 0 15px rgba(128, 128, 128, 0.3);
+  margin-bottom: 80px;
+  border-radius: 10px;
+}
+
+/* شريط الفلاتر */
+.donation-container .filter {
+  background-color: var(--main-color-fundo);
+  margin: 0 auto 30px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  padding: 20px;
+  border: 2px solid var(--main-color-alt);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}
+
+/* شبكة البطاقات */
+.donation-grid {
+  background: linear-gradient(to bottom, #f9fbfb, #ffffff) !important;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 20px;
+  border-top: 4px solid var(--main-color-alt);
+  padding: 20px 10px;
+  background-color: var(--main-color-fundo);
+  border-radius: 8px;
+  width: 100%;
+}
+
+/* كل بطاقة تمسك عمودًا مثل الدم */
+.donation-card {
+  flex: 1 1 calc(25% - 20px); /* 4 في السطر */
+  max-width: calc(25% - 20px);
+  min-width: 250px;
+}
+
+@media (max-width: 1200px) {
+  .donation-card {
+    flex: 1 1 calc(33.33% - 20px); /* 3 في السطر */
+    max-width: calc(33.33% - 20px);
+  }
+}
+
+@media (max-width: 768px) {
+  .donation-card {
+    flex: 1 1 calc(50% - 20px); /* 2 في السطر */
+    max-width: calc(50% - 20px);
+  }
+}
+
+@media (max-width: 576px) {
+  .donation-card {
+    flex: 1 1 100%; /* بطاقة واحدة */
+    max-width: 100%;
+  }
+}
+
+.container-card {
+  width: 100%;
+  padding: 0;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-radius: 8px;
+}

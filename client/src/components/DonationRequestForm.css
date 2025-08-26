@@ -240,3 +240,95 @@ select[name="bloodType"] option {
     min-width: 100%;
   }
 }
+.details-card {
+  border: 0;
+  overflow: hidden;
+}
+
+.details-header {
+  background: linear-gradient(90deg, #198754, #0d6efd);
+}
+
+.meta-strip .badge {
+  font-weight: 600;
+}
+
+.publisher-card {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+}
+
+.publisher-card .pub-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex: 0 0 56px;
+}
+
+.publisher-card.no-avatar .flex-grow-1 {
+  margin-inline-start: 0;
+}
+
+.publisher-card .pub-avatar.fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #e9ecef;
+  font-weight: 700;
+}
+
+.pub-name {
+  font-weight: 700;
+}
+
+.pub-meta {
+  font-size: .9rem;
+  color: #6c757d;
+}
+
+.icon-toolbar .btn-icon {
+  border: 1px solid #dee2e6;
+  background: #fff;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform .15s ease, background .15s ease;
+}
+
+.icon-toolbar .btn-icon:hover {
+  transform: translateY(-1px);
+  background: #f8f9fa;
+}
+
+.icon-toolbar .btn-confirm {
+  border-color: #198754;
+}
+
+.icon-toolbar .btn-outline {
+  color: #0d6efd;
+}
+
+.icon-toolbar .btn-outline-danger {
+  color: #dc3545;
+}
+
+.action-panel {
+  border: 1px solid #e9ecef;
+  border-radius: .5rem;
+  padding: 1rem;
+  background: #fff;
+}
+
+.chat-topic {
+  font-size: .9rem;
+  color: #6c757d;
+  margin-bottom: .5rem;
+}

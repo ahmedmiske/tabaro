@@ -1,110 +1,203 @@
+// server/socket.js
 const jwt = require('jsonwebtoken');
-const mongoose = require('mongoose');
+const mongoose2 = require('mongoose');
+
 const Message = require('./models/message');
 const User = require('./models/user');
-const Notification = require('./models/Notification'); // ✅     
+const { notifyUser } = require('./utils/notify');
 
+const isValidId = (id) => !!id && mongoose2.Types.ObjectId.isValid(id);
 
-const setupSocket = (io) => {
-  // ✅ تحقق من JWT لتعيين socket.userId
+module.exports = function setupSocket(io) {
+  // مصادقة كل اتصال Socket
   io.use((socket, next) => {
-    const token = socket.handshake.auth.token;
-    if (!token) return next(new Error('Authentication error'));
-
     try {
+      const token = socket.handshake.auth && socket.handshake.auth.token;
+      if (!token) {
+        console.warn('[socket] no token');
+        return next(new Error('Authentication error'));
+      }
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      socket.userId = decoded.id;
+
+      // دعم مفاتيح متعددة للهوية داخل الـJWT
+      const uid =
+        decoded.id ||
+        decoded._id ||
+        decoded.userId ||
+        (decoded.user &&
+          (decoded.user._id || decoded.user.id || decoded.user.userId));
+
+      if (!uid) {
+        console.warn('[socket] invalid token payload');
+        return next(new Error('Invalid token payload'));
+      }
+
+      socket.userId = String(uid);
       next();
-    } catch (error) {
+    } catch (e) {
+      console.warn('[socket] verify failed:', e.message);
       next(new Error('Invalid token'));
     }
   });
 
   io.on('connection', (socket) => {
-    console.log(`✅ User ${socket.userId} connected via socket`);
+    const currentUserId = socket.userId;
+    if (!currentUserId) return socket.disconnect(true);
 
-    // ✅ ينضم المستخدم لغرفته الخاصة لتلقي الرسائل
-    socket.join(socket.userId);
+    // الغرفة الخاصة بالمستخدم
+    socket.join(String(currentUserId));
 
-    // ✅ تأكيد للعميل أنه انضم بنجاح
-    socket.emit('connectedToRoom', socket.userId);
+    /* ===================== جلب الرسائل ===================== */
+    socket.on(
+      'loadMessages',
+      async ({ recipientId, limit = 50, skip = 0 } = {}) => {
+        try {
+          if (!isValidId(recipientId)) {
+            return socket.emit('error', { message: 'Invalid recipient ID' });
+          }
 
-    // ✅ إرسال رسالة بين المستخدمين
-   socket.on('sendMessage', async ({ recipientId, content, requestId, offerId }) => {
-  try {
-    if (
-      !mongoose.Types.ObjectId.isValid(socket.userId) ||
-      !mongoose.Types.ObjectId.isValid(recipientId)
-    ) {
-      return socket.emit('error', { message: 'Invalid user ID' });
-    }
+          const msgs = await Message.find({
+            $or: [
+              { sender: currentUserId, recipient: recipientId },
+              { sender: recipientId, recipient: currentUserId },
+            ],
+          })
+            .sort({ timestamp: 1 })
+            .skip(Number(skip) || 0)
+            .limit(Math.min(Number(limit) || 50, 200));
 
-    console.log('📨 Socket Message Send Triggered');
-    console.log('👉 From:', socket.userId);
-    console.log('👉 To:', recipientId);
-    console.log('👉 Content:', content);
+          const userIds = [
+            ...new Set(
+              msgs.flatMap((m) => [String(m.sender), String(m.recipient)]),
+            ),
+          ];
 
-    const message = new Message({
-      sender: socket.userId,
-      recipient: recipientId,
-      content,
-      timestamp: new Date(),
-      read: false,
-      requestId,
-      offerId
+          const users = await User.find({ _id: { $in: userIds } }).select(
+            'firstName lastName profileImage',
+          );
+          const usersMap = Object.fromEntries(
+            users.map((u) => [String(u._id), u]),
+          );
+
+          const hydrated = msgs.map((m) => {
+            const sender = usersMap[String(m.sender)];
+            return {
+              ...m.toObject(),
+              senderName: sender
+                ? `${sender.firstName || ''} ${sender.lastName || ''}`
+                    .trim() || 'مستخدم'
+                : 'مستخدم',
+              senderProfileImage: sender?.profileImage || '',
+            };
+          });
+
+          socket.emit('chatHistory', hydrated);
+        } catch (err) {
+          console.error('loadMessages error:', err);
+          socket.emit('error', { message: 'تعذر تحميل المحادثة' });
+        }
+      },
+    );
+
+    /* ===================== مؤشر الكتابة ===================== */
+    socket.on('typing', ({ recipientId } = {}) => {
+      if (!isValidId(recipientId) || recipientId === currentUserId) return;
+      io.to(String(recipientId)).emit('typing', { senderId: currentUserId });
     });
 
-    await message.save();
+    /* ===================== إرسال رسالة ===================== */
+    socket.on(
+      'sendMessage',
+      async ({
+        recipientId,
+        content,
+        requestId,
+        offerId,
+        type,
+        tempId, // 👈 سيصل من العميل لإرجاعه كما هو
+      } = {}) => {
+        try {
+          if (!isValidId(recipientId)) {
+            return socket.emit('error', { message: 'Invalid recipient ID' });
+          }
+          if (recipientId === currentUserId) {
+            return socket.emit('error', { message: 'لا يمكنك مراسلة نفسك' });
+          }
 
-    // ✅ إنشاء إشعار مرتبط بالرسالة
-    await Notification.create({
-      userId: recipientId,
-      title: '💬 رسالة جديدة',
-      message: content.length > 100 ? content.slice(0, 100) + '...' : content,
-      read: false,
-      type: 'message',
-      date: new Date()
-    });
+          const body = (content || '').trim();
+          if (!body) {
+            return socket.emit('error', {
+              message: 'لا يمكن إرسال رسالة فارغة',
+            });
+          }
+          if (body.length > 2000) {
+            return socket.emit('error', { message: 'النص طويل جدًا' });
+          }
 
-    const sender = await User.findById(socket.userId).select('firstName lastName');
-    const messageWithName = {
-      ...message._doc,
-      senderName: sender ? `${sender.firstName} ${sender.lastName}` : 'مستخدم'
-    };
+          const safeRequestId = isValidId(requestId) ? requestId : undefined;
+          const safeOfferId = isValidId(offerId) ? offerId : undefined;
 
-    const socketsInRoom = await io.in(recipientId).fetchSockets();
-    console.log(`📡 Recipient socket count: ${socketsInRoom.length}`);
+          const message = await Message.create({
+            sender: currentUserId,
+            recipient: recipientId,
+            content: body,
+            timestamp: new Date(),
+            read: false,
+            requestId: safeRequestId,
+            offerId: safeOfferId,
+          });
 
-    io.to(recipientId).emit('receiveMessage', messageWithName);
-    socket.emit('messageSent', messageWithName);
-  } catch (error) {
-    console.error('❌ Error sending message:', error);
-    socket.emit('error', { message: 'Message failed' });
-  }
-});
+          const sender = await User.findById(currentUserId).select(
+            'firstName lastName profileImage',
+          );
 
+          const enriched = {
+            ...message.toObject(),
+            tempId: tempId || null, // 👈 نُعيد tempId ليستبدل العميل الرسالة التفاؤلية
+            senderName: sender
+              ? `${sender.firstName || ''} ${sender.lastName || ''}`.trim() ||
+                'مستخدم'
+              : 'مستخدم',
+            senderProfileImage: sender?.profileImage || '',
+          };
 
-    // ✅ إشعار نية التبرع
-    socket.on('donationIntent', ({ recipientId, donationId }) => {
-      io.to(recipientId).emit('donationIntentNotification', {
-        title: '🩸 شخص يريد التبرع',
-        message: `أحد المستخدمين أبدى نيته بالتبرع لحالتك`,
-        donationId,
-        type: 'offer',
-        date: new Date()
-      });
-    });
+          // لا تُنشئ إشعارًا في حالة type === 'offer' (الإشعار يأتي من مسار التأكيد)
+          if (type !== 'offer') {
+            await notifyUser({
+              io,
+              userId: recipientId,
+              sender: currentUserId,
+              title: '💬 رسالة جديدة',
+              message: body.length > 100 ? body.slice(0, 100) + '…' : body,
+              type: 'message',
+              referenceId: message._id,
+            });
+          }
 
-    // ✅ المستخدم يكتب الآن
-    socket.on('typing', ({ recipientId }) => {
-      socket.to(recipientId).emit('typing', { senderId: socket.userId });
-    });
+          // للمستقبِل
+          io.to(String(recipientId)).emit('receiveMessage', enriched);
+          // للمرسل (ليستبدل التفاؤلية عبر tempId)
+          socket.emit('messageSent', enriched);
+        } catch (error) {
+          console.error('sendMessage error:', error);
+          socket.emit('error', { message: 'فشل في إرسال الرسالة' });
+        }
+      },
+    );
 
-    socket.on('disconnect', () => {
-      console.log(`🔴 User ${socket.userId} disconnected`);
+    /* ===================== تعليم كمقروء ===================== */
+    socket.on('markRead', async ({ messageIds = [] } = {}) => {
+      try {
+        const safeIds = messageIds.filter(isValidId);
+        if (safeIds.length === 0) return;
+
+        await Message.updateMany(
+          { _id: { $in: safeIds }, recipient: currentUserId },
+          { $set: { read: true } },
+        );
+      } catch (e) {
+        console.error('Error marking messages as read:', e);
+      }
     });
   });
 };
-
-module.exports = setupSocket;
-// This code sets up a WebSocket server using Socket.IO.  
