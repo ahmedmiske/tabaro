@@ -25,7 +25,8 @@ const fileFilter = (req, file, cb) => {
   if (allowedTypes.test(ext)) {
     cb(null, true);
   } else {
-    cb(new Error('Only images and PDF files are allowed!'), false);
+    req.fileFilterError = 'Only images and PDF files are allowed!';
+    cb(null, false);
   }
 };
 

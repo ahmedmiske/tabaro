@@ -6,6 +6,11 @@ const User = require('../models/user'); // ⬅️ ضروري حتى تعمل pop
 // @route   POST /api/blood-requests
 // @access  Private
 const createBloodRequest = asyncHandler(async (req, res) => {
+
+  if (req.fileFilterError) {
+    return res.status(415).send(req.fileFilterError);
+  }
+
   const { bloodType, location, deadline, description, isUrgent, contactMethods } = req.body;
   
   // Parse contactMethods if sent as JSON string
