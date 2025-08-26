@@ -10,7 +10,7 @@ const fmtTime = (d) => {
   } catch { return ''; }
 };
 
-const ChatBox = ({ recipientId, className = '' }) => {
+const ChatBox = ({ conversationId, recipientId, className = '' }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(true);
@@ -50,7 +50,8 @@ const ChatBox = ({ recipientId, className = '' }) => {
       setLoading(false);
       return;
     }
-    s.emit('loadMessages', { recipientId, limit: 100 });
+    // اطلب السجل الخاص بهذه المحادثة فقط
+    s.emit('loadMessages', { conversationId, limit: 100 });
   };
 
   // الاشتراكات
@@ -61,7 +62,7 @@ const ChatBox = ({ recipientId, className = '' }) => {
     knownTempRef.current.clear();
     historyRequestedRef.current = false;
 
-    if (!token || !recipientId) {
+    if (!token || !recipientId || !conversationId) {
       setError('بيانات غير مكتملة لبدء المحادثة.');
       setLoading(false);
       return;
@@ -71,10 +72,11 @@ const ChatBox = ({ recipientId, className = '' }) => {
 
     const onConnect = () => {
       setError('');
+      // انضم لغرفة المحادثة
+      s.emit('joinConversation', { conversationId });
       requestHistory();
     };
     const onConnectError = (err) => {
-      // رسائل أوضح (مثلاً Authentication error من السيرفر)
       setError(err?.message || 'تعذّر الاتصال.');
       setLoading(false);
     };
@@ -87,11 +89,20 @@ const ChatBox = ({ recipientId, className = '' }) => {
       setLoading(true);
       historyRequestedRef.current = false;
       clearTimeout(reconnectTimerRef.current);
-      reconnectTimerRef.current = setTimeout(requestHistory, 300);
+      reconnectTimerRef.current = setTimeout(() => {
+        // تأكد أننا داخل الغرفة بعد إعادة الاتصال
+        s.emit('joinConversation', { conversationId });
+        requestHistory();
+      }, 300);
     };
 
-    const onHistory = (list) => {
-      const normalized = (Array.isArray(list) ? list : []).map((m) => {
+    const onHistory = (payload) => {
+      // توقع أن السيرفر يبعث { conversationId, messages: [...] }
+      const list = Array.isArray(payload?.messages) ? payload.messages : Array.isArray(payload) ? payload : [];
+      // تجاهل أي تاريخ ليس لمحادثتنا (احتياط)
+      if (payload?.conversationId && payload.conversationId !== conversationId) return;
+
+      const normalized = list.map((m) => {
         if (m._id) knownIdsRef.current.add(String(m._id));
         return m;
       });
@@ -101,6 +112,9 @@ const ChatBox = ({ recipientId, className = '' }) => {
     };
 
     const onReceive = (msg) => {
+      // تأكد أن الرسالة تخص هذه المحادثة
+      if (!msg || msg.conversationId !== conversationId) return;
+
       if (msg?._id && knownIdsRef.current.has(String(msg._id))) return;
       if (msg?.tempId && knownTempRef.current.has(String(msg.tempId))) return;
 
@@ -125,6 +139,8 @@ const ChatBox = ({ recipientId, className = '' }) => {
     };
 
     const onSent = (msg) => {
+      if (!msg || msg.conversationId !== conversationId) return;
+
       if (msg?.tempId) {
         setMessages((prev) => {
           const i = prev.findIndex((x) => x.tempId === msg.tempId);
@@ -144,7 +160,9 @@ const ChatBox = ({ recipientId, className = '' }) => {
       }
     };
 
-    const onTyping = () => {
+    const onTyping = (payload) => {
+      // payload: { conversationId, from }
+      if (!payload || payload.conversationId !== conversationId) return;
       setIsTyping(true);
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
       typingTimeoutRef.current = setTimeout(() => setIsTyping(false), 1200);
@@ -165,10 +183,16 @@ const ChatBox = ({ recipientId, className = '' }) => {
     s.on('typing', onTyping);
     s.on('error', onServerError);
 
-    if (s.connected) requestHistory();
+    // في حال الاتصال جاهز مسبقًا
+    if (s.connected) {
+      s.emit('joinConversation', { conversationId });
+      requestHistory();
+    }
 
     return () => {
       clearTimeout(reconnectTimerRef.current);
+      // اخرج من الغرفة عند التفكيك
+      try { s.emit('leaveConversation', { conversationId }); } catch {}
       s.off('connect', onConnect);
       s.off('connect_error', onConnectError);
       s.off('disconnect', onDisconnect);
@@ -179,14 +203,14 @@ const ChatBox = ({ recipientId, className = '' }) => {
       s.off('typing', onTyping);
       s.off('error', onServerError);
     };
-  }, [token, recipientId]);
+  }, [token, recipientId, conversationId]);
 
   const sendTyping = () => {
     const now = Date.now();
     if (now - typingSentAtRef.current > 800) {
       typingSentAtRef.current = now;
       const s = getSocket();
-      if (s?.connected && recipientId) s.emit('typing', { recipientId });
+      if (s?.connected && conversationId) s.emit('typing', { conversationId });
     }
   };
 
@@ -204,6 +228,7 @@ const ChatBox = ({ recipientId, className = '' }) => {
     const me = JSON.parse(localStorage.getItem('user') || '{}');
     const optimistic = {
       tempId,
+      conversationId,
       sender: me?._id || 'me',
       recipient: recipientId,
       content: text,
@@ -217,8 +242,10 @@ const ChatBox = ({ recipientId, className = '' }) => {
     setInput('');
     setSending(true);
 
-    s.emit('sendMessage', { recipientId, content: text, type: 'chat', tempId });
+    // أرسل الرسالة مع conversationId
+    s.emit('sendMessage', { conversationId, recipientId, content: text, type: 'chat', tempId });
 
+    // fallback إزالة pending إن تأخر الإيصال
     setTimeout(() => {
       setMessages((prev) =>
         prev.map((m) => (m.tempId === tempId ? { ...m, pending: false } : m)),
@@ -311,6 +338,7 @@ const ChatBox = ({ recipientId, className = '' }) => {
 };
 
 ChatBox.propTypes = {
+  conversationId: PropTypes.string.isRequired, //  
   recipientId: PropTypes.string.isRequired,
   className: PropTypes.string,
 };
