@@ -1,14 +1,13 @@
 // src/AuthContext.js
 import PropTypes from "prop-types";
-import { createContext, useState, useEffect, useContext} from "react";
-import socket, { connectSocket } from "./socket"; // ✅ من src/socket.js
+import { createContext, useState, useEffect, useContext } from "react";
+import { connectSocket, getSocket } from "./socket"; // ⬅️ فقط التصديرات المسماة
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
-  // ✅ تحميل المستخدم من localStorage عند أول تحميل
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     const token = localStorage.getItem("token");
@@ -16,25 +15,23 @@ export const AuthProvider = ({ children }) => {
     if (storedUser && token) {
       const parsedUser = JSON.parse(storedUser);
       setUser(parsedUser);
-      connectSocket(token); // ✅ الاتصال بـ socket بالتوكن
+      connectSocket(token);
     }
   }, []);
 
-  // ✅ تسجيل الدخول: حفظ البيانات + اتصال socket
   const login = (userData) => {
     setUser(userData);
     localStorage.setItem("user", JSON.stringify(userData));
     if (userData?.token) localStorage.setItem("token", userData.token);
-    if (userData?.token) connectSocket(userData.token); // ✅ الاتصال بـ socket
+    if (userData?.token) connectSocket(userData.token);
   };
 
-  // ✅ تسجيل الخروج: حذف البيانات + قطع الاتصال
   const logout = () => {
     setUser(null);
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     try {
-      socket.disconnect(); // ✅ إغلاق الاتصال socket
+      getSocket()?.disconnect(); // ⬅️ استعمل getSocket
     } catch {}
   };
 
@@ -45,7 +42,6 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// ✅ PropTypes لإزالة تحذير ESLint
 AuthProvider.propTypes = {
   children: PropTypes.node.isRequired,
 };

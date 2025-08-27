@@ -1,3 +1,4 @@
+// src/components/ChatBox.jsx
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Form, Button, Spinner, Alert } from 'react-bootstrap';
@@ -11,28 +12,33 @@ const fmtTime = (d) => {
 };
 
 const ChatBox = ({ conversationId, recipientId, className = '' }) => {
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [sending, setSending] = useState(false);
-  const [isTyping, setIsTyping] = useState(false);
-  const [error, setError] = useState('');
+  const [messages, setMessages]   = useState([]);
+  const [input, setInput]         = useState('');
+  const [loading, setLoading]     = useState(true);
+  const [sending, setSending]     = useState(false);
+  const [isTyping, setIsTyping]   = useState(false);
+  const [error, setError]         = useState('');
 
-  const listRef = useRef(null);
-  const knownIdsRef = useRef(new Set());
-  const knownTempRef = useRef(new Set());
-  const typingTimeoutRef = useRef(null);
-  const typingSentAtRef = useRef(0);
-  const historyRequestedRef = useRef(false);
-  const reconnectTimerRef = useRef(null);
+  const listRef                  = useRef(null);
+  const knownIdsRef              = useRef(new Set());
+  const knownTempRef             = useRef(new Set());
+  const typingTimeoutRef         = useRef(null);
+  const typingSentAtRef          = useRef(0);
+  const historyRequestedRef      = useRef(false);
+  const reconnectTimerRef        = useRef(null);
+  const watchdogRef              = useRef(null);
+  const socketRef                = useRef(null);
 
-  // token
   const token = useMemo(() => {
     const u = JSON.parse(localStorage.getItem('user') || '{}');
     return u?.token || localStorage.getItem('token') || localStorage.getItem('authToken') || null;
   }, []);
 
-  // scroll to bottom
+  const myId = useMemo(() => {
+    try { return JSON.parse(localStorage.getItem('user') || '{}')._id || null; }
+    catch { return null; }
+  }, []);
+
   const scrollToBottom = () => {
     const el = listRef.current;
     if (!el) return;
@@ -40,66 +46,91 @@ const ChatBox = ({ conversationId, recipientId, className = '' }) => {
   };
   useEffect(scrollToBottom, [messages]);
 
-  const requestHistory = async () => {
-    if (historyRequestedRef.current) return;
-    historyRequestedRef.current = true;
-
-    const s = await waitUntilConnected(4000);
-    if (!s) {
-      setError('تعذّر الاتصال بالخادم. تحقّق من تسجيل الدخول أو إعداد عنوان الخادم.');
-      setLoading(false);
-      return;
+  const clearWatchdog = () => {
+    if (watchdogRef.current) {
+      clearTimeout(watchdogRef.current);
+      watchdogRef.current = null;
     }
-    // اطلب السجل الخاص بهذه المحادثة فقط
-    s.emit('loadMessages', { conversationId, limit: 100 });
   };
 
-  // الاشتراكات
-  useEffect(() => {
-    setLoading(true);
-    setError('');
-    knownIdsRef.current.clear();
-    knownTempRef.current.clear();
-    historyRequestedRef.current = false;
+  const startWatchdog = () => {
+    clearWatchdog();
+    // إن لم يصل التاريخ خلال 7 ثوانٍ، أظهر زر إعادة المحاولة
+    watchdogRef.current = setTimeout(() => {
+      setLoading(false);
+      setError('تأخّر تحميل المحادثة. جرّب إعادة المحاولة.');
+    }, 7000);
+  };
 
-    if (!token || !recipientId || !conversationId) {
+  const requestHistory = async () => {
+    if (!conversationId || !recipientId) {
       setError('بيانات غير مكتملة لبدء المحادثة.');
       setLoading(false);
       return;
     }
 
-    const s = connectSocket(token);
+    const s = socketRef.current || getSocket();
+    if (!s || !s.connected) {
+      // انتظر حتى يتصل الـ socket
+      const ready = await waitUntilConnected(8000);
+      if (!ready) {
+        setError('تعذّر الاتصال بالخادم. تحقّق من تسجيل الدخول أو الشبكة.');
+        setLoading(false);
+        return;
+      }
+    }
+
+    startWatchdog();
+    historyRequestedRef.current = true;
+    // مهم: تمرير recipientId لأن قاعدة البيانات لا تخزن conversationId
+    (socketRef.current || getSocket())?.emit('loadMessages', {
+      conversationId,
+      recipientId,
+      limit: 100,
+    });
+  };
+
+  const bindSocket = (s) => {
+    socketRef.current = s;
 
     const onConnect = () => {
       setError('');
-      // انضم لغرفة المحادثة
+      // انضم إلى غرفة المحادثة ثم اطلب السجل
       s.emit('joinConversation', { conversationId });
+      historyRequestedRef.current = false;
+      setLoading(true);
       requestHistory();
     };
+
     const onConnectError = (err) => {
       setError(err?.message || 'تعذّر الاتصال.');
       setLoading(false);
     };
+
     const onDisconnect = () => {
       setError('انقطع الاتصال… جارِ إعادة المحاولة');
       setLoading(true);
     };
+
     const onReconnect = () => {
       setError('');
       setLoading(true);
       historyRequestedRef.current = false;
       clearTimeout(reconnectTimerRef.current);
       reconnectTimerRef.current = setTimeout(() => {
-        // تأكد أننا داخل الغرفة بعد إعادة الاتصال
         s.emit('joinConversation', { conversationId });
         requestHistory();
       }, 300);
     };
 
     const onHistory = (payload) => {
-      // توقع أن السيرفر يبعث { conversationId, messages: [...] }
-      const list = Array.isArray(payload?.messages) ? payload.messages : Array.isArray(payload) ? payload : [];
-      // تجاهل أي تاريخ ليس لمحادثتنا (احتياط)
+      clearWatchdog();
+      const list = Array.isArray(payload?.messages)
+        ? payload.messages
+        : Array.isArray(payload)
+        ? payload
+        : [];
+
       if (payload?.conversationId && payload.conversationId !== conversationId) return;
 
       const normalized = list.map((m) => {
@@ -112,9 +143,7 @@ const ChatBox = ({ conversationId, recipientId, className = '' }) => {
     };
 
     const onReceive = (msg) => {
-      // تأكد أن الرسالة تخص هذه المحادثة
       if (!msg || msg.conversationId !== conversationId) return;
-
       if (msg?._id && knownIdsRef.current.has(String(msg._id))) return;
       if (msg?.tempId && knownTempRef.current.has(String(msg.tempId))) return;
 
@@ -140,7 +169,6 @@ const ChatBox = ({ conversationId, recipientId, className = '' }) => {
 
     const onSent = (msg) => {
       if (!msg || msg.conversationId !== conversationId) return;
-
       if (msg?.tempId) {
         setMessages((prev) => {
           const i = prev.findIndex((x) => x.tempId === msg.tempId);
@@ -161,7 +189,6 @@ const ChatBox = ({ conversationId, recipientId, className = '' }) => {
     };
 
     const onTyping = (payload) => {
-      // payload: { conversationId, from }
       if (!payload || payload.conversationId !== conversationId) return;
       setIsTyping(true);
       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
@@ -169,6 +196,7 @@ const ChatBox = ({ conversationId, recipientId, className = '' }) => {
     };
 
     const onServerError = (payload) => {
+      clearWatchdog();
       setError(payload?.message || 'حدث خطأ في المحادثة.');
       setLoading(false);
     };
@@ -183,16 +211,8 @@ const ChatBox = ({ conversationId, recipientId, className = '' }) => {
     s.on('typing', onTyping);
     s.on('error', onServerError);
 
-    // في حال الاتصال جاهز مسبقًا
-    if (s.connected) {
-      s.emit('joinConversation', { conversationId });
-      requestHistory();
-    }
-
+    // إلغاء الاشتراكات
     return () => {
-      clearTimeout(reconnectTimerRef.current);
-      // اخرج من الغرفة عند التفكيك
-      try { s.emit('leaveConversation', { conversationId }); } catch {}
       s.off('connect', onConnect);
       s.off('connect_error', onConnectError);
       s.off('disconnect', onDisconnect);
@@ -202,6 +222,38 @@ const ChatBox = ({ conversationId, recipientId, className = '' }) => {
       s.off('messageSent', onSent);
       s.off('typing', onTyping);
       s.off('error', onServerError);
+    };
+  };
+
+  // الاشتراكات/الإعداد
+  useEffect(() => {
+    setLoading(true);
+    setError('');
+    knownIdsRef.current.clear();
+    knownTempRef.current.clear();
+    historyRequestedRef.current = false;
+    clearWatchdog();
+
+    if (!token || !recipientId || !conversationId) {
+      setError('بيانات غير مكتملة لبدء المحادثة.');
+      setLoading(false);
+      return;
+    }
+
+    const s = connectSocket(token);
+    const unbind = bindSocket(s);
+
+    // إن كان متصلًا بالفعل بعد التحديث
+    if (s.connected) {
+      s.emit('joinConversation', { conversationId });
+      requestHistory();
+    }
+
+    return () => {
+      clearTimeout(reconnectTimerRef.current);
+      clearWatchdog();
+      try { s.emit('leaveConversation', { conversationId }); } catch {}
+      unbind?.();
     };
   }, [token, recipientId, conversationId]);
 
@@ -242,10 +294,9 @@ const ChatBox = ({ conversationId, recipientId, className = '' }) => {
     setInput('');
     setSending(true);
 
-    // أرسل الرسالة مع conversationId
     s.emit('sendMessage', { conversationId, recipientId, content: text, type: 'chat', tempId });
 
-    // fallback إزالة pending إن تأخر الإيصال
+    // Fallback لإزالة pending إن لم يصل messageSent
     setTimeout(() => {
       setMessages((prev) =>
         prev.map((m) => (m.tempId === tempId ? { ...m, pending: false } : m)),
@@ -265,44 +316,53 @@ const ChatBox = ({ conversationId, recipientId, className = '' }) => {
         {isTyping && <small className="text-muted">يكتب الآن…</small>}
       </div>
 
-      <div ref={listRef} className="card-body p-2 messages-area">
+      <div ref={listRef} className="card-body p-2 messages-area messages-scroll">
         {loading ? (
           <div className="text-center py-5">
             <Spinner animation="border" />
             <div className="mt-2 text-muted">جارٍ تحميل المحادثة…</div>
           </div>
         ) : error ? (
-          <Alert variant="warning" className="mx-auto" style={{ maxWidth: 520 }}>
-            {error}
-          </Alert>
+          <div className="text-center py-4">
+            <Alert variant="warning" className="mx-auto mb-3" style={{ maxWidth: 520 }}>
+              {error}
+            </Alert>
+            <Button variant="outline-success" size="sm" onClick={requestHistory}>
+              إعادة المحاولة
+            </Button>
+          </div>
         ) : messages.length === 0 ? (
           <div className="text-center text-muted py-5">ابدأ المحادثة…</div>
         ) : (
           messages.map((m) => {
-            const myId = (JSON.parse(localStorage.getItem('user') || '{}')._id);
-            const mine = m.sender === myId;
+            const mine = String(m.sender) === String(myId);
+            const avatarSrc = m.senderProfileImage
+              ? (m.senderProfileImage.startsWith('http') ? m.senderProfileImage : `/uploads/profileImages/${m.senderProfileImage}`)
+              : '/default-avatar.png';
+
             return (
               <div
                 key={m._id || m.tempId}
-                className={`chatbox-messages d-flex mb-2 ${mine ? 'justify-content-end' : 'justify-content-start'}`}
+                className={`d-flex mb-2 ${mine ? 'justify-content-end' : 'justify-content-start'}`}
               >
                 {!mine && (
                   <img
-                    src={m.senderProfileImage || '/default-avatar.png'}
+                    src={avatarSrc}
                     alt=""
-                    style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', marginInlineEnd: 8 }}
+                    className="bubble-avatar"
                     onError={(e) => { e.currentTarget.src = '/default-avatar.png'; }}
                   />
                 )}
-                <div
-                  className={`p-2 rounded-3 ${mine ? 'bg-primary text-white' : 'bg-white border'}`}
-                  style={{ maxWidth: '76%' }}
-                >
-                  {!mine && <div className="small text-muted mb-1">{m.senderName || 'مستخدم'}</div>}
-                  <div style={{ whiteSpace: 'pre-wrap' }}>{m.content}</div>
-                  <div className={`small mt-1 ${mine ? 'text-white-50' : 'text-muted'}`}>
-                    {fmtTime(m.timestamp)}
-                    {m.pending ? <span className="ms-2">…إرسال</span> : <span className="ms-2">✓</span>}
+                <div className={`bubble ${mine ? 'mine' : 'theirs'}`}>
+                  {!mine && <div className="bubble-name">{m.senderName || 'مستخدم'}</div>}
+                  <div className="bubble-message" style={{ whiteSpace: 'pre-wrap' }}>{m.content}</div>
+                  <div className="bubble-meta">
+                    <span>{fmtTime(m.timestamp)}</span>
+                    {m.pending ? (
+                      <span className="tick tick-sent">✓</span>
+                    ) : (
+                      <span className="tick tick-delivered">✓✓</span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -312,12 +372,15 @@ const ChatBox = ({ conversationId, recipientId, className = '' }) => {
       </div>
 
       <div className="card-footer bg-white">
-        <Form onSubmit={sendMessage} className="d-flex gap-2">
+        <Form onSubmit={sendMessage} className="chat">
+          <Button type="submit" variant="success" disabled={!input.trim()} title="إرسال" className="px-5">
+            {sending ? <Spinner size="sm" /> : <i className="fas fa-paper-plane" />}
+          </Button>
+
           <Form.Control
             as="textarea"
             rows={1}
-            className="flex-grow-1"
-            style={{ resize: 'none' }}
+            className="chat-text"
             placeholder="اكتب رسالتك…"
             value={input}
             onChange={(e) => { setInput(e.target.value); sendTyping(); }}
@@ -328,9 +391,6 @@ const ChatBox = ({ conversationId, recipientId, className = '' }) => {
               }
             }}
           />
-          <Button type="submit" variant="success" disabled={!input.trim()} title="إرسال">
-            {sending ? <Spinner size="sm" /> : <i className="fas fa-paper-plane" />}
-          </Button>
         </Form>
       </div>
     </div>
@@ -338,7 +398,7 @@ const ChatBox = ({ conversationId, recipientId, className = '' }) => {
 };
 
 ChatBox.propTypes = {
-  conversationId: PropTypes.string.isRequired, //  
+  conversationId: PropTypes.string.isRequired,
   recipientId: PropTypes.string.isRequired,
   className: PropTypes.string,
 };

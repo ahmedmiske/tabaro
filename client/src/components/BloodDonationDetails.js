@@ -7,7 +7,7 @@ import {
 } from 'react-bootstrap';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import ChatBox from './ChatBox';
-import socket from '../socket';
+import { connectSocket, waitUntilConnected } from '../socket';
 import DonationOffersForRequest from './DonationOffersForRequest';
 import './BloodDonationDetails.css';
 
@@ -56,6 +56,13 @@ const BloodDonationDetails = () => {
   const active = isRequestActive(donation?.deadline);
   const isOwner = donation?.userId?._id === currentUserId || donation?.userId === currentUserId;
   const recipientId = typeof donation?.userId === 'object' ? donation?.userId?._id : donation?.userId;
+
+  // ✅ معرّف المحادثة الحتمي (يربط الطلب بالطرفين)
+  const conversationId = useMemo(() => {
+    if (!recipientId || !currentUserId || !donation?._id) return null;
+    const pair = [String(currentUserId), String(recipientId)].sort().join(':');
+    return `req:${donation._id}:${pair}`;
+  }, [recipientId, currentUserId, donation?._id]);
 
   const progressValue = React.useMemo(() => {
     if (!donation?.createdAt || !donation?.deadline) return 0;
@@ -156,13 +163,25 @@ const BloodDonationDetails = () => {
 
       if (res.ok) {
         setInfoMessage('✅ تم إعلان التبرع — يمكنك الآن متابعة التواصل والتنفيذ.');
-        socket.emit('sendMessage', {
-          recipientId,
-          content: `🩸 ${currentUser?.firstName || 'متبرّع'} أعلن تبرعًا لطلب فصيلة ${donation.bloodType}`,
-          requestId: donation._id,
-          offerId: null,
-          type: 'offer'
-        });
+
+        // 🔌 تأكد من الاتصال ثم أرسل عبر الغرفة الصحيحة
+        connectSocket(
+          JSON.parse(localStorage.getItem('user') || '{}')?.token ||
+          localStorage.getItem('token') ||
+          localStorage.getItem('authToken')
+        );
+        const s = await waitUntilConnected();
+        if (s && conversationId) {
+          s.emit('joinConversation', { conversationId });
+          s.emit('sendMessage', {
+            conversationId,
+            recipientId,
+            content: `🩸 ${currentUser?.firstName || 'متبرّع'} أعلن تبرعًا لطلب فصيلة ${donation.bloodType}`,
+            requestId: donation._id,
+            offerId: null,
+            type: 'offer'
+          });
+        }
 
         setDonationStatus('announced');
         setShowOfferConfirm(false);
@@ -472,10 +491,11 @@ const BloodDonationDetails = () => {
             </Alert>
           )}
 
-          {showChat && recipientId && (
+          {showChat && recipientId && conversationId && (
             <div className="mt-4">
               <h5 className="text-center mb-3">محادثة مع {donation.userId?.firstName || 'الناشر'}</h5>
-              <ChatBox recipientId={recipientId} />
+              {/* ✅ نمرر conversationId + recipientId */}
+              <ChatBox conversationId={conversationId} recipientId={recipientId} />
             </div>
           )}
         </Card.Body>
