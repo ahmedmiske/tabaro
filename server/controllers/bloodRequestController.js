@@ -37,6 +37,11 @@ function parseContactMethods(input) {
 // @route   POST /api/blood-requests
 // @access  Private
 const createBloodRequest = asyncHandler(async (req, res) => {
+
+  if (req.fileFilterError) {
+    return res.status(415).send(req.fileFilterError);
+  }
+
   const { bloodType, location, deadline, description, isUrgent } = req.body;
 
   const contactMethods = parseContactMethods(req.body.contactMethods);
