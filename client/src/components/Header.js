@@ -130,29 +130,39 @@ function Header() {
               <FaBullhorn className="nav-icon" /> حملات الجمعيات
             </Nav.Link>
 
-            <NavDropdown title={<><FaDonate className="nav-icon" /> التبرعات</>} id="donation-dropdown" className="link-nav">
-              <NavDropdown.Item as={Link} to="/donation-requests">
-                <FaHandHoldingHeart className="nav-icon" /> طلب تبرع
-              </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/donations">
-                <FaHandHoldingHeart className="nav-icon" />  طلبات التبرع
-              </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/donation-offers">
-                <FaHandHoldingHeart className="nav-icon" /> عرض تبرع
-              </NavDropdown.Item>
-            </NavDropdown>
+     
+<NavDropdown title={<><FaDonate className="nav-icon" /> التبرعات</>} id="donation-dropdown" className="link-nav">
+  <NavDropdown.Item
+    as={Link}
+    to={!user ? `/login?next=${encodeURIComponent('/donation-requests')}` : '/donation-requests'}
+  >
+    <FaHandHoldingHeart className="nav-icon" /> طلب تبرع
+  </NavDropdown.Item>
+  <NavDropdown.Item as={Link} to="/donations">
+    <FaHandHoldingHeart className="nav-icon" />  طلبات التبرع
+  </NavDropdown.Item>
+  <NavDropdown.Item
+    as={Link}
+    to={!user ? `/login?next=${encodeURIComponent('/donation-offers')}` : '/donation-offers'}
+  >
+    <FaHandHoldingHeart className="nav-icon" /> عرض تبرع
+  </NavDropdown.Item>
+</NavDropdown>
 
-            <NavDropdown title={<><FaTint className="nav-icon" /> التبرع بالدم</>} id="blood-dropdown" className="link-nav">
-              <NavDropdown.Item as={Link} to="/blood-donation">
-                <FaHandHoldingHeart className="nav-icon" /> طلب تبرع بالدم
-              </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/blood-donations">
-                <FaTint className="nav-icon" /> قائمة طلبات الدم
-              </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/donors">
-                <FaUserShield className="nav-icon" /> قائمة المتبرعين
-              </NavDropdown.Item>
-            </NavDropdown>
+<NavDropdown title={<><FaTint className="nav-icon" /> التبرع بالدم</>} id="blood-dropdown" className="link-nav">
+  <NavDropdown.Item
+    as={Link}
+    to={!user ? `/login?next=${encodeURIComponent('/blood-donation')}` : '/blood-donation'}
+  >
+    <FaHandHoldingHeart className="nav-icon" /> طلب تبرع بالدم
+  </NavDropdown.Item>
+  <NavDropdown.Item as={Link} to="/blood-donations">
+    <FaTint className="nav-icon" /> قائمة طلبات الدم
+  </NavDropdown.Item>
+  <NavDropdown.Item as={Link} to="/donors">
+    <FaUserShield className="nav-icon" /> قائمة المتبرعين
+  </NavDropdown.Item>
+</NavDropdown>
 
             <Nav.Link as={Link} to="/social-ads" className={`link-nav nav-link ${location.pathname === '/social-ads' ? 'active-link' : ''}`}>
               <FaBullseye className="nav-icon" /> الإعلانات الاجتماعية

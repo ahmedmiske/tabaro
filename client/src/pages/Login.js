@@ -1,6 +1,7 @@
+// src/pages/Login.jsx
 import React, { useState } from 'react';
 import { Form, Button, Alert, Spinner } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import './Login.css';
 import loginImg from './login.jpeg';
 import fetchWithInterceptors from '../services/fetchWithInterceptors.js';
@@ -12,7 +13,12 @@ function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
+
+  // لو فيه ?next=/something نرجع له بعد النجاح
+  const params = new URLSearchParams(location.search);
+  const next = params.get('next');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,7 +35,7 @@ function Login() {
         const token = response.body?.token;
         if (user && token) {
           login({ ...user, token });
-          navigate('/profile');
+          navigate(next || '/profile', { replace: true }); // ✅ رجوع للصفحة المطلوبة
         } else {
           setError('البيانات غير مكتملة. الرجاء المحاولة لاحقًا.');
         }
