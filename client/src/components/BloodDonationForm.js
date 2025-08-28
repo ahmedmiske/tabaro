@@ -2,11 +2,14 @@
 import React, { useState } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
 import { FaArrowRight, FaArrowLeft, FaCheck } from 'react-icons/fa';
-
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import './BloodDonationForm.css';
 import TitleMain from './TitleMain';
 import ProgressStep from './ProgressStep';
+
+const ALLOWED_FILE_TYPES = ['application/pdf','image/png','image/jpeg','image/jpg','image/webp','image/gif'];
+const MAX_FILE_MB = 10;
+const isAllowed = (f) => f && ALLOWED_FILE_TYPES.includes(f.type) && f.size <= MAX_FILE_MB*1024*1024;
 
 const BloodDonationForm = () => {
   const [step, setStep] = useState(1);
@@ -14,6 +17,7 @@ const BloodDonationForm = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [errors, setErrors] = useState({});
   const [supportDocs, setSupportDocs] = useState([]);
+  const [fileError, setFileError] = useState('');
   const [showValidationAlert, setShowValidationAlert] = useState(false);
   const [bloodDonation, setBloodDonation] = useState({
     bloodType: '',
@@ -30,33 +34,34 @@ const BloodDonationForm = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setBloodDonation(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+    setBloodDonation(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
 
   const handleContactChange = (method, value) => {
     setBloodDonation(prev => {
       const updated = [...prev.contactMethods];
       const index = updated.findIndex(m => m.method === method);
-      if (index !== -1) {
-        updated[index].number = value;
-      } else {
-        updated.push({ method, number: value });
-      }
+      if (index !== -1) updated[index].number = value;
+      else updated.push({ method, number: value });
       return { ...prev, contactMethods: updated };
     });
   };
 
   const handleFileChange = (e) => {
-    setSupportDocs([...supportDocs, ...Array.from(e.target.files)]);
+    const incoming = Array.from(e.target.files || []);
+    const ok = [];
+    const rejected = [];
+    incoming.forEach(f => (isAllowed(f) ? ok.push(f) : rejected.push(f)));
+    setSupportDocs(prev => [...prev, ...ok]);
+    if (rejected.length) {
+      setFileError(`❌ تم تجاهل ${rejected.length} ملف (مسموح فقط صور/PDF وبحجم ≤ ${MAX_FILE_MB}MB).`);
+      setTimeout(()=>setFileError(''), 4000);
+    }
+    e.target.value = '';
   };
 
   const removeFile = (index) => {
-    const newFiles = [...supportDocs];
-    newFiles.splice(index, 1);
-    setSupportDocs(newFiles);
+    setSupportDocs(prev => prev.filter((_,i)=>i!==index));
   };
 
   const handleSubmit = (e) => {
@@ -64,9 +69,7 @@ const BloodDonationForm = () => {
 
     const newErrors = {};
     bloodDonation.contactMethods.forEach(({ method, number }) => {
-      if (!validatePhoneNumber(number)) {
-        newErrors[method] = true;
-      }
+      if (!validatePhoneNumber(number)) newErrors[method] = true;
     });
 
     if (Object.keys(newErrors).length > 0) {
@@ -75,18 +78,10 @@ const BloodDonationForm = () => {
     }
 
     const formData = new FormData();
-
-    // بقية الحقول العادية
     const { contactMethods, ...rest } = bloodDonation;
     Object.entries(rest).forEach(([k, v]) => formData.append(k, v));
-
-    // contactMethods كسلسلة JSON واحدة
     formData.append('contactMethods', JSON.stringify(contactMethods));
-
-    // الملفات
-    supportDocs.forEach((file) => {
-      formData.append('files', file);
-    });
+    supportDocs.forEach((file) => formData.append('files', file));
 
     fetchWithInterceptors('/api/blood-requests', {
       method: 'POST',
@@ -104,35 +99,18 @@ const BloodDonationForm = () => {
     let valid = true;
 
     if (step === 1) {
-      if (!bloodDonation.bloodType) {
-        newErrors.bloodType = true;
-        valid = false;
-      }
-      if (!bloodDonation.location.trim()) {
-        newErrors.location = true;
-        valid = false;
-      }
+      if (!bloodDonation.bloodType) { newErrors.bloodType = true; valid = false; }
+      if (!bloodDonation.location.trim()) { newErrors.location = true; valid = false; }
     }
-
     if (step === 2) {
-      if (!bloodDonation.description.trim()) {
-        newErrors.description = true;
-        valid = false;
-      }
-      if (!bloodDonation.deadline) {
-        newErrors.deadline = true;
-        valid = false;
-      }
+      if (!bloodDonation.description.trim()) { newErrors.description = true; valid = false; }
+      if (!bloodDonation.deadline) { newErrors.deadline = true; valid = false; }
     }
-
     if (step === 3) {
       contactOptions.forEach((method) => {
         const current = bloodDonation.contactMethods.find(m => m.method === method);
         const number = current?.number || '';
-        if (!validatePhoneNumber(number)) {
-          newErrors[method] = true;
-          valid = false;
-        }
+        if (!validatePhoneNumber(number)) { newErrors[method] = true; valid = false; }
       });
     }
 
@@ -148,11 +126,14 @@ const BloodDonationForm = () => {
         <div className="form-title-box">
           <ProgressStep step={step} total={5} />
         </div>
+
+        {fileError && <Alert variant="warning">{fileError}</Alert>}
         {showValidationAlert && (
           <Alert variant="danger" onClose={() => setShowValidationAlert(false)} dismissible>
             ⚠️ يرجى ملء جميع الحقول الإلزامية قبل المتابعة.
           </Alert>
         )}
+
         {formSubmitted ? (
           <Alert variant="success">{successMessage}</Alert>
         ) : (
@@ -161,40 +142,17 @@ const BloodDonationForm = () => {
               <>
                 <Form.Group>
                   <Form.Label>فصيلة الدم</Form.Label>
-                  <Form.Control
-                    as="select"
-                    name="bloodType"
-                    value={bloodDonation.bloodType}
-                    onChange={handleChange}
-                    isInvalid={errors.bloodType}
-                  >
+                  <Form.Control as="select" name="bloodType" value={bloodDonation.bloodType} onChange={handleChange} isInvalid={errors.bloodType} required>
                     <option value="">-- اختر الفصيلة --</option>
-                    {bloodTypes.map(type => (
-                      <option key={type} value={type}>{type}</option>
-                    ))}
+                    {bloodTypes.map(type => (<option key={type} value={type}>{type}</option>))}
                   </Form.Control>
-                  {errors.bloodType && (
-                    <Form.Control.Feedback type="invalid">
-                      الرجاء اختيار فصيلة الدم
-                    </Form.Control.Feedback>
-                  )}
+                  {errors.bloodType && <Form.Control.Feedback type="invalid">الرجاء اختيار فصيلة الدم</Form.Control.Feedback>}
                 </Form.Group>
 
                 <Form.Group>
                   <Form.Label>الموقع</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="location"
-                    value={bloodDonation.location}
-                    onChange={handleChange}
-                    placeholder="المدينة أو المستشفى"
-                    isInvalid={errors.location}
-                  />
-                  {errors.location && (
-                    <Form.Control.Feedback type="invalid">
-                      هذا الحقل مطلوب
-                    </Form.Control.Feedback>
-                  )}
+                  <Form.Control type="text" name="location" value={bloodDonation.location} onChange={handleChange} placeholder="المدينة أو المستشفى" isInvalid={errors.location} required/>
+                  {errors.location && <Form.Control.Feedback type="invalid">هذا الحقل مطلوب</Form.Control.Feedback>}
                 </Form.Group>
               </>
             )}
@@ -203,44 +161,18 @@ const BloodDonationForm = () => {
               <>
                 <Form.Group>
                   <Form.Label>وصف الحالة</Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    name="description"
-                    value={bloodDonation.description}
-                    onChange={handleChange}
-                    isInvalid={errors.description}
-                  />
-                  {errors.description && (
-                    <Form.Control.Feedback type="invalid">
-                      يرجى إدخال وصف الحالة
-                    </Form.Control.Feedback>
-                  )}
+                  <Form.Control as="textarea" name="description" value={bloodDonation.description} onChange={handleChange} isInvalid={errors.description} required />
+                  {errors.description && <Form.Control.Feedback type="invalid">يرجى إدخال وصف الحالة</Form.Control.Feedback>}
                 </Form.Group>
 
                 <Form.Group>
                   <Form.Label>الموعد النهائي</Form.Label>
-                  <Form.Control
-                    type="date"
-                    name="deadline"
-                    value={bloodDonation.deadline}
-                    onChange={handleChange}
-                    isInvalid={errors.deadline}
-                  />
-                  {errors.deadline && (
-                    <Form.Control.Feedback type="invalid">
-                      حدد موعدًا نهائيًا صالحًا
-                    </Form.Control.Feedback>
-                  )}
+                  <Form.Control type="date" name="deadline" value={bloodDonation.deadline} onChange={handleChange} isInvalid={errors.deadline} required />
+                  {errors.deadline && <Form.Control.Feedback type="invalid">حدد موعدًا نهائيًا صالحًا</Form.Control.Feedback>}
                 </Form.Group>
 
                 <Form.Group className="mt-2">
-                  <Form.Check
-                    type="checkbox"
-                    label="طلب مستعجل"
-                    name="isUrgent"
-                    checked={bloodDonation.isUrgent}
-                    onChange={handleChange}
-                  />
+                  <Form.Check type="checkbox" label="طلب مستعجل" name="isUrgent" checked={bloodDonation.isUrgent} onChange={handleChange} />
                 </Form.Group>
               </>
             )}
@@ -251,30 +183,22 @@ const BloodDonationForm = () => {
                 {contactOptions.map(method => {
                   const current = bloodDonation.contactMethods.find(m => m.method === method);
                   const numberValue = current ? current.number : '';
-
                   return (
                     <div key={method} className="mb-3">
                       <Form.Label>{method === 'phone' ? 'الهاتف' : 'واتساب'}</Form.Label>
                       <Form.Control
                         type="text"
-                        placeholder={` ${method}`}
-                        required
+                        placeholder={`${method}`}
                         value={numberValue}
                         onChange={(e) => {
                           const value = e.target.value;
                           handleContactChange(method, value);
-
-                          if (!validatePhoneNumber(value)) {
-                            setErrors(prev => ({ ...prev, [method]: true }));
-                          } else {
-                            setErrors(prev => ({ ...prev, [method]: false }));
-                          }
+                          setErrors(prev => ({ ...prev, [method]: !/^\d{8}$/.test(value) }));
                         }}
                         isInvalid={errors[method]}
+                        required
                       />
-                      <Form.Control.Feedback type="invalid">
-                        يجب إدخال رقم صالح مكوّن من 8 أرقام
-                      </Form.Control.Feedback>
+                      <Form.Control.Feedback type="invalid">يجب إدخال رقم صالح مكوّن من 8 أرقام</Form.Control.Feedback>
                     </div>
                   );
                 })}
@@ -283,20 +207,12 @@ const BloodDonationForm = () => {
 
             {step === 4 && (
               <Form.Group>
-                <Form.Label>الوثائق الداعمة (يمكنك رفع أكثر من ملف)</Form.Label>
-                <Form.Control type="file" multiple onChange={handleFileChange} />
+                <Form.Label>الوثائق الداعمة (صور / PDF)</Form.Label>
+                <Form.Control type="file" multiple accept=".pdf,image/*" onChange={handleFileChange} />
                 <ul className="mt-2 list-unstyled">
                   {supportDocs.map((file, idx) => (
-                    <li key={idx}>
-                      📎 {file.name}
-                      <Button
-                        variant="outline-danger"
-                        size="sm"
-                        onClick={() => removeFile(idx)}
-                        className="ms-2"
-                      >
-                        حذف
-                      </Button>
+                    <li key={idx}>📎 {file.name}
+                      <Button variant="outline-danger" size="sm" onClick={() => removeFile(idx)} className="ms-2">حذف</Button>
                     </li>
                   ))}
                 </ul>
@@ -304,28 +220,23 @@ const BloodDonationForm = () => {
             )}
 
             {step === 5 && (
-              <Alert variant="info" className="text-center">
-                ✅ أنت على وشك إرسال الطلب بعد مراجعة جميع المعلومات.
-              </Alert>
+              <Alert variant="info" className="text-center">✅ أنت على وشك إرسال الطلب بعد مراجعة جميع المعلومات.</Alert>
             )}
 
             <div className="action-buttons">
               {step > 1 && (
                 <Button className="button-prev" onClick={() => setStep(step - 1)}>
-                  السابق
-                  <FaArrowRight className="ms-2" size={25} />
+                  السابق <FaArrowRight className="ms-2" size={25} />
                 </Button>
               )}
               {step < 5 && (
                 <Button className="button-next" onClick={() => { if (validateStep()) setStep(step + 1); }}>
-                  <FaArrowLeft className="me-2" size={25} />
-                  التالي
+                  <FaArrowLeft className="me-2" size={25} /> التالي
                 </Button>
               )}
               {step === 5 && (
                 <Button className="button-submit" type="submit">
-                  <FaCheck className="ms-2" size={25} />
-                  إرسال الطلب
+                  <FaCheck className="ms-2" size={25} /> إرسال الطلب
                 </Button>
               )}
             </div>

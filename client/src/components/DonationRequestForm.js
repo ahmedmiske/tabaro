@@ -1,7 +1,12 @@
+// src/components/DonationRequestForm.jsx
 import React, { useEffect, useMemo, useState } from 'react';
-import { Form, Button, ListGroup, ListGroupItem, Spinner } from 'react-bootstrap';
+import { Form, Button, ListGroup, ListGroupItem, Spinner, Alert } from 'react-bootstrap';
 import './DonationRequestForm.css';
 import { useNavigate } from 'react-router-dom';
+
+const ALLOWED_FILE_TYPES = ['application/pdf','image/png','image/jpeg','image/jpg','image/webp','image/gif'];
+const MAX_FILE_MB = 10;
+const isAllowed = (f) => f && ALLOWED_FILE_TYPES.includes(f.type) && f.size <= MAX_FILE_MB*1024*1024;
 
 const DonationRequestForm = () => {
   const navigate = useNavigate();
@@ -17,13 +22,14 @@ const DonationRequestForm = () => {
     deadline: '',
     isUrgent: false,
     bloodType: '',
-    proofDocuments: [],   // Files فقط للواجهة
+    proofDocuments: [],   // Files (واجهة فقط)
     date: new Date().toISOString()
   });
 
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({ paymentPhones: {}, contactNumbers: {} });
+  const [fileError, setFileError] = useState('');
 
   const categories = {
     "الصحة": [ "أدوية", "معدات طبية"],
@@ -39,7 +45,7 @@ const DonationRequestForm = () => {
   const validatePhoneNumber = (v) => /^\d{8}$/.test(v || '');
   const socialAds = categories["الإعلانات الاجتماعية"];
   const isFinancial = useMemo(() => donation.type && !socialAds.includes(donation.type), [donation.type]);
-  const isStep1Valid = useMemo(() => donation.category && donation.type, [donation.category, donation.type]);
+  const isStep1Valid = useMemo(() => !!donation.category && !!donation.type, [donation.category, donation.type]);
 
   const contactsValid = useMemo(
     () => donation.contactMethods.every(c => !c.number || validatePhoneNumber(c.number)),
@@ -54,7 +60,9 @@ const DonationRequestForm = () => {
     return phonesOk && amountOk;
   }, [donation.paymentMethods, donation.amount, isFinancial]);
 
-  const displayedStep = !isFinancial && step >= 4 ? step - 1 : step;
+  // الخطوة الظاهرة للمستخدم (عند عدم الحاجة للمالية نقلّل العدد)
+  const totalSteps = isFinancial ? 5 : 4;
+  const displayedStep = Math.min(step, totalSteps);
 
   const minDeadline = useMemo(() => {
     const d = new Date(); d.setHours(0,0,0,0);
@@ -77,13 +85,23 @@ const DonationRequestForm = () => {
     setDonation(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
   const handleCategoryChange = (e) => setDonation(prev => ({ ...prev, category: e.target.value, type: '' }));
+
   const handleFileUpload = (e) => {
-    const files = Array.from(e.target.files || []);
-    setDonation(prev => ({ ...prev, proofDocuments: [...prev.proofDocuments, ...files] }));
+    const incoming = Array.from(e.target.files || []);
+    const ok = [];
+    const rejected = [];
+    incoming.forEach(f => (isAllowed(f) ? ok.push(f) : rejected.push(f)));
+    setDonation(prev => ({ ...prev, proofDocuments: [...prev.proofDocuments, ...ok] }));
+    if (rejected.length) {
+      setFileError(`❌ تم تجاهل ${rejected.length} ملف (المسموح: صور/PDF حتى ${MAX_FILE_MB}MB).`);
+      setTimeout(()=>setFileError(''), 4000);
+    }
+    e.target.value = '';
   };
   const handleRemoveFile = (index) => {
     setDonation(prev => ({ ...prev, proofDocuments: prev.proofDocuments.filter((_, i) => i !== index) }));
   };
+
   const togglePaymentMethod = (method, checked) => {
     setDonation(prev => {
       const current = [...prev.paymentMethods];
@@ -108,9 +126,14 @@ const DonationRequestForm = () => {
   };
 
   const goNext = () => {
+    // منع التقدّم إذا الخطوة غير مستوفاة
+    if (step === 1 && !isStep1Valid) return;
+    if (step === 2 && (!donation.place || !contactsValid)) return;
+    if (step === 3 && isFinancial && !paymentsValid) return;
+
     let s = step + 1;
-    if (!isFinancial && s === 3) s = 4;
-    setStep(Math.min(s, isFinancial ? 5 : 4));
+    if (!isFinancial && s === 3) s = 4; // تخطّي خطوة المالية عند غير المالية
+    setStep(Math.min(s, totalSteps));
   };
   const goPrev = () => {
     let s = step - 1;
@@ -140,7 +163,6 @@ const DonationRequestForm = () => {
 
     if (hasError) return;
 
-    // ✅ نرسل contactMethods/paymentMethods كـ JSON (الكنترولر صار يدعم JSON أو الأقواس)
     const fd = new FormData();
     fd.append('category', donation.category);
     fd.append('type', donation.type);
@@ -153,7 +175,6 @@ const DonationRequestForm = () => {
 
     const cleanContacts = donation.contactMethods.filter(x => x && (x.method || x.number));
     const cleanPayments = donation.paymentMethods.filter(x => x && (x.method || x.phone));
-
     fd.append('contactMethods', JSON.stringify(cleanContacts));
     fd.append('paymentMethods', JSON.stringify(cleanPayments));
 
@@ -179,7 +200,7 @@ const DonationRequestForm = () => {
 
       const resp = await fetch('/api/donationRequests', {
         method: 'POST',
-        body: fd, // لا تضع Content-Type يدوياً
+        body: fd,
         headers: {
           Authorization: `Bearer ${token}`,
           'x-auth-token': token,
@@ -209,27 +230,20 @@ const DonationRequestForm = () => {
     }
   };
 
-  const renderFilePreview = (file) => {
-    if (!file) return null;
-    if (file.type && file.type.startsWith('image/')) {
-      const url = URL.createObjectURL(file);
-      return <img alt={file.name} src={url} style={{ maxHeight: 60, maxWidth: 80, objectFit: 'cover', borderRadius: 6 }} onLoad={() => URL.revokeObjectURL(url)} />;
-    }
-    return <span>{file.name}</span>;
-  };
-
   return (
-    <div className="donation-form-container">
+    <div className="donation-form-container" dir="rtl">
       <h2>طلب تبرع جديد</h2>
 
       <div className="progress-container">
-        <div className="progress-bar" style={{ width: `${(displayedStep / (isFinancial ? 5 : 4)) * 100}%` }} />
-        <span className="progress-text">{`الخطوة ${displayedStep} من ${isFinancial ? 5 : 4}`}</span>
+        <div className="progress-bar" style={{ width: `${(displayedStep / totalSteps) * 100}%` }} />
+        <span className="progress-text">{`الخطوة ${displayedStep} من ${totalSteps}`}</span>
       </div>
+
+      {fileError && <Alert variant="warning">{fileError}</Alert>}
 
       <Form onSubmit={handleSubmit}>
         {/* 1) المجال/النوع/الوصف */}
-        {step === 1 && (
+        {displayedStep === 1 && (
           <>
             <Form.Group>
               <Form.Label>اختر المجال</Form.Label>
@@ -240,7 +254,7 @@ const DonationRequestForm = () => {
             </Form.Group>
 
             {donation.category && (
-              <Form.Group>
+              <Form.Group className="mt-2">
                 <Form.Label>اختر نوع التبرع</Form.Label>
                 <Form.Control as="select" name="type" value={donation.type} onChange={handleChange} required>
                   <option value="">-- اختر النوع --</option>
@@ -249,7 +263,7 @@ const DonationRequestForm = () => {
               </Form.Group>
             )}
 
-            <Form.Group>
+            <Form.Group className="mt-2">
               <Form.Label>وصف الحالة</Form.Label>
               <Form.Control as="textarea" name="description" value={donation.description} onChange={handleChange} placeholder="أدخل وصفًا مختصرًا للحالة أو الاحتياج" />
             </Form.Group>
@@ -257,7 +271,7 @@ const DonationRequestForm = () => {
         )}
 
         {/* 2) المكان + وسائل التواصل */}
-        {step === 2 && (
+        {displayedStep === 2 && (
           <>
             <Form.Group>
               <Form.Label>الموقع (اسم المكان)</Form.Label>
@@ -286,7 +300,9 @@ const DonationRequestForm = () => {
                               ...prev,
                               contactMethods: prev.contactMethods.map(m => m.method === method ? { ...m, number } : m)
                             }));
+                            setErrors(prev => ({ ...prev, contactNumbers: { ...prev.contactNumbers, [method]: !validatePhoneNumber(number) } }));
                           }}
+                          required
                         />
                         {errors.contactNumbers[method] && <div className="invalid-feedback d-block">الرقم يجب أن يتكون من 8 أرقام.</div>}
                       </>
@@ -299,11 +315,11 @@ const DonationRequestForm = () => {
         )}
 
         {/* 3) المبلغ + وسائل الدفع (مالية فقط) */}
-        {step === 3 && isFinancial && (
+        {displayedStep === 3 && isFinancial && (
           <>
             <Form.Group>
               <Form.Label>المبلغ المطلوب</Form.Label>
-              <Form.Control type="number" name="amount" value={donation.amount} onChange={handleChange} min="1" />
+              <Form.Control type="number" name="amount" value={donation.amount} onChange={handleChange} min="1" required />
             </Form.Group>
 
             <Form.Group>
@@ -326,7 +342,9 @@ const DonationRequestForm = () => {
                               ...prev,
                               paymentMethods: prev.paymentMethods.map(m => m.method === method ? { ...m, phone } : m)
                             }));
+                            setErrors(prev => ({ ...prev, paymentPhones: { ...prev.paymentPhones, [method]: !validatePhoneNumber(phone) } }));
                           }}
+                          required
                         />
                         {errors.paymentPhones[method] && <div className="invalid-feedback d-block">الرقم يجب أن يتكون من 8 أرقام.</div>}
                       </>
@@ -339,8 +357,8 @@ const DonationRequestForm = () => {
           </>
         )}
 
-        {/* 4) التاريخ + الاستعجال */}
-        {((step === 4) || (!isFinancial && step === 3)) && (
+        {/* 4) التاريخ + الاستعجال (أو 3 لغير المالية) */}
+        {displayedStep === (isFinancial ? 4 : 3) && (
           <div className="row">
             <div className="col-md-6">
               <Form.Group>
@@ -356,8 +374,8 @@ const DonationRequestForm = () => {
           </div>
         )}
 
-        {/* 5) الملفات */}
-        {((step === 5) || (!isFinancial && step === 4)) && (
+        {/* 5) الملفات (أو 4 لغير المالية) */}
+        {displayedStep === totalSteps && (
           <>
             <Form.Group>
               <div className="d-flex justify-content-between">
@@ -382,21 +400,21 @@ const DonationRequestForm = () => {
           {displayedStep > 1 && (
             <Button variant="secondary" onClick={goPrev} disabled={submitting}>السابق</Button>
           )}
-          {displayedStep < (isFinancial ? 5 : 4) && (
+          {displayedStep < totalSteps && (
             <Button
               variant="primary"
               onClick={goNext}
               disabled={
                 submitting ||
-                (step === 1 && !isStep1Valid) ||
-                (step === 2 && (!donation.place || !contactsValid)) ||
-                (step === 3 && isFinancial && !paymentsValid)
+                (displayedStep === 1 && !isStep1Valid) ||
+                (displayedStep === 2 && (!donation.place || !contactsValid)) ||
+                (displayedStep === 3 && isFinancial && !paymentsValid)
               }
             >
               التالي
             </Button>
           )}
-          {displayedStep === (isFinancial ? 5 : 4) && (
+          {displayedStep === totalSteps && (
             <Button type="submit" variant="success" disabled={submitting}>
               {submitting ? (<><Spinner size="sm" className="me-2" /> جارٍ الإرسال...</>) : 'إرسال'}
             </Button>
