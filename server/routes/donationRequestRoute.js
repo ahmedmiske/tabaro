@@ -1,4 +1,3 @@
-// server/routes/donationRequestRoute.js
 const express = require("express");
 const router = express.Router();
 
@@ -8,20 +7,21 @@ const {
   getDonationRequest,
   updateDonationRequest,
   deleteDonationRequest,
+  getMineWithOffers, // ⬅️ الجديد
 } = require("../controllers/donationRequestController");
 const { protect } = require("../middlewares/authMiddleware");
 const { uploadDonationReq } = require("../middlewares/upload");
 
-/* اسم الحقل في الـ FormData = 'files' */
-const uploadReqDocs = uploadDonationReq.fields([
-  { name: "files", maxCount: 10 },
-]);
+const uploadReqDocs = uploadDonationReq.fields([{ name: "files", maxCount: 10 }]);
 
-router.get("/", listDonationRequests);
-router.get("/:id", getDonationRequest);
+// ✅ ثابت قبل :id
+router.get("/mine-with-offers", protect, getMineWithOffers);
+
+router.get("/",  listDonationRequests);
+router.get("/:id([0-9a-fA-F]{24})", getDonationRequest);
 
 router.post("/", protect, uploadReqDocs, createDonationRequest);
-router.put("/:id", protect, uploadReqDocs, updateDonationRequest);
-router.delete("/:id", protect, deleteDonationRequest);
+router.put("/:id([0-9a-fA-F]{24})", protect, uploadReqDocs, updateDonationRequest);
+router.delete("/:id([0-9a-fA-F]{24})", protect, deleteDonationRequest);
 
 module.exports = router;

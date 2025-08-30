@@ -1,4 +1,4 @@
-// server/controllers/donationConfirmationController.js
+const mongoose = require("mongoose");
 const BloodRequest = require("../models/bloodRequest");
 const DonationConfirmation = require("../models/DonationConfirmation");
 const Notification = require("../models/Notification");
@@ -10,10 +10,13 @@ async function createDonationConfirmation(req, res) {
     if (!donor) return res.status(401).json({ message: "غير مصرح" });
 
     const { requestId, message, method, proposedTime } = req.body;
+    if (!mongoose.Types.ObjectId.isValid(requestId)) {
+      return res.status(400).json({ message: "requestId غير صالح" });
+    }
+
     const request = await BloodRequest.findById(requestId);
     if (!request) return res.status(404).json({ message: "طلب التبرع غير موجود" });
 
-    // لا تسمح بالتبرع لنفس طلبك
     if (String(request.userId) === String(donor)) {
       return res.status(400).json({ message: "لا يمكنك إرسال عرض على طلبك الخاص." });
     }
@@ -24,16 +27,17 @@ async function createDonationConfirmation(req, res) {
       requestId,
       message,
       method: method || "call",
-      status: "pending",
+      status: "pending", // قيد الاستلام
       proposedTime: proposedTime ? new Date(proposedTime) : new Date(),
     });
 
-    // إشعار صاحب الطلب
     await Notification.create({
       userId: request.userId,
       title: "عرض تبرع جديد",
       message: "وصلك عرض تبرع على طلب الدم الخاص بك.",
       read: false,
+      type: "donation_offer",
+      referenceId: confirmation._id
     });
 
     res.status(201).json({ message: "تم إرسال عرض التبرع بنجاح", confirmation });
@@ -43,47 +47,56 @@ async function createDonationConfirmation(req, res) {
   }
 }
 
-/** قبول العرض (ما زال مستخدمًا في مسار الدم) */
+/** (توافقي) قبول العرض — لا تستخدمه الواجهة */
 async function acceptDonationConfirmation(req, res) {
   try {
-    const c = await DonationConfirmation.findById(req.params.id).populate("donor requestId");
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "معرّف غير صالح" });
+    }
+    const c = await DonationConfirmation.findById(id).populate("donor requestId");
     if (!c) return res.status(404).json({ message: "العرض غير موجود" });
     if (String(c.recipientId) !== String(req.user._id)) {
       return res.status(403).json({ message: "غير مصرح" });
     }
-    c.status = "accepted";
+    c.status = "accepted"; // يظل يظهر كـ "قيد الاستلام" بالواجهة
     c.acceptedAt = new Date();
     await c.save();
-    res.json({ message: "تم قبول العرض" });
+    res.json({ message: "تم تحديث العرض إلى قيد الاستلام (مقبول داخليًا)" });
   } catch (err) {
     console.error("❌ acceptDonationConfirmation:", err);
     res.status(500).json({ message: "خطأ في السيرفر" });
   }
 }
 
-async function rejectDonationConfirmation(req, res) {
-  try {
-    const c = await DonationConfirmation.findById(req.params.id);
-    if (!c) return res.status(404).json({ message: "العرض غير موجود" });
-    if (String(c.recipientId) !== String(req.user._id)) {
-      return res.status(403).json({ message: "غير مصرح" });
-    }
-    c.status = "rejected";
-    await c.save();
-    res.json({ message: "تم رفض العرض" });
-  } catch (err) {
-    console.error("❌ rejectDonationConfirmation:", err);
-    res.status(500).json({ message: "خطأ في السيرفر" });
-  }
-}
-
+/** تأكيد الاستلام (صاحب الطلب فقط) */
 async function markAsFulfilled(req, res) {
   try {
-    const c = await DonationConfirmation.findById(req.params.id);
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "معرّف غير صالح" });
+    }
+
+    const c = await DonationConfirmation.findById(id);
     if (!c) return res.status(404).json({ message: "لا يوجد سجل للتبرع" });
+
+    if (String(c.recipientId) !== String(req.user._id)) {
+      return res.status(403).json({ message: "غير مصرح: فقط صاحب الطلب يمكنه تأكيد الاستلام" });
+    }
+
     c.status = "fulfilled";
     c.fulfilledAt = new Date();
     await c.save();
+
+    await Notification.create({
+      userId: c.donor,
+      title: "تم تأكيد استلام التبرع",
+      message: "تم تأكيد استلام تبرعك من طرف صاحب الطلب. شكرًا لعطائك.",
+      read: false,
+      type: "donation_fulfilled",
+      referenceId: c._id
+    });
+
     res.json({ message: "تم تأكيد التبرع كمنفذ", confirmation: c });
   } catch (err) {
     console.error("❌ markAsFulfilled:", err);
@@ -91,13 +104,28 @@ async function markAsFulfilled(req, res) {
   }
 }
 
+/** تقييم (المتبرع أو المتلقي) */
 async function rateDonation(req, res) {
   try {
-    const c = await DonationConfirmation.findById(req.params.id);
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "معرّف غير صالح" });
+    }
+
+    const c = await DonationConfirmation.findById(id);
     if (!c) return res.status(404).json({ message: "لا يوجد سجل للتبرع" });
+
     const { rating } = req.body;
-    if (String(req.user._id) === String(c.donor)) c.ratingByDonor = rating;
-    else c.ratingByRecipient = rating;
+    if (rating == null) return res.status(400).json({ message: "الرجاء إرسال قيمة التقييم" });
+
+    if (String(req.user._id) === String(c.donor)) {
+      c.ratingByDonor = rating;
+    } else if (String(req.user._id) === String(c.recipientId)) {
+      c.ratingByRecipient = rating;
+    } else {
+      return res.status(403).json({ message: "غير مصرح للتقييم" });
+    }
+
     c.status = "rated";
     await c.save();
     res.json({ message: "تم حفظ التقييم", confirmation: c });
@@ -107,6 +135,7 @@ async function rateDonation(req, res) {
   }
 }
 
+/** العروض التي تلقيتها */
 async function getMyDonationOffers(req, res) {
   try {
     const items = await DonationConfirmation.find({ recipientId: req.user._id })
@@ -119,6 +148,7 @@ async function getMyDonationOffers(req, res) {
   }
 }
 
+/** العروض التي أرسلتها */
 async function getMySentOffers(req, res) {
   try {
     const items = await DonationConfirmation.find({ donor: req.user._id })
@@ -135,9 +165,15 @@ async function getMySentOffers(req, res) {
   }
 }
 
+/** العروض حسب الطلب */
 async function getOffersByRequestId(req, res) {
   try {
-    const list = await DonationConfirmation.find({ requestId: req.params.requestId })
+    const { requestId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(requestId)) {
+      return res.status(400).json({ message: "requestId غير صالح" });
+    }
+
+    const list = await DonationConfirmation.find({ requestId })
       .populate("donor", "firstName lastName email phoneNumber")
       .sort({ createdAt: -1 });
     res.json(list);
@@ -147,9 +183,15 @@ async function getOffersByRequestId(req, res) {
   }
 }
 
+/** إلغاء عرض (للمتبرع قبل الاستلام) */
 async function cancelDonationConfirmation(req, res) {
   try {
-    const c = await DonationConfirmation.findById(req.params.id);
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "معرّف غير صالح" });
+    }
+
+    const c = await DonationConfirmation.findById(id);
     if (!c) return res.status(404).json({ message: "العرض غير موجود" });
     if (String(c.donor) !== String(req.user._id)) {
       return res.status(403).json({ message: "غير مصرح" });
@@ -168,7 +210,6 @@ async function cancelDonationConfirmation(req, res) {
 module.exports = {
   createDonationConfirmation,
   acceptDonationConfirmation,
-  rejectDonationConfirmation,
   markAsFulfilled,
   rateDonation,
   getMyDonationOffers,

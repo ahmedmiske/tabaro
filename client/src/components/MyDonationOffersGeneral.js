@@ -29,18 +29,18 @@ const MyDonationOffersGeneral = () => {
 
   const getStatusLabel = (status) => {
     switch (status) {
-      case 'accepted':  return 'تم القبول';
-      case 'rejected':  return 'مرفوض';
-      case 'fulfilled': return 'تم التنفيذ';
-      default:          return 'قيد الانتظار';
+      case 'fulfilled': return 'تم الاستلام';
+      case 'rated':     return 'تم التقييم';
+      case 'accepted':  return 'قيد الاستلام'; // توافق قديم
+      default:          return 'قيد الاستلام'; // pending
     }
   };
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'accepted':  return 'success';
-      case 'rejected':  return 'danger';
       case 'fulfilled': return 'info';
+      case 'rated':     return 'secondary';
+      case 'accepted':  return 'warning';
       default:          return 'warning';
     }
   };
@@ -85,10 +85,10 @@ const MyDonationOffersGeneral = () => {
           onChange={(e) => setFilterStatus(e.target.value)}
         >
           <option value="">جميع الحالات</option>
-          <option value="pending">قيد الانتظار</option>
-          <option value="accepted">تم القبول</option>
-          <option value="rejected">مرفوض</option>
-          <option value="fulfilled">تم التنفيذ</option>
+          <option value="pending">قيد الاستلام</option>
+          <option value="accepted">قيد الاستلام</option>
+          <option value="fulfilled">تم الاستلام</option>
+          <option value="rated">تم التقييم</option>
         </select>
       </div>
 
@@ -106,10 +106,13 @@ const MyDonationOffersGeneral = () => {
         </thead>
         <tbody>
           {(offers || [])
-            .filter((o) => !filterStatus || o.status === filterStatus)
+            .filter((o) => !filterStatus || o.status === filterStatus || (filterStatus === 'pending' && o.status === 'accepted'))
             .map((offer) => {
-              const req = offer.request || {};
-              const reqId = req._id || offer.requestId;
+              const req = offer.request || offer.requestId || {};
+              const reqId = req?._id || offer.requestId?._id || offer.requestId;
+              const owner = req?.user || req?.userId || {};
+              const ownerName = [owner?.firstName, owner?.lastName].filter(Boolean).join(' ') || '—';
+
               return (
                 <tr
                   key={offer._id}
@@ -117,18 +120,18 @@ const MyDonationOffersGeneral = () => {
                   className="clickable-row"
                   style={{ cursor: reqId ? 'pointer' : 'default' }}
                 >
-                  <td>{req?.user?.firstName || ''} {req?.user?.lastName || ''}</td>
+                  <td>{ownerName}</td>
                   <td>{req?.category || '—'}{req?.type ? ` / ${req.type}` : ''}</td>
                   <td>{offer.message || '—'}</td>
                   <td>{offer.method || '—'}</td>
                   <td>{getRemainingTime(req?.deadline)}</td>
                   <td><Badge bg={getStatusColor(offer.status)}>{getStatusLabel(offer.status)}</Badge></td>
                   <td>
-                    {offer.status === 'accepted' && req?.user?._id && (
+                    {(owner?._id) && (
                       <Button
                         variant="outline-primary"
                         size="sm"
-                        onClick={(e) => { e.stopPropagation(); navigate(`/chat/${req.user._id}`); }}
+                        onClick={(e) => { e.stopPropagation(); navigate(`/chat/${owner._id}`); }}
                       >
                         <i className="fas fa-comments" /> دردشة
                       </Button>

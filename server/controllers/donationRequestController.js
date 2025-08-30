@@ -1,5 +1,5 @@
 const DonationRequest = require("../models/DonationRequest");
-
+const DonationRequestConfirmation = require("../models/DonationRequestConfirmation");
 // ===== أدوات مساعدة =====
 const toBool = (v) => v === true || v === "true" || v === 1 || v === "1";
 const toNum = (v) =>
@@ -9,6 +9,7 @@ const toDate = (v) => {
   const d = new Date(v);
   return isNaN(d.getTime()) ? null : d;
 };
+
 
 // --- قبول الصيغتين: الأقواس أو JSON ---
 function parseBracketArray(body, root, fields) {
@@ -263,5 +264,33 @@ exports.deleteDonationRequest = async (req, res) => {
   } catch (error) {
     console.error("❌ Delete DonationRequest:", error);
     res.status(500).json({ message: "فشل حذف الطلب", error: error.message });
+  }
+};
+
+exports.getMineWithOffers = async (req, res) => {
+  try {
+    const myId = req.user._id;
+
+    const requests = await DonationRequest.find({ userId: myId })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const ids = requests.map(r => r._id);
+    const confirmations = await DonationRequestConfirmation.find({ requestId: { $in: ids } })
+      .populate('donor', 'firstName lastName')
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const grouped = confirmations.reduce((acc, c) => {
+      const key = String(c.requestId);
+      (acc[key] ||= []).push(c);
+      return acc;
+    }, {});
+
+    const result = requests.map(r => ({ ...r, offers: grouped[String(r._id)] || [] }));
+    res.json(result);
+  } catch (e) {
+    console.error('❌ getMineWithOffers (general):', e);
+    res.status(500).json({ message: 'خطأ في السيرفر' });
   }
 };

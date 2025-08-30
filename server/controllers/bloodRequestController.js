@@ -1,198 +1,216 @@
-// server/controllers/bloodRequestController.js
-const BloodRequest = require("../models/bloodRequest");
-const DonationConfirmation = require("../models/DonationConfirmation");
-const asyncHandler = require("../utils/asyncHandler");
+const fs = require('fs');
+const path = require('path');
+const mongoose = require('mongoose');
+const BloodRequest = require('../models/bloodRequest');
+const DonationConfirmation = require('../models/DonationConfirmation');
 
-/** يبني documents[] من أي شكل قادم من multer (fields/array) */
-function collectDocumentsFromReq(req) {
-  const list = [
-    ...(req.files?.docs || []),
-    ...(req.files?.files || []),
-    ...(Array.isArray(req.files) ? req.files : []), // احتياط لو استخدمت upload.array
-  ];
-  return list.map((f) => ({
-    originalName: f.originalname,
-    filename: f.filename,
-    mimeType: f.mimetype,
-    size: f.size,
-    url: `/uploads/blood-requests/${f.filename}`,
-  }));
-}
+/* ========= Helpers ========= */
+const isObjectId = (v) => mongoose.Types.ObjectId.isValid(v);
+const toSafeRelPath = (folder, file) => `/uploads/${folder}/${file.filename}`;
 
-/** يحاول قراءة contactMethods سواء جاءت كسلسلة JSON أو كمصفوفة جاهزة */
-function parseContactMethods(input) {
-  if (!input) return [];
-  if (Array.isArray(input)) return input;
-  if (typeof input === "string") {
-    try {
-      return JSON.parse(input);
-    } catch {
-      /* ignore */
-    }
+/* ========= CREATE ========= */
+exports.createBloodRequest = async (req, res) => {
+  try {
+    if (!req.user?._id) return res.status(401).json({ message: 'غير مصرح' });
+
+    const {
+      bloodType,
+      description,
+      location,
+      isUrgent,
+      deadline,   // تاريخ آخر أجل (string/ISO)
+      title,      // إن كان لديك عنوان للطلب
+    } = req.body;
+
+    // ملفات مرفوعة بواسطة multer (middlewares/upload -> uploadBloodReq)
+    const docs = Array.isArray(req.files?.docs) ? req.files.docs.map(f => toSafeRelPath('blood-requests', f)) : [];
+    const files = Array.isArray(req.files?.files) ? req.files.files.map(f => toSafeRelPath('blood-requests', f)) : [];
+
+    const payload = {
+      userId: req.user._id,
+      title: title || undefined,
+      bloodType: bloodType || undefined,
+      description: description || undefined,
+      location: location || undefined,
+      isUrgent: String(isUrgent) === 'true',
+      deadline: deadline ? new Date(deadline) : undefined,
+      // حقول شائعة في نموذجك (سمّها بما لديك في الـ model)
+      proofDocuments: docs,
+      attachments: files,
+    };
+
+    const created = await BloodRequest.create(payload);
+    return res.status(201).json(created);
+  } catch (err) {
+    console.error('❌ createBloodRequest:', err);
+    return res.status(500).json({ message: 'خطأ في السيرفر' });
   }
-  return [];
-}
+};
 
-// @desc    Create a new blood request
-// @route   POST /api/blood-requests
-// @access  Private
-const createBloodRequest = asyncHandler(async (req, res) => {
+/* ========= LIST (with filters & pagination) ========= */
+exports.getBloodRequests = async (req, res) => {
+  try {
+    // قادمة من الراوتر (فلترة مسبقة)
+    const {
+      page = '1',
+      limit = '12',
+    } = req.query;
 
-  if (req.fileFilterError) {
-    return res.status(415).send(req.fileFilterError);
-  }
+    const p = Math.max(parseInt(page, 10) || 1, 1);
+    const l = Math.min(Math.max(parseInt(limit, 10) || 12, 1), 100);
 
-  const { bloodType, location, deadline, description, isUrgent } = req.body;
+    // فلتر إضافي تم وضعه في الراوتر
+    const extra = req._extraFilter || {};
 
-  const contactMethods = parseContactMethods(req.body.contactMethods);
-  const documents = collectDocumentsFromReq(req);
+    const q = { ...extra };
 
-  const created = await BloodRequest.create({
-    bloodType,
-    location,
-    deadline,
-    description,
-    isUrgent: isUrgent === "true" || isUrgent === true,
-    userId: req.user._id,
-    contactMethods,
-    documents, // ✅ الحقل المعتمد
-    files: [], // (اختياري) اتركه فارغًا للانسجام مع السجلات القديمة
-  });
-
-  res.status(201).json(created);
-});
-
-// @desc    Get blood requests (with optional status + pagination)
-// @route   GET /api/blood-requests?status=active|inactive|all&page=1&limit=12
-// @access  Public
-const getBloodRequests = asyncHandler(async (req, res) => {
-  const { status = "all" } = req.query;
-  const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
-  const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 12, 1), 100);
-
-  const filter = {};
-  const now = new Date();
-  if (status === "active") filter.deadline = { $gte: now };
-  if (status === "inactive") filter.deadline = { $lt: now };
-
-  const [items, total] = await Promise.all([
-    BloodRequest.find(filter)
+    const total = await BloodRequest.countDocuments(q);
+    const data = await BloodRequest.find(q)
       .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit)
-      .select("-__v")
-      .populate("userId", "firstName lastName profileImage"),
-    BloodRequest.countDocuments(filter),
-  ]);
+      .skip((p - 1) * l)
+      .limit(l);
 
-  // (اختياري) لو تبي تضيف isActive بالحسبان
-  const withFlag = items.map((d) => ({
-    ...d.toObject(),
-    isActive: new Date(d.deadline) >= now,
-  }));
-
-  res.json({
-    items: withFlag,
-    page,
-    limit,
-    total,
-    pages: Math.max(1, Math.ceil(total / limit)),
-  });
-});
-
-// @desc    Get a single blood request by ID
-// @route   GET /api/blood-requests/:id
-// @access  Public
-const getBloodRequestById = asyncHandler(async (req, res) => {
-  const doc = await BloodRequest.findById(req.params.id).populate(
-    "userId",
-    "firstName lastName profileImage",
-  );
-
-  if (!doc) {
-    return res.status(404).json({ message: "Blood request not found" });
+    return res.json({
+      total,
+      page: p,
+      pages: Math.ceil(total / l),
+      limit: l,
+      data,
+    });
+  } catch (err) {
+    console.error('❌ getBloodRequests:', err);
+    return res.status(500).json({ message: 'خطأ في السيرفر' });
   }
-  res.json(doc);
-});
+};
 
-// @desc    Update a blood request (يمكن إضافة وثائق جديدة)
-// @route   PUT /api/blood-requests/:id
-// @access  Private
-const updateBloodRequest = asyncHandler(async (req, res) => {
-  const br = await BloodRequest.findById(req.params.id);
-  if (!br) return res.status(404).json({ message: "Blood request not found" });
-  if (String(br.userId) !== String(req.user._id))
-    return res.status(403).json({ message: "Not authorized" });
+/* ========= READ ONE ========= */
+exports.getBloodRequestById = async (req, res) => { // الاسم الذي يستورده الراوتر
+  try {
+    const { id } = req.params;
+    if (!isObjectId(id)) return res.status(400).json({ message: 'معرّف غير صالح' });
 
-  const { bloodType, location, deadline, description, isUrgent } = req.body;
-  if (bloodType !== undefined) br.bloodType = bloodType;
-  if (location !== undefined) br.location = location;
-  if (deadline !== undefined) br.deadline = deadline;
-  if (description !== undefined) br.description = description;
-  if (isUrgent !== undefined)
-    br.isUrgent = isUrgent === "true" || isUrgent === true;
-
-  // contactMethods قد تأتي كسلسلة
-  if (req.body.contactMethods !== undefined) {
-    br.contactMethods = parseContactMethods(req.body.contactMethods);
+    const doc = await BloodRequest.findById(id);
+    if (!doc) return res.status(404).json({ message: 'غير موجود' });
+    return res.json(doc);
+  } catch (err) {
+    console.error('❌ getBloodRequestById:', err);
+    return res.status(500).json({ message: 'خطأ في السيرفر' });
   }
+};
 
-  // إلحاق وثائق جديدة إن رُفعت
-  const newDocs = collectDocumentsFromReq(req);
-  if (newDocs.length) {
-    br.documents.push(...newDocs);
+/* ========= UPDATE ========= */
+exports.updateBloodRequest = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!isObjectId(id)) return res.status(400).json({ message: 'معرّف غير صالح' });
+
+    const doc = await BloodRequest.findById(id);
+    if (!doc) return res.status(404).json({ message: 'غير موجود' });
+
+    // صلاحية: المالك فقط
+    if (String(doc.userId) !== String(req.user?._id)) {
+      return res.status(403).json({ message: 'غير مصرح' });
+    }
+
+    const {
+      bloodType,
+      description,
+      location,
+      isUrgent,
+      deadline,
+      title,
+    } = req.body;
+
+    if (title !== undefined) doc.title = title;
+    if (bloodType !== undefined) doc.bloodType = bloodType;
+    if (description !== undefined) doc.description = description;
+    if (location !== undefined) doc.location = location;
+    if (isUrgent !== undefined) doc.isUrgent = String(isUrgent) === 'true';
+    if (deadline !== undefined) doc.deadline = deadline ? new Date(deadline) : undefined;
+
+    // إضافة ملفات جديدة (لا نحذف القديمة هنا)
+    const newDocs = Array.isArray(req.files?.docs) ? req.files.docs.map(f => toSafeRelPath('blood-requests', f)) : [];
+    const newFiles = Array.isArray(req.files?.files) ? req.files.files.map(f => toSafeRelPath('blood-requests', f)) : [];
+
+    if (newDocs.length)  doc.proofDocuments = [...(doc.proofDocuments || []), ...newDocs];
+    if (newFiles.length) doc.attachments   = [...(doc.attachments || []), ...newFiles];
+
+    await doc.save();
+    return res.json(doc);
+  } catch (err) {
+    console.error('❌ updateBloodRequest:', err);
+    return res.status(500).json({ message: 'خطأ في السيرفر' });
   }
+};
 
-  const updated = await br.save();
-  res.json(updated);
-});
+/* ========= DELETE ========= */
+exports.deleteBloodRequest = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!isObjectId(id)) return res.status(400).json({ message: 'معرّف غير صالح' });
 
-// @desc    Delete a blood request
-// @route   DELETE /api/blood-requests/:id
-// @access  Private
-const deleteBloodRequest = asyncHandler(async (req, res) => {
-  const br = await BloodRequest.findById(req.params.id);
-  if (!br) return res.status(404).json({ message: "Blood request not found" });
-  if (String(br.userId) !== String(req.user._id))
-    return res.status(403).json({ message: "Not authorized" });
+    const doc = await BloodRequest.findById(id);
+    if (!doc) return res.status(404).json({ message: 'غير موجود' });
 
-  await BloodRequest.deleteOne({ _id: br._id });
-  res.json({ message: "Blood request removed" });
-});
+    // صلاحية: المالك فقط
+    if (String(doc.userId) !== String(req.user?._id)) {
+      return res.status(403).json({ message: 'غير مصرح' });
+    }
 
-// @desc    Get my requests with donation offers
-// @route   GET /api/blood-requests/mine-with-offers?status=active|inactive
-// @access  Private
-const getMyRequestsWithOffers = asyncHandler(async (req, res) => {
-  const statusFilter = req.query.status;
-  const now = new Date();
-  const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
+    // (اختياري) حذف الملفات من القرص
+    const delFiles = [...(doc.proofDocuments || []), ...(doc.attachments || [])];
+    delFiles.forEach((rel) => {
+      try {
+        const abs = path.join(__dirname, '..', rel.replace(/^\/+/, '')); // /uploads/...
+        if (fs.existsSync(abs)) fs.unlinkSync(abs);
+      } catch (_) {}
+    });
 
-  let requests = await BloodRequest.find({ userId: req.user._id })
-    .populate("userId", "firstName lastName profileImage")
-    .lean();
+    await doc.deleteOne();
+    return res.json({ message: 'تم الحذف' });
+  } catch (err) {
+    console.error('❌ deleteBloodRequest:', err);
+    return res.status(500).json({ message: 'خطأ في السيرفر' });
+  }
+};
 
-  // جمع العروض لكل طلب
-  for (let request of requests) {
-    const offers = await DonationConfirmation.find({ requestId: request._id })
-      .populate("donor", "firstName lastName profileImage")
+/* ========= CUSTOM: Mine with offers ========= */
+exports.getMineWithOffers = async (req, res) => {
+  try {
+    const myId = req.user._id;
+
+    const requests = await BloodRequest.find({ userId: myId })
+      .sort({ createdAt: -1 })
       .lean();
-    request.offers = offers;
-    request.isActive = new Date(request.deadline) >= twoDaysAgo;
+
+    const reqIds = requests.map(r => r._id);
+    const confirmations = await DonationConfirmation.find({ requestId: { $in: reqIds } })
+      .populate('donor', 'firstName lastName')
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const grouped = confirmations.reduce((acc, c) => {
+      const key = String(c.requestId);
+      (acc[key] ||= []).push(c);
+      return acc;
+    }, {});
+
+    const result = requests.map(r => ({ ...r, offers: grouped[String(r._id)] || [] }));
+    res.json(result);
+  } catch (err) {
+    console.error('❌ getMineWithOffers:', err);
+    res.status(500).json({ message: 'خطأ في السيرفر' });
   }
+};
 
-  if (statusFilter === "active") requests = requests.filter((r) => r.isActive);
-  if (statusFilter === "inactive")
-    requests = requests.filter((r) => !r.isActive);
-
-  res.json(requests);
-});
-
-module.exports = {
-  createBloodRequest,
-  getBloodRequests,
-  getBloodRequestById,
-  updateBloodRequest,
-  deleteBloodRequest,
-  getMyRequestsWithOffers,
+/* ========= CUSTOM: My blood requests only ========= */
+exports.getMyBloodRequests = async (req, res) => {
+  try {
+    const items = await BloodRequest.find({ userId: req.user._id })
+      .sort({ createdAt: -1 });
+    res.json(items);
+  } catch (err) {
+    console.error('❌ getMyBloodRequests:', err);
+    res.status(500).json({ message: 'خطأ في السيرفر' });
+  }
 };

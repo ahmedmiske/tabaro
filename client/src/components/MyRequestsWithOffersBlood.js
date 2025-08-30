@@ -16,7 +16,6 @@ const MyRequestsWithOffersBlood = () => {
       const res = await fetchWithInterceptors('/api/blood-requests/mine-with-offers');
       if (res.ok) {
         const list = Array.isArray(res.body) ? res.body : [];
-        // تأكد أن لكل طلب مصفوفة عروض
         setRequests(list.map(r => ({ ...r, offers: Array.isArray(r.offers) ? r.offers : [] })));
       }
     } catch (err) {
@@ -38,10 +37,31 @@ const MyRequestsWithOffersBlood = () => {
 
   const toggleExpand = (id) => setExpandedRequestId(expandedRequestId === id ? null : id);
 
-  const handleAccept  = async (offerId) => { await fetchWithInterceptors(`/api/donation-confirmations/${offerId}/accept`,  { method: 'PATCH' }); fetchRequests(); };
-  const handleReject  = async (offerId) => { await fetchWithInterceptors(`/api/donation-confirmations/${offerId}/reject`,  { method: 'PATCH' }); fetchRequests(); };
-  const handleFulfill = async (offerId) => { await fetchWithInterceptors(`/api/donation-confirmations/${offerId}/fulfill`, { method: 'PATCH' }); fetchRequests(); };
-  const handleRate    = async (offerId) => { await fetchWithInterceptors(`/api/donation-confirmations/${offerId}/rate`,    { method: 'PATCH' }); fetchRequests(); };
+  // ⛔️ لم يعد هناك قبول/رفض — فقط "تأكيد الاستلام"
+  const handleFulfill = async (offerId) => {
+    await fetchWithInterceptors(`/api/donation-confirmations/${offerId}/fulfill`, { method: 'PATCH' });
+    fetchRequests();
+  };
+  const handleRate = async (offerId) => {
+    // مثال: تقييم ثابت 5 — غيّره لاحقًا بواجهة تقييم
+    await fetchWithInterceptors(`/api/donation-confirmations/${offerId}/rate`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rating: 5 })
+    });
+    fetchRequests();
+  };
+
+  const statusBadge = (status) => {
+    const map = {
+      pending:   { text: 'قيد الاستلام', variant: 'warning' },
+      accepted:  { text: 'قيد الاستلام', variant: 'warning' }, // توافق قديم
+      fulfilled: { text: 'تم الاستلام',  variant: 'info' },
+      rated:     { text: 'تم التقييم',   variant: 'secondary' },
+    };
+    const conf = map[status] || map.pending;
+    return <Badge bg={conf.variant}>{conf.text}</Badge>;
+  };
 
   const renderRequestRow = (req, expired = false) => (
     <React.Fragment key={req._id}>
@@ -72,38 +92,26 @@ const MyRequestsWithOffersBlood = () => {
             <strong>المتبرع:</strong> {offer?.donor?.firstName || ''} {offer?.donor?.lastName || ''}<br />
             <strong>الرسالة:</strong> {offer.message || '—'}<br />
             <strong>التاريخ:</strong> {offer.createdAt ? new Date(offer.createdAt).toLocaleDateString() : '—'}<br />
-            <strong>الحالة:</strong>{' '}
-            <Badge bg={
-              offer.status === 'accepted' ? 'success' :
-              offer.status === 'fulfilled' ? 'info' :
-              offer.status === 'rated'    ? 'secondary' :
-              offer.status === 'rejected' ? 'danger' : 'warning'
-            }>
-              {offer.status === 'accepted' ? 'تم القبول' :
-               offer.status === 'fulfilled' ? 'تم التنفيذ' :
-               offer.status === 'rated'    ? 'تم التقييم' :
-               offer.status === 'rejected' ? 'مرفوض' : 'قيد الانتظار'}
-            </Badge>
+            <strong>الحالة:</strong> {statusBadge(offer.status)}
 
             <div className="mt-2 d-flex flex-wrap gap-2">
+              {/* صاحب الطلب فقط، والطلب غير منتهٍ */}
               {String(offer.recipientId || req.user) === String(currentUser._id) && !isExpired(req.deadline) && (
                 <>
-                  {offer.status === 'pending' && (
-                    <>
-                      <Button variant="success" size="sm" onClick={() => handleAccept(offer._id)}>قبول</Button>
-                      <Button variant="danger"  size="sm" onClick={() => handleReject(offer._id)}>رفض</Button>
-                    </>
-                  )}
-                  {offer.status === 'accepted' && (
-                    <Button variant="primary" size="sm" onClick={() => handleFulfill(offer._id)}>تم التنفيذ</Button>
+                  {(offer.status === 'pending' || offer.status === 'accepted') && (
+                    <Button variant="primary" size="sm" onClick={() => handleFulfill(offer._id)}>
+                      ✅ تأكيد الاستلام
+                    </Button>
                   )}
                   {offer.status === 'fulfilled' && (
-                    <Button variant="warning" size="sm" onClick={() => handleRate(offer._id)}>تقييم</Button>
+                    <Button variant="warning" size="sm" onClick={() => handleRate(offer._id)}>
+                      ⭐ تقييم
+                    </Button>
                   )}
                 </>
               )}
 
-              {offer.status === 'accepted' && offer?.donor?._id && (
+              {offer?.donor?._id && (
                 <Button variant="outline-primary" size="sm" onClick={() => navigate(`/chat/${offer.donor._id}`)}>
                   💬 محادثة
                 </Button>

@@ -1,14 +1,11 @@
-// server/server.js
 const fs = require("fs");
 const http = require("http");
 const path = require("path");
-
 const cors = require("cors");
 const dotenv = require("dotenv");
 const express = require("express");
 const mongoose = require("mongoose");
 const { Server } = require("socket.io");
-
 const { notFound, errorHandler } = require("./middlewares/errorMiddleware");
 const logger = require("./middlewares/logger");
 const { ensureUploadTree } = require("./middlewares/upload");
@@ -17,8 +14,8 @@ const { otpRoutes } = require("./routes/otpRoute");
 const { userRoutes } = require("./routes/userRoute");
 const donationRequestRoutes = require("./routes/donationRequestRoute");
 const donationRequestConfirmationRoutes = require("./routes/donationRequestConfirmationRoutes");
-const donationConfirmationRoutes = require("./routes/donationConfirmationRoutes");
-const bloodRequestRoutes = require("./routes/bloodRequestRoute");
+const donationConfirmationRoutes = require("./routes/donationConfirmationRoutes"); // الدم (عروض/تأكيدات)
+const bloodRequestRoutes = require("./routes/bloodRequestRoute");                 // الدم (الطلبات)
 const messageRoutes = require("./routes/messageRoute");
 const notificationRoutes = require("./routes/notificationRoutes");
 
@@ -37,9 +34,8 @@ const io = new Server(server, {
     origin: process.env.CLIENT_ORIGIN || "http://localhost:3000",
     credentials: true,
   },
-  transports: ["websocket", "polling"],  // ممتاز: اسمح بالاثنين
+  transports: ["websocket", "polling"],
 });
-
 
 // اجعل io متاحًا داخل الـ app (للكنترولرز)
 app.set("io", io);
@@ -69,12 +65,20 @@ app.get("/", (req, res) => res.send("✅ API is running..."));
 /* ===== Routes ===== */
 app.use("/api/users", userRoutes);
 app.use("/api/otp", otpRoutes);
+
+// 🔹 الدم: الطلبات
 app.use("/api/blood-requests", bloodRequestRoutes);
+
+// 🔹 الدم: عروض/تأكيدات
+app.use("/api/donation-confirmations", donationConfirmationRoutes);
+
+// 🔹 الطلبات العامة
+app.use("/api/donation-request-confirmations", donationRequestConfirmationRoutes);
+app.use("/api/donationRequests", donationRequestRoutes);
+
+// 🔹 الرسائل والإشعارات
 app.use("/api/messages", messageRoutes);
 app.use("/api/notifications", notificationRoutes);
-app.use("/api/donation-confirmations", donationConfirmationRoutes); // الدم
-app.use("/api/donation-request-confirmations", donationRequestConfirmationRoutes); // الطلبات العامة
-app.use("/api/donationRequests", donationRequestRoutes);
 
 /* ===== Swagger (فقط في التطوير) ===== */
 if (!process.env.NODE_ENV || process.env.NODE_ENV !== "production") {
