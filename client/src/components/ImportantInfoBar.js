@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 // import Marquee from 'react-marquee-slider';
 import { Container } from 'react-bootstrap';
 import Marquee from 'react-fast-marquee';
+import PropTypes from 'prop-types';
 
 import './ImportantInfoBar.css';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
@@ -26,6 +27,10 @@ const ImportantInfoBar = ({ apiUrl = '/important-info' }) => {
     </Container>
   );
   
+};
+
+ImportantInfoBar.propTypes = {
+  apiUrl: PropTypes.string
 };
 
 export default React.memo(ImportantInfoBar);

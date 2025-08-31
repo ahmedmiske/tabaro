@@ -4,6 +4,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 // import './DonorList.css';
 import './DonorFilter.css';
+import PropTypes from 'prop-types';
 
 const DonorFilter = ({ filter, setFilter, startDate, setStartDate, endDate, setEndDate, donationTypes }) => {
   return (
@@ -46,6 +47,16 @@ const DonorFilter = ({ filter, setFilter, startDate, setStartDate, endDate, setE
       </div>
     </div>
   );
+};
+
+DonorFilter.propTypes = {
+  filter: PropTypes.string,
+  setFilter: PropTypes.func,
+  startDate: PropTypes.instanceOf(Date),
+  setStartDate: PropTypes.func,
+  endDate: PropTypes.instanceOf(Date),
+  setEndDate: PropTypes.func,
+  donationTypes: PropTypes.array
 };
 
 export default DonorFilter;

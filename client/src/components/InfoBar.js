@@ -8,6 +8,7 @@ import ImportantInfoBar from './ImportantInfoBar';
 
 const InfoBar = () => {
   return (
+    // eslint-disable-next-line react/no-unknown-property
     <div bg="red" expand="lg" className="containar-infoBar" >
       <Notifications />
       <ImportantInfoBar />

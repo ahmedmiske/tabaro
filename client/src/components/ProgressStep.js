@@ -1,6 +1,7 @@
 import React from 'react';
 import { ProgressBar } from 'react-bootstrap';
 import './ProgressStep.css';
+import PropTypes from 'prop-types';
 
 const ProgressStep = ({ step, total = 5 }) => {
   const percentage = (step / total) * 100;
@@ -24,6 +25,11 @@ const ProgressStep = ({ step, total = 5 }) => {
       </div>
     </div>
   );
+};
+
+ProgressStep.propTypes = {
+  step: PropTypes.number.isRequired,
+  total: PropTypes.number
 };
 
 export default ProgressStep;

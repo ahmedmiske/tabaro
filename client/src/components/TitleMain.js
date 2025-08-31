@@ -1,5 +1,6 @@
 import React from 'react';
 import './TitleMain.css';
+import PropTypes from 'prop-types';
 
 function TitleMain({ text1, text2 }) {
   return (
@@ -12,5 +13,9 @@ function TitleMain({ text1, text2 }) {
     </div>
   );
 }
+TitleMain.propTypes = {
+  text1: PropTypes.string.isRequired,
+  text2: PropTypes.string.isRequired
+};
 
 export default TitleMain;
