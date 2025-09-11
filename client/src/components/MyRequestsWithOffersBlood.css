@@ -1,149 +1,75 @@
-/* MyRequestsWithOffers.css */
-.my-requests-container{
-    background-color: #f8f9fa;
-    padding: 20px;
-   border: 2px solid var(--color-border);
-   border-radius: 12px;
-   box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-}
-.my-requests-container h3 {
-  text-align: center;
-  color:var(--main-color-alt);
-  margin-bottom: 20px;
-  font-weight: bold;
-}
 .my-requests-with-offers {
-
+  direction: rtl;
+  padding: 1.5rem;
+  background-color: #f9f9fb;
+  border-radius: 14px;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+  margin-bottom: 2rem;
 }
 
-.request-card {
-    max-height: 100px;
-  min-width: 600px !important;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 24px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
+/* العنوان */
+.my-requests-with-offers .header-bar { display:flex; align-items:center; justify-content:space-between; }
+.my-requests-with-offers .title-wrap { display:flex; align-items:center; gap:.6rem; }
+.my-requests-with-offers .title-icon{
+  width:38px;height:38px;display:inline-flex;align-items:center;justify-content:center;
+  background:#eef2ff;color:#3b82f6;border-radius:50%;font-size:1rem;
+}
+.my-requests-with-offers h4{ margin:0;font-weight:800;font-size:1.25rem;color:#0f172a; }
+
+/* فلترة */
+.my-requests-with-offers .status-filter{ max-width:220px; min-width:180px; }
+.my-requests-with-offers .status-filter .form-select{ font-size:.92rem; padding:.4rem .75rem; }
+
+/* أقسام */
+.my-requests-with-offers .section-card{
+  background:#fff;border-radius:10px;border:1px solid #e5e7eb;padding:.75rem;margin-bottom:1rem;
+}
+.my-requests-with-offers .section-head{ display:flex; align-items:center; justify-content:space-between; }
+.my-requests-with-offers .section-card h6{
+  margin:0;font-weight:700;color:#111827;display:flex;align-items:center;gap:.4rem;
 }
 
-.request-card:hover {
-min-height: fit-content;
+/* الجداول */
+.my-requests-with-offers table{ border:none;background:#fff;border-radius:8px;overflow:hidden; }
+.my-requests-with-offers table thead th{
+  background:var(--main-color-alt, #2563eb);color:#fff;text-align:center;vertical-align:middle;
+  font-weight:600;font-size:.95rem;padding:.65rem;
 }
-.requests-with-offers-container {
-  border: #dc3545 1px solid !important;
-  width: 100%;
-  padding: 20px;
-  background-color: #fdfdfd;
-  border-radius: 12px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-  -webkit-border-radius: 12px;
-  -moz-border-radius: 12px;
-  -ms-border-radius: 12px;
-  -o-border-radius: 12px;
+.my-requests-with-offers table td{
+  vertical-align:middle;text-align:center;font-size:.92rem;padding:.6rem .7rem;
+  border-top:1px solid #eef2f7;border-left:1px solid #eef2f7;color:#334155;transition:background-color .2s ease-in-out;
+}
+.my-requests-with-offers .clickable-row:hover{ background:#f1f5ff; cursor:pointer; }
+
+/* صف منتهي/ muted */
+.my-requests-with-offers .row-muted{ background:#fafafa; color:#9ca3af; }
+
+/* 🔵 كبسولة دائرية للوقت (ي/س) */
+.time-chip{
+  width:54px;height:54px;border-radius:50%;
+  display:inline-flex;flex-direction:column;align-items:center;justify-content:center;
+  font-weight:800; line-height:1; letter-spacing:.2px;
+  border:1px solid transparent; user-select:none;
+}
+.time-chip .t{ font-size:.95rem; }
+.time-chip .b{ font-size:.8rem; opacity:.9; }
+
+.time-chip.chip--ok{
+  background:#eefcf3; color:#156d3f; border-color:#dff7e7;
+}
+.time-chip.chip--soon{
+  background:#fff7ec; color:#9a4a00; border-color:#ffe8cc;
+}
+.time-chip.chip--urgent{
+  background:#fff1f2; color:#9f1239; border-color:#ffd9de;
+}
+.time-chip.chip--expired{
+  background:#f3f4f6; color:#374151; border-color:#e5e7eb;
+}
+.time-chip.chip--na{
+  background:#f8fafc; color:#475569; border-color:#e2e8f0;
 }
 
-.requests-with-offers-container h4 {
-  margin-bottom: 20px;
-  font-weight: bold;
-  color: #333;
-  text-align: center;
-}
-
-.request-box {
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 24px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04);
-}
-
-.request-box:hover {
-  border-color: #0d6efd;
-}
-
-.request-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.request-bloodtype {
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #dc3545;
-}
-
-.request-status {
-  font-size: 0.9rem;
-  font-weight: bold;
-}
-
-.request-meta {
-  color: #666;
-  font-size: 0.9rem;
-}
-
-.offer-list {
-  margin-top: 10px;
-  border-top: 1px solid #eee;
-  padding-top: 12px;
-}
-
-.offer-box {
-  background-color: #f8f9fa;
-  border-radius: 6px;
-  padding: 10px 14px;
-  margin-bottom: 10px;
-}
-
-.offer-box .donor-name {
-  font-weight: bold;
-  color: #0d6efd;
-}
-
-.offer-box .message {
-  font-size: 0.95rem;
-  margin-top: 4px;
-}
-
-.offer-box .actions {
-  margin-top: 8px;
-  display: flex;
-  gap: 8px;
-}
-
-.no-offers {
-  color: #888;
-  font-style: italic;
-  padding: 8px;
-  background-color: #fcfcfc;
-  border-radius: 5px;
-  border: 1px dashed #ccc;
-}
-
-.btn-offer {
-  font-size: 0.85rem;
-  padding: 4px 10px;
-}
-
-
-
-.request-header {
-  cursor: pointer;
-  background-color: #f8f9fa;
-}
-
-.offer-box {
-  background-color: #fdfdfd;
-  transition: background-color 0.3s ease;
-}
-
-.offer-box:hover {
-  background-color: #f1f1f1;
-}
-.request-box {
-  background-color: #f8f9fa;
-  transition: background-color 0.3s ease;
-}
+/* أزرار وبادجات */
+.my-requests-with-offers .btn-sm{ font-size:.8rem; padding:.35rem .6rem; }
+.my-requests-with-offers .badge{ font-size:.76rem; padding:.35em .6em; }

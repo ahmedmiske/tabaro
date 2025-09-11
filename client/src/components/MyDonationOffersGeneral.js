@@ -1,15 +1,89 @@
-import React, { useEffect, useState } from 'react';
-import { Table, Badge, Button, Toast, ToastContainer } from 'react-bootstrap';
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  Table, Badge, Button, Toast, ToastContainer, Form, Collapse
+} from 'react-bootstrap';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import useTicker from '../hooks/useTicker';
 import './MyDonationOffersGeneral.css';
 
+/* =============== Helpers =============== */
+const getStatusLabel = (status) => {
+  switch (status) {
+    case 'fulfilled': return 'تم الاستلام';
+    case 'rated':     return 'تم التقييم';
+    case 'accepted':  return 'قيد الاستلام';
+    default:          return 'قيد الاستلام';
+  }
+};
+const getStatusColor = (status) => {
+  switch (status) {
+    case 'fulfilled': return 'info';
+    case 'rated':     return 'secondary';
+    case 'accepted':  return 'warning';
+    default:          return 'warning';
+  }
+};
+const toDateSafe = (v) => {
+  const d = new Date(v);
+  return Number.isNaN(d.getTime()) ? null : d;
+};
+const getNowMs = (v) => (v instanceof Date ? v.getTime()
+  : (typeof v === 'number' ? v : (Date.parse(v) || Date.now())));
+const isExpired = (deadline, nowMs) => {
+  const d = toDateSafe(deadline);
+  if (!d) return false;
+  return d.getTime() < getNowMs(nowMs);
+};
+const isActiveOffer = (offer, request, nowMs) => {
+  const s = offer?.status || 'pending';
+  const activeStates = ['pending', 'accepted'];
+  if (!activeStates.includes(s)) return false;
+  if (isExpired(request?.deadline, nowMs)) return false;
+  return true;
+};
+
+/** 🔵 كبسولة دائرية: تُعيد اليوم/الساعة فقط + كلاس لوني + tooltip */
+const buildDayHourChip = (deadline, nowVal) => {
+  const d = toDateSafe(deadline);
+  if (!d) return { top: '—', bottom: '', cls: 'chip--na', title: '' };
+  const now = getNowMs(nowVal);
+  const diff = d.getTime() - now;
+  const title = d.toLocaleString('ar-MA');
+  if (diff <= 0) return { top: 'منتهي', bottom: '', cls: 'chip--expired', title };
+
+  const hoursTotal = Math.floor(diff / 3600_000);
+  const days = Math.floor(hoursTotal / 24);
+  const hours = hoursTotal % 24;
+
+  let cls = 'chip--ok';
+  if (hoursTotal <= 24) cls = 'chip--soon';
+  if (hoursTotal <= 3)  cls = 'chip--urgent';
+
+  return { top: `${days}ي`, bottom: `${hours}س`, cls, title };
+};
+
+/* =============== Component =============== */
 const MyDonationOffersGeneral = () => {
   const [offers, setOffers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showToast, setShowToast] = useState(false);
-  const [filterStatus, setFilterStatus] = useState('');
+  const [toastMsg, setToastMsg] = useState('تمت العملية بنجاح');
+
+  // فلترة بالحالة فقط
+  const [statusFilter, setStatusFilter] = useState('');
+
+  // أقسام قابلة للطي
+  const [openActive, setOpenActive] = useState(true);
+  const [openInactive, setOpenInactive] = useState(true);
+
+  const now = useTicker(60_000); // دقيقة كافية لأننا نعرض يوم/ساعة
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    sessionStorage.setItem('lastListPath', location.pathname + location.search);
+  }, [location.pathname, location.search]);
 
   const fetchMyOffers = async () => {
     try {
@@ -24,34 +98,39 @@ const MyDonationOffersGeneral = () => {
       setLoading(false);
     }
   };
-
   useEffect(() => { fetchMyOffers(); }, []);
 
-  const getStatusLabel = (status) => {
-    switch (status) {
-      case 'fulfilled': return 'تم الاستلام';
-      case 'rated':     return 'تم التقييم';
-      case 'accepted':  return 'قيد الاستلام'; // توافق قديم
-      default:          return 'قيد الاستلام'; // pending
-    }
-  };
+  const { activeOffers, inactiveOffers } = useMemo(() => {
+    const act = [];
+    const inact = [];
+    (offers || []).forEach((offer) => {
+      const req = offer.request || offer.requestId || {};
+      if (isActiveOffer(offer, req, now)) act.push(offer);
+      else inact.push(offer);
+    });
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'fulfilled': return 'info';
-      case 'rated':     return 'secondary';
-      case 'accepted':  return 'warning';
-      default:          return 'warning';
-    }
-  };
+    const applyStatusFilter = (list) =>
+      !statusFilter
+        ? list
+        : list.filter((o) =>
+            o.status === statusFilter ||
+            (statusFilter === 'pending' && o.status === 'accepted')
+          );
 
-  const getRemainingTime = (deadline) => {
-    if (!deadline) return '—';
-    const diff = new Date(deadline) - new Date();
-    if (Number.isNaN(diff)) return '—';
-    if (diff <= 0) return 'انتهى الأجل';
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    return `متبقي ${days} يوم`;
+    const byNewest = (a, b) =>
+      new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+
+    return {
+      activeOffers: applyStatusFilter(act).sort(byNewest),
+      inactiveOffers: applyStatusFilter(inact).sort(byNewest),
+    };
+  }, [offers, now, statusFilter]);
+
+  const openDetails = (reqId) => {
+    if (!reqId) return;
+    sessionStorage.setItem('lastListScroll', String(window.scrollY || 0));
+    const from = location.pathname + location.search;
+    navigate(`/donations/${reqId}`, { state: { from } });
   };
 
   const handleCancelOffer = async (offerId, e) => {
@@ -60,13 +139,63 @@ const MyDonationOffersGeneral = () => {
     try {
       const res = await fetchWithInterceptors(`/api/donation-request-confirmations/${offerId}`, { method: 'DELETE' });
       if (res.ok) {
-        setOffers(prev => (Array.isArray(prev) ? prev.filter(o => o._id !== offerId) : []));
+        setOffers((prev) => (Array.isArray(prev) ? prev.filter((o) => o._id !== offerId) : []));
+        setToastMsg('✅ تم إلغاء العرض بنجاح.');
         setShowToast(true);
-        setTimeout(() => setShowToast(false), 3000);
       }
     } catch (err) {
       console.error('فشل في إلغاء العرض العام:', err);
     }
+  };
+
+  const renderRow = (offer) => {
+    const req = offer.request || offer.requestId || {};
+    const reqId = req?._id || offer.requestId?._id || offer.requestId;
+    const owner = req?.user || req?.userId || {};
+    const ownerName = [owner?.firstName, owner?.lastName].filter(Boolean).join(' ') || '—';
+
+    const chip = buildDayHourChip(req?.deadline, now);
+
+    return (
+      <tr
+        key={offer._id}
+        onClick={() => openDetails(reqId)}
+        className="clickable-row"
+        style={{ cursor: reqId ? 'pointer' : 'default' }}
+      >
+        <td>{ownerName}</td>
+        <td>{req?.category || '—'}{req?.type ? ` / ${req.type}` : ''}</td>
+        <td>
+          <span className={`time-chip ${chip.cls}`} title={chip.title}>
+            <span className="t">{chip.top}</span>
+            {chip.bottom && <span className="b">{chip.bottom}</span>}
+          </span>
+        </td>
+        <td><Badge bg={getStatusColor(offer.status)}>{getStatusLabel(offer.status)}</Badge></td>
+        <td onClick={(e) => e.stopPropagation()}>
+          {owner?._id && (
+            <Button
+              variant="outline-primary"
+              size="sm"
+              className="me-1 mb-1"
+              onClick={() => navigate(`/chat/${owner._id}`, { state: { from: location.pathname + location.search } })}
+            >
+              <i className="fas fa-comments" /> دردشة
+            </Button>
+          )}
+          {(offer.status === 'pending' || offer.status === 'accepted') && !isExpired(req?.deadline, now) && (
+            <Button
+              variant="outline-danger"
+              size="sm"
+              className="me-1 mb-1"
+              onClick={(e) => handleCancelOffer(offer._id, e)}
+            >
+              <i className="fas fa-trash" /> إلغاء العرض
+            </Button>
+          )}
+        </td>
+      </tr>
+    );
   };
 
   if (loading) return <p>⏳ جاري تحميل عروضي...</p>;
@@ -74,88 +203,90 @@ const MyDonationOffersGeneral = () => {
 
   return (
     <div className="my-donation-offers">
-      <h5 className="text-center mb-3">
-        <i className="fas fa-hand-holding-heart me-2" /> عروضي على طلبات التبرع العامة
-      </h5>
-
-      <div className="filter-wrapper">
-        <select
-          className="form-select w-auto"
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-        >
-          <option value="">جميع الحالات</option>
-          <option value="pending">قيد الاستلام</option>
-          <option value="accepted">قيد الاستلام</option>
-          <option value="fulfilled">تم الاستلام</option>
-          <option value="rated">تم التقييم</option>
-        </select>
+      {/* العنوان + فلترة بالحالة فقط */}
+      <div className="header-bar mb-3">
+        <div className="title-wrap">
+          <span className="title-icon"><i className="fas fa-hand-holding-heart" /></span>
+          <h4 className="m-0 fw-bold">عروضي على طلبات التبرع العامة</h4>
+        </div>
+        <div className="status-filter">
+          <Form.Select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            aria-label="فلترة بالحالة"
+          >
+            <option value="">كل الحالات</option>
+            <option value="pending">قيد الاستلام</option>
+            <option value="accepted">قيد الاستلام</option>
+            <option value="fulfilled">تم الاستلام</option>
+            <option value="rated">تم التقييم</option>
+          </Form.Select>
+        </div>
       </div>
 
-      <Table striped bordered hover responsive>
-        <thead>
-          <tr>
-            <th>صاحب الطلب</th>
-            <th>المجال/النوع</th>
-            <th>الرسالة</th>
-            <th>الطريقة</th>
-            <th>الوقت المتبقي</th>
-            <th>الحالة</th>
-            <th>الدردشة</th>
-          </tr>
-        </thead>
-        <tbody>
-          {(offers || [])
-            .filter((o) => !filterStatus || o.status === filterStatus || (filterStatus === 'pending' && o.status === 'accepted'))
-            .map((offer) => {
-              const req = offer.request || offer.requestId || {};
-              const reqId = req?._id || offer.requestId?._id || offer.requestId;
-              const owner = req?.user || req?.userId || {};
-              const ownerName = [owner?.firstName, owner?.lastName].filter(Boolean).join(' ') || '—';
+      {/* نشطة */}
+      <div className="section-card mb-3">
+        <div className="section-head">
+          <h6 className="m-0">العروض النشطة <Badge bg="success" className="ms-1">{activeOffers.length}</Badge></h6>
+          <Button size="sm" variant="outline-secondary" onClick={() => setOpenActive(v => !v)}>
+            {openActive ? 'إخفاء' : 'عرض'}
+          </Button>
+        </div>
+        <Collapse in={openActive}>
+          <div>
+            {activeOffers.length === 0 ? (
+              <div className="text-muted small p-3">لا توجد عروض نشطة.</div>
+            ) : (
+              <Table striped bordered hover responsive className="mt-2">
+                <thead>
+                  <tr>
+                    <th>صاحب الطلب</th>
+                    <th>المجال/النوع</th>
+                    <th>الوقت</th>
+                    <th>الحالة</th>
+                    <th>الإجراءات</th>
+                  </tr>
+                </thead>
+                <tbody>{activeOffers.map(renderRow)}</tbody>
+              </Table>
+            )}
+          </div>
+        </Collapse>
+      </div>
 
-              return (
-                <tr
-                  key={offer._id}
-                  onClick={() => reqId && navigate(`/donations/${reqId}`)}
-                  className="clickable-row"
-                  style={{ cursor: reqId ? 'pointer' : 'default' }}
-                >
-                  <td>{ownerName}</td>
-                  <td>{req?.category || '—'}{req?.type ? ` / ${req.type}` : ''}</td>
-                  <td>{offer.message || '—'}</td>
-                  <td>{offer.method || '—'}</td>
-                  <td>{getRemainingTime(req?.deadline)}</td>
-                  <td><Badge bg={getStatusColor(offer.status)}>{getStatusLabel(offer.status)}</Badge></td>
-                  <td>
-                    {(owner?._id) && (
-                      <Button
-                        variant="outline-primary"
-                        size="sm"
-                        onClick={(e) => { e.stopPropagation(); navigate(`/chat/${owner._id}`); }}
-                      >
-                        <i className="fas fa-comments" /> دردشة
-                      </Button>
-                    )}
-                    {offer.status === 'pending' && (
-                      <Button
-                        variant="outline-danger"
-                        size="sm"
-                        className="ms-2"
-                        onClick={(e) => handleCancelOffer(offer._id, e)}
-                      >
-                        <i className="fas fa-trash" /> إلغاء العرض
-                      </Button>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-        </tbody>
-      </Table>
+      {/* غير نشطة */}
+      <div className="section-card mb-3">
+        <div className="section-head">
+          <h6 className="m-0">العروض غير النشطة <Badge bg="secondary" className="ms-1">{inactiveOffers.length}</Badge></h6>
+          <Button size="sm" variant="outline-secondary" onClick={() => setOpenInactive(v => !v)}>
+            {openInactive ? 'إخفاء' : 'عرض'}
+          </Button>
+        </div>
+        <Collapse in={openInactive}>
+          <div>
+            {inactiveOffers.length === 0 ? (
+              <div className="text-muted small p-3">لا توجد عروض غير نشطة.</div>
+            ) : (
+              <Table striped bordered hover responsive className="mt-2">
+                <thead>
+                  <tr>
+                    <th>صاحب الطلب</th>
+                    <th>المجال/النوع</th>
+                    <th>الوقت</th>
+                    <th>الحالة</th>
+                    <th>الإجراءات</th>
+                  </tr>
+                </thead>
+                <tbody>{inactiveOffers.map(renderRow)}</tbody>
+              </Table>
+            )}
+          </div>
+        </Collapse>
+      </div>
 
       <ToastContainer position="bottom-start" className="p-3">
-        <Toast show={showToast} onClose={() => setShowToast(false)} delay={3000} autohide bg="success">
-          <Toast.Body className="text-white">✅ تم إلغاء العرض بنجاح.</Toast.Body>
+        <Toast show={showToast} onClose={() => setShowToast(false)} delay={2500} autohide bg="success">
+          <Toast.Body className="text-white">{toastMsg}</Toast.Body>
         </Toast>
       </ToastContainer>
     </div>

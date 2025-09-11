@@ -1,70 +1,89 @@
+/* ========== الحاوية الأساسية ========== */
 .blood-details-container{
-  display:flex; flex-direction:column; align-items:center;
-  padding:20px; background:#f3f4f6; min-height:100vh;
-  font-family:'Cairo',sans-serif; color:#333; line-height:1.6; font-size:16px;
-  max-width:1200px; margin:auto; margin-bottom:200px; box-shadow:0 2px 10px rgba(0,0,0,.05);
+  display:flex; 
+  flex-direction:column;
+  align-items:center;
+  padding:clamp(12px,3vw,24px); 
+  background:#f6f7f9; 
+  min-height:100vh;
+  font-family:'Cairo',sans-serif; 
+  color:#333; line-height:1.6;
+  width:60%; 
+  max-width:1200px;
+  margin-inline:auto;
+  margin-block-end:clamp(24px,8vh,96px);
+  margin-bottom: 200px;
+  box-shadow:0 2px 10px rgba(0,0,0,.05);
 }
 
-.details-card{ border-radius:12px; overflow:hidden; position:relative; border:none!important; }
-.card-header{ background:linear-gradient(90deg,#2e7d32,#43a047); }
-.subhead{ opacity:.95; }
+/* البطاقات */
+.details-card{ border-radius:12px; overflow:hidden; position:relative; border:none!important; background:#fff; }
+.card-header, .details-header-compact{ background:linear-gradient(90deg,#2e7d32,#43a047); color:#fff; }
+.card-header h5, .details-header-compact h5{ margin-right:200px; font-weight:700; font-size:1.25rem; }
+.details-header-compact{ padding:10px 14px!important; min-height:auto!important; line-height:1.2; }
+.details-header-compact .btn{ font-size:.9rem; padding:4px 10px; margin-right: 200px; }
 
-.ribbon-container{ position:absolute; top:10px; inset-inline-start:10px; display:flex; gap:6px; z-index:2; }
-.ribbon{ padding:4px 10px; border-radius:999px; font-weight:700; font-size:.8rem; color:#fff; box-shadow:0 2px 8px rgba(0,0,0,.12); }
-.ribbon-urgent{ background:linear-gradient(135deg,#e53935,#ff7043); }
-.ribbon-closed{ background:linear-gradient(135deg,#757575,#9e9e9e); }
+/* أقسام */
+.section-card{ background:#fff; border:1px dashed #e5e7eb; border-radius:12px; padding:12px; }
+.section-title{ font-weight:700; margin-bottom:8px; color:#115e59; }
+.subsection-title{ font-weight:700; margin:10px 0 6px; color:#374151; }
 
-.deadline-box{ background:#f8faf9; border:1px solid #eaeaea; border-radius:12px; padding:12px; display:grid; gap:8px; }
-.deadline-row{ display:flex; align-items:center; gap:8px; }
-.deadline-row .label{ font-weight:700; }
-.timeleft{ font-size:.95rem; }
-.time-progress{ height:12px; border-radius:999px; }
-
-.publisher-wrapper{ background:transparent; }
-.publisher-card{
-  
-  display:flex; gap:12px; align-items:center; border:1px solid #eaeaea; background:#fefefe;
-  border-radius:12px; padding:12px 14px; cursor:pointer; transition: box-shadow .15s ease, transform .15s ease, border-color .15s ease;
-}
-.publisher-card.no-avatar .pub-info {
-  margin-inline-start: 0; /* يلغي أي مسافة متوقعة لصورة */
-}
-
-.publisher-card.hoverable:hover{ box-shadow:0 8px 18px rgba(0,0,0,.06); transform: translateY(-1px); border-color:#dcdcdc; }
-.publisher-card.is-owner{ opacity:.9; cursor:default; }
+/* شريط الناشر */
+.publisher-strip{ display:flex; align-items:center; gap:12px; }
 .pub-avatar{ width:56px; height:56px; border-radius:50%; object-fit:cover; border:1px solid #e6e6e6; background:#fff; }
+.pub-text{ display:flex; flex-direction:column; gap:2px; }
 .pub-name{ font-weight:700; }
-.publisher-extra{ border-top:1px dashed #eaeaea; padding-top:6px; }
+.role-chip{ display:inline-flex; align-items:center; gap:6px; font-weight:700; padding:2px 10px; border-radius:999px; font-size:.8rem; border:1px solid transparent; }
+.role-chip.publisher{ background:#eef2ff; color:#3730a3; border-color:#dfe3ff; }
+
+/* شارة "أنت صاحب هذا الطلب" */
+.self-chip{
+  background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0;
+  padding:2px 10px; border-radius:999px; font-weight:700; font-size:.75rem;
+}
+
+/* تفاصيل */
+.meta-row{ display:flex; flex-wrap:wrap; gap:8px; }
+.chip{ background:#f3f4f6; border:1px solid #e5e7eb; color:#374151; padding:4px 10px; border-radius:999px; font-size:.92rem; }
+.chip .icon{ margin-inline-end:6px; display:inline-block; }
+.chip.danger{ background:#fee2e2; border-color:#fecaca; color:#991b1b; }
+
+/* وسائل التواصل */
+.contact-row{ display:flex; gap:8px; flex-wrap:wrap; }
+.contact-chip{ display:inline-flex; align-items:center; gap:6px; background:#f3f4f6; border:1px solid #e5e7eb; color:#374151; padding:4px 10px; border-radius:999px; font-size:.9rem; }
 
 /* الوثائق */
-.docs-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; }
-.doc-tile{ background:#fff; border:1px solid #eaeaea; border-radius:10px; overflow:hidden; text-align:center; display:flex; flex-direction:column; justify-content:space-between; }
+.docs-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; }
+.doc-tile{ background:#fff; border:1px solid #eaeaea; border-radius:10px; overflow:hidden; text-align:center; display:flex; flex-direction:column; justify-content:space-between; color:inherit; cursor:pointer; }
+.doc-tile:hover{ box-shadow:0 8px 18px rgba(0,0,0,.06); transform:translateY(-1px); }
+
 .doc-thumb{ height:140px; background:#f6f7f9; display:flex; align-items:center; justify-content:center; border-bottom:1px solid #eee; }
 .doc-thumb img{ max-height:115px; max-width:100%; object-fit:contain; }
-.pdf-icon-big{ font-size:56px; color:#d93025; opacity:.9; }
-.generic-icon{ font-size:48px; color:#6c757d; }
+
+/* معاينة PDF كشارة/أيقونة ثابتة */
+.pdf-thumb{
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  background:#fff; border:2px dashed #d93025; border-radius:10px;
+  padding:10px 14px;
+}
+.pdf-emoji{ font-size:28px; line-height:1; }
+.pdf-text{ font-weight:800; font-size:20px; color:#d93025; letter-spacing:.5px; text-transform:uppercase; }
+
 .doc-name{ padding:8px; font-size:.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .doc-actions{ display:flex; gap:6px; justify-content:center; padding:8px; }
 
-/* أزرار أيقونات دائرية (fab) */
-.actions-row{ gap:10px; }
-.btn-fab{
-  width:48px; height:48px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center;
-  border:none; color:#fff; background:#6b7280; transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
+/* Responsive */
+@media (max-width: 991.98px){
+  .blood-details-container{ box-shadow:0 1px 6px rgba(0,0,0,.04); }
+  .pub-avatar{ width:48px; height:48px; }
+  .docs-grid{ grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); }
 }
-.btn-fab:hover{ transform:translateY(-1px); filter:brightness(1.06); box-shadow:0 6px 14px rgba(0,0,0,.12); }
-.btn-fab:active{ transform:translateY(0); }
-.btn-fab:focus{ outline:none; box-shadow:0 0 0 3px rgba(99,102,241,.2); }
-
-.btn-fab.success{ background:#22c55e; }     /* محادثة */
-.btn-fab.danger{ background:#ef4444; }      /* محادثة عند الفتح */
-.btn-fab.warning{ background:#f59e0b; }     /* إبلاغ */
-.btn-fab.donate{ background:linear-gradient(135deg,#19a463,#0b7d4f); box-shadow:0 4px 12px rgba(25,164,99,.3); }
-
-/* skeleton */
-.skeleton-card{ width:min(780px,92vw); border:1px solid #eee; border-radius:12px; padding:16px; margin-inline:auto; background:#fff; box-shadow:0 2px 10px rgba(0,0,0,.05); }
-.sk-header,.sk-line{ height:14px; background:linear-gradient(90deg,#f2f2f2,#eaeaea,#f2f2f2); background-size:200% 100%; animation:sk 1.2s ease-in-out infinite; border-radius:8px; }
-.sk-header{ height:24px; margin-bottom:12px; }
-.sk-line{ margin:8px 0; }
-.sk-line.short{ width:60%; }
-@keyframes sk{ 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+@media (max-width: 575.98px){
+  .blood-details-container{ padding:12px; }
+  .pub-avatar{ width:44px; height:44px; }
+  .docs-grid{ grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:10px; }
+  .doc-thumb{ height:120px; }
+  .pdf-emoji{ font-size:24px; }
+  .pdf-text{ font-size:18px; }
+}
+/* ========== End of BloodDonationDetails.css ========== */

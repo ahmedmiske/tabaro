@@ -1,3 +1,4 @@
+// server/controllers/bloodRequestController.js
 const fs = require('fs');
 const path = require('path');
 const mongoose = require('mongoose');
@@ -6,7 +7,70 @@ const DonationConfirmation = require('../models/DonationConfirmation');
 
 /* ========= Helpers ========= */
 const isObjectId = (v) => mongoose.Types.ObjectId.isValid(v);
-const toSafeRelPath = (folder, file) => `/uploads/${folder}/${file.filename}`;
+const toRel = (folder, f) => `/uploads/${folder}/${f.filename}`;
+const toDate = (v) => {
+  if (!v) return null;
+  const d = new Date(v);
+  return Number.isNaN(d.getTime()) ? null : d;
+};
+
+// contactMethods[0][method]/[number]  أو JSON كسلسلة
+function parseBracketArray(body, root, fields) {
+  const re = new RegExp(`^${root}\\[(\\d+)\\]\\[(${fields.join('|')})\\]$`);
+  const map = new Map();
+  for (const [k, val] of Object.entries(body)) {
+    const m = k.match(re);
+    if (!m) continue;
+    const idx = Number(m[1]);
+    const f = m[2];
+    const obj = map.get(idx) || {};
+    obj[f] = val;
+    map.set(idx, obj);
+  }
+  return Array.from(map.keys())
+    .sort((a, b) => a - b)
+    .map((k) => map.get(k))
+    .filter((o) => Object.values(o).some((v) => String(v || '').trim() !== ''));
+}
+function parseFlexibleArray(body, root, fields) {
+  const bracket = parseBracketArray(body, root, fields);
+  if (bracket.length) return bracket;
+
+  const raw = body[root];
+  if (typeof raw === 'string') {
+    try {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) return arr;
+    } catch { /* ignore */ }
+  }
+  if (Array.isArray(body[root])) return body[root];
+  return [];
+}
+
+// اجمع كائنات multer نفسها
+function collectMulterFiles(req) {
+  const out = [];
+  if (req.files?.docs)  out.push(...req.files.docs);
+  if (req.files?.files) out.push(...req.files.files);
+  if (Array.isArray(req.files)) out.push(...req.files);
+  if (req.file) out.push(req.file);
+  return out;
+}
+
+// حوّلها إلى كائنات تناسب الـSchema (subdocument)
+function mapToDocumentObjects(multerFiles, folder = 'blood-requests') {
+  return multerFiles.map((f) => {
+    const url = toRel(folder, f);
+    return {
+      url,          // أو استخدم key = "path" حسب الـSchema لديك
+      path: url,    // أضف كِلاهما لتوافق سهل
+      name: f.originalname,
+      mime: f.mimetype,
+      size: f.size,
+      uploadedAt: new Date(),
+    };
+  });
+}
 
 /* ========= CREATE ========= */
 exports.createBloodRequest = async (req, res) => {
@@ -18,83 +82,77 @@ exports.createBloodRequest = async (req, res) => {
       description,
       location,
       isUrgent,
-      deadline,   // تاريخ آخر أجل (string/ISO)
-      title,      // إن كان لديك عنوان للطلب
+      deadline,
+      title,
     } = req.body;
 
-    // ملفات مرفوعة بواسطة multer (middlewares/upload -> uploadBloodReq)
-    const docs = Array.isArray(req.files?.docs) ? req.files.docs.map(f => toSafeRelPath('blood-requests', f)) : [];
-    const files = Array.isArray(req.files?.files) ? req.files.files.map(f => toSafeRelPath('blood-requests', f)) : [];
+    const contactMethods = parseFlexibleArray(req.body, 'contactMethods', ['method', 'number']);
 
-    const payload = {
+    // كل الرفع يصبح داخل documents فقط
+    const uploaded = collectMulterFiles(req);
+    const documentObjs = mapToDocumentObjects(uploaded, 'blood-requests');
+
+    const created = await BloodRequest.create({
       userId: req.user._id,
       title: title || undefined,
       bloodType: bloodType || undefined,
       description: description || undefined,
       location: location || undefined,
-      isUrgent: String(isUrgent) === 'true',
-      deadline: deadline ? new Date(deadline) : undefined,
-      // حقول شائعة في نموذجك (سمّها بما لديك في الـ model)
-      proofDocuments: docs,
-      attachments: files,
-    };
+      isUrgent: String(isUrgent) === 'true' || isUrgent === true,
+      deadline: toDate(deadline),
+      contactMethods,
+      documents: documentObjs,  // ✅ فقط هذا الحقل
+      // لا نكتب files نهائيًا بعد الآن
+    });
 
-    const created = await BloodRequest.create(payload);
-    return res.status(201).json(created);
+    const populated = await BloodRequest.findById(created._id).populate({
+      path: 'userId',
+      model: 'User',
+      select: 'firstName lastName profileImage phoneNumber email',
+    });
+
+    return res.status(201).json(populated);
   } catch (err) {
     console.error('❌ createBloodRequest:', err);
-    return res.status(500).json({ message: 'خطأ في السيرفر' });
+    return res.status(500).json({ message: 'خطأ في السيرفر', error: err.message });
   }
 };
 
-/* ========= LIST (with filters & pagination) ========= */
+/* ========= LIST ========= */
 exports.getBloodRequests = async (req, res) => {
   try {
-    // قادمة من الراوتر (فلترة مسبقة)
-    const {
-      page = '1',
-      limit = '12',
-    } = req.query;
-
+    const { page = '1', limit = '12' } = req.query;
     const p = Math.max(parseInt(page, 10) || 1, 1);
     const l = Math.min(Math.max(parseInt(limit, 10) || 12, 1), 100);
-
-    // فلتر إضافي تم وضعه في الراوتر
     const extra = req._extraFilter || {};
 
-    const q = { ...extra };
-
-    const total = await BloodRequest.countDocuments(q);
-    const data = await BloodRequest.find(q)
+    const total = await BloodRequest.countDocuments(extra);
+    const data = await BloodRequest.find(extra)
       .sort({ createdAt: -1 })
       .skip((p - 1) * l)
-      .limit(l);
+      .limit(l)
+      .populate({ path: 'userId', select: 'firstName lastName profileImage' });
 
-    return res.json({
-      total,
-      page: p,
-      pages: Math.ceil(total / l),
-      limit: l,
-      data,
-    });
+    res.json({ total, page: p, pages: Math.ceil(total / l), limit: l, data });
   } catch (err) {
     console.error('❌ getBloodRequests:', err);
-    return res.status(500).json({ message: 'خطأ في السيرفر' });
+    res.status(500).json({ message: 'خطأ في السيرفر' });
   }
 };
 
 /* ========= READ ONE ========= */
-exports.getBloodRequestById = async (req, res) => { // الاسم الذي يستورده الراوتر
+exports.getBloodRequestById = async (req, res) => {
   try {
-    const { id } = req.params;
-    if (!isObjectId(id)) return res.status(400).json({ message: 'معرّف غير صالح' });
-
-    const doc = await BloodRequest.findById(id);
-    if (!doc) return res.status(404).json({ message: 'غير موجود' });
-    return res.json(doc);
-  } catch (err) {
-    console.error('❌ getBloodRequestById:', err);
-    return res.status(500).json({ message: 'خطأ في السيرفر' });
+    const doc = await BloodRequest.findById(req.params.id).populate({
+      path: 'userId',
+      model: 'User',
+      select: 'firstName lastName profileImage phoneNumber email',
+    });
+    if (!doc) return res.status(404).json({ message: 'طلب التبرع غير موجود' });
+    res.json({ data: doc });
+  } catch (e) {
+    console.error('getBloodRequestById:', e);
+    res.status(500).json({ message: 'خطأ في السيرفر' });
   }
 };
 
@@ -106,40 +164,39 @@ exports.updateBloodRequest = async (req, res) => {
 
     const doc = await BloodRequest.findById(id);
     if (!doc) return res.status(404).json({ message: 'غير موجود' });
-
-    // صلاحية: المالك فقط
     if (String(doc.userId) !== String(req.user?._id)) {
       return res.status(403).json({ message: 'غير مصرح' });
     }
 
-    const {
-      bloodType,
-      description,
-      location,
-      isUrgent,
-      deadline,
-      title,
-    } = req.body;
-
+    const { bloodType, description, location, isUrgent, deadline, title } = req.body;
     if (title !== undefined) doc.title = title;
     if (bloodType !== undefined) doc.bloodType = bloodType;
     if (description !== undefined) doc.description = description;
     if (location !== undefined) doc.location = location;
-    if (isUrgent !== undefined) doc.isUrgent = String(isUrgent) === 'true';
-    if (deadline !== undefined) doc.deadline = deadline ? new Date(deadline) : undefined;
+    if (isUrgent !== undefined) doc.isUrgent = String(isUrgent) === 'true' || isUrgent === true;
+    if (deadline !== undefined) doc.deadline = toDate(deadline);
 
-    // إضافة ملفات جديدة (لا نحذف القديمة هنا)
-    const newDocs = Array.isArray(req.files?.docs) ? req.files.docs.map(f => toSafeRelPath('blood-requests', f)) : [];
-    const newFiles = Array.isArray(req.files?.files) ? req.files.files.map(f => toSafeRelPath('blood-requests', f)) : [];
+    const incomingContact = parseFlexibleArray(req.body, 'contactMethods', ['method', 'number']);
+    if (incomingContact.length) doc.contactMethods = incomingContact;
 
-    if (newDocs.length)  doc.proofDocuments = [...(doc.proofDocuments || []), ...newDocs];
-    if (newFiles.length) doc.attachments   = [...(doc.attachments || []), ...newFiles];
+    // أضف ملفات جديدة إلى documents فقط
+    const uploaded = collectMulterFiles(req);
+    if (uploaded.length) {
+      const documentObjs = mapToDocumentObjects(uploaded, 'blood-requests');
+      doc.documents = [...(doc.documents || []), ...documentObjs];
+      // لا نلمس doc.files إطلاقًا
+    }
 
     await doc.save();
-    return res.json(doc);
+
+    const populated = await BloodRequest.findById(doc._id).populate({
+      path: 'userId',
+      select: 'firstName lastName profileImage phoneNumber email',
+    });
+    res.json(populated);
   } catch (err) {
     console.error('❌ updateBloodRequest:', err);
-    return res.status(500).json({ message: 'خطأ في السيرفر' });
+    res.status(500).json({ message: 'خطأ في السيرفر' });
   }
 };
 
@@ -151,63 +208,58 @@ exports.deleteBloodRequest = async (req, res) => {
 
     const doc = await BloodRequest.findById(id);
     if (!doc) return res.status(404).json({ message: 'غير موجود' });
-
-    // صلاحية: المالك فقط
     if (String(doc.userId) !== String(req.user?._id)) {
       return res.status(403).json({ message: 'غير مصرح' });
     }
 
-    // (اختياري) حذف الملفات من القرص
-    const delFiles = [...(doc.proofDocuments || []), ...(doc.attachments || [])];
-    delFiles.forEach((rel) => {
+    // اجمع المسارات من documents (url/path) + أي legacy داخل files للتنظيف فقط
+    const fromDocs = (doc.documents || [])
+      .map((d) => d?.url || d?.path)
+      .filter(Boolean);
+    const legacy = (doc.files || []); // قديم – لا نكتب له مستقبلًا
+    const delFiles = Array.from(new Set([...fromDocs, ...legacy]));
+
+    for (const rel of delFiles) {
       try {
-        const abs = path.join(__dirname, '..', rel.replace(/^\/+/, '')); // /uploads/...
+        const abs = path.join(__dirname, '..', rel.replace(/^\/+/, ''));
         if (fs.existsSync(abs)) fs.unlinkSync(abs);
       } catch (_) {}
-    });
+    }
 
     await doc.deleteOne();
-    return res.json({ message: 'تم الحذف' });
+    res.json({ message: 'تم الحذف' });
   } catch (err) {
     console.error('❌ deleteBloodRequest:', err);
-    return res.status(500).json({ message: 'خطأ في السيرفر' });
+    res.status(500).json({ message: 'خطأ في السيرفر' });
   }
 };
 
-/* ========= CUSTOM: Mine with offers ========= */
+/* ========= CUSTOM ========= */
 exports.getMineWithOffers = async (req, res) => {
   try {
     const myId = req.user._id;
-
-    const requests = await BloodRequest.find({ userId: myId })
-      .sort({ createdAt: -1 })
-      .lean();
-
-    const reqIds = requests.map(r => r._id);
+    const requests = await BloodRequest.find({ userId: myId }).sort({ createdAt: -1 }).lean();
+    const reqIds = requests.map((r) => r._id);
     const confirmations = await DonationConfirmation.find({ requestId: { $in: reqIds } })
       .populate('donor', 'firstName lastName')
       .sort({ createdAt: -1 })
       .lean();
 
     const grouped = confirmations.reduce((acc, c) => {
-      const key = String(c.requestId);
-      (acc[key] ||= []).push(c);
+      const k = String(c.requestId);
+      (acc[k] ||= []).push(c);
       return acc;
     }, {});
-
-    const result = requests.map(r => ({ ...r, offers: grouped[String(r._id)] || [] }));
-    res.json(result);
+    res.json(requests.map((r) => ({ ...r, offers: grouped[String(r._id)] || [] })));
   } catch (err) {
     console.error('❌ getMineWithOffers:', err);
     res.status(500).json({ message: 'خطأ في السيرفر' });
   }
 };
 
-/* ========= CUSTOM: My blood requests only ========= */
 exports.getMyBloodRequests = async (req, res) => {
   try {
-    const items = await BloodRequest.find({ userId: req.user._id })
-      .sort({ createdAt: -1 });
+    const items = await BloodRequest.find({ userId: req.user._id }).sort({ createdAt: -1 });
     res.json(items);
   } catch (err) {
     console.error('❌ getMyBloodRequests:', err);

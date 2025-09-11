@@ -1,3 +1,4 @@
+// server/controllers/donationRequestConfirmation.controller.js
 const mongoose = require("mongoose");
 const DonationRequest = require("../models/DonationRequest");
 const DonationRequestConfirmation = require("../models/DonationRequestConfirmation");
@@ -31,8 +32,8 @@ exports.createConfirmation = async (req, res) => {
       amount: amount ? Number(amount) : 0,
       method: method || "call",
       proposedTime: proposedTime ? new Date(proposedTime) : new Date(),
-      proofFiles: files,
-      status: "pending", // ➜ قيد الاستلام
+      proofFiles: files, // ✅ نفس الاسم الذي تقرأه الواجهة الآن
+      status: "pending",
     });
 
     // إشعار صاحب الطلب
@@ -141,7 +142,8 @@ exports.getMyDonationOffers = async (req, res) => {
     const myRequests = await DonationRequest.find({ userId: req.user._id }).select("_id");
     const ids = myRequests.map(r => r._id);
     const items = await DonationRequestConfirmation.find({ requestId: { $in: ids } })
-      .populate("donor", "firstName lastName")
+      // ✅ صورة وبريد وهاتف وتقييم المتبرّع
+      .populate("donor", "firstName lastName email phoneNumber profileImage rating averageRating")
       .sort({ createdAt: -1 });
     res.json(items);
   } catch (e) {
@@ -157,7 +159,7 @@ exports.getMySentOffers = async (req, res) => {
       .populate({
         path: "requestId",
         model: "DonationRequest",
-        populate: { path: "userId", model: "User", select: "firstName lastName" },
+        populate: { path: "userId", model: "User", select: "firstName lastName profileImage rating averageRating" },
       })
       .sort({ createdAt: -1 });
     res.json(items);
@@ -174,7 +176,8 @@ exports.getOffersByRequestId = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(requestId)) return res.status(400).json({ message: "requestId غير صالح" });
 
     const list = await DonationRequestConfirmation.find({ requestId })
-      .populate("donor", "firstName lastName email phoneNumber")
+      // ✅ صورة/تقييم/تواصل المتبرّع
+      .populate("donor", "firstName lastName email phoneNumber profileImage rating averageRating")
       .sort({ createdAt: -1 });
     res.json(list);
   } catch (e) {

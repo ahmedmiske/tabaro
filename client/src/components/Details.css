@@ -1,0 +1,85 @@
+/* اتجاه وتهيئة عامة */
+.details-page {
+  direction: rtl;
+}
+
+/* كرت الملخص */
+.details-summary .badge {
+  font-size: 0.85rem;
+}
+
+/* جدول العروض */
+.offers-table table {
+  table-layout: auto;
+  margin: 0;
+}
+.offers-table th,
+.offers-table td {
+  vertical-align: middle;
+  white-space: nowrap; /* منع كسر النص في الأعمدة الضيقة */
+}
+.offers-table td:first-child,
+.offers-table th:first-child {
+  white-space: normal; /* اسم المتبرع يمكنه الكسر */
+}
+.offers-table tbody tr:hover {
+  background: #fafafa;
+}
+
+/* أزرار الإجراءات داخل الجدول */
+.offers-table .btn {
+  margin-inline-end: 0.25rem;
+  margin-block-end: 0.25rem;
+}
+
+/* عمود الإجراءات: عرض أدنى، وتثبيت (Sticky) على الشاشات العريضة */
+.offers-table .actions-col {
+  min-width: 260px;
+}
+@media (min-width: 1200px) {
+  .offers-table thead th.actions-col,
+  .offers-table tbody td.actions-col {
+    position: sticky;
+    right: 0;             /* لأن RTL */
+    background: #fff;
+    box-shadow: -6px 0 6px rgba(0,0,0,0.06);
+    z-index: 2;           /* يبقى فوق بقية الأعمدة */
+  }
+}
+
+/* نجوم التقييم (لو استخدمت كلاس بدل الـinline style) */
+.rating-stars {
+  display: inline-flex;
+  gap: 6px;
+  direction: ltr;
+}
+.rating-stars button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 1;
+  color: #e0e0e0;
+}
+.rating-stars button.filled {
+  color: #ffc107; /* أصفر */
+}
+.rating-stars button:disabled {
+  cursor: default;
+}
+
+/* تهيئة بسيطة للشاشات الصغيرة */
+@media (max-width: 576px) {
+  .offers-table th,
+  .offers-table td {
+    font-size: 0.92rem;
+  }
+  /* أخفِ عمود التاريخ على الشاشات الصغيرة لتحسين العرض */
+  .col-sm-hide {
+    display: none !important;
+  }
+  /* قلّل أقل عرض لعمود الإجراءات */
+  .offers-table .actions-col {
+    min-width: 200px;
+  }
+}

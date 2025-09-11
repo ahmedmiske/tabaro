@@ -12,8 +12,15 @@ const DonationConfirmationSchema = new Schema(
 
     // معلومات إضافية
     message:     { type: String, trim: true },
-    method:      { type: String, enum: ['call', 'whatsapp', 'other'], default: 'call' },
-    proposedTime:{ type: Date },
+
+    // ✅ اختيارية مع افتراضي
+    method: {
+      type: String,
+      enum: ['call', 'phone', 'whatsapp', 'chat'],
+      default: 'chat',
+    },
+
+    proposedTime: { type: Date },
 
     // الحالة (لا يوجد "rejected")
     status:      { type: String, enum: ['pending', 'accepted', 'fulfilled', 'rated'], default: 'pending' },
@@ -33,5 +40,8 @@ const DonationConfirmationSchema = new Schema(
 DonationConfirmationSchema.index({ recipientId: 1, createdAt: -1 });
 DonationConfirmationSchema.index({ donor: 1, createdAt: -1 });
 DonationConfirmationSchema.index({ requestId: 1, createdAt: -1 });
+
+// 👇 منع التكرار: متبرّع واحد لكل طلب
+DonationConfirmationSchema.index({ requestId: 1, donor: 1 }, { unique: true });
 
 module.exports = mongoose.model('DonationConfirmation', DonationConfirmationSchema);
