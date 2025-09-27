@@ -9,21 +9,19 @@ const { Server } = require("socket.io");
 const { notFound, errorHandler } = require("./middlewares/errorMiddleware");
 const logger = require("./middlewares/logger");
 const { ensureUploadTree } = require("./middlewares/upload");
-
+const publicProfileRoutes = require('./routes/publicProfileRoutes');
 const { otpRoutes } = require("./routes/otpRoute");
 const { userRoutes } = require("./routes/userRoute");
 const donationRequestRoutes = require("./routes/donationRequestRoute");
 const donationRequestConfirmationRoutes = require("./routes/donationRequestConfirmationRoutes");
-const donationConfirmationRoutes = require("./routes/donationConfirmationRoutes"); // الدم (عروض/تأكيدات)
-const bloodRequestRoutes = require("./routes/bloodRequestRoute");                 // الدم (الطلبات)
+const donationConfirmationRoutes = require("./routes/donationConfirmationRoutes");
+const bloodRequestRoutes = require("./routes/bloodRequestRoute");
 const messageRoutes = require("./routes/messageRoute");
 const notificationRoutes = require("./routes/notificationRoutes");
 
 const setupSocket = require("./socket");
 
 dotenv.config();
-
-/* ✅ تأكد من شجرة الرفع */
 ensureUploadTree();
 
 const app = express();
@@ -39,63 +37,66 @@ const io = new Server(server, {
   pingTimeout: 30000, // time without pong to consider the connection closed
   pingInterval: 25000, // interval to send pings
 });
-
-// اجعل io متاحًا داخل الـ app (للكنترولرز)
 app.set("io", io);
 
-/* ===== Middlewares ===== */
+/* Middlewares */
 app.use(cors());
 app.use(express.json({ limit: "30mb" }));
 app.use(express.urlencoded({ extended: true, limit: "30mb" }));
 app.use(logger);
 
-/* ===== Aliases قديمة للتوافق ===== */
-// /donations/<file> → /uploads/donationRequests/<file>
+/* alias قديم للتوافق */
 app.use("/donations", (req, res, next) => {
   const file = req.path.replace(/^\/+/, "");
   req.url = `/donationRequests/${file}`;
   next();
 });
 
-/* ===== Static للملفات المرفوعة ===== */
+/* Static uploads */
 const uploadsDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
-app.use("/uploads", express.static(uploadsDir));
+app.use(
+  "/uploads",
+  express.static(uploadsDir, {
+    index: false,
+    fallthrough: true,
+    dotfiles: "ignore",
+    maxAge: "7d",
+    etag: true,
+    lastModified: true,
+  })
+);
 
-/* ===== صحة السيرفر ===== */
+/* Health */
 app.get("/", (req, res) => res.send("✅ API is running..."));
 
-/* ===== Routes ===== */
+/* Routes */
 app.use("/api/users", userRoutes);
 app.use("/api/otp", otpRoutes);
 
-// 🔹 الدم: الطلبات
 app.use("/api/blood-requests", bloodRequestRoutes);
-
-// 🔹 الدم: عروض/تأكيدات
 app.use("/api/donation-confirmations", donationConfirmationRoutes);
 
-// 🔹 الطلبات العامة
 app.use("/api/donation-request-confirmations", donationRequestConfirmationRoutes);
 app.use("/api/donationRequests", donationRequestRoutes);
 
-// 🔹 الرسائل والإشعارات
 app.use("/api/messages", messageRoutes);
 app.use("/api/notifications", notificationRoutes);
 
-/* ===== Swagger (فقط في التطوير) ===== */
+/* Swagger dev-only */
 if (!process.env.NODE_ENV || process.env.NODE_ENV !== "production") {
   require("./swagger")(app);
 }
 
-/* ===== Errors ===== */
+app.use('/api/public', publicProfileRoutes);
+/* Errors */
 app.use(notFound);
 app.use(errorHandler);
 
-/* ===== Socket.IO Setup ===== */
+/* Socket.IO */
 setupSocket(io);
 
-/* ===== DB + Server ===== */
+/* DB + Server */
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {

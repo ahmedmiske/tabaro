@@ -1,206 +1,189 @@
 .container-notifications {
-   margin-top: 0 !important;
-   width: 100%;
-   background-color: #f8f9fa;
-   padding: 20px ;
-   border: 2px solid var(--color-border);
-   border-radius: 12px;
-   display: flex;
-   flex-direction: column;
-   align-items: center;
-   justify-content: center;
-   box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-   -webkit-border-radius: 12px;
-   -moz-border-radius: 12px;
-   -ms-border-radius: 12px;
-   -o-border-radius: 12px;
-}
-.filter-notifications{
-  display: flex;
-  justify-content:center !important;
-  align-items:center !important;
-  margin-bottom: 20px;
-  padding: 10px;
+  margin-top: 0 !important;
   width: 100%;
+  background-color: #f8f9fa;
+  padding: 12px;
   border: 2px solid var(--color-border);
-  border-radius: 8px;
-  -webkit-border-radius:;
-  -moz-border-radius:;
-  -ms-border-radius:;
-  -o-border-radius:;
-}
-
-.filter-notifications-dropdown {
-  width: 200px;
-  background-color: #fff;
-  padding: 10px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 8px;
-  border: 2px solid var(--color-border);
-  -webkit-border-radius:;
-  -moz-border-radius:;
-  -ms-border-radius:;
-  -o-border-radius:;
-}
-.filter-notifications-dropdown .dropdown {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  /*background-color: #fff;
-  */padding: 10px;
-  border:#198754 2px solid;
-  overflow: hidden;
-  border-radius: 8px;
-  -webkit-border-radius:;
-  -moz-border-radius:;
-  -ms-border-radius:;
-  -o-border-radius:;
-  transition: background-color 0.3s ease;
-  cursor: pointer;
-  -webkit-transition: background-color 0.3s ease;
-  -moz-transition: background-color 0.3s ease;
-  -ms-transition: background-color 0.3s ease;
-  -o-transition: background-color 0.3s ease;
-}
-.filter-notifications-dropdown .dropdown:hover {
-  background-color: var(--color-secondary);
-  color: #fff;
-}
-.filter-notifications-dropdown .dropdown-menu{
-  width: 90%;
-  margin: 0px auto !important;
-  max-height: 200px;
-  overflow-y: auto;
-  background-color: #fff;
-  border-radius: 8px;
-  padding-bottom: 0 !important;
-  border: 2px solid var(--color-border);
-  -webkit-border-radius:;
-  -moz-border-radius:;
-  -ms-border-radius:;
-  -o-border-radius:;
-}
-.filter-notifications-dropdown .dropdown-menu-item {
-  padding: 10px;
-  color: #333;
-  border-bottom: 2px solid var(--color-border);
-  font-size: 0.96rem;
-  text-align: center;
-  transition: background-color 0.3s ease;
-  -webkit-transition: background-color 0.3s ease;
-  -moz-transition: background-color 0.3s ease;
-  -ms-transition: background-color 0.3s ease;
-  -o-transition: background-color 0.3s ease;
-}
-
-.section-underline {
-  height: 4px;
-  width: 180px;
-  background-color: #28a745;
-  border-radius: 10px;
-  margin-top: 8px;
-  margin-bottom: 20px;
-  -webkit-border-radius:;
-  -moz-border-radius:;
-  -ms-border-radius:;
-  -o-border-radius:;
-}
-
-.notification-list {
-  width: 100%;
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
+  align-items: stretch;
+  box-shadow: 0 0 10px rgba(0,0,0,0.05);
 }
 
-.notification-item {
-  border-right: 4px solid transparent;
+/* شريط علوي ثابت */
+.notif-header {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  background: #fff;
+  margin-bottom: 10px;
+}
+.notif-header.sticky {
+  position: sticky;
+  top: 68px; /* عدّلها لارتفاع الـNavbar */
+  z-index: 20;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.04);
+}
+
+/* ======= شريط الأدوات (فلتر + زر تحديث) ======= */
+.toolbar { display: flex; align-items: center; gap: 10px; }
+
+/* تنظيف أي حدود/ألوان قديمة للفلتر */
+.filter-notifications-dropdown .dropdown,
+.filter-notifications-dropdown .btn,
+.filter-notifications-dropdown .dropdown-toggle {
+  border: 1px solid var(--color-border) !important;
+  background: #fff !important;
+  color: #334155 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* زر الفلتر النظيف والثابت */
+.toolbar-filter .dropdown-toggle-clean {
+  border: 1px solid var(--color-border) !important;
+  border-radius: 12px !important;
+  padding: 8px 12px !important;
+  background: #fff !important;
+  color: #334155 !important;
+  line-height: 1.1 !important;
+  display: inline-flex; align-items: center; gap: 8px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important;
+  transition: background-color .15s ease, color .15s ease, box-shadow .15s ease;
+}
+.toolbar-filter .dropdown-toggle-clean::after { margin-inline-start: 6px; }
+.toolbar-filter .dropdown-toggle-clean:hover,
+.toolbar-filter .dropdown-toggle-clean:focus,
+.toolbar-filter .dropdown-toggle-clean:active,
+.toolbar-filter .show > .dropdown-toggle-clean {
+  background: #f8fafc !important;
+  color: #111827 !important;
+  border-color: var(--color-border) !important; /* نفس السماكة — لا قفز */
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06) !important;
+  outline: none !important;
+}
+
+/* قائمة الفلتر */
+.filter-notifications-dropdown .dropdown-menu {
   width: 100%;
-  padding: 15px;
-  transition: background-color 0.3s ease;
-  -webkit-transition: background-color 0.3s ease;
-  -moz-transition: background-color 0.3s ease;
-  -ms-transition: background-color 0.3s ease;
-  -o-transition: background-color 0.3s ease;
+  max-height: 260px;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 10px;
+  padding-bottom: 0 !important;
+  border: 1px solid var(--color-border);
 }
 
-.notification-item:hover {
-  background-color: #e9ecef;
-  cursor: pointer;
+/* زر تحديث ناعم */
+.toolbar-actions { display: flex; align-items: center; gap: 8px; }
+.btn-soft {
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: #fff;
+  color: #334155;
+  padding: 8px 12px;
+  line-height: 1.1;
+  display: inline-flex; align-items: center; gap: 6px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  transition: background-color .15s ease, color .15s ease, box-shadow .15s ease;
+}
+.btn-soft:hover { background: #f8fafc; color: #111827; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.btn-soft:focus, .btn-soft:active { outline: none; box-shadow: none; border: 1px solid var(--color-border); transform: none; }
+.btn-soft .icon { font-size: 1rem; line-height: 1; }
+
+/* عناوين الأقسام */
+.section-heading {
+  margin: 8px 0;
+  font-weight: 800;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: .4rem;
 }
 
-.notification-item.unread {
-  background-color: #f0f9ff;
-  border-right-color: #0d6efd;
+/* قائمة الإشعارات */
+.notification-list { width: 100%; display: flex; flex-direction: column; }
+
+/* كرت مضغوط */
+.notification-item {
+  width: 100%;
+  transition: background-color .15s ease, border-color .15s ease;
+  border-right: none; /* إزالة أي خط */
+}
+.notification-item.compact { padding: 10px; }
+.notification-item:hover { background-color: #eef2f6; cursor: pointer; }
+.notification-item.unread { background-color: #f0f9ff; }
+
+/* مؤشر بسيط لغير المقروء */
+.notification-item.unread .title::after {
+  content: '';
+  width: 8px; height: 8px;
+  background: #0d6efd;
+  border-radius: 50%;
+  display: inline-block;
+  margin-inline-start: 6px;
 }
 
-.notification-title {
-  font-size: 1.15rem;
-  margin-bottom: 0.4rem;
-}
+.item-wrap { display: flex; align-items: center; gap: 10px; }
+.item-wrap .grow { flex: 1; min-width: 0; }
 
-.notification-title.message {
-  color: #6f42c1;
-}
+.row-1 { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.row-2 { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 4px; }
 
-.notification-title.offer {
-  color: #d63384;
-}
+.title { font-size: .98rem; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.title.message { color: #6f42c1; }
 
-.notification-title.system {
-  color: #0d6efd;
-}
-
-.message-truncated {
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  color: #444;
-  font-size: 0.95rem;
-  white-space: nowrap;
+.msg { color: #444; font-size: .92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.msg.line-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* سطران فقط */
+  -webkit-box-orient: vertical;
+  white-space: normal;
   overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
 }
-.message-truncated .sender{
-  color: var(--color-secondary) !important;
-  font-size: 1.2rem;
-  margin-bottom: 0.4rem;
-}
+.date { font-size: .82rem; color: #198754; }
 
-.message-truncated .sender strong{
-  color: #444;
-  font-size: 0.85rem;
-  margin-bottom: 0.4rem;
+/* شارات صغيرة */
+.chip-type, .chip-cat {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 2px 8px; border-radius: 999px; font-size: .78rem; line-height: 1; font-weight: 700;
 }
+.chip-type { background:#e9ecef; color:#343a40; }
+.chip-cat  { background:#e7f5ff; color:#0b7285; }
+
+/* زر التفاصيل */
 .btn-details {
-  margin-right: 0.5rem;
+  margin-inline-start: 8px;
   background-color: var(--color-secondary);
-  color: #fff;
-  border: none;
-  padding: 5px 10px;
-  font-size: 0.9rem;
+  color: #fff; border: none; padding: 4px 10px; font-size: .85rem;
 }
 
-.msg {
-  color: #444;
-  font-size: 0.95rem;
-  white-space: normal;
-  margin-top: 0.4rem;
+/* أسهم الصعود/الهبوط */
+.page-fabs {
+  position: fixed;
+  inset-block-end: 18px;
+  inset-inline-end: 18px;
+  display: flex; flex-direction: column; gap: 10px;
+  z-index: 2147483647;
 }
+html[dir="rtl"] .page-fabs { inset-inline-end: auto; inset-inline-start: 18px; }
 
-.message-full {
-  color: #444;
-  font-size: 0.95rem;
-  white-space: normal;
+.fab-btn {
+  width: 46px; height: 46px; border-radius: 999px;
+  border: 1px solid #e6e9f0; background: #ffffff;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  cursor: pointer; font-weight: 800; font-size: 18px;
 }
+.fab-btn:hover { transform: translateY(-1px); }
 
-.notification-date {
-  font-size: 0.85rem;
-  color: #198754;
-  margin-top: 0.4rem;
+@media (max-width: 576px) {
+  .notif-header { flex-direction: column; align-items: stretch; gap: 8px; }
+  .toolbar { flex-direction: column; align-items: stretch; }
+  .notification-item.compact { padding: 8px; }
+  .fab-btn { width: 44px; height: 44px; }
 }
-
-

@@ -1,0 +1,10 @@
+.public-profile { max-width: 1140px; }
+.top-actions { display: flex; gap: .5rem; justify-content: flex-start; margin-bottom: .75rem; }
+
+.pp-card { border-radius: 14px; }
+.pp-header { display: grid; grid-template-columns: 84px 1fr; gap: 14px; align-items: center; }
+.pp-meta { display: grid; gap: 6px; }
+.pp-name { font-size: 1.25rem; font-weight: 800; color: #0f172a; }
+.pp-sub { color: #475569; font-size: .95rem; }
+.pp-actions { display: flex; gap: .5rem; margin-top: .25rem; }
+.prewrap { white-space: pre-wrap; }

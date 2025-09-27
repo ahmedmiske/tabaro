@@ -1,124 +1,112 @@
-.landing-page {
-  background: url('./tabarou.png') no-repeat center center;
-  background-size: cover;
-  font-family: 'IBM Plex Sans Arabic SemiBold, sans-serif';
+/* ===== Skip link (وصولية) ===== */
+.skip-link{
+  position: absolute;
+  left: .75rem; top: -100vh;
+  background: #000; color: #fff;
+  padding: .5rem .75rem; z-index: 1000; border-radius: 8px;
+}
+.skip-link:focus{ top: .75rem; }
+
+/* ===== خلفية الهيرو ===== */
+.landing-page{
+  min-height: 100svh;
+  display: flex; align-items: center; justify-content: center;
+  padding-inline: clamp(.75rem, 2vw, 1.25rem);
+  color: var(--text-color, #0f172a);
+
+  /* عدّل المسار حسب مكان الصورة لديك */
+  background: url('./tabarou.png') center / cover no-repeat fixed;
+
+  animation: lp-move 15s infinite alternate ease-in-out;
+}
+@media (prefers-reduced-motion: reduce){
+  .landing-page{ animation: none; background-attachment: scroll; }
+}
+@keyframes lp-move{
+  0%{ background-position: center bottom; }
+  50%{ background-position: center center; }
+  100%{ background-position: center top; }
+}
+
+/* ===== حاوية داخلية مخصّصة (ليست Bootstrap Container) ===== */
+.container-landing{
+  max-width: 1100px;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+
+/* ===== بطاقة الهيرو الزجاجية ===== */
+.card-landing{
+  background: rgba(255,255,255,0.68);
+  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+  border: 1px solid rgba(255,255,255,0.35);
+  border-radius: 22px;
+  padding: clamp(1.2rem, 2.4vw, 2.4rem);
+
+  /* عرض متجاوب ومتمركز */
+  width: clamp(540px, 70vw, 1100px);
+  margin-inline: auto;
+
+  box-shadow: 0 18px 50px rgba(0,0,0,.12);
+}
+@media (max-width: 576px){
+  .card-landing{ width: min(92vw, 560px); }
+}
+
+/* عمود النص الداخلـي—مريح للقراءة */
+.hero-content{
   width: 100%;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: moveBackground 15s infinite alternate;
-  font-size: 1.2rem;
-}
-
-@keyframes moveBackground {
-  0% { background-position: center bottom; }
-  50% { background-position: center center; }
-  100% { background-position: center top; }
-}
-
-.container-landing {
-  max-width: 800px;
-  padding: 0;
-}
-
-.card-landing {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(255, 255, 255, 0.92);
-  border-radius: 15px;
-  padding: 20px auto;
-  opacity: 0.95;
-  width: 800px;
-  max-width: 600px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.3s ease, background-color 0.3s ease;
-  -webkit-border-radius: 15px;
-  -moz-border-radius: 15px;
-  -ms-border-radius: 15px;
-  -o-border-radius: 15px;
-  -webkit-transition: box-shadow 0.3s ease, background-color 0.3s ease;
-  -moz-transition: box-shadow 0.3s ease, background-color 0.3s ease;
-  -ms-transition: box-shadow 0.3s ease, background-color 0.3s ease;
-  -o-transition: box-shadow 0.3s ease, background-color 0.3s ease;
-}
-
-.landing-title {
-  font-size: 2.4rem;
-  font-weight: bold;
-  margin-bottom: 20px;
-}
-
-.highlight {
-  color: var(--color-secondary);
-}
-
-.lead-text {
-  font-size: 1.3rem;
-  margin-bottom: 10px;
-}
-
-.link-card {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 20px;
-}
-
-.go-landing, .log-landing {
-  padding: 12px 20px;
-  font-size: 1rem;
-  border-radius: 8px;
-  font-weight: bold;
-  border: none;
-  -webkit-border-radius: 8px;
-  -moz-border-radius: 8px;
-  -ms-border-radius: 8px;
-  -o-border-radius: 8px;
-}
-
-.go-landing {
-  background-color: var(--main-color-alt);
-  color: white;
-}
-
-.go-landing:hover {
-  background-color: var(--color-secondary);
-}
-
-.log-landing {
-  background-color: #555;
-  color: white;
-}
-
-.log-landing:hover {
-  opacity: 0.9;
-}
-
-.scroll-down {
-  display: block;
-  margin-top: 20px;
-  font-size: 2rem;
-  color: var(--color-primary, #1e88e5);
-  animation: bounce 1.5s infinite;
-  -webkit-animation: bounce 1.5s infinite;
-}
-
-.about-section{
-  padding: 0px;
+  max-width: 860px;
+  margin-inline: auto;
   text-align: center;
-  background-color: #f8f9fa;
-  font-size: 1.2rem;
-  line-height: 1.6;
-  color: #333;
-  font-family: 'Arial', sans-serif;
-  width: 100vw;
 }
 
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(8px); }
+/* ===== نصوص ===== */
+.landing-title{
+  color: #0f172a;
+  font-size: clamp(2rem, 3.2vw, 3rem);
+  line-height: 1.22;
+  font-weight: 900;
+  margin: 0 0 1rem;
+}
+.highlight{ color: var(--ui-accent, #FF7043); }
+
+.lead-text{
+  font-size: clamp(1rem, 2.1vw, 1.2rem);
+  margin: 0 0 .5rem;
+  color: #334155;
 }
 
+/* ===== الأزرار ===== */
+.link-card{
+  display: flex; justify-content: center; gap: .8rem; margin-top: 1rem; flex-wrap: wrap;
+}
+.go-landing, .log-landing{
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 44px; min-width: 44px;
+  padding: .8rem 1.1rem;
+  font-size: 1rem; font-weight: 800;
+  border-radius: 12px; border: 0; text-decoration: none;
+}
+.go-landing{ background-color: var(--ui-primary, #4CAF50); color: #fff; }
+.go-landing:hover, .go-landing:focus-visible{ background-color: var(--ui-primary-600, #2E7D32); }
+.log-landing{ background-color: #4b5563; color: #fff; }
+.log-landing:hover, .log-landing:focus-visible{ background-color: #374151; }
+
+/* ===== سهم التمرير ===== */
+.scroll-down{ margin-top: 1rem; font-size: 2rem; }
+.scroll-link{
+  display: inline-flex; width: 44px; height: 44px; align-items: center; justify-content: center;
+  color: var(--ui-primary, #4CAF50);
+  animation: lp-bounce 1.4s infinite;
+}
+@media (prefers-reduced-motion: reduce){ .scroll-link{ animation:none; } }
+@keyframes lp-bounce{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(8px)} }
+
+/* ===== قسم “عن المنصة” أسفل الهيرو ===== */
+.about-section{
+  padding: clamp(1.25rem, 3vw, 2rem) 0;
+  background: #f3f4f6;
+  width: 100%;
+}

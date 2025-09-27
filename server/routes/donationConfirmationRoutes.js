@@ -3,13 +3,14 @@ const router = express.Router();
 
 const {
   createDonationConfirmation,
-  acceptDonationConfirmation,   // توافقي فقط
+  acceptDonationConfirmation,
   markAsFulfilled,
   rateDonation,
   getMyDonationOffers,
   getMySentOffers,
   getOffersByRequestId,
   cancelDonationConfirmation,
+  getDonationConfirmationById,   // ✅ جديد
 } = require("../controllers/donationConfirmationController");
 
 const { protect } = require("../middlewares/authMiddleware");
@@ -17,19 +18,18 @@ const { protect } = require("../middlewares/authMiddleware");
 // إنشاء عرض تبرع (دم)
 router.post("/", protect, createDonationConfirmation);
 
-// قبول (توافقي – الواجهة لا تستخدمه)
-router.patch("/:id/accept", protect, acceptDonationConfirmation);
-
-// تأكيد الاستلام → fulfilled
+// إدارة الحالة
+router.patch("/:id/accept",  protect, acceptDonationConfirmation);
 router.patch("/:id/fulfill", protect, markAsFulfilled);
-
-// تقييم
-router.patch("/:id/rate", protect, rateDonation);
+router.patch("/:id/rate",    protect, rateDonation);
 
 // استعلامات
-router.get("/mine", protect, getMyDonationOffers);    // ما وصلني من عروض
-router.get("/sent", protect, getMySentOffers);        // ما أرسلته أنا
+router.get("/mine",              protect, getMyDonationOffers);
+router.get("/sent",              protect, getMySentOffers);
 router.get("/request/:requestId", protect, getOffersByRequestId);
+
+// ✅ جلب تأكيد واحد بالمعرف (ضعه بعد المسارات السابقة حتى لا يصطاد /mine أو /sent)
+router.get("/:id", protect, getDonationConfirmationById);
 
 // إلغاء العرض (للمتبرع قبل الاستلام)
 router.delete("/:id", protect, cancelDonationConfirmation);

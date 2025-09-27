@@ -1,4 +1,4 @@
-// src/pages/Notifications.jsx
+// src/componentes/Notifications.jsx
 import React, { useEffect, useState } from 'react';
 import { Card, Button, Spinner, Row, Col, Image, Badge } from 'react-bootstrap';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';

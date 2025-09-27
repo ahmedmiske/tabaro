@@ -32,7 +32,7 @@ exports.createConfirmation = async (req, res) => {
       method: method || "call",
       proposedTime: proposedTime ? new Date(proposedTime) : new Date(),
       proofFiles: files,
-      status: "pending", // ➜ قيد الاستلام
+      status: "pending",
     });
 
     // إشعار صاحب الطلب
@@ -141,7 +141,7 @@ exports.getMyDonationOffers = async (req, res) => {
     const myRequests = await DonationRequest.find({ userId: req.user._id }).select("_id");
     const ids = myRequests.map(r => r._id);
     const items = await DonationRequestConfirmation.find({ requestId: { $in: ids } })
-      .populate("donor", "firstName lastName")
+      .populate("donor", "firstName lastName email phoneNumber profileImage rating averageRating")
       .sort({ createdAt: -1 });
     res.json(items);
   } catch (e) {
@@ -157,7 +157,7 @@ exports.getMySentOffers = async (req, res) => {
       .populate({
         path: "requestId",
         model: "DonationRequest",
-        populate: { path: "userId", model: "User", select: "firstName lastName" },
+        populate: { path: "userId", model: "User", select: "firstName lastName profileImage rating averageRating" },
       })
       .sort({ createdAt: -1 });
     res.json(items);
@@ -174,7 +174,7 @@ exports.getOffersByRequestId = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(requestId)) return res.status(400).json({ message: "requestId غير صالح" });
 
     const list = await DonationRequestConfirmation.find({ requestId })
-      .populate("donor", "firstName lastName email phoneNumber")
+      .populate("donor", "firstName lastName email phoneNumber profileImage rating averageRating")
       .sort({ createdAt: -1 });
     res.json(list);
   } catch (e) {
@@ -198,6 +198,33 @@ exports.cancelConfirmation = async (req, res) => {
     res.json({ message: "تم الإلغاء" });
   } catch (e) {
     console.error("cancelConfirmation error:", e);
+    res.status(500).json({ message: "خطأ في السيرفر" });
+  }
+};
+
+/** ✅ جديد: جلب تأكيد طلب تبرّع واحد بالمعرّف */
+exports.getDonationRequestConfirmationById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "معرّف غير صالح" });
+    }
+
+    const doc = await DonationRequestConfirmation.findById(id)
+      .populate({
+        path: "requestId",
+        model: "DonationRequest",
+        select: "title category type deadline userId",
+        populate: { path: "userId", model: "User", select: "firstName lastName profileImage" },
+      })
+      .populate({ path: "donor", select: "firstName lastName profileImage" })
+      .lean();
+
+    if (!doc) return res.status(404).json({ message: "غير موجود" });
+
+    return res.json({ data: doc });
+  } catch (e) {
+    console.error("getDonationRequestConfirmationById error:", e);
     res.status(500).json({ message: "خطأ في السيرفر" });
   }
 };

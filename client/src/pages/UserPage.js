@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 import { Table, Button, Modal, Alert } from 'react-bootstrap';
 import './UserPage.css';
 import Title from '../components/Title';
@@ -12,29 +13,19 @@ function UserPage({ onEdit, onDelete }) {
   const [error, setError] = useState('');
 
   const getAllUsers = () => {
-    fetchWithInterceptors('/api/users', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    })
-    .then(({ body, ok, status }) => {
-      if (!ok) {
-        throw new Error(`HTTP error! Status: ${status}`);
-      }
-      // تأكد من أن body هي مصفوفة قبل محاولة استخدامها كذلك
-      setUserList(Array.isArray(body.result) ? body.result : []);
-      setError('');
-    })
-    .catch((error) => {
-      console.error('Error fetching users:', error.message);
-      setError('Error fetching users: Unauthorized. Redirecting to login.');
-    });
+    fetchWithInterceptors('/api/users', { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+      .then(({ body, ok, status }) => {
+        if (!ok) throw new Error(`HTTP error! Status: ${status}`);
+        setUserList(Array.isArray(body?.result) ? body.result : []);
+        setError('');
+      })
+      .catch((err) => {
+        console.error('Error fetching users:', err.message);
+        setError('Error fetching users: Unauthorized. Redirecting to login.');
+      });
   };
-  
-  useEffect(() => {
-    getAllUsers();
-  }, []);
+
+  useEffect(() => { getAllUsers(); }, []);
 
   const handleDeleteClick = (user) => {
     setUserToDelete(user);
@@ -44,7 +35,7 @@ function UserPage({ onEdit, onDelete }) {
   const confirmDelete = () => {
     onDelete(userToDelete.id)
       .then(() => {
-        getAllUsers(); // تحديث القائمة بعد الحذف
+        getAllUsers();
         setShowConfirm(false);
         setUserToDelete(null);
       })
@@ -53,7 +44,7 @@ function UserPage({ onEdit, onDelete }) {
 
   return (
     <div className="container mt-5">
-      <Title text='المستخدمين'/>
+      <Title text="المستخدمين" />
       {error && <Alert variant="danger">{error}</Alert>}
       <Table striped bordered hover>
         <thead>
@@ -92,19 +83,11 @@ function UserPage({ onEdit, onDelete }) {
       </Table>
 
       <Modal show={showConfirm} onHide={() => setShowConfirm(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>تأكيد الحذف</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          هل أنت متأكد أنك تريد حذف المستخدم؟
-        </Modal.Body>
+        <Modal.Header closeButton><Modal.Title>تأكيد الحذف</Modal.Title></Modal.Header>
+        <Modal.Body>هل أنت متأكد أنك تريد حذف المستخدم؟</Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowConfirm(false)}>
-            إلغاء
-          </Button>
-          <Button variant="danger" onClick={confirmDelete}>
-            حذف
-          </Button>
+          <Button variant="secondary" onClick={() => setShowConfirm(false)}>إلغاء</Button>
+          <Button variant="danger" onClick={confirmDelete}>حذف</Button>
         </Modal.Footer>
       </Modal>
     </div>
@@ -113,7 +96,7 @@ function UserPage({ onEdit, onDelete }) {
 
 UserPage.propTypes = {
   onEdit: PropTypes.func.isRequired,
-  onDelete: PropTypes.func.isRequired
+  onDelete: PropTypes.func.isRequired, // يجب أن تُعيد Promise كما في الاستخدام الحالي
 };
 
 export default UserPage;

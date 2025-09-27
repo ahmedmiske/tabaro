@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-// import Marquee from 'react-marquee-slider';
+import React, { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 import { Container } from 'react-bootstrap';
 import Marquee from 'react-fast-marquee';
 import PropTypes from 'prop-types';
@@ -7,30 +7,39 @@ import PropTypes from 'prop-types';
 import './ImportantInfoBar.css';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 
-const ImportantInfoBar = ({ apiUrl = '/important-info' }) => {
+const ImportantInfoBar = ({ apiUrl }) => {
   const [info, setInfo] = useState([]);
 
   useEffect(() => {
-    fetchWithInterceptors(apiUrl)
-      .then(response => response.json())
-      .then(data => setInfo(data))
-      .catch(error => console.error('Error fetching important info:', error));
+    let mounted = true;
+    (async () => {
+      try {
+        const { ok, body } = await fetchWithInterceptors(apiUrl);
+        if (ok && mounted) setInfo(Array.isArray(body) ? body : (body?.data || []));
+      } catch (e) {
+        console.error('Error fetching important info:', e);
+      }
+    })();
+    return () => { mounted = false; };
   }, [apiUrl]);
 
   return (
     <Container fluid className="important-info-bar">
-      <Marquee gradient={false}>
-        {info.map((item, index) => (
-          <span key={index} className="info-item">{item.description}</span>
+      <Marquee gradient={false} pauseOnHover>
+        {info.map((item, i) => (
+          <span key={i} className="info-item">{item.description || String(item)}</span>
         ))}
       </Marquee>
     </Container>
   );
-  
 };
 
 ImportantInfoBar.propTypes = {
-  apiUrl: PropTypes.string
+  apiUrl: PropTypes.string,
+};
+
+ImportantInfoBar.defaultProps = {
+  apiUrl: '/important-info',
 };
 
 export default React.memo(ImportantInfoBar);
