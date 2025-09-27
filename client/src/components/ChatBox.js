@@ -11,6 +11,8 @@ const fmtTime = (d) => {
   } catch { return ''; }
 };
 
+const PAGE_SIZE = 5; // pagination size
+
 const ChatBox = ({ conversationId, recipientId, className = '' }) => {
   const [messages, setMessages]   = useState([]);
   const [input, setInput]         = useState('');
@@ -18,6 +20,8 @@ const ChatBox = ({ conversationId, recipientId, className = '' }) => {
   const [sending, setSending]     = useState(false);
   const [isTyping, setIsTyping]   = useState(false);
   const [error, setError]         = useState('');
+  const [hasMore, setHasMore]     = useState(true);
+  const [loadingPrev, setLoadingPrev] = useState(false);
 
   const listRef                  = useRef(null);
   const knownIdsRef              = useRef(new Set());
@@ -28,6 +32,12 @@ const ChatBox = ({ conversationId, recipientId, className = '' }) => {
   const reconnectTimerRef        = useRef(null);
   const watchdogRef              = useRef(null);
   const socketRef                = useRef(null);
+  const preventAutoScrollRef     = useRef(false);
+  const loadingMoreRef           = useRef(false);
+  // track read-marking to avoid duplicates and to batch updates
+  const readMarkedRef            = useRef(new Set());
+  const markQueueRef             = useRef(new Set());
+  const markTimerRef             = useRef(null);
 
   const token = useMemo(() => {
     const u = JSON.parse(localStorage.getItem('user') || '{}');
@@ -44,7 +54,14 @@ const ChatBox = ({ conversationId, recipientId, className = '' }) => {
     if (!el) return;
     el.scrollTop = el.scrollHeight;
   };
-  useEffect(scrollToBottom, [messages]);
+  useEffect(() => {
+    if (preventAutoScrollRef.current) {
+      // skip one auto-scroll (used when prepending older messages)
+      preventAutoScrollRef.current = false;
+      return;
+    }
+    scrollToBottom();
+  }, [messages]);
 
   const clearWatchdog = () => {
     if (watchdogRef.current) {
@@ -86,9 +103,77 @@ const ChatBox = ({ conversationId, recipientId, className = '' }) => {
     (socketRef.current || getSocket())?.emit('loadMessages', {
       conversationId,
       recipientId,
-      limit: 50,
+      limit: PAGE_SIZE,
       before: null, // first page (newest)
     });
+  };
+
+  const loadPrevious = async () => {
+    if (loadingPrev || !messages.length || !hasMore) return;
+
+    const s = socketRef.current || getSocket();
+    if (!s || !s.connected) return;
+
+    setLoadingPrev(true);
+    loadingMoreRef.current = true;
+
+    // Preserve scroll position during prepend
+    const el = listRef.current;
+    const prevScrollHeight = el ? el.scrollHeight : 0;
+
+    const beforeCursor = messages[0]?.timestamp || null;
+    // avoid auto-scroll to bottom on prepend
+    preventAutoScrollRef.current = true;
+
+    s.emit('loadMessages', {
+      conversationId,
+      recipientId,
+      limit: PAGE_SIZE,
+      before: beforeCursor,
+    });
+
+    // After messages merge, adjust scroll to keep viewport stable
+    setTimeout(() => {
+      const el2 = listRef.current;
+      if (el && el2) {
+        const newScrollHeight = el2.scrollHeight;
+        el2.scrollTop = newScrollHeight - prevScrollHeight + el2.scrollTop;
+      }
+      setLoadingPrev(false);
+    }, 0);
+  };
+
+  const flushMarkRead = () => {
+    if (markTimerRef.current) {
+      clearTimeout(markTimerRef.current);
+      markTimerRef.current = null;
+    }
+    const ids = Array.from(markQueueRef.current);
+    if (!ids.length) return;
+    markQueueRef.current.clear();
+
+    const s = socketRef.current || getSocket();
+    if (s?.connected) {
+      try { s.emit('markRead', { messageIds: ids }); } catch {}
+    }
+
+    // Optimistically update local state to reflect read status
+    setMessages((prev) => prev.map((m) => (m._id && ids.includes(String(m._id)) ? { ...m, read: true } : m)));
+  };
+
+  const queueMarkRead = (ids = []) => {
+    let added = false;
+    ids.forEach((id) => {
+      const sid = String(id);
+      if (!sid) return;
+      if (readMarkedRef.current.has(sid)) return;
+      readMarkedRef.current.add(sid);
+      markQueueRef.current.add(sid);
+      added = true;
+    });
+    if (added && !markTimerRef.current) {
+      markTimerRef.current = setTimeout(flushMarkRead, 300);
+    }
   };
 
   const bindSocket = (s) => {
@@ -136,9 +221,30 @@ const ChatBox = ({ conversationId, recipientId, className = '' }) => {
 
       const normalized = list.map((m) => {
         if (m._id) knownIdsRef.current.add(String(m._id));
-        return m;
+        // default read flag to false if missing
+        return { read: false, ...m };
       });
-      setMessages(normalized);
+
+      if (loadingMoreRef.current) {
+        // prepend older messages, avoid duplicates
+        setMessages((prev) => {
+          const dedup = normalized.filter((m) => !m._id || !prev.some((p) => p._id === m._id));
+          return dedup.length ? [...dedup, ...prev] : prev;
+        });
+        loadingMoreRef.current = false;
+        // if page smaller than PAGE_SIZE, likely no more
+        if (normalized.length < PAGE_SIZE) setHasMore(false);
+      } else {
+        setMessages(normalized);
+        setHasMore(normalized.length >= PAGE_SIZE);
+      }
+
+      // Queue mark-as-read for messages addressed to me that are not yet read
+      const unreadIds = normalized
+        .filter((m) => String(m.recipient) === String(myId) && !m.read && m._id)
+        .map((m) => String(m._id));
+      if (unreadIds.length) queueMarkRead(unreadIds);
+
       setLoading(false);
       setError('');
     };
@@ -161,11 +267,15 @@ const ChatBox = ({ conversationId, recipientId, className = '' }) => {
           if (msg._id) knownIdsRef.current.add(String(msg._id));
           return [...prev, { ...msg, pending: false }];
         });
+        // If I am the recipient, mark this message as read
+        if (msg._id && String(msg.recipient) === String(myId)) queueMarkRead([msg._id]);
         return;
       }
 
       if (msg?._id) knownIdsRef.current.add(String(msg._id));
       setMessages((prev) => [...prev, { ...msg, pending: false }]);
+      // If I am the recipient, mark this message as read
+      if (msg?._id && String(msg.recipient) === String(myId)) queueMarkRead([msg._id]);
     };
 
     const onSent = (msg) => {
@@ -202,6 +312,13 @@ const ChatBox = ({ conversationId, recipientId, className = '' }) => {
       setLoading(false);
     };
 
+    const onMessagesRead = ({ conversationId: conv, messageIds = [] } = {}) => {
+      if (!conv || conv !== conversationId) return;
+      if (!Array.isArray(messageIds) || !messageIds.length) return;
+      const idSet = new Set(messageIds.map(String));
+      setMessages((prev) => prev.map((m) => (m._id && idSet.has(String(m._id)) ? { ...m, read: true } : m)));
+    };
+
     s.on('connect', onConnect);
     s.on('connect_error', onConnectError);
     s.on('disconnect', onDisconnect);
@@ -212,6 +329,7 @@ const ChatBox = ({ conversationId, recipientId, className = '' }) => {
     s.on('typing', onTyping);
     // listen to namespaced server errors
     s.on('ws:error', onServerError);
+    s.on('messagesRead', onMessagesRead);
 
     // إلغاء الاشتراكات
     return () => {
@@ -224,6 +342,8 @@ const ChatBox = ({ conversationId, recipientId, className = '' }) => {
       s.off('messageSent', onSent);
       s.off('typing', onTyping);
       s.off('ws:error', onServerError);
+      s.off('messagesRead', onMessagesRead);
+      if (markTimerRef.current) clearTimeout(markTimerRef.current);
     };
   };
 
@@ -231,8 +351,13 @@ const ChatBox = ({ conversationId, recipientId, className = '' }) => {
   useEffect(() => {
     setLoading(true);
     setError('');
+    setHasMore(true);
+    setLoadingPrev(false);
     knownIdsRef.current.clear();
     knownTempRef.current.clear();
+    readMarkedRef.current.clear();
+    markQueueRef.current.clear();
+    if (markTimerRef.current) { clearTimeout(markTimerRef.current); markTimerRef.current = null; }
     historyRequestedRef.current = false;
     clearWatchdog();
 
@@ -288,6 +413,7 @@ const ChatBox = ({ conversationId, recipientId, className = '' }) => {
       content: text,
       timestamp: new Date().toISOString(),
       pending: true,
+      read: false,
       senderName: `${me?.firstName || ''} ${me?.lastName || ''}`.trim() || 'أنا',
       senderProfileImage: me?.profileImage || '',
     };
@@ -319,6 +445,13 @@ const ChatBox = ({ conversationId, recipientId, className = '' }) => {
       </div>
 
       <div ref={listRef} className="card-body p-2 messages-area messages-scroll">
+        {!loading && hasMore && messages.length > 0 && (
+          <div className="text-center mb-2">
+            <Button variant="outline-secondary" size="sm" onClick={loadPrevious} disabled={loadingPrev}>
+              {loadingPrev ? <Spinner size="sm" /> : 'تحميل الرسائل الأقدم'}
+            </Button>
+          </div>
+        )}
         {loading ? (
           <div className="text-center py-5">
             <Spinner animation="border" />
@@ -360,10 +493,12 @@ const ChatBox = ({ conversationId, recipientId, className = '' }) => {
                   <div className="bubble-message" style={{ whiteSpace: 'pre-wrap' }}>{m.content}</div>
                   <div className="bubble-meta">
                     <span>{fmtTime(m.timestamp)}</span>
-                    {m.pending ? (
-                      <span className="tick tick-sent">✓</span>
-                    ) : (
-                      <span className="tick tick-delivered">✓✓</span>
+                    {mine && (
+                      m.read ? (
+                        <span className="tick tick-delivered">✓✓</span>
+                      ) : (
+                        <span className="tick tick-sent">✓</span>
+                      )
                     )}
                   </div>
                 </div>

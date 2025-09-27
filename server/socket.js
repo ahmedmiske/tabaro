@@ -274,13 +274,36 @@ module.exports = function setupSocket(io) {
     /* ============= تعليم كمقروء ============= */
     socket.on('markRead', async ({ messageIds = [] } = {}) => {
       try {
-        const safeIds = messageIds.filter(isValidId);
+        const safeIds = (Array.isArray(messageIds) ? messageIds : []).filter(isValidId).map(String);
         if (safeIds.length === 0) return;
 
+        // Find unread messages that belong to this recipient to know senders and convs
+        const unread = await Message.find({
+          _id: { $in: safeIds },
+          recipient: currentUserId,
+          read: { $ne: true },
+        })
+          .select('_id sender conversationId')
+          .lean();
+
+        if (!unread.length) return;
+
         await Message.updateMany(
-          { _id: { $in: safeIds }, recipient: currentUserId },
+          { _id: { $in: unread.map((m) => m._id) }, recipient: currentUserId },
           { $set: { read: true } },
         );
+
+        // Group by sender and conversation to emit receipts
+        const groups = new Map(); // key: senderId:convId -> ids[]
+        for (const m of unread) {
+          const key = `${String(m.sender)}:${String(m.conversationId)}`;
+          if (!groups.has(key)) groups.set(key, { senderId: String(m.sender), conversationId: String(m.conversationId), ids: [] });
+          groups.get(key).ids.push(String(m._id));
+        }
+
+        for (const { senderId, conversationId, ids } of groups.values()) {
+          io.to(senderId).emit('messagesRead', { conversationId, messageIds: ids });
+        }
       } catch (e) {
         console.error('Error marking messages as read:', e);
       }
