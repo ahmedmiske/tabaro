@@ -35,6 +35,9 @@ const io = new Server(server, {
     credentials: true,
   },
   transports: ["websocket", "polling"],
+  // Harden heartbeat to detect stale connections quicker and reduce ghost sockets
+  pingTimeout: 30000, // time without pong to consider the connection closed
+  pingInterval: 25000, // interval to send pings
 });
 
 // اجعل io متاحًا داخل الـ app (للكنترولرز)

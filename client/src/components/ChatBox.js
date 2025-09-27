@@ -86,7 +86,8 @@ const ChatBox = ({ conversationId, recipientId, className = '' }) => {
     (socketRef.current || getSocket())?.emit('loadMessages', {
       conversationId,
       recipientId,
-      limit: 100,
+      limit: 50,
+      before: null, // first page (newest)
     });
   };
 
@@ -209,7 +210,8 @@ const ChatBox = ({ conversationId, recipientId, className = '' }) => {
     s.on('receiveMessage', onReceive);
     s.on('messageSent', onSent);
     s.on('typing', onTyping);
-    s.on('error', onServerError);
+    // listen to namespaced server errors
+    s.on('ws:error', onServerError);
 
     // إلغاء الاشتراكات
     return () => {
@@ -221,7 +223,7 @@ const ChatBox = ({ conversationId, recipientId, className = '' }) => {
       s.off('receiveMessage', onReceive);
       s.off('messageSent', onSent);
       s.off('typing', onTyping);
-      s.off('error', onServerError);
+      s.off('ws:error', onServerError);
     };
   };
 
