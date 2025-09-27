@@ -179,9 +179,22 @@ module.exports = function setupSocket(io) {
     );
 
     /* ============= مؤشر الكتابة ============= */
+    const RATE_LIMIT = {
+      TYPING_INTERVAL_MS: 300, // 300ms بين كل إشارة كتابة
+      SEND_WINDOW_MS: 1000,    // 1 ثانية نافذة زمنية لكل إرسال
+      SEND_MAX: 5,             // الحد الأقصى لعدد الرسائل المسموح بها في النافذة الزمنية
+    };
+    const typingLast = new Map(); // مفتاح: userId:convId -> timestamp
+    const sendBuckets = new Map(); // مفتاح: userId -> [timestamps]
+
     socket.on('typing', ({ conversationId } = {}) => {
       if (!conversationId) return;
       if (!isValidConvIdForUser(conversationId, currentUserId)) return;
+      const now = Date.now();
+      const key = `${String(currentUserId)}:${String(conversationId)}`;
+      const last = typingLast.get(key) || 0;
+      if (now - last < RATE_LIMIT.TYPING_INTERVAL_MS) return;
+      typingLast.set(key, now);
       socket.to(String(conversationId)).emit('typing', { conversationId, from: currentUserId });
     });
 
@@ -205,9 +218,22 @@ module.exports = function setupSocket(io) {
             return socket.emit('ws:error', { message: 'لا يمكنك مراسلة نفسك' });
           }
 
+          // Rate limit per user
+          const now = Date.now();
+          const list = sendBuckets.get(String(currentUserId)) || [];
+          const cutoff = now - RATE_LIMIT.SEND_WINDOW_MS;
+          const recent = list.filter((t) => t > cutoff);
+          if (recent.length >= RATE_LIMIT.SEND_MAX) {
+            return socket.emit('ws:error', { message: 'تجاوزت حد الإرسال. انتظر قليلًا.' });
+          }
+
           const body = (content || '').trim();
           if (!body) return socket.emit('ws:error', { message: 'لا يمكن إرسال رسالة فارغة' });
           if (body.length > 2000) return socket.emit('ws:error', { message: 'النص طويل جدًا' });
+
+          // persist new timestamp to bucket
+          recent.push(now);
+          sendBuckets.set(String(currentUserId), recent);
 
           const safeRequestId = isValidId(requestId) ? requestId : undefined;
           const safeOfferId   = isValidId(offerId)   ? offerId   : undefined;
@@ -221,7 +247,7 @@ module.exports = function setupSocket(io) {
           });
 
           const message = await Message.create({
-            conversationId: convId,        // ✅ مهم إذا كان في الـSchema required
+            conversationId: convId,
             sender: currentUserId,
             recipient: recipientId,
             content: body,
@@ -255,9 +281,6 @@ module.exports = function setupSocket(io) {
               referenceId: message._id,
             });
           }
-
-          // إزالة الإرسال لغرفة المحادثة لتجنّب التكرار
-          // io.to(String(convId)).emit('receiveMessage', enriched);
 
           // تأكيد للمرسل
           socket.emit('messageSent', enriched);
