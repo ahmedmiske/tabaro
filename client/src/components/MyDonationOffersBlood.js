@@ -50,15 +50,16 @@ RatingStars.defaultProps = { value: 0, onRate: () => {}, disabled: false };
 /* ===== Helpers ===== */
 const statusLabel = (s) => ({
   pending: 'قيد الاستلام',
-  accepted: 'تم الاستلام',
+  accepted: 'تم التنفيذ',     // ✅ التسمية المطلوبة
   fulfilled: 'تم التنفيذ',
   rated: 'تم التقييم',
   canceled: 'ملغى',
 }[s] || 'قيد الاستلام');
 
 const statusColor = (s) => ({
-  accepted: 'info',
-  fulfilled: 'primary',
+  pending: 'warning',
+  accepted: 'primary',
+  fulfilled: 'info',
   rated: 'secondary',
   canceled: 'dark',
 }[s] || 'warning');
@@ -89,10 +90,9 @@ function buildDayHourChip(deadline, nowVal) {
   const days = Math.floor(hoursTotal / 24);
   const hours = hoursTotal % 24;
 
-  // ألوان لطيفة حسب القرب من الانتهاء
-  let cls = 'chip--ok';           // بعيد
-  if (hoursTotal <= 24) cls = 'chip--soon';    // خلال 24 ساعة
-  if (hoursTotal <= 3)  cls = 'chip--urgent';  // خلال 3 ساعات
+  let cls = 'chip--ok';
+  if (hoursTotal <= 24) cls = 'chip--soon';
+  if (hoursTotal <= 3)  cls = 'chip--urgent';
 
   const top = `${days}ي`;
   const bottom = `${hours}س`;
@@ -105,7 +105,7 @@ const MyDonationOffersBlood = () => {
   const [showToast, setShowToast] = useState(false);
   const [toastMsg, setToastMsg] = useState('تمت العملية بنجاح');
 
-  // فلترة بالحالة فقط
+  // ✅ فلترة محصورة في 3 حالات فقط
   const [statusFilter, setStatusFilter] = useState('');
 
   // أقسام قابلة للطي
@@ -141,14 +141,25 @@ const MyDonationOffersBlood = () => {
       const d = req?.deadline ? new Date(req.deadline) : null;
       const expired = d ? d.getTime() <= nowMs : false;
 
-      if (offer.status === 'canceled') g.canceled.push(offer);
-      else if (expired || offer.status === 'fulfilled' || offer.status === 'rated') g.inactive.push(offer);
-      else g.active.push(offer); // pending / accepted
+      if (offer.status === 'canceled') {
+        g.canceled.push(offer);
+      } else if (expired || offer.status === 'fulfilled' || offer.status === 'rated') {
+        g.inactive.push(offer);
+      } else {
+        g.active.push(offer); // pending / accepted
+      }
     });
 
-    const applyStatus = (list) =>
-      !statusFilter ? list :
-      list.filter(o => o.status === statusFilter || (statusFilter === 'pending' && o.status === 'accepted'));
+    const applyStatus = (list) => {
+      if (!statusFilter) return list;
+      // ✅ الفلترة المسموح بها فقط: pending / accepted / rated
+      return list.filter((o) => {
+        if (statusFilter === 'pending') return o.status === 'pending';
+        if (statusFilter === 'accepted') return o.status === 'accepted';
+        if (statusFilter === 'rated') return o.status === 'rated';
+        return true;
+      });
+    };
 
     const byNewest = (a, b) =>
       new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
@@ -332,32 +343,46 @@ const MyDonationOffersBlood = () => {
     </div>
   );
 
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+  const scrollToBottom = () => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+
   if (loading) return <p>⏳ جاري تحميل عروضي...</p>;
   if (!Array.isArray(offers) || offers.length === 0) return <p>لم تقم بإرسال أي عروض تبرع بالدم بعد.</p>;
 
   return (
     <div className="my-donation-offers">
-      {/* العنوان + فلترة بالحالة فقط */}
-      <div className="header-bar mb-3">
+      {/* ✅ شريط علوي مُحسّن وثابت */}
+      <div className="header-bar sticky">
         <div className="title-wrap">
           <span className="title-icon"><i className="fas fa-hand-holding-heart" /></span>
           <h4 className="m-0 fw-bold">عروضي على طلبات التبرع بالدم</h4>
         </div>
         <div className="status-filter">
-          <Form.Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+          <Form.Select
+            aria-label="فلترة بحسب الحالة"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
             <option value="">كل الحالات</option>
             <option value="pending">قيد الاستلام</option>
-            <option value="accepted">قيد الاستلام</option>
-            <option value="fulfilled">تم التنفيذ</option>
+            <option value="accepted">قيد التنفيذ</option>
             <option value="rated">تم التقييم</option>
-            <option value="canceled">ملغى</option>
           </Form.Select>
         </div>
       </div>
 
+      {/* مسافة صغيرة بعد الشريط الثابت */}
+      <div style={{ height: 12 }} />
+
       {section('العروض النشطة', groups.active, openActive, setOpenActive, 'success')}
       {section('العروض غير النشطة', groups.inactive, openInactive, setOpenInactive, 'secondary')}
       {section('العروض الملغاة', groups.canceled, openCanceled, setOpenCanceled, 'dark')}
+
+      {/* ✅ أزرار الطفو للصعود/الهبوط */}
+      <div className="page-fabs" dir="ltr">
+        <button className="fab-btn" title="للأعلى" onClick={scrollToTop}>▲</button>
+        <button className="fab-btn" title="للأسفل" onClick={scrollToBottom}>▼</button>
+      </div>
 
       <ToastContainer position="bottom-start" className="p-3">
         <Toast show={showToast} onClose={() => setShowToast(false)} delay={2500} autohide bg="success">

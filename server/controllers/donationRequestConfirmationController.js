@@ -1,4 +1,3 @@
-// server/controllers/donationRequestConfirmation.controller.js
 const mongoose = require("mongoose");
 const DonationRequest = require("../models/DonationRequest");
 const DonationRequestConfirmation = require("../models/DonationRequestConfirmation");
@@ -32,7 +31,7 @@ exports.createConfirmation = async (req, res) => {
       amount: amount ? Number(amount) : 0,
       method: method || "call",
       proposedTime: proposedTime ? new Date(proposedTime) : new Date(),
-      proofFiles: files, // ✅ نفس الاسم الذي تقرأه الواجهة الآن
+      proofFiles: files,
       status: "pending",
     });
 
@@ -142,7 +141,6 @@ exports.getMyDonationOffers = async (req, res) => {
     const myRequests = await DonationRequest.find({ userId: req.user._id }).select("_id");
     const ids = myRequests.map(r => r._id);
     const items = await DonationRequestConfirmation.find({ requestId: { $in: ids } })
-      // ✅ صورة وبريد وهاتف وتقييم المتبرّع
       .populate("donor", "firstName lastName email phoneNumber profileImage rating averageRating")
       .sort({ createdAt: -1 });
     res.json(items);
@@ -176,7 +174,6 @@ exports.getOffersByRequestId = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(requestId)) return res.status(400).json({ message: "requestId غير صالح" });
 
     const list = await DonationRequestConfirmation.find({ requestId })
-      // ✅ صورة/تقييم/تواصل المتبرّع
       .populate("donor", "firstName lastName email phoneNumber profileImage rating averageRating")
       .sort({ createdAt: -1 });
     res.json(list);
@@ -201,6 +198,33 @@ exports.cancelConfirmation = async (req, res) => {
     res.json({ message: "تم الإلغاء" });
   } catch (e) {
     console.error("cancelConfirmation error:", e);
+    res.status(500).json({ message: "خطأ في السيرفر" });
+  }
+};
+
+/** ✅ جديد: جلب تأكيد طلب تبرّع واحد بالمعرّف */
+exports.getDonationRequestConfirmationById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "معرّف غير صالح" });
+    }
+
+    const doc = await DonationRequestConfirmation.findById(id)
+      .populate({
+        path: "requestId",
+        model: "DonationRequest",
+        select: "title category type deadline userId",
+        populate: { path: "userId", model: "User", select: "firstName lastName profileImage" },
+      })
+      .populate({ path: "donor", select: "firstName lastName profileImage" })
+      .lean();
+
+    if (!doc) return res.status(404).json({ message: "غير موجود" });
+
+    return res.json({ data: doc });
+  } catch (e) {
+    console.error("getDonationRequestConfirmationById error:", e);
     res.status(500).json({ message: "خطأ في السيرفر" });
   }
 };

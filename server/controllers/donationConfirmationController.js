@@ -223,6 +223,34 @@ async function cancelDonationConfirmation(req, res) {
   }
 }
 
+/** ✅ جديد: الحصول على تأكيد واحد بالمعرّف */
+async function getDonationConfirmationById(req, res) {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "معرّف غير صالح" });
+    }
+
+    const doc = await DonationConfirmation.findById(id)
+      .populate({
+        path: "requestId",
+        model: "BloodRequest",
+        select: "title bloodType deadline userId requestType kind category",
+        populate: { path: "userId", model: "User", select: "firstName lastName profileImage" },
+      })
+      .populate({ path: "donor",       select: "firstName lastName profileImage" })
+      .populate({ path: "recipientId", select: "firstName lastName profileImage" })
+      .lean();
+
+    if (!doc) return res.status(404).json({ message: "غير موجود" });
+
+    return res.json({ data: doc });
+  } catch (err) {
+    console.error("❌ getDonationConfirmationById:", err);
+    res.status(500).json({ message: "خطأ في السيرفر" });
+  }
+}
+
 module.exports = {
   createDonationConfirmation,
   acceptDonationConfirmation,
@@ -232,4 +260,5 @@ module.exports = {
   getMySentOffers,
   getOffersByRequestId,
   cancelDonationConfirmation,
+  getDonationConfirmationById, // ✅ تصدير الجديد
 };

@@ -217,8 +217,7 @@ const MyDonationOffersGeneral = () => {
           >
             <option value="">كل الحالات</option>
             <option value="pending">قيد الاستلام</option>
-            <option value="accepted">قيد الاستلام</option>
-            <option value="fulfilled">تم الاستلام</option>
+            <option value="accepted">تم الاستلام</option>
             <option value="rated">تم التقييم</option>
           </Form.Select>
         </div>

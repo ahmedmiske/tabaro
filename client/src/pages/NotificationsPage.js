@@ -1,13 +1,20 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
-import { ListGroup, Dropdown, Button, Image, Badge } from 'react-bootstrap';
+import { ListGroup, Dropdown, Button, Image, Badge, Spinner } from 'react-bootstrap';
 import './NotificationsPage.css';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 
 const API_BASE =
   process.env.REACT_APP_API_ORIGIN ||
   process.env.REACT_APP_API_URL ||
   'http://localhost:5000';
+
+/* ✅ مسارات التفاصيل — متوافقة مع App.js لديك */
+const BLOOD_REQUEST_ROUTE            = process.env.REACT_APP_BLOOD_DETAILS_ROUTE              || '/blood-donation-details';
+const GENERAL_REQUEST_ROUTE          = process.env.REACT_APP_DONATION_DETAILS_ROUTE           || '/donations';
+const DONATION_CONFIRM_ROUTE         = process.env.REACT_APP_DONATION_CONFIRMATION_ROUTE      || '/donation-confirmations';
+const DONATION_ENTITY_ROUTE          = process.env.REACT_APP_DONATION_ENTITY_ROUTE            || '/donation-details';
+const DONATION_REQUEST_CONFIRM_ROUTE = process.env.REACT_APP_DONATION_REQUEST_CONFIRM_ROUTE   || '/donation-request-confirmations';
 
 const resolveAvatar = (p) => {
   if (!p) return '/default-avatar.png';
@@ -19,416 +26,478 @@ const resolveAvatar = (p) => {
 const fmtDateTime = (s) =>
   s
     ? new Date(s).toLocaleString('ar-MA', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit',
       })
-    : '';
+    : '' ;
 
-/** استنتاج مسار التفاصيل لطلبات/عروض التبرع */
-const buildDetailsRoute = (n) => {
-  if (n?.meta?.route) return n.meta.route;
+/* ====== تسميات عربية مختصرة ====== */
+const typeLabelAr = (n) => {
+  const key = (n?.meta?.event || n?.event || n?.type || n?.meta?.type || 'general').toLowerCase();
+  const map = {
+    message: 'رسالة جديدة',
+    offer: 'عرض تبرع',
+    donation: 'تبرع',
+    general: 'إشعار',
+    system: 'نظام',
+    donation_request_confirmation: 'تأكيد طلب تبرع',
+    donation_confirmation: 'تأكيد استلام التبرع',
+    donation_offer: 'عرض تبرع',
+    donation_fulfilled: 'تم التنفيذ',
+    donation_rated: 'تم التقييم',
+    request_created: 'طلب تبرع جديد',
+    offer_accepted: 'تم قبول العرض',
+    offer_rejected: 'تم رفض العرض',
+  };
+  return map[key] || 'إشعار';
+};
 
-  // لو السيرفر يرسل نوع الطلب داخل meta
-  const kind = n?.meta?.requestType || n?.meta?.kind || n?.meta?.category;
+/* 🔎 هل الإشعار عن "طلب دم"؟ (صارم) */
+const isBloodStrict = (n) => {
+  const m = n?.meta || {};
+  const kind = String(m.requestType || m.kind || m.category || '').toLowerCase();
+  return (
+    m.blood === true ||
+    m.blood === 'true' ||
+    !!m.bloodRequestId ||
+    !!m.bloodType ||
+    kind === 'blood'
+  );
+};
 
-  // إشعار "عرض" على طلب تبرع بالدم
-  if (n.type === 'offer' && (kind === 'blood' || n?.meta?.blood === true)) {
-    return `/blood-donation-details/${n.referenceId}`;
+/* شارة الطبيعة */
+const categoryLabelAr = (n) => {
+  if (isBloodStrict(n)) return 'تبرع بالدم';
+  const m = n?.meta || {};
+  const kind = (m.requestType || m.kind || m.category || '').toString().toLowerCase();
+  const map = { money: 'تبرع مالي', financial: 'تبرع مالي', goods: 'تبرع عيني', material: 'تبرع عيني', health: 'الصحة' };
+  return map[kind] || (m.requestType || m.kind || m.category || '');
+};
+
+/* 📦 استخراج كل المعرّفات المحتملة من الإشعار */
+const extractIds = (n) => {
+  const m = n?.meta || {};
+
+  // معرّف "الطلب"
+  const requestId =
+    m.requestId ||
+    m.donationRequestId ||
+    m.bloodRequestId ||
+    n?.requestId ||
+    n?.request?._id ||
+    null;
+
+  // معرّف "التبرع ككيان" (تفاصيل التبرع العام)
+  const donationEntityId =
+    m.donationId ||
+    m.donation?._id ||
+    null;
+
+  // معرّف "تأكيد/عرض التبرع"
+  const confirmationId =
+    m.confirmationId ||
+    m.donationConfirmationId ||
+    m.offerId ||
+    n?.referenceId ||   // 🟢 مهم جداً مع إشعارات fulfilled/rated
+    m.id ||
+    null;
+
+  // معرّف "تأكيد طلب التبرع"
+  const requestConfId =
+    m.requestConfirmationId ||
+    m.donationRequestConfirmationId ||
+    m.reqConfirmationId ||
+    null;
+
+  return { requestId, donationEntityId, confirmationId, requestConfId };
+};
+
+/* 🧭 هل الإشعار عن تأكيد/عرض (وليس كيان تبرع عام)؟ */
+const isDonationConfirmation = (n) => {
+  const m = n?.meta || {};
+  const t = (n?.type || m.type || m.event || '').toLowerCase();
+  const entity = (m.entity || '').toLowerCase();
+  const keys = [
+    'donation_confirmation',
+    'confirmation',
+    'offer',
+    'donation_offer',
+    'donation_fulfilled',
+    'fulfilled',
+    'donation_rated',
+    'rated',
+  ];
+  return keys.some(k => t.includes(k) || entity.includes(k));
+};
+
+/* 🧭 هل الإشعار عن "تأكيد طلب تبرع"؟ */
+const isDonationRequestConfirmation = (n) => {
+  const m = n?.meta || {};
+  const t = (n?.type || m.type || m.event || '').toLowerCase();
+  return t.includes('donation_request_confirmation');
+};
+
+/* 🧭 تحديد الوجهة */
+const buildNavigateTarget = (n) => {
+  const { requestId, donationEntityId, confirmationId, requestConfId } = extractIds(n);
+  const t = (n?.type || n?.meta?.type || '').toLowerCase();
+
+  // 1) إشعار حول "طلب"
+  if (requestId) {
+    const base = isBloodStrict(n) ? BLOOD_REQUEST_ROUTE : GENERAL_REQUEST_ROUTE;
+    return `${base}/${requestId}`;
   }
 
-  // أي إشعار عرض/تبرع عام (أو fallback)
-  if (n.type === 'offer' || n.type === 'donation' || n.type === 'general') {
-    return `/donations/${n.referenceId || ''}`;
+  // 2) إشعار حول "تأكيد طلب تبرع" — استخدم requestConfId أو referenceId
+  if (isDonationRequestConfirmation(n) && (requestConfId || confirmationId)) {
+    const id = requestConfId || confirmationId;
+    return `${DONATION_REQUEST_CONFIRM_ROUTE}/${id}`;
   }
 
-  // إن لم يكن تبرعًا، عند الحاجة يمكن إبقاءه دون route
-  return n.referenceId ? `/donations/${n.referenceId}` : null;
+  // 3) إشعار حول "تأكيد/عرض/تنفيذ/تقييم التبرع"
+  if (isDonationConfirmation(n) && confirmationId) {
+    return `${DONATION_CONFIRM_ROUTE}/${confirmationId}`;
+  }
+
+  // 4) إشعار حول "كيان تبرع عام"
+  if (donationEntityId) {
+    return `${DONATION_ENTITY_ROUTE}/${donationEntityId}`;
+  }
+
+  // لا يوجد ما نفتح له تفاصيل
+  return null;
 };
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState([]);
-  const [filter, setFilter] = useState('all');
+  const [loading, setLoading] = useState(true);
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const fetchNotifications = async () => {
-    const res = await fetchWithInterceptors('/api/notifications');
-    if (res.ok) setNotifications(res.body?.data || res.body || []);
-  };
+  // فلتر محفوظ
+  const initialFilter = searchParams.get('filter') || sessionStorage.getItem('notifFilter') || 'all';
+  const [filter, setFilter] = useState(initialFilter);
+  const setFilterPersist = useCallback((val) => {
+    setFilter(val);
+    sessionStorage.setItem('notifFilter', val);
+    const next = new URLSearchParams(searchParams);
+    next.set('filter', val);
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
+
+  const fetchNotifications = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await fetchWithInterceptors('/api/notifications');
+      if (res.ok) setNotifications(res.body?.data || res.body || []);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   const markAsRead = async (id) => {
-    try {
-      await fetchWithInterceptors(`/api/notifications/${id}/read`, { method: 'PATCH' });
-    } catch {}
-  };
-
-  // تعليم مجموعة رسائل مرسل واحد كمقروءة
-  const markThreadAsRead = async (ids = []) => {
-    try {
-      await Promise.all(ids.map((id) =>
-        fetchWithInterceptors(`/api/notifications/${id}/read`, { method: 'PATCH' })
-      ));
-    } catch {}
+    try { await fetchWithInterceptors(`/api/notifications/${id}/read`, { method: 'PATCH' }); } catch {}
   };
 
   useEffect(() => {
     fetchNotifications();
     const t = setInterval(fetchNotifications, 30000);
     return () => clearInterval(t);
-  }, []);
+  }, [fetchNotifications]);
 
-  // ====== تجميع الرسائل حسب المُرسِل (threads) ======
+  /* ===== تجميع رسائل المحادثات كـ Threads ===== */
   const { messageThreads, others } = useMemo(() => {
-    const threadsMap = new Map();
-    const rest = [];
-
+    const threadsMap = new Map(); const rest = [];
     (notifications || []).forEach((n) => {
-      const t = n.type || 'system';
-      if (t !== 'message') {
-        rest.push(n);
-        return;
-      }
-      const senderId =
-        n.sender?._id || n.senderId || n.meta?.senderId || 'unknown';
-      const key = String(senderId);
+      if ((n.type || 'system') !== 'message') { rest.push(n); return; }
 
-      const entry = threadsMap.get(key) || {
-        senderId: key,
-        sender: n.sender || null,
-        ids: [],
-        unreadCount: 0,
-        lastMessage: '',
-        lastCreatedAt: 0,
-        lastNotificationId: null,
+      const senderId = n.sender?._id || n.senderId || n.meta?.senderId || 'unknown';
+      const entry = threadsMap.get(senderId) || {
+        senderId, sender: n.sender || null, ids: [], unreadCount: 0, lastMessage: '', lastCreatedAt: 0,
       };
 
       entry.ids.push(n._id);
       if (!n.read) entry.unreadCount += 1;
 
-      const createdAt = new Date(n.createdAt || 0).getTime();
-      if (createdAt >= entry.lastCreatedAt) {
-        entry.lastCreatedAt = createdAt;
+      const ts = new Date(n.createdAt || 0).getTime();
+      if (ts >= entry.lastCreatedAt) {
+        entry.lastCreatedAt = ts;
         entry.lastMessage = n.message || n.title || '';
-        entry.lastNotificationId = n._id;
         entry.sender = n.sender || entry.sender;
       }
-
-      threadsMap.set(key, entry);
+      threadsMap.set(senderId, entry);
     });
 
-    // حوّلها لمصفوفة مرتبة بالأحدث
-    const messageThreadsArr = Array.from(threadsMap.values()).sort(
-      (a, b) => b.lastCreatedAt - a.lastCreatedAt
-    );
-
+    const messageThreadsArr = Array.from(threadsMap.values()).sort((a,b) => b.lastCreatedAt - a.lastCreatedAt);
     return { messageThreads: messageThreadsArr, others: rest };
   }, [notifications]);
 
-  // ====== تطبيق الفلترة ======
+  /* عدّادات للفلاتر */
+  const counts = useMemo(() => {
+    const unreadAll = notifications.filter(n => !n.read).length;
+    const msg      = notifications.filter(n => (n.type || 'system') === 'message').length;
+    const offer    = notifications.filter(n => (n.type || 'system') === 'offer').length;
+    const system   = notifications.filter(n => (n.type || 'system') === 'system').length;
+    const donation = notifications.filter(n => (n.type || 'system') === 'donation').length;
+    const general  = notifications.filter(n => (n.type || 'system') === 'general').length;
+    return { unreadAll, msg, offer, system, donation, general, all: notifications.length };
+  }, [notifications]);
+
+  /* الفيو حسب الفلتر */
   const viewModel = useMemo(() => {
-    if (filter === 'message') {
-      return { mode: 'messageOnly', threads: messageThreads, items: [] };
-    }
-    if (filter === 'offer' || filter === 'system' || filter === 'donation' || filter === 'general') {
-      const items = (others || []).filter((n) => (n.type || 'system') === filter);
+    if (filter === 'message') return { mode: 'messageOnly', threads: messageThreads, items: [] };
+    if (['offer','system','donation','general'].includes(filter)) {
+      const items = (others || []).filter(n => (n.type || 'system') === filter);
       return { mode: 'othersOnly', threads: [], items };
     }
-    // all: أعرض قسم للرسائل (threads) + قسم للإشعارات الأخرى
     return { mode: 'all', threads: messageThreads, items: others };
   }, [filter, messageThreads, others]);
 
-  // ====== أحداث الضغط ======
+  /* فتح محادثة */
   const openChat = async (thread) => {
     if (!thread?.senderId || thread.senderId === 'unknown') return;
-    // علم كل رسائل هذا المرسل كمقروءة
-    await markThreadAsRead(thread.ids);
-    // انتقل إلى المحادثة
-    navigate(`/chat/${thread.senderId}`);
-    // حدّث القائمة
+    await Promise.all(thread.ids.map(id => markAsRead(id)));
+    navigate(`/chat/${thread.senderId}`, { state: { from: location.pathname + location.search } });
     fetchNotifications();
   };
 
+  /* فتح تفاصيل (طلب/تبرع/تأكيد) */
   const openDetails = async (n) => {
-    const route = buildDetailsRoute(n);
-    if (!n.read) {
-      await markAsRead(n._id);
-      fetchNotifications();
-    }
-    if (route) navigate(route);
+    if (!n.read) { await markAsRead(n._id); fetchNotifications(); }
+    const route = buildNavigateTarget(n);
+    if (route) navigate(route, { state: { from: location.pathname + location.search } });
   };
 
-  // ====== العرض ======
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+  const scrollToBottom = () => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+
   return (
     <div className="container-notifications">
-      <h3 className="text-center mb-3 fw-bold text-secondary">🔔 جميع الإشعارات</h3>
+      <div className="notif-header sticky">
+        <h3 className="m-0 fw-bold text-secondary">🔔 جميع الإشعارات</h3>
 
-      <div className="filter-notifications d-flex justify-content-end mb-3">
-        <Dropdown className="filter-notifications-dropdown">
-          <Dropdown.Toggle className="dropdown" variant="outline-secondary" id="filter-dropdown">
-            {filter === 'all'
-              ? 'تصفية: الكل'
-              : filter === 'message'
-              ? 'تصفية: رسائل'
-              : filter === 'offer'
-              ? 'تصفية: عروض'
-              : filter === 'system'
-              ? 'تصفية: نظام'
-              : `تصفية: ${filter}`}
-          </Dropdown.Toggle>
-          <Dropdown.Menu className="dropdown-menu">
-            <Dropdown.Item onClick={() => setFilter('all')}>الكل</Dropdown.Item>
-            <Dropdown.Item onClick={() => setFilter('message')}>رسائل</Dropdown.Item>
-            <Dropdown.Item onClick={() => setFilter('offer')}>عروض</Dropdown.Item>
-            <Dropdown.Item onClick={() => setFilter('system')}>نظام</Dropdown.Item>
-          </Dropdown.Menu>
-        </Dropdown>
+        <div className="toolbar">
+          {/* فلتر */}
+          <div className="toolbar-filter">
+            <Dropdown className="filter-notifications-dropdown">
+              <Dropdown.Toggle className="dropdown-toggle-clean" variant="light" id="filter-dropdown">
+                {filter === 'all'
+                  ? `تصفية: الكل (${counts.all})`
+                  : filter === 'message'
+                  ? `تصفية: رسائل (${counts.msg})`
+                  : filter === 'offer'
+                  ? `تصفية: عروض (${counts.offer})`
+                  : filter === 'system'
+                  ? `تصفية: نظام (${counts.system})`
+                  : filter === 'donation'
+                  ? `تصفية: تبرعات (${counts.donation})`
+                  : `تصفية: عام (${counts.general})`}
+                {counts.unreadAll > 0 && <Badge bg="primary" className="ms-2">{counts.unreadAll}</Badge>}
+              </Dropdown.Toggle>
+              <Dropdown.Menu className="dropdown-menu">
+                <Dropdown.Item onClick={() => setFilterPersist('all')}>الكل ({counts.all})</Dropdown.Item>
+                <Dropdown.Item onClick={() => setFilterPersist('message')}>رسائل ({counts.msg})</Dropdown.Item>
+                <Dropdown.Item onClick={() => setFilterPersist('offer')}>عروض ({counts.offer})</Dropdown.Item>
+                <Dropdown.Item onClick={() => setFilterPersist('donation')}>تبرعات ({counts.donation})</Dropdown.Item>
+                <Dropdown.Item onClick={() => setFilterPersist('general')}>عام ({counts.general})</Dropdown.Item>
+                <Dropdown.Divider />
+                <Dropdown.Item onClick={() => setFilterPersist('system')}>نظام ({counts.system})</Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
+          </div>
+
+          {/* زر تحديث */}
+          <div className="toolbar-actions">
+            <Button className="btn-soft" onClick={fetchNotifications}>
+              <span className="icon">🔄</span> تحديث
+            </Button>
+          </div>
+        </div>
       </div>
 
-      {/* ===== وضع: الكل ===== */}
-      {viewModel.mode === 'all' && (
+      {loading && (
+        <div className="py-4 text-center text-muted">
+          <Spinner animation="border" size="sm" /> جاري التحميل...
+        </div>
+      )}
+
+      {!loading && (
         <>
-          {/* قسم الرسائل (threads) */}
-          <h6 className="section-heading">الرسائل</h6>
-          <ListGroup className="notification-list">
-            {viewModel.threads.length === 0 ? (
-              <div className="text-muted small p-2">لا توجد رسائل.</div>
-            ) : (
-              viewModel.threads.map((th) => (
-                <ListGroup.Item
-                  key={th.senderId}
-                  className={`notification-item thread-item shadow-sm p-3 mb-3 rounded ${
-                    th.unreadCount > 0 ? 'unread' : ''
-                  }`}
-                  onClick={() => openChat(th)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <div className="d-flex align-items-start gap-3">
-                    <Image
-                      src={resolveAvatar(th.sender?.profileImage)}
-                      onError={(e) => (e.currentTarget.src = '/default-avatar.png')}
-                      roundedCircle
-                      width={48}
-                      height={48}
-                      alt="sender"
-                    />
-                    <div className="flex-grow-1">
-                      <div className="d-flex align-items-center gap-2">
-                        <div className="fw-bold notification-title message">
-                          💬 {th.sender ? `${th.sender.firstName || ''} ${th.sender.lastName || ''}`.trim() : 'مستخدم'}
-                        </div>
-                        {th.unreadCount > 0 && (
-                          <Badge bg="primary" pill>{th.unreadCount}</Badge>
-                        )}
-                      </div>
-                      <div className="msg mt-1 text-truncate">{th.lastMessage || '—'}</div>
-                      <div className="notification-date">{fmtDateTime(th.lastCreatedAt)}</div>
-                    </div>
-                    <div>
-                      <Button size="sm" variant="outline-primary" onClick={(e) => {e.stopPropagation(); openChat(th);}}>
-                        فتح المحادثة
-                      </Button>
-                    </div>
-                  </div>
-                </ListGroup.Item>
-              ))
-            )}
-          </ListGroup>
-
-          {/* قسم باقي الإشعارات */}
-          <h6 className="section-heading mt-4">إشعارات أخرى</h6>
-          <ListGroup className="notification-list">
-            {viewModel.items.length === 0 ? (
-              <div className="text-muted small p-2">لا توجد إشعارات أخرى.</div>
-            ) : (
-              viewModel.items.map((n) => {
-                const sender = n.sender;
-                const when = fmtDateTime(n.createdAt);
-                const titleIcon =
-                  n.type === 'offer' ? '🩸 ' :
-                  n.type === 'system' ? '⚙️ ' : '';
-
-                return (
-                  <ListGroup.Item
-                    key={n._id}
-                    className={`notification-item shadow-sm p-3 mb-3 rounded ${!n.read ? 'unread' : ''}`}
-                    onClick={() => openDetails(n)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <div className="d-flex align-items-start gap-3">
-                      <Image
-                        src={resolveAvatar(sender?.profileImage)}
-                        onError={(e) => (e.currentTarget.src = '/default-avatar.png')}
-                        roundedCircle
-                        width={44}
-                        height={44}
-                        alt="sender"
-                      />
-                      <div className="flex-grow-1">
-                        <div className="d-flex align-items-center gap-2">
-                          <div className={`fw-bold notification-title ${n.type || 'system'}`}>
-                            {titleIcon}{n.title || 'إشعار'}
+          {/* وضع: الكل */}
+          {viewModel.mode === 'all' && (
+            <>
+              <h6 className="section-heading">الرسائل</h6>
+              <ListGroup className="notification-list">
+                {viewModel.threads.length === 0 ? (
+                  <div className="text-muted small p-2">لا توجد رسائل.</div>
+                ) : (
+                  viewModel.threads.map((th) => (
+                    <ListGroup.Item
+                      key={th.senderId}
+                      className={`notification-item compact thread-item shadow-sm rounded ${th.unreadCount > 0 ? 'unread' : ''}`}
+                      onClick={() => openChat(th)}
+                    >
+                      <div className="item-wrap">
+                        <Image src={resolveAvatar(th.sender?.profileImage)} onError={(e) => (e.currentTarget.src = '/default-avatar.png')} roundedCircle width={40} height={40} alt="sender" />
+                        <div className="grow">
+                          <div className="row-1">
+                            <div className="title message">💬 {th.sender ? `${th.sender.firstName || ''} ${th.sender.lastName || ''}`.trim() : 'مستخدم'}</div>
+                            {th.unreadCount > 0 && <Badge bg="primary" pill>{th.unreadCount}</Badge>}
                           </div>
-                          <Badge bg={n.type === 'offer' ? 'success' : n.type === 'system' ? 'secondary' : 'secondary'}>
-                            {n.type || 'system'}
-                          </Badge>
-                        </div>
-
-                        <div className="message-truncated mt-2">
-                          {sender && (
-                            <div className="text-muted sender small mb-1">
-                              <strong>👤 من طرف:</strong> {sender.firstName} {sender.lastName}
-                            </div>
-                          )}
-                          <div className="msg">{n.message}</div>
-
-                          {/* الزر يفتح تفاصيل الطلب مباشرة */}
-                          {buildDetailsRoute(n) && (
-                            <Button
-                              variant="outline-secondary"
-                              size="sm"
-                              className="btn-details mt-3"
-                              onClick={(e) => { e.stopPropagation(); openDetails(n); }}
-                            >
-                              👁️ تفاصيل
-                            </Button>
-                          )}
-                        </div>
-
-                        <div className="text-success small mt-2">{when}</div>
-                      </div>
-                    </div>
-                  </ListGroup.Item>
-                );
-              })
-            )}
-          </ListGroup>
-        </>
-      )}
-
-      {/* ===== وضع: رسائل فقط ===== */}
-      {viewModel.mode === 'messageOnly' && (
-        <>
-          <h6 className="section-heading">الرسائل</h6>
-          <ListGroup className="notification-list">
-            {viewModel.threads.length === 0 ? (
-              <div className="text-muted small p-2">لا توجد رسائل.</div>
-            ) : (
-              viewModel.threads.map((th) => (
-                <ListGroup.Item
-                  key={th.senderId}
-                  className={`notification-item thread-item shadow-sm p-3 mb-3 rounded ${
-                    th.unreadCount > 0 ? 'unread' : ''
-                  }`}
-                  onClick={() => openChat(th)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <div className="d-flex align-items-start gap-3">
-                    <Image
-                      src={resolveAvatar(th.sender?.profileImage)}
-                      onError={(e) => (e.currentTarget.src = '/default-avatar.png')}
-                      roundedCircle
-                      width={48}
-                      height={48}
-                      alt="sender"
-                    />
-                    <div className="flex-grow-1">
-                      <div className="d-flex align-items-center gap-2">
-                        <div className="fw-bold notification-title message">
-                          💬 {th.sender ? `${th.sender.firstName || ''} ${th.sender.lastName || ''}`.trim() : 'مستخدم'}
-                        </div>
-                        {th.unreadCount > 0 && (
-                          <Badge bg="primary" pill>{th.unreadCount}</Badge>
-                        )}
-                      </div>
-                      <div className="msg mt-1 text-truncate">{th.lastMessage || '—'}</div>
-                      <div className="notification-date">{fmtDateTime(th.lastCreatedAt)}</div>
-                    </div>
-                    <div>
-                      <Button size="sm" variant="outline-primary" onClick={(e) => {e.stopPropagation(); openChat(th);}}>
-                        فتح المحادثة
-                      </Button>
-                    </div>
-                  </div>
-                </ListGroup.Item>
-              ))
-            )}
-          </ListGroup>
-        </>
-      )}
-
-      {/* ===== وضع: إشعارات أخرى فقط (عرض/نظام) ===== */}
-      {viewModel.mode === 'othersOnly' && (
-        <>
-          <h6 className="section-heading">إشعارات</h6>
-          <ListGroup className="notification-list">
-            {viewModel.items.length === 0 ? (
-              <div className="text-muted small p-2">لا توجد إشعارات.</div>
-            ) : (
-              viewModel.items.map((n) => {
-                const sender = n.sender;
-                const when = fmtDateTime(n.createdAt);
-                const titleIcon =
-                  n.type === 'offer' ? '🩸 ' :
-                  n.type === 'system' ? '⚙️ ' : '';
-
-                return (
-                  <ListGroup.Item
-                    key={n._id}
-                    className={`notification-item shadow-sm p-3 mb-3 rounded ${!n.read ? 'unread' : ''}`}
-                    onClick={() => openDetails(n)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <div className="d-flex align-items-start gap-3">
-                      <Image
-                        src={resolveAvatar(sender?.profileImage)}
-                        onError={(e) => (e.currentTarget.src = '/default-avatar.png')}
-                        roundedCircle
-                        width={44}
-                        height={44}
-                        alt="sender"
-                      />
-                      <div className="flex-grow-1">
-                        <div className="d-flex align-items-center gap-2">
-                          <div className={`fw-bold notification-title ${n.type || 'system'}`}>
-                            {titleIcon}{n.title || 'إشعار'}
+                          <div className="row-2">
+                            <div className="msg text-truncate">{th.lastMessage || '—'}</div>
+                            <div className="date">{fmtDateTime(th.lastCreatedAt)}</div>
                           </div>
-                          <Badge bg={n.type === 'offer' ? 'success' : n.type === 'system' ? 'secondary' : 'secondary'}>
-                            {n.type || 'system'}
-                          </Badge>
                         </div>
-
-                        <div className="message-truncated mt-2">
-                          {sender && (
-                            <div className="text-muted sender small mb-1">
-                              <strong>👤 من طرف:</strong> {sender.firstName} {sender.lastName}
-                            </div>
-                          )}
-                          <div className="msg">{n.message}</div>
-
-                          {buildDetailsRoute(n) && (
-                            <Button
-                              variant="outline-secondary"
-                              size="sm"
-                              className="btn-details mt-3"
-                              onClick={(e) => { e.stopPropagation(); openDetails(n); }}
-                            >
-                              👁️ تفاصيل
-                            </Button>
-                          )}
-                        </div>
-
-                        <div className="text-success small mt-2">{when}</div>
+                        <Button size="sm" variant="outline-primary" onClick={(e) => { e.stopPropagation(); openChat(th); }}>فتح</Button>
                       </div>
-                    </div>
-                  </ListGroup.Item>
-                );
-              })
-            )}
-          </ListGroup>
+                    </ListGroup.Item>
+                  ))
+                )}
+              </ListGroup>
+
+              <h6 className="section-heading mt-3">إشعارات أخرى</h6>
+              <ListGroup className="notification-list">
+                {viewModel.items.length === 0 ? (
+                  <div className="text-muted small p-2">لا توجد إشعارات أخرى.</div>
+                ) : (
+                  viewModel.items.map((n) => {
+                    const sender = n.sender;
+                    const when = fmtDateTime(n.createdAt);
+                    const typeText = typeLabelAr(n);
+                    const catText = categoryLabelAr(n);
+                    const ids = extractIds(n);
+                    const canDetail = !!(ids.requestId || ids.donationEntityId || ids.confirmationId || ids.requestConfId);
+
+                    return (
+                      <ListGroup.Item
+                        key={n._id}
+                        className={`notification-item compact shadow-sm rounded ${!n.read ? 'unread' : ''}`}
+                        onClick={() => openDetails(n)}
+                      >
+                        <div className="item-wrap">
+                          <Image src={resolveAvatar(sender?.profileImage)} onError={(e) => (e.currentTarget.src = '/default-avatar.png')} roundedCircle width={38} height={38} alt="sender" />
+                          <div className="grow">
+                            <div className="row-1">
+                              <div className="title">
+                                <span className="chip-type">{typeText}</span>
+                                {catText && <span className="chip-cat">{catText}</span>}
+                              </div>
+                              <div className="date">{when}</div>
+                            </div>
+                            <div className="row-2">
+                              <div className="msg line-2">{n.message || n.title || '—'}</div>
+                              {canDetail && (
+                                <Button variant="outline-secondary" size="sm" className="btn-details"
+                                  onClick={(e) => { e.stopPropagation(); openDetails(n); }}>
+                                  تفاصيل
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </ListGroup.Item>
+                    );
+                  })
+                )}
+              </ListGroup>
+            </>
+          )}
+
+          {/* وضع: رسائل فقط */}
+          {viewModel.mode === 'messageOnly' && (
+            <>
+              <h6 className="section-heading">الرسائل</h6>
+              <ListGroup className="notification-list">
+                {viewModel.threads.length === 0 ? (
+                  <div className="text-muted small p-2">لا توجد رسائل.</div>
+                ) : (
+                  viewModel.threads.map((th) => (
+                    <ListGroup.Item
+                      key={th.senderId}
+                      className={`notification-item compact thread-item shadow-sm rounded ${th.unreadCount > 0 ? 'unread' : ''}`}
+                      onClick={() => openChat(th)}
+                    >
+                      <div className="item-wrap">
+                        <Image src={resolveAvatar(th.sender?.profileImage)} onError={(e) => (e.currentTarget.src = '/default-avatar.png')} roundedCircle width={40} height={40} alt="sender" />
+                        <div className="grow">
+                          <div className="row-1">
+                            <div className="title message">💬 {th.sender ? `${th.sender.firstName || ''} ${th.sender.lastName || ''}`.trim() : 'مستخدم'}</div>
+                            {th.unreadCount > 0 && <Badge bg="primary" pill>{th.unreadCount}</Badge>}
+                          </div>
+                          <div className="row-2">
+                            <div className="msg text-truncate">{th.lastMessage || '—'}</div>
+                            <div className="date">{fmtDateTime(th.lastCreatedAt)}</div>
+                          </div>
+                        </div>
+                        <Button size="sm" variant="outline-primary" onClick={(e) => { e.stopPropagation(); openChat(th); }}>فتح</Button>
+                      </div>
+                    </ListGroup.Item>
+                  ))
+                )}
+              </ListGroup>
+            </>
+          )}
+
+          {/* وضع: إشعارات أخرى فقط */}
+          {viewModel.mode === 'othersOnly' && (
+            <>
+              <h6 className="section-heading">إشعارات</h6>
+              <ListGroup className="notification-list">
+                {viewModel.items.length === 0 ? (
+                  <div className="text-muted small p-2">لا توجد إشعارات.</div>
+                ) : (
+                  viewModel.items.map((n) => {
+                    const sender = n.sender;
+                    const when = fmtDateTime(n.createdAt);
+                    const typeText = typeLabelAr(n);
+                    const catText = categoryLabelAr(n);
+                    const ids = extractIds(n);
+                    const canDetail = !!(ids.requestId || ids.donationEntityId || ids.confirmationId || ids.requestConfId);
+
+                    return (
+                      <ListGroup.Item
+                        key={n._id}
+                        className={`notification-item compact shadow-sm rounded ${!n.read ? 'unread' : ''}`}
+                        onClick={() => openDetails(n)}
+                      >
+                        <div className="item-wrap">
+                          <Image src={resolveAvatar(sender?.profileImage)} onError={(e) => (e.currentTarget.src = '/default-avatar.png')} roundedCircle width={38} height={38} alt="sender" />
+                          <div className="grow">
+                            <div className="row-1">
+                              <div className="title">
+                                <span className="chip-type">{typeText}</span>
+                                {catText && <span className="chip-cat">{catText}</span>}
+                              </div>
+                              <div className="date">{when}</div>
+                            </div>
+                            <div className="row-2">
+                              <div className="msg line-2">{n.message || n.title || '—'}</div>
+                              {canDetail && (
+                                <Button variant="outline-secondary" size="sm" className="btn-details"
+                                  onClick={(e) => { e.stopPropagation(); openDetails(n); }}>
+                                  تفاصيل
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </ListGroup.Item>
+                    );
+                  })
+                )}
+              </ListGroup>
+            </>
+          )}
         </>
       )}
+
+      {/* أسهم الصعود/الهبوط */}
+      <div className="page-fabs" dir="ltr">
+        <button className="fab-btn" title="للأعلى" onClick={scrollToTop}>▲</button>
+        <button className="fab-btn" title="للأسفل" onClick={scrollToBottom}>▼</button>
+      </div>
     </div>
   );
 }

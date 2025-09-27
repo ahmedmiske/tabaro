@@ -1,13 +1,19 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Form } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-// import './DonorList.css';
 import './DonorFilter.css';
 
-const DonorFilter = ({ filter, setFilter, startDate, setStartDate, endDate, setEndDate, donationTypes }) => {
+const DonorFilter = ({
+  filter, setFilter,
+  startDate, setStartDate,
+  endDate, setEndDate,
+  donationTypes,
+}) => {
+  const types = Array.isArray(donationTypes) ? donationTypes : [];
   return (
-    <div className='filter-donor'>
+    <div className="filter-donor">
       <Form.Control
         as="select"
         value={filter}
@@ -15,10 +21,11 @@ const DonorFilter = ({ filter, setFilter, startDate, setStartDate, endDate, setE
         className="mb-4 form-control"
       >
         <option value="">كل الحالات</option>
-        {donationTypes.map(type => (
+        {types.map(type => (
           <option key={type} value={type}>{type}</option>
         ))}
       </Form.Control>
+
       <div className="mb-4 filter-date">
         <label>اختر التاريخ</label>
         <div className="d-flex input-date">
@@ -46,6 +53,22 @@ const DonorFilter = ({ filter, setFilter, startDate, setStartDate, endDate, setE
       </div>
     </div>
   );
+};
+
+DonorFilter.propTypes = {
+  filter: PropTypes.string.isRequired,
+  setFilter: PropTypes.func.isRequired,
+  startDate: PropTypes.instanceOf(Date),
+  setStartDate: PropTypes.func.isRequired,
+  endDate: PropTypes.instanceOf(Date),
+  setEndDate: PropTypes.func.isRequired,
+  donationTypes: PropTypes.arrayOf(PropTypes.string),
+};
+
+DonorFilter.defaultProps = {
+  startDate: null,
+  endDate: null,
+  donationTypes: [],
 };
 
 export default DonorFilter;

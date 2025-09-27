@@ -18,8 +18,16 @@
 
 /* فلترة */
 .my-requests-with-offers .status-filter{ max-width:220px; min-width:180px; }
-.my-requests-with-offers .status-filter .form-select{ font-size:.92rem; padding:.4rem .75rem; }
-
+/* .my-requests-with-offers .status-filter .form-select{ font-size:.92rem; padding:.4rem .75rem; } */
+.form-select {
+  font-size: 14px;
+  padding: 6px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  transition: border-color .2s ease-in-out;
+  text-align: center;
+}
 /* أقسام */
 .my-requests-with-offers .section-card{
   background:#fff;border-radius:10px;border:1px solid #e5e7eb;padding:.75rem;margin-bottom:1rem;

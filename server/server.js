@@ -9,7 +9,7 @@ const { Server } = require("socket.io");
 const { notFound, errorHandler } = require("./middlewares/errorMiddleware");
 const logger = require("./middlewares/logger");
 const { ensureUploadTree } = require("./middlewares/upload");
-
+const publicProfileRoutes = require('./routes/publicProfileRoutes');
 const { otpRoutes } = require("./routes/otpRoute");
 const { userRoutes } = require("./routes/userRoute");
 const donationRequestRoutes = require("./routes/donationRequestRoute");
@@ -85,6 +85,7 @@ if (!process.env.NODE_ENV || process.env.NODE_ENV !== "production") {
   require("./swagger")(app);
 }
 
+app.use('/api/public', publicProfileRoutes);
 /* Errors */
 app.use(notFound);
 app.use(errorHandler);

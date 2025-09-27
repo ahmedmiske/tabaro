@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import './TitleMain.css';
 
 function TitleMain({ text1, text2 }) {
@@ -7,10 +8,15 @@ function TitleMain({ text1, text2 }) {
       <h1 className="title-main-text">
         <span className="title-primary">{text1}</span>
         <span className="separator"> / </span>
-         <span className="title-secondary">{text2}</span>
+        <span className="title-secondary">{text2}</span>
       </h1>
     </div>
   );
 }
+
+TitleMain.propTypes = {
+  text1: PropTypes.oneOfType([PropTypes.string, PropTypes.node]).isRequired,
+  text2: PropTypes.oneOfType([PropTypes.string, PropTypes.node]).isRequired,
+};
 
 export default TitleMain;

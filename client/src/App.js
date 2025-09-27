@@ -32,9 +32,14 @@ import About from './components/About';
 import DonationRequestList from './components/DonationRequestList';
 import DonationRequestDetails from './components/DonationRequestDetails';
 import { connectSocket } from './socket';
+import PublicProfile from './pages/PublicProfile';
 
-// ✅ استيراد الحارس
+// ✅ الحارس
 import RequireAuth from './components/RequireAuth';
+
+// ✅ صفحة تفاصيل التبرّع/التأكيد/العرض
+import DonationConfirmationDetails from './pages/DonationConfirmationDetails';
+import DonationRequestConfirmationDetails from './pages/DonationRequestConfirmationDetails';
 
 function App() {
   const location = useLocation();
@@ -46,7 +51,7 @@ function App() {
 
   useEffect(() => {
     const handleScroll = () => {
-      const header = document.querySelector('.header');
+      const header = document.querySelector('.header-container'); // ← التعديل هنا
       const footer = document.querySelector('.footer');
       if (!header || !footer) return;
 
@@ -82,95 +87,24 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/users" element={<UserPage />} />
 
-            {/* محميّة: التفاصيل + النماذج + المراسلة + الإشعارات + الملف الشخصي */}
-            <Route
-              path="/donation-details/:id"
-              element={
-                <RequireAuth>
-                  <DonationDetails />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/blood-donation-details/:id"
-              element={
-                <RequireAuth>
-                  <BloodDonationDetails />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/campaign/:id"
-              element={
-                <RequireAuth>
-                  <CampaignDetails />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/donations/:id"
-              element={
-                <RequireAuth>
-                  <DonationRequestDetails />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/my-request-details/:id"
-              element={
-                <RequireAuth>
-                  <MyRequestDetails />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/donation-requests"
-              element={
-                <RequireAuth>
-                  <DonationRequestForm />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/blood-donation"
-              element={
-                <RequireAuth>
-                  <BloodDonationForm />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/chat/:recipientId"
-              element={
-                <RequireAuth>
-                  <ChatPage />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/messages"
-              element={
-                <RequireAuth>
-                  <ChatList />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/notifications"
-              element={
-                <RequireAuth>
-                  <NotificationsPage />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <RequireAuth>
-                  <UserProfile />
-                </RequireAuth>
-              }
-            />
+            {/* محميّة */}
+            <Route path="/donation-details/:id" element={<RequireAuth><DonationDetails /></RequireAuth>} />
+            <Route path="/blood-donation-details/:id" element={<RequireAuth><BloodDonationDetails /></RequireAuth>} />
+            <Route path="/campaign/:id" element={<RequireAuth><CampaignDetails /></RequireAuth>} />
+            <Route path="/donations/:id" element={<RequireAuth><DonationRequestDetails /></RequireAuth>} />
+            <Route path="/my-request-details/:id" element={<RequireAuth><MyRequestDetails /></RequireAuth>} />
+            <Route path="/donation-requests" element={<RequireAuth><DonationRequestForm /></RequireAuth>} />
+            <Route path="/blood-donation" element={<RequireAuth><BloodDonationForm /></RequireAuth>} />
+            <Route path="/chat/:recipientId" element={<RequireAuth><ChatPage /></RequireAuth>} />
+            <Route path="/messages" element={<RequireAuth><ChatList /></RequireAuth>} />
+            <Route path="/notifications" element={<RequireAuth><NotificationsPage /></RequireAuth>} />
+            <Route path="/users/:id" element={<RequireAuth><PublicProfile /></RequireAuth>} />
+
+            {/* تفاصيل التأكيد */}
+            <Route path="/donation-confirmations/:id" element={<RequireAuth><DonationConfirmationDetails /></RequireAuth>} />
+            <Route path="/donation-request-confirmations/:id" element={<RequireAuth><DonationRequestConfirmationDetails /></RequireAuth>} />
+
+            <Route path="/profile" element={<RequireAuth><UserProfile /></RequireAuth>} />
           </Routes>
         </div>
         <Footer />

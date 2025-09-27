@@ -3,13 +3,14 @@ const router = express.Router();
 
 const {
   createConfirmation,
-  acceptConfirmation,     // اختياري/توافقي
+  acceptConfirmation,
   fulfillConfirmation,
   rateConfirmation,
   getMyDonationOffers,
   getMySentOffers,
   getOffersByRequestId,
   cancelConfirmation,
+  getDonationRequestConfirmationById,   // ✅ جديد
 } = require("../controllers/donationRequestConfirmationController");
 
 const { protect } = require("../middlewares/authMiddleware");
@@ -21,15 +22,18 @@ const uploadConfirmDocs = uploadDonationConfirm.array("files", 10);
 // إنشاء تأكيد
 router.post("/", protect, uploadConfirmDocs, createConfirmation);
 
-// إدارة الحالة (بدون رفض)
-router.patch("/:id/accept",  protect, acceptConfirmation);   // غير مستخدم بالواجهة
+// إدارة الحالة
+router.patch("/:id/accept",  protect, acceptConfirmation);
 router.patch("/:id/fulfill", protect, fulfillConfirmation);
 router.patch("/:id/rate",    protect, rateConfirmation);
 
 // استعلامات
-router.get("/mine",              protect, getMyDonationOffers);
-router.get("/sent",              protect, getMySentOffers);
+router.get("/mine",               protect, getMyDonationOffers);
+router.get("/sent",               protect, getMySentOffers);
 router.get("/request/:requestId", protect, getOffersByRequestId);
+
+// ✅ جلب تأكيد طلب واحد بالمعرف (بعد المسارات السابقة)
+router.get("/:id", protect, getDonationRequestConfirmationById);
 
 // إلغاء قبل المعالجة
 router.delete("/:id", protect, cancelConfirmation);

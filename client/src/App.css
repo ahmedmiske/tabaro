@@ -1,54 +1,117 @@
-* {
-  box-sizing: border-box;
-}
+/* ====== Reset & base ====== */
+*{ box-sizing: border-box; }
+html{ scroll-behavior: smooth; }
+html:focus-within{ scroll-behavior: smooth; }
 
-:root {
-  --font-family: 'Cairo', sans-serif;
-  --font-family-alt: 'Roboto', sans-serif;
-  --font-family-mono: 'Courier New', monospace;
+:root{
+  /* خطوط وأحجام عامة */
+  --font-family: 'Cairo', system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --font-family-alt: 'Roboto', system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --font-size: 16px;
   --font-size-small: 14px;
-  --font-size-large: 18px;  
+  --font-size-large: 18px;
   --font-weight-normal: 400;
   --font-weight-bold: 700;
   --font-weight-bolder: 900;
-  --line-height: 1.5;
+  --line-height: 1.6;
+
+  /* قيم المشروع القديمة (للتوافق) */
+  --main-color: #4CAF50;
   --main-color-hover: #66BB6A;
   --main-color-active: #388E3C;
-  --main-color: #4CAF50;
-  --color-border:  #dfe2e2;
   --main-color-alt: #2E7D32;
   --main-color-fundo: #EFEFEF;
+  --color-border:  #dfe2e2;
   --color-primary: #1E88E5;
   --color-secondary: #FF7043;
+
+  /* ألوان الشعار */
+  --brand-green: #12B279;
+  --brand-green-600: #0e9363;
+  --brand-orange: #FF7A45;
+  --brand-orange-600: #E46432;
+
+  /* هوية موحّدة */
+  --ui-primary: var(--brand-green);
+  --ui-primary-600: var(--brand-green-600);
+  --ui-accent: var(--brand-orange);
+  --ui-accent-600: var(--brand-orange-600);
+
+  --bg-page: var(--main-color-fundo);
+  --text-color: #1f2937;
+  --text-muted: #4b5563;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 22px;
+
+  --shadow-1: 0 4px 16px rgba(0,0,0,.08);
+  --shadow-2: 0 12px 40px rgba(0,0,0,.14);
+
   --main-transition: 0.3s;
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  font-family: 'Cairo', sans-serif;
+body{
+  font-family: var(--font-family);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  color: var(--text-color);
   margin: 0;
-  padding: 0;
+  min-height: 100vh;
+  background: var(--bg-page);
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  background-color: var(--main-color-fundo);
-  margin-bottom: 80px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.page-app {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+/* صفحات عامة */
+.page-app{ display:flex; flex-direction:column; min-height:100vh; }
+.page-wrapper{ width:100%; padding:0; margin:0; flex:1; }
+
+/* عناصر عامة */
+img{ max-width:100%; height:auto; display:block; }
+a{ color: var(--ui-primary); text-decoration: none; }
+a:hover, a:focus-visible{ text-decoration: underline; }
+button, .btn{ cursor:pointer; }
+
+/* وصولية */
+:focus-visible{ outline: 3px solid var(--ui-accent); outline-offset: 2px; }
+
+/* تخصيص أزرار Bootstrap بسرعة */
+.btn-primary,
+.btn.go-landing{
+  background: var(--ui-primary) !important;
+  border: 0 !important;
+}
+.btn-primary:hover,
+.btn.go-landing:hover,
+.btn.go-landing:focus-visible{
+  background: var(--ui-primary-600) !important;
 }
 
-.page-wrapper {
-  width: 100%;
-  padding: 0 ;
-  margin:0 ;
-  flex: 1;
+/* RTL helpers */
+[dir="rtl"] .text-start{ text-align: right !important; }
+[dir="rtl"] .text-end{ text-align: left !important; }
 
+@media (max-width: 360px){
+  body{ font-size: 15px; }
+}
+
+/* ===== ربط الهيدر بالمحتوى ===== */
+.page-app{
+  /* يحجز فراغًا تحت الهيدر الثابت (يتغير تلقائيًا حسب نقطة الانكسار) */
+  padding-top: var(--appbar-h);
+  /* لمنع اختباء الأقسام المرتبطة بالهاش خلف الهيدر */
+  scroll-padding-top: var(--appbar-h);
+}
+
+/* إن كنت تستخدم سلوك إخفاء/إظهار في App.js */
+.header-container{ transition: transform .24s ease; }
+.header-container.hide{ transform: translateY(calc(-1 * var(--appbar-h))); }
+
+/* دعم حواف أجهزة iOS ذات النتوء */
+@supports (padding: max(0px)){
+  .header-container{ padding-top: env(safe-area-inset-top); }
 }
