@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { ProgressBar } from 'react-bootstrap';
 import './ProgressStep.css';
-import PropTypes from 'prop-types';
 
 const ProgressStep = ({ step, total }) => {
   const t = total > 0 ? total : 1;

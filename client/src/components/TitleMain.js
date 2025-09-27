@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import './TitleMain.css';
-import PropTypes from 'prop-types';
 
 function TitleMain({ text1, text2 }) {
   return (

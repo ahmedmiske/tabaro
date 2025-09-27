@@ -4,7 +4,6 @@ import { Form } from 'react-bootstrap';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import './DonorFilter.css';
-import PropTypes from 'prop-types';
 
 const DonorFilter = ({
   filter, setFilter,

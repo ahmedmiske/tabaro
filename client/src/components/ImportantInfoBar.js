@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Container } from 'react-bootstrap';
 import Marquee from 'react-fast-marquee';
-import PropTypes from 'prop-types';
 
 import './ImportantInfoBar.css';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';

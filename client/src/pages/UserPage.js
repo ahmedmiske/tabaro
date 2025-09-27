@@ -4,7 +4,6 @@ import { Table, Button, Modal, Alert } from 'react-bootstrap';
 import './UserPage.css';
 import Title from '../components/Title';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
-import PropTypes from 'prop-types';
 
 function UserPage({ onEdit, onDelete }) {
   const [userList, setUserList] = useState([]);
