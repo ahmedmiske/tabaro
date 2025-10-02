@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Table, Badge, Button, Spinner, Form, Collapse } from 'react-bootstrap';
+import { Table, Badge, Button, Spinner, Form } from './ui';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useTicker from '../hooks/useTicker';
@@ -182,7 +182,7 @@ const MyRequestsWithOffersBlood = () => {
             {openActive ? 'إخفاء' : 'عرض'}
           </Button>
         </div>
-        <Collapse in={openActive}>
+        {openActive && (
           <div>
             {activeRequests.length === 0 ? (
               <div className="text-muted small p-3">لا توجد طلبات نشطة حسب الفلترة الحالية.</div>
@@ -204,7 +204,7 @@ const MyRequestsWithOffersBlood = () => {
               </Table>
             )}
           </div>
-        </Collapse>
+        )}
       </div>
 
       {/* الطلبات المنتهية */}
@@ -217,7 +217,7 @@ const MyRequestsWithOffersBlood = () => {
             {openExpired ? 'إخفاء' : 'عرض'}
           </Button>
         </div>
-        <Collapse in={openExpired}>
+        {openExpired && (
           <div>
             {expiredRequests.length === 0 ? (
               <div className="text-muted small p-3">لا توجد طلبات منتهية حسب الفلترة الحالية.</div>
@@ -239,7 +239,7 @@ const MyRequestsWithOffersBlood = () => {
               </Table>
             )}
           </div>
-        </Collapse>
+        )}
       </div>
     </div>
   );

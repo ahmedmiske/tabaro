@@ -1,7 +1,7 @@
 // src/components/UserDetails.js
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Form, Button, Alert } from 'react-bootstrap';
+import { Form, Button, Alert } from './ui';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import './UserDetails.css';
 

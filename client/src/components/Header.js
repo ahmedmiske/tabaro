@@ -1,434 +1,391 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import PropTypes from 'prop-types';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import PropTypes from "prop-types";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
-  FiChevronDown, FiSearch, FiShoppingCart, FiUser, FiBell,
-  FiHeart, FiUsers, FiHelpCircle, FiDroplet, FiGrid, FiMenu, FiX, FiList
-} from 'react-icons/fi';
-import fetchWithInterceptors from '../services/fetchWithInterceptors';
-import './Header.css';
+  FiBell as Bell,
+  FiChevronDown as ChevronDown,
+  FiDroplet as Droplet,
+  FiHeart as Heart,
+  FiHome as Home,
+  FiInfo as Info,
+  FiLogOut as LogOut,
+  FiMenu as Menu,
+  FiPhone as Phone,
+  FiSearch as Search,
+  FiSettings as Settings,
+  FiUsers as Users,
+  FiUser as User,
+  FiX as X,
+} from "react-icons/fi";
 
-function Header({ notifCount }) {
+/**
+ * Tailwind-only Header component (no external CSS)
+ * - Desktop XL+ (≥1280px): Full navigation, search bar, mega menus
+ * - Tablet/Mobile (< 1280px): Hamburger menu with slide-in drawer
+ * - Responsive: Hamburger menu works on tablets (768-1023px) and mobiles
+ * - A11y: aria-* attributes, Esc to close, click-outside to dismiss popovers
+ * 
+ * Breakpoints:
+ * - XS/SM/MD/LG (< 1280px): Hamburger menu visible, drawer navigation
+ * - XL+ (≥ 1280px): Full horizontal navigation, search bar visible
+ */
+export default function HeaderTailwind({ user, notifications, onLogout }) {
   const location = useLocation();
   const navigate = useNavigate();
+  const rootRef = useRef(null);
 
-  // ===== حالة المستخدم + مزامنة فورية =====
-  const [user, setUser] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('user') || 'null'); }
-    catch { return null; }
-  });
-  const isAuthed = !!user;
-
-  const syncUser = useCallback(() => {
-    try { setUser(JSON.parse(localStorage.getItem('user') || 'null')); }
-    catch { setUser(null); }
-  }, []);
-
-  useEffect(() => { syncUser(); }, [syncUser]);
-  useEffect(() => { syncUser(); }, [location.key, syncUser]);
-  useEffect(() => {
-    const onFocus = () => syncUser();
-    const onStorage = (e) => {
-      if (!e.key || e.key === 'user' || e.key === 'token') syncUser();
-    };
-    const onAuthChanged = () => syncUser();
-
-    window.addEventListener('focus', onFocus);
-    window.addEventListener('storage', onStorage);
-    window.addEventListener('auth:changed', onAuthChanged);
-    return () => {
-      window.removeEventListener('focus', onFocus);
-      window.removeEventListener('storage', onStorage);
-      window.removeEventListener('auth:changed', onAuthChanged);
-    };
-  }, [syncUser]);
-
-  // اسم العرض + حرف الأفاتار
-  const displayName = useMemo(() => {
-    if (!user) return '';
-    const fn = user.firstName || user.given_name || '';
-    const ln = user.lastName || user.family_name || '';
-    const full = `${fn} ${ln}`.trim();
-    return full || user.username || user.email || 'الحساب';
-  }, [user]);
-  const avatarLetter = (displayName || 'ح').trim().charAt(0).toUpperCase();
-
-  // ===== باقي الحالة =====
-  const [q, setQ] = useState('');
-  const [open, setOpen] = useState(null);          // 'blood' | 'general' | 'campaigns' | 'about' | null
+  const [dropdownOpen, setDropdownOpen] = useState(null); // 'blood' | 'user' | null
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [badgeCount, setBadgeCount] = useState(
-    Number.isFinite(notifCount) ? notifCount : 0
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const unreadCount = useMemo(
+    () => (Array.isArray(notifications) ? notifications.filter((n) => !n.read).length : 0),
+    [notifications]
   );
 
-  const isActive = (path) =>
-    location.pathname === path || (path !== '/' && location.pathname.startsWith(path));
+  const isBloodSection = useCallback(
+    () => location.pathname.startsWith("/donations/blood") || location.pathname.startsWith("/donors"),
+    [location.pathname]
+  );
 
-  const onSubmit = (e) => {
-    e.preventDefault();
-    const s = q.trim();
-    if (!s) return;
-    navigate(`/search?query=${encodeURIComponent(s)}`);
-    setQ('');
-    setOpen(null);
+  const closeAll = () => {
+    setDropdownOpen(null);
     setMobileOpen(false);
   };
 
-  // إغلاق عند النقر خارج/زر Esc
-  const rootRef = useRef(null);
+  // click outside + Escape to close popovers & drawer
   useEffect(() => {
     const onDocClick = (e) => {
-      if (!rootRef.current) return;
-      if (!rootRef.current.contains(e.target)) { setOpen(null); setMobileOpen(false); }
+      if (rootRef.current && !rootRef.current.contains(e.target)) closeAll();
     };
-    const onKey = (e) => { if (e.key === 'Escape') { setOpen(null); setMobileOpen(false); } };
-    document.addEventListener('mousedown', onDocClick);
-    document.addEventListener('keydown', onKey);
+    const onKey = (e) => {
+      if (e.key === "Escape") closeAll();
+    };
+    document.addEventListener("mousedown", onDocClick);
+    document.addEventListener("keydown", onKey);
     return () => {
-      document.removeEventListener('mousedown', onDocClick);
-      document.removeEventListener('keydown', onKey);
+      document.removeEventListener("mousedown", onDocClick);
+      document.removeEventListener("keydown", onKey);
     };
   }, []);
 
-  // ضبط ارتفاع الهيدر للميغا
-  useEffect(() => {
-    const el = document.querySelector('.eh-header');
-    if (!el) return;
-    const updateVar = () => el.style.setProperty('--header-height', `${Math.round(el.getBoundingClientRect().height)}px`);
-    updateVar();
-    window.addEventListener('resize', updateVar);
-    return () => window.removeEventListener('resize', updateVar);
-  }, []);
+  const navItems = [
+    { to: "/", label: "الرئيسية", icon: Home, exact: true },
+    { to: "/about", label: "حول", icon: Info },
+    { to: "/contact", label: "اتصل بنا", icon: Phone },
+  ];
 
-  // قفل تمرير الصفحة عند فتح الدرج
-  useEffect(() => {
-    document.body.style.overflow = mobileOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
-  }, [mobileOpen]);
+  const bloodItems = [
+    { to: "/donations/blood/request", label: "طلب تبرع بالدم", icon: Heart },
+    { to: "/donations/blood", label: "قائمة الطلبات", icon: Droplet },
+    { to: "/donors/blood", label: "المتبرعون", icon: Users },
+  ];
 
-  // جلب عدد الإشعارات إن لم يصل prop
-  useEffect(() => {
-    let stop = false;
-    let timer;
-    const loadCount = async () => {
-      try {
-        const { body, ok } = await fetchWithInterceptors('/api/notifications');
-        if (!ok) return;
-        const list = body?.data || body || [];
-        const unread = Array.isArray(list) ? list.filter(n => !n.read).length : 0;
-        if (!stop) setBadgeCount(unread);
-      } catch { /* silent */ }
-    };
+  const linkBase =
+    "inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-colors hover:bg-gray-100/70 focus:outline-none focus:ring-2 focus:ring-primary/30";
+  const linkActive = "text-primary-600 bg-primary-50 hover:bg-primary-50";
+  const iconBtn =
+    "relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition focus:outline-none focus:ring-2 focus:ring-primary/30";
+  const badge =
+    "absolute -top-1 -right-1 min-w-[1.25rem] h-5 px-1.5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center";
 
-    if (!Number.isFinite(notifCount)) {
-      loadCount();
-      timer = setInterval(loadCount, 30000);
-    } else {
-      setBadgeCount(notifCount);
+  const handleLogout = async () => {
+    try {
+      if (typeof onLogout === "function") {
+        await onLogout();
+      } else {
+        // Fallback: best-effort API
+        await fetch("/api/users/logout", { method: "POST", credentials: "include" });
+      }
+      navigate("/");
+    } catch (e) {
+      // Non-blocking
+      console.error("Logout error", e);
+      navigate("/");
     }
-    return () => { stop = true; if (timer) clearInterval(timer); };
-  }, [notifCount]);
-
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
-    setOpen(null);
-    setMobileOpen(false);
-    window.dispatchEvent(new Event('auth:changed'));
-    navigate('/login');
   };
 
   return (
-    <header className="eh-header" dir="rtl" ref={rootRef}>
-      <div className="eh-container">
-        {/* الشعار + السطر التعريفي */}
-        <Link to="/" className="eh-brand" aria-label="الرئيسية">
-          <img src="/logo.png" alt="الشعار" />
-          <div className="eh-brand-caption" aria-hidden="true">
-            <span className="eh-brand-slogan">المنصة الوطنية للتبرع</span>
-          </div>
-        </Link>
-
-        {/* زر الهامبرغر */}
-        <button
-          className="eh-burger"
-          aria-label="فتح القائمة"
-          aria-expanded={mobileOpen}
-          onClick={() => setMobileOpen(v => !v)}
-        >
-          {mobileOpen ? <FiX /> : <FiMenu />}
-        </button>
-
-        {/* القائمة الرئيسية (سطح المكتب) */}
-        <nav className="eh-nav" role="menubar" aria-label="القائمة الرئيسية">
-          <Link to="/" className={`eh-link ${isActive('/') ? 'active' : ''}`}>الرئيسية</Link>
-
-          {/* التبرع بالدم */}
-          <div
-            className={`eh-item ${open==='blood' ? 'open' : ''}`}
-            onMouseEnter={() => setOpen('blood')}
-          >
+    <header ref={rootRef} className="sticky top-0 z-50 border-b border-gray-200/80 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 items-center justify-between gap-3">
+          {/* Left: burger + brand */}
+          <div className="flex items-center gap-2">
+            {/* Mobile & Tablet burger */}
             <button
               type="button"
-              className={`eh-link ${isActive('/blood-donations') ? 'active' : ''}`}
-              aria-haspopup="true"
-              aria-expanded={open==='blood'}
-              onClick={() => setOpen(prev => prev === 'blood' ? null : 'blood')}
+              className="xl:hidden inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition focus:outline-none focus:ring-2 focus:ring-primary/30"
+              aria-label="القائمة"
+              aria-expanded={mobileOpen}
+              onClick={() => setMobileOpen((v) => !v)}
             >
-              التبرع بالدم <FiChevronDown className="eh-caret" />
+              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
-          </div>
 
-          {/* تبرعات عامة */}
-          <div
-            className={`eh-item ${open==='general' ? 'open' : ''}`}
-            onMouseEnter={() => setOpen('general')}
-          >
-            <button
-              type="button"
-              className={`eh-link ${isActive('/donations') ? 'active' : ''}`}
-              aria-haspopup="true"
-              aria-expanded={open==='general'}
-              onClick={() => setOpen(prev => prev === 'general' ? null : 'general')}
-            >
-              تبرعات عامة <FiChevronDown className="eh-caret" />
-            </button>
-          </div>
-
-          {/* حملات التبرع */}
-          <div
-            className={`eh-item ${open==='campaigns' ? 'open' : ''}`}
-            onMouseEnter={() => setOpen('campaigns')}
-          >
-            <button
-              type="button"
-              className={`eh-link ${isActive('/campaigns') ? 'active' : ''}`}
-              aria-haspopup="true"
-              aria-expanded={open==='campaigns'}
-              onClick={() => setOpen(prev => prev === 'campaigns' ? null : 'campaigns')}
-            >
-              حملات التبرع <FiChevronDown className="eh-caret" />
-            </button>
-          </div>
-
-          {/* عن المنصة */}
-          <div
-            className={`eh-item ${open==='about' ? 'open' : ''}`}
-            onMouseEnter={() => setOpen('about')}
-          >
-            <button
-              type="button"
-              className={`eh-link ${isActive('/about') ? 'active' : ''}`}
-              aria-haspopup="true"
-              aria-expanded={open==='about'}
-              onClick={() => setOpen(prev => prev === 'about' ? null : 'about')}
-            >
-              عن المنصة <FiChevronDown className="eh-caret" />
-            </button>
-          </div>
-        </nav>
-
-        {/* أدوات يمين */}
-        <div className="eh-actions">
-          <form className="eh-search" role="search" onSubmit={onSubmit}>
-            <input
-              className="eh-search-input"
-              type="search"
-              placeholder="ابحث عن حالة/متبرّع/مدينة…"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              aria-label="بحث"
-            />
-            <button className="eh-search-btn" type="submit" aria-label="بحث">
-              <FiSearch />
-            </button>
-          </form>
-
-          <Link to="/cart" className="eh-iconbtn" title="سلة التبرعات">
-            <FiShoppingCart />
-          </Link>
-
-          {!isAuthed ? (
-            <Link to="/login" className="eh-login">
-              <FiUser className="ms-1" /> تسجيل الدخول
+            {/* Brand */}
+            <Link to="/" className="group flex items-center gap-3" aria-label="الرئيسية">
+              <img src="/logoTabaro.png" alt="تبرع Tabaro" className="h-9 w-auto" />
+              <span className="flex flex-col leading-tight">
+                <strong className="text-base">تبرع Tabaro</strong>
+                <span className="text-xs text-gray-500 group-hover:text-gray-700">منصة التبرع الرقمية</span>
+              </span>
             </Link>
-          ) : (
-            <div className="eh-user">
-              <Link to="/notifications" className="eh-iconbtn eh-bell" aria-label="الإشعارات">
-                <FiBell />
-                { badgeCount > 0 && <span className="eh-badge">{badgeCount}</span> }
-              </Link>
+          </div>
 
-              <div className="eh-userchip" title={displayName}>
-                <span className="eh-avatar" aria-hidden="true">{avatarLetter}</span>
-                <span className="eh-username">{displayName}</span>
+          {/* Center: Desktop nav (only on very large screens) */}
+          <nav className="hidden xl:flex items-center gap-1">
+            {navItems.map(({ to, label, icon: Icon, exact }) => (
+              <NavLink
+                key={to}
+                to={to}
+                end={!!exact}
+                className={({ isActive }) => `${linkBase} ${isActive ? linkActive : "text-gray-700"}`}
+              >
+                <Icon className="h-4 w-4" />
+                {label}
+              </NavLink>
+            ))}
+
+            {/* Blood donation dropdown */}
+            <div className="relative">
+              <button
+                type="button"
+                className={`${linkBase} ${isBloodSection() ? linkActive : "text-gray-700"}`}
+                aria-expanded={dropdownOpen === "blood"}
+                aria-controls="blood-menu"
+                onClick={() => setDropdownOpen(dropdownOpen === "blood" ? null : "blood")}
+              >
+                <Droplet className="h-4 w-4" />
+                التبرع بالدم
+                <ChevronDown className="h-4 w-4" />
+              </button>
+
+              {/* Mega menu */}
+              <div
+                id="blood-menu"
+                className={`absolute left-1/2 z-40 mt-2 w-[640px] -translate-x-1/2 rounded-2xl border border-gray-200 bg-white p-3 shadow-lg transition [transform-origin:top_center] ${
+                  dropdownOpen === "blood" ? "scale-100 opacity-100" : "pointer-events-none scale-95 opacity-0"
+                }`}
+                role="menu"
+              >
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {bloodItems.map(({ to, label, icon: Icon }) => (
+                    <Link
+                      key={to}
+                      to={to}
+                      className="group flex items-start gap-3 rounded-xl p-3 transition hover:bg-gray-50"
+                      onClick={() => setDropdownOpen(null)}
+                      role="menuitem"
+                    >
+                      <span className="mt-0.5 inline-flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white">
+                        <Icon className="h-4 w-4" />
+                      </span>
+                      <span className="flex min-w-0 flex-col">
+                        <span className="truncate text-sm font-semibold text-gray-900">{label}</span>
+                        <span className="truncate text-xs text-gray-500">انتقل إلى {label}</span>
+                      </span>
+                    </Link>
+                  ))}
+                </div>
               </div>
-
-              <button className="eh-logout" onClick={logout}>خروج</button>
             </div>
-          )}
-        </div>
-      </div>
+          </nav>
 
-      {/* ===== Mega: التبرع بالدم ===== */}
-      <div
-        className={`eh-mega ${open==='blood' ? 'open' : ''}`}
-        onMouseEnter={() => setOpen('blood')}
-        onMouseLeave={() => setOpen(null)}
-      >
-        <div className="eh-mega-wrap">
-          <div className="eh-mega-grid">
-            <Link to="/blood-donation" className="eh-mega-item" onClick={() => setOpen(null)}>
-              <span className="eh-mega-icon"><FiDroplet /></span>
-              <span className="eh-mega-title">زر التبرع بالدم</span>
-              <span className="eh-mega-sub">سجّل رغبتك بالتبرع الآن</span>
+          {/* Right: actions */}
+          <div className="flex items-center gap-2">
+            {/* Search (desktop only - hidden on tablet for space) */}
+            <div className="hidden xl:flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-2 py-1.5 focus-within:ring-2 focus-within:ring-primary/30">
+              <Search className="h-4 w-4 text-gray-500" />
+              <input
+                className="w-56 bg-transparent text-sm placeholder:text-gray-400 focus:outline-none"
+                placeholder="ابحث عن المتبرعين أو الطلبات..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                aria-label="بحث"
+              />
+            </div>
+
+            {/* Notifications */}
+            <Link to="/notifications" className={iconBtn} aria-label="الإشعارات">
+              <Bell className="h-5 w-5" />
+              {unreadCount > 0 && (
+                <span className={badge}>{unreadCount > 9 ? "9+" : unreadCount}</span>
+              )}
             </Link>
-            <Link to="/blood-donation" className="eh-mega-item" onClick={() => setOpen(null)}>
-              <span className="eh-mega-icon"><FiList /></span>
-              <span className="eh-mega-title">طلب التبرع</span>
-              <span className="eh-mega-sub">إضافة طلب جديد</span>
-            </Link>
-            <Link to="/blood-donations" className="eh-mega-item" onClick={() => setOpen(null)}>
-              <span className="eh-mega-icon"><FiGrid /></span>
-              <span className="eh-mega-title">قائمة الطلبات</span>
-              <span className="eh-mega-sub">تصفّح وفلترة</span>
-            </Link>
-            <Link to="/donors/blood" className="eh-mega-item" onClick={() => setOpen(null)}>
-              <span className="eh-mega-icon"><FiUsers /></span>
-              <span className="eh-mega-title">المتبرعون</span>
-              <span className="eh-mega-sub">المتبرعون المسجّلون</span>
-            </Link>
+
+            {/* User */}
+            {user ? (
+              <div className="relative">
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  aria-expanded={dropdownOpen === "user"}
+                  aria-controls="user-menu"
+                  onClick={() => setDropdownOpen(dropdownOpen === "user" ? null : "user")}
+                >
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary-600 text-white text-xs font-bold">
+                    {(user.username || "U").slice(0, 1).toUpperCase()}
+                  </span>
+                  <span className="hidden sm:inline-block max-w-[120px] truncate">{user.username}</span>
+                  <ChevronDown className="h-4 w-4" />
+                </button>
+
+                {/* user menu */}
+                <div
+                  id="user-menu"
+                  role="menu"
+                  className={`absolute right-0 z-40 mt-2 w-56 rounded-2xl border border-gray-200 bg-white p-1.5 shadow-lg transition ${
+                    dropdownOpen === "user" ? "opacity-100" : "pointer-events-none opacity-0"
+                  }`}
+                >
+                  <Link
+                    to="/profile"
+                    role="menuitem"
+                    className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm hover:bg-gray-50"
+                    onClick={() => setDropdownOpen(null)}
+                  >
+                    <User className="h-4 w-4" /> الملف الشخصي
+                  </Link>
+                  <Link
+                    to="/settings"
+                    role="menuitem"
+                    className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm hover:bg-gray-50"
+                    onClick={() => setDropdownOpen(null)}
+                  >
+                    <Settings className="h-4 w-4" /> الإعدادات
+                  </Link>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    onClick={handleLogout}
+                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50/70"
+                  >
+                    <LogOut className="h-4 w-4" /> تسجيل الخروج
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="hidden sm:flex items-center gap-2">
+                <Link to="/login" className={iconBtn} aria-label="تسجيل الدخول">
+                  <User className="h-5 w-5" />
+                </Link>
+                <Link
+                  to="/add-user"
+                  className="inline-flex items-center justify-center rounded-xl bg-primary-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                >
+                  إنشاء حساب
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* ===== Mega: تبرعات عامة ===== */}
-      <div
-        className={`eh-mega ${open==='general' ? 'open' : ''}`}
-        onMouseEnter={() => setOpen('general')}
-        onMouseLeave={() => setOpen(null)}
-      >
-        <div className="eh-mega-wrap">
-          <div className="eh-mega-grid">
-            <Link to="/donation-requests" className="eh-mega-item" onClick={() => setOpen(null)}>
-              <span className="eh-mega-icon"><FiHeart /></span>
-              <span className="eh-mega-title">تبرعات عامة</span>
-              <span className="eh-mega-sub">ابدأ تبرعًا الآن</span>
-            </Link>
-            <Link to="/donation-requests" className="eh-mega-item" onClick={() => setOpen(null)}>
-              <span className="eh-mega-icon"><FiList /></span>
-              <span className="eh-mega-title">طلب التبرع</span>
-              <span className="eh-mega-sub">أنشئ طلبًا عامًا</span>
-            </Link>
-            <Link to="/donations" className="eh-mega-item" onClick={() => setOpen(null)}>
-              <span className="eh-mega-icon"><FiGrid /></span>
-              <span className="eh-mega-title">قائمة الطلبات</span>
-              <span className="eh-mega-sub">تصفية حسب النوع</span>
-            </Link>
-            <Link to="/donors/general" className="eh-mega-item" onClick={() => setOpen(null)}>
-              <span className="eh-mega-icon"><FiUsers /></span>
-              <span className="eh-mega-title">المتبرعون</span>
-              <span className="eh-mega-sub">المتبرعون العامّون</span>
-            </Link>
+      {/* Mobile & Tablet drawer */}
+      <div className={`xl:hidden ${mobileOpen ? "pointer-events-auto" : "pointer-events-none"}`} aria-hidden={!mobileOpen}>
+        {/* Overlay */}
+        <div
+          className={`fixed inset-0 z-40 bg-gray-900/30 transition ${mobileOpen ? "opacity-100" : "opacity-0"}`}
+          onClick={() => setMobileOpen(false)}
+        />
+
+        {/* Panel */}
+        <aside
+          className={`fixed inset-y-0 right-0 z-50 w-80 md:w-96 max-w-[85vw] translate-x-0 overflow-y-auto border-l border-gray-200 bg-white p-4 shadow-xl transition-transform ${
+            mobileOpen ? "translate-x-0" : "translate-x-full"
+          }`}
+        >
+          <div className="mb-3 flex items-center justify-between">
+            <span className="text-sm font-semibold text-gray-900">القائمة</span>
+            <button
+              type="button"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white hover:bg-gray-50"
+              onClick={() => setMobileOpen(false)}
+              aria-label="إغلاق القائمة"
+            >
+              <X className="h-5 w-5" />
+            </button>
           </div>
-        </div>
-      </div>
 
-      {/* ===== Mega: حملات التبرع ===== */}
-      <div
-        className={`eh-mega ${open==='campaigns' ? 'open' : ''}`}
-        onMouseEnter={() => setOpen('campaigns')}
-        onMouseLeave={() => setOpen(null)}
-      >
-        <div className="eh-mega-wrap">
-          <div className="eh-mega-grid">
-            <Link to="/campaigns" className="eh-mega-item" onClick={() => setOpen(null)}>
-              <span className="eh-mega-icon"><FiGrid /></span>
-              <span className="eh-mega-title">قائمة الحملات</span>
-              <span className="eh-mega-sub">استكشف الحملات</span>
-            </Link>
-            <Link to="/campaigns/create" className="eh-mega-item" onClick={() => setOpen(null)}>
-              <span className="eh-mega-icon"><FiHeart /></span>
-              <span className="eh-mega-title">إنشاء حملة</span>
-              <span className="eh-mega-sub">أطلق حملتك الآن</span>
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* درج الموبايل/المتوسط — يغلق عند الضغط على الخلفية */}
-      <div
-        className={`eh-drawer ${mobileOpen ? 'open' : ''}`}
-        role="dialog"
-        aria-label="قائمة الموبايل"
-        aria-modal="true"
-        aria-hidden={!mobileOpen}
-        onClick={() => setMobileOpen(false)}
-      >
-        <div className="eh-drawer-panel" onClick={(e)=>e.stopPropagation()}>
-          <button
-            className="eh-burger"
-            aria-label="إغلاق القائمة"
-            onClick={() => setMobileOpen(false)}
-            style={{ marginInlineStart: 'auto', marginBottom: 8 }}
-          >
-            <FiX />
-          </button>
-
-          <form className="eh-drawer-search" role="search" onSubmit={onSubmit}>
+          {/* Search */}
+          <div className="mb-3 flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-2 py-1.5">
+            <Search className="h-4 w-4 text-gray-500" />
             <input
-              type="search"
-              placeholder="ابحث…"
-              value={q}
-              onChange={(e)=>setQ(e.target.value)}
+              className="w-full bg-transparent text-sm placeholder:text-gray-400 focus:outline-none"
+              placeholder="ابحث..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               aria-label="بحث في الموبايل"
             />
-            <button type="submit"><FiSearch/></button>
-          </form>
+          </div>
 
-          <Link to="/" className="eh-drawer-link" onClick={()=>setMobileOpen(false)}>الرئيسية</Link>
+          {/* Primary links */}
+          <div className="space-y-1">
+            {navItems.map(({ to, label, icon: Icon }) => (
+              <NavLink
+                key={to}
+                to={to}
+                onClick={() => setMobileOpen(false)}
+                className={({ isActive }) => `flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition ${
+                  isActive ? "bg-primary-50 text-primary-700" : "hover:bg-gray-50"
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                {label}
+              </NavLink>
+            ))}
 
-          <details className="eh-drawer-group">
-            <summary>التبرع بالدم</summary>
-            <Link to="/donations/blood/request" onClick={()=>setMobileOpen(false)}>زر التبرع بالدم</Link>
-            <Link to="/donations/blood/request" onClick={()=>setMobileOpen(false)}>طلب التبرع</Link>
-            <Link to="/donations/blood" onClick={()=>setMobileOpen(false)}>قائمة الطلبات</Link>
-            <Link to="/donors/blood" onClick={()=>setMobileOpen(false)}>المتبرعون</Link>
-          </details>
+            <details className="rounded-xl border border-gray-200">
+              <summary className="flex cursor-pointer items-center justify-between gap-2 rounded-xl px-3 py-2 text-sm">
+                <span className="inline-flex items-center gap-2"><Droplet className="h-4 w-4" /> التبرع بالدم</span>
+                <ChevronDown className="h-4 w-4" />
+              </summary>
+              <div className="px-2 pb-2">
+                {bloodItems.map(({ to, label, icon: Icon }) => (
+                  <NavLink
+                    key={to}
+                    to={to}
+                    onClick={() => setMobileOpen(false)}
+                    className={({ isActive }) => `mt-1 flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition ${
+                      isActive ? "bg-primary-50 text-primary-700" : "hover:bg-gray-50"
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {label}
+                  </NavLink>
+                ))}
+              </div>
+            </details>
 
-          <details className="eh-drawer-group">
-            <summary>تبرعات عامة</summary>
-            <Link to="/donations/general/give" onClick={()=>setMobileOpen(false)}>تبرعات عامة</Link>
-            <Link to="/donations/general/request" onClick={()=>setMobileOpen(false)}>طلب التبرع</Link>
-            <Link to="/donations/general" onClick={()=>setMobileOpen(false)}>قائمة الطلبات</Link>
-            <Link to="/donors/general" onClick={()=>setMobileOpen(false)}>المتبرعون</Link>
-          </details>
-
-          <details className="eh-drawer-group">
-            <summary>حملات التبرع</summary>
-            <Link to="/campaigns" onClick={()=>setMobileOpen(false)}>قائمة الحملات</Link>
-            <Link to="/campaigns/create" onClick={()=>setMobileOpen(false)}>إنشاء حملة</Link>
-          </details>
-
-          <details className="eh-drawer-group">
-            <summary>عن المنصة</summary>
-            <Link to="/about" onClick={()=>setMobileOpen(false)}>من نحن</Link>
-            <Link to="/about/team" onClick={()=>setMobileOpen(false)}>فريق العمل</Link>
-            <Link to="/about/contact" onClick={()=>setMobileOpen(false)}>تواصل معنا</Link>
-          </details>
-        </div>
+            {!user && (
+              <div className="mt-2 space-y-1">
+                <Link
+                  to="/login"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm hover:bg-gray-50"
+                >
+                  <User className="h-4 w-4" /> تسجيل الدخول
+                </Link>
+                <Link
+                  to="/add-user"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center justify-center rounded-xl bg-primary-600 px-3 py-2 text-sm font-semibold text-white hover:bg-primary-700"
+                >
+                  إنشاء حساب
+                </Link>
+              </div>
+            )}
+          </div>
+        </aside>
       </div>
     </header>
   );
 }
 
-Header.propTypes = {
-  notifCount: PropTypes.number,
+HeaderTailwind.propTypes = {
+  user: PropTypes.shape({ username: PropTypes.string }),
+  notifications: PropTypes.arrayOf(
+    PropTypes.shape({ read: PropTypes.bool })
+  ),
+  onLogout: PropTypes.func,
 };
-
-Header.defaultProps = {
-  notifCount: null,
-};
-
-export default Header;

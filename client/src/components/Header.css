@@ -1,230 +1,815 @@
 :root{
   --eh-text:#0f172a;
-  --eh-brand:#16a34a;
-  --eh-accent:#22c55e;
+  --eh-brand:#dc2626;
+  --eh-accent:#ef4444;
   --eh-shadow: 0 16px 40px rgba(2,6,23,.10);
   --color-secondary:#0ea5e9;
   --main-color:#e2e8f0;
-  --header-height: 80px;
+  --header-height: 70px;
+  --header-height-mobile: 60px;
 }
 
-/* رأسية عامة */
-.eh-header{ position:sticky; top:0; background:#fff; z-index:60; box-shadow: 0 1px 0 #dcdddf; }
+/* رأسية عامة - متوافق مع جميع الشاشات */
+.eh-header{ 
+  position:sticky; 
+  top:0; 
+  background:linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  z-index:60; 
+  box-shadow: 0 2px 12px rgba(220, 38, 38, 0.1);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(220, 38, 38, 0.1);
+}
+
 .eh-container{
   max-width:100%;
-  padding:0 12px;                      /* تقليل الحشوة */
+  padding:0 16px;
   display:flex;
   align-items:center;
-  gap:8px;                             /* تقليل المسافة العامة */
+  gap:12px;
   height: var(--header-height);
+  transition: all 0.3s ease;
 }
 
-/* الشعار + السطر التعريفي */
+/* تحسينات للموبايل */
+@media (max-width: 768px) {
+  .eh-container {
+    height: var(--header-height-mobile);
+    padding: 0 12px;
+    gap: 8px;
+  }
+}
+
+/* الشعار + السطر التعريفي - متجاوب */
 .eh-brand{
-  display:inline-flex; align-items:center; gap:8px; text-decoration:none;
+  display:inline-flex; 
+  align-items:center; 
+  gap:12px; 
+  text-decoration:none;
   color:var(--eh-text);
-  margin-left: 20px;
+  margin-left: 16px;
+  transition: all 0.3s ease;
+  padding: 8px 0;
 }
+
+.eh-brand:hover {
+  transform: scale(1.02);
+}
+
 .eh-brand img{
-  width: 56px; height:auto; display:block; object-fit:contain; object-position:center;
+  width: 48px; 
+  height: 48px; 
+  display:block; 
+  object-fit:contain; 
+  object-position:center;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
 }
+
 .eh-brand-caption{
-  display:flex; flex-direction:column; line-height:1.05;
+  display:flex; 
+  flex-direction:column; 
+  line-height:1.2;
 }
+
+.eh-brand-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--eh-brand);
+  margin: 0;
+}
+
 .eh-brand-slogan{
-  font-size: 12px; color:#16a34a; white-space:nowrap;
+  font-size: 12px; 
+  color: #666; 
+  white-space:nowrap;
+  font-weight: 500;
 }
-/* لو أردت إخفاء الشعار النصي على الموبايل، أزل التعليق: */
 
-@media (max-width: 575.98px){
+/* تحسينات متجاوبة للشعار */
+@media (max-width: 768px){
+  .eh-brand{
+    gap: 8px;
+    margin-left: 8px;
+  }
+  
+  .eh-brand img{
+    width: 40px;
+    height: 40px;
+  }
+  
+  .eh-brand-title {
+    font-size: 18px;
+  }
+  
+  .eh-brand-slogan{
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px){
   .eh-brand-caption{ display:none; }
+  
+  .eh-brand img{
+    width: 36px;
+    height: 36px;
+  }
 }
 
 
-/* هامبرغر */
+/* هامبرغر - محسن للموبايل */
 .eh-burger{
-  display:inline-grid; place-items:center;
-  width:38px; height:38px; border-radius:10px;
-  border:1px solid #e2e8f0; background:#fff; cursor:pointer;
+  display:inline-grid; 
+  place-items:center;
+  width:44px; 
+  height:44px; 
+  border-radius:12px;
+  border:1px solid rgba(220, 38, 38, 0.2); 
+  background: linear-gradient(135deg, #fff 0%, #fef2f2 100%);
+  cursor:pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.1);
 }
 
-/* قائمة سطح مكتب */
+.eh-burger:hover {
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border-color: var(--eh-brand);
+  transform: scale(1.05);
+}
+
+.eh-burger:active {
+  transform: scale(0.95);
+}
+
+/* تحسينات للموبايل */
+@media (max-width: 768px) {
+  .eh-burger {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* قائمة سطح مكتب - محسنة ومتجاوبة */
 .eh-nav{
   display:flex;
   align-items:center;
-  justify-content:flex-start;          /* قربها من الشعار */
-  gap:.25rem;                          /* مسافة أصغر بين العناصر */
-  padding:0 .15rem;
-  border-radius:10px;
-  margin-inline-start: 6px;            /* مسافة صغيرة جدًا بعد الشعار */
+  justify-content:flex-start;
+  gap:0.5rem;
+  padding:0 0.5rem;
+  border-radius:12px;
+  margin-inline-start: 12px;
 }
+
 .eh-link{
   position:relative;
   display:inline-flex;
   align-items:center;
-  gap:.35rem;
-  height:48px;
-  /*أقلشويةلتقليلالارتفاع*/padding:0 .7rem;
-  font-size: 18px;
-  border-radius:10px;
+  gap:0.5rem;
+  height:44px;
+  padding:0 1rem;
+  font-size: 16px;
+  border-radius:12px;
   font-weight:600;
   color:var(--eh-text);
   background:transparent;
   border:0;
   cursor:pointer;
-  transition:.3s;
+  transition: all 0.3s ease;
   text-decoration:none;
-  -webkit-transition:.3s;
-  -moz-transition:.3s;
-  -ms-transition:.3s;
-  -o-transition:.3s;
+  white-space: nowrap;
 }
-.eh-link:hover{ background:var(--eh-brand); color:#fff; border-radius:0; }
+
+.eh-link:hover{ 
+  background: linear-gradient(135deg, var(--eh-brand) 0%, var(--eh-accent) 100%);
+  color:#fff; 
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
 .eh-link:hover::after,.eh-link.active::after{
-  content:""; position:absolute; inset-inline:8px; bottom:-1px;
-  height:3px; background: var(--eh-accent); border-radius:3px;
+  content:""; 
+  position:absolute; 
+  inset-inline:8px; 
+  bottom:-2px;
+  height:3px; 
+  background: var(--eh-accent); 
+  border-radius:3px;
+  animation: slideIn 0.3s ease;
 }
-.eh-link.active{ background: var(--color-secondary); color:#fff; }
-.eh-caret{ font-size:1rem; opacity:.9; }
+
+@keyframes slideIn {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.eh-link.active{ 
+  background: linear-gradient(135deg, var(--color-secondary) 0%, #0284c7 100%);
+  color:#fff;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3);
+}
+
+.eh-caret{ 
+  font-size:1rem; 
+  opacity:.8; 
+  transition: transform 0.3s ease;
+}
+
+.eh-link:hover .eh-caret {
+  transform: rotate(180deg);
+}
+
 .eh-item{ position:relative; }
 
-/* أدوات يمين */
-.eh-actions{
-  display:flex; align-items:center; gap:8px;
-  margin-inline-start:auto;            /* ⬅️ ادفع الأدوات لأقصى اليسار (RTL) */
+/* تحسينات للشاشات المتوسطة */
+@media (max-width: 1200px) {
+  .eh-link {
+    font-size: 15px;
+    padding: 0 0.8rem;
+    height: 42px;
+  }
 }
-.eh-search{ display:none; position:relative; max-height: 40px; }
-.eh-search-input{
-  width:240px;
-  background:#f8fafc;
-  border:1px solid transparent;
-  border-radius:999px;
-  padding:8px 40px 8px 12px;
-  outline:none;
-  -webkit-border-radius:999px;
-  -moz-border-radius:999px;
-  -ms-border-radius:999px;
-  -o-border-radius:999px;
-}
-.eh-search-input:focus{ border-color:#93c5fd; box-shadow:0 0 0 3px rgba(147,197,253,.35); }
-.eh-search-btn{
- width: 40px; height:40px;
- display: flex;
- align-items: center;
 
+@media (max-width: 1024px) {
+  .eh-nav {
+    gap: 0.25rem;
+  }
+  
+  .eh-link {
+    font-size: 14px;
+    padding: 0 0.6rem;
+    height: 40px;
+  }
 }
+
+/* أدوات يمين - محسنة ومتجاوبة */
+.eh-actions{
+  display:flex; 
+  align-items:center; 
+  gap:12px;
+  margin-inline-start:auto;
+}
+
+.eh-search{ 
+  display:none; 
+  position:relative; 
+  max-height: 44px;
+}
+
+.eh-search-input{
+  width:280px;
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  border:2px solid transparent;
+  border-radius:24px;
+  padding:12px 50px 12px 16px;
+  outline:none;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.1);
+}
+
+.eh-search-input:focus{ 
+  border-color: var(--eh-brand); 
+  box-shadow:0 0 0 3px rgba(220, 38, 38, 0.1);
+  transform: scale(1.02);
+}
+
+.eh-search-input::placeholder {
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.eh-search-btn{
+  width: 44px; 
+  height:44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  left: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: linear-gradient(135deg, var(--eh-brand) 0%, var(--eh-accent) 100%);
+  border: none;
+  border-radius: 20px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.eh-search-btn:hover {
+  transform: translateY(-50%) scale(1.05);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
 .eh-iconbtn{
   display:inline-grid;
   place-items:center;
-  width:38px;
-  height:38px;
-  border-radius:10px;
-  border:1px solid #e2e8f0;
-  background:#fff;
+  width:44px;
+  height:44px;
+  border-radius:12px;
+  border:1px solid rgba(220, 38, 38, 0.2);
+  background: linear-gradient(135deg, #fff 0%, #fef2f2 100%);
   cursor:pointer;
   position:relative;
-  -webkit-border-radius:10px;
-  -moz-border-radius:10px;
-  -ms-border-radius:10px;
-  -o-border-radius:10px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.1);
 }
-.eh-iconbtn:hover{ background:#f8fafc; }
 
-/* زر تسجيل الدخول */
+.eh-iconbtn:hover{ 
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border-color: var(--eh-brand);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+}
+
+/* تحسينات للشاشات المتوسطة والصغيرة */
+@media (max-width: 1200px) {
+  .eh-search-input {
+    width: 220px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .eh-search-input {
+    width: 180px;
+    font-size: 13px;
+    padding: 10px 45px 10px 14px;
+  }
+  
+  .eh-search-btn {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .eh-iconbtn {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .eh-actions {
+    gap: 8px;
+  }
+  
+  .eh-iconbtn {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* زر تسجيل الدخول - محسن */
 .eh-login{
   display:none;
-  align-items:center; gap:.5rem;
-  padding:.5rem .8rem; border-radius:999px; background:#16a34a; color:#fff; text-decoration:none;
+  align-items:center; 
+  gap:0.5rem;
+  padding:12px 20px; 
+  border-radius:24px; 
+  background: linear-gradient(135deg, var(--eh-brand) 0%, var(--eh-accent) 100%);
+  color:#fff; 
+  text-decoration:none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
 }
-.eh-login:hover{ background:#15803d; }
 
-/* مستخدم مسجّل */
-.eh-user{ display:none; align-items:center; gap:8px; }
-.eh-bell{ position:relative; }
+.eh-login:hover{ 
+  background: linear-gradient(135deg, var(--eh-accent) 0%, #b91c1c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+/* مستخدم مسجّل - محسن */
+.eh-user{ 
+  display:none; 
+  align-items:center; 
+  gap:12px; 
+}
+
+.eh-bell{ 
+  position:relative; 
+  transition: all 0.3s ease;
+}
+
+.eh-bell:hover {
+  transform: scale(1.1);
+}
+
 .eh-badge{
-  position:absolute; top:-6px; inset-inline-start:-6px;
-  min-width:18px; height:18px; border-radius:999px; background:#ef4444; color:#fff;
-  font-size:12px; display:inline-grid; place-items:center; padding:0 4px;
+  position:absolute; 
+  top:-8px; 
+  inset-inline-start:-8px;
+  min-width:20px; 
+  height:20px; 
+  border-radius:10px; 
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color:#fff;
+  font-size:11px; 
+  display:inline-grid; 
+  place-items:center; 
+  padding:0 6px;
+  font-weight: 700;
+  border: 2px solid #fff;
+  animation: pulse 2s infinite;
 }
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
 .eh-userchip{
-  display:inline-flex; align-items:center; gap:.5rem;
-  padding:.3rem .55rem; border:1px solid #e2e8f0; border-radius:999px; background:#fff;
-  max-width:260px;
+  display:inline-flex; 
+  align-items:center; 
+  gap:0.75rem;
+  padding:8px 16px; 
+  border:2px solid rgba(220, 38, 38, 0.2); 
+  border-radius:24px; 
+  background: linear-gradient(135deg, #fff 0%, #fef2f2 100%);
+  max-width:280px;
+  transition: all 0.3s ease;
+  cursor: pointer;
 }
+
+.eh-userchip:hover {
+  border-color: var(--eh-brand);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+}
+
 .eh-avatar{
-  width:26px; height:26px; border-radius:999px; display:inline-grid; place-items:center;
-  background:#f1f5f9; border:1px solid #e2e8f0; font-weight:800;
+  width:32px; 
+  height:32px; 
+  border-radius:16px; 
+  display:inline-grid; 
+  place-items:center;
+  background: linear-gradient(135deg, var(--eh-brand) 0%, var(--eh-accent) 100%);
+  border:2px solid #fff; 
+  font-weight:700;
+  color: #fff;
+  font-size: 14px;
 }
+
 .eh-username{
-  font-weight:800; color:#0f172a; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  font-weight:700; 
+  color:var(--eh-text); 
+  overflow:hidden; 
+  text-overflow:ellipsis; 
+  white-space:nowrap;
+  font-size: 14px;
 }
+
 .eh-logout{
-  padding:.5rem .8rem; border-radius:999px; border:1px solid #e2e8f0; background:#fff; cursor:pointer;
+  padding:10px 16px; 
+  border-radius:20px; 
+  border:2px solid rgba(220, 38, 38, 0.2); 
+  background: linear-gradient(135deg, #fff 0%, #fef2f2 100%);
+  cursor:pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  color: var(--eh-text);
 }
-.eh-logout:hover{ background:#f8fafc; }
 
-/* ===== MegaMenu ===== */
+.eh-logout:hover{ 
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border-color: var(--eh-brand);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+}
+
+/* تحسينات متجاوبة للمستخدم */
+@media (max-width: 1024px) {
+  .eh-userchip {
+    max-width: 200px;
+    padding: 6px 12px;
+  }
+  
+  .eh-avatar {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+  
+  .eh-username {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 768px) {
+  .eh-user {
+    gap: 8px;
+  }
+  
+  .eh-userchip {
+    max-width: 150px;
+  }
+  
+  .eh-login {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+}
+
+/* ===== MegaMenu - محسن ومتجاوب ===== */
 .eh-mega{
-  position:fixed; inset-inline:0; top:var(--header-height);
-  opacity:0; visibility:hidden; transform:none;
-  transition:opacity .18s ease, visibility .18s ease;
-  z-index:70; pointer-events:none;
+  position:fixed; 
+  inset-inline:0; 
+  top: var(--header-height);
+  opacity:0; 
+  visibility:hidden; 
+  transform: translateY(-10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index:70; 
+  pointer-events:none;
+  padding: 0 16px;
 }
-.eh-mega.open{ opacity:1; visibility:visible; pointer-events:auto; }
+
+.eh-mega.open{ 
+  opacity:1; 
+  visibility:visible; 
+  pointer-events:auto;
+  transform: translateY(0);
+}
+
 .eh-mega-wrap{
-  background:#fff; border-radius:16px; box-shadow:var(--eh-shadow);
-  padding:16px 20px; margin:0 auto; max-width:1280px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius:20px; 
+  box-shadow: 0 20px 60px rgba(220, 38, 38, 0.15);
+  padding:24px 28px; 
+  margin:8px auto; 
+  max-width:1280px;
+  border: 1px solid rgba(220, 38, 38, 0.1);
+  backdrop-filter: blur(10px);
 }
+
 .eh-mega-grid{
-  display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:12px;
+  display:grid; 
+  grid-template-columns:repeat(4, minmax(0,1fr)); 
+  gap:16px;
 }
+
 .eh-mega-item{
-  display:flex; flex-direction:column; gap:6px;
-  padding:12px; border:1px solid #eef2f7; border-radius:14px; text-decoration:none; color:var(--eh-text);
-  transition:.18s ease;
+  display:flex; 
+  flex-direction:column; 
+  gap:8px;
+  padding:16px; 
+  border:2px solid rgba(220, 38, 38, 0.1); 
+  border-radius:16px; 
+  text-decoration:none; 
+  color:var(--eh-text);
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #fff 0%, #fef2f2 100%);
+  position: relative;
+  overflow: hidden;
 }
-.eh-mega-item:hover{ background:#f8fafc; transform:translateY(-1px); }
+
+.eh-mega-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(135deg, var(--eh-brand) 0%, var(--eh-accent) 100%);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.eh-mega-item:hover{ 
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  transform:translateY(-4px); 
+  border-color: var(--eh-brand);
+  box-shadow: 0 8px 24px rgba(220, 38, 38, 0.2);
+}
+
+.eh-mega-item:hover::before {
+  transform: scaleX(1);
+}
+
 .eh-mega-icon{
-  display:inline-grid; place-items:center; width:42px; height:42px; border-radius:12px;
-  border:1px solid #e2e8f0; background:#fff; font-size:20px;
+  display:inline-grid; 
+  place-items:center; 
+  width:48px; 
+  height:48px; 
+  border-radius:14px;
+  border:2px solid rgba(220, 38, 38, 0.2); 
+  background: linear-gradient(135deg, #fff 0%, #fef2f2 100%);
+  font-size:22px;
+  color: var(--eh-brand);
+  transition: all 0.3s ease;
 }
-.eh-mega-title{ font-weight:800; }
-.eh-mega-sub{ color:#64748b; font-size:.9rem; }
 
-/* ===== درج الموبايل ===== */
+.eh-mega-item:hover .eh-mega-icon {
+  background: linear-gradient(135deg, var(--eh-brand) 0%, var(--eh-accent) 100%);
+  color: white;
+  transform: scale(1.1);
+}
+
+.eh-mega-title{ 
+  font-weight:700; 
+  font-size: 16px;
+  color: var(--eh-text);
+  margin-bottom: 4px;
+}
+
+.eh-mega-sub{ 
+  color:#64748b; 
+  font-size:14rem; 
+  line-height: 1.4;
+  font-weight: 500;
+}
+
+/* ===== درج الموبايل - محسن ومتجاوب ===== */
 .eh-drawer{
-  position:fixed; inset:0; background:rgba(2,6,23,.45);
-  opacity:0; visibility:hidden; transition:opacity .2s ease, visibility .2s ease;
-  z-index:9999; pointer-events:none;
+  position:fixed; 
+  inset:0; 
+  background:rgba(2,6,23,.6);
+  opacity:0; 
+  visibility:hidden; 
+  transition: all 0.3s ease;
+  z-index:9999; 
+  pointer-events:none;
+  backdrop-filter: blur(4px);
 }
-.eh-drawer.open{ opacity:1; visibility:visible; pointer-events:auto; }
+
+.eh-drawer.open{ 
+  opacity:1; 
+  visibility:visible; 
+  pointer-events:auto; 
+}
+
 .eh-drawer-panel{
-  position:absolute; inset-block:0; inset-inline-start:0; right:0; left:auto;
-  width:min(86vw, 380px); background:#fff; padding:16px; overflow:auto;
-  transform:translateX(110%); transition:transform .25s ease;
-  box-shadow:-8px 0 24px rgba(2,6,23,.15);
+  position:absolute; 
+  inset-block:0; 
+  inset-inline-start:0; 
+  right:0; 
+  left:auto;
+  width:min(90vw, 400px); 
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  padding:20px; 
+  overflow:auto;
+  transform:translateX(110%); 
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: -12px 0 32px rgba(220, 38, 38, 0.15);
+  border-radius: 20px 0 0 20px;
 }
-.eh-drawer.open .eh-drawer-panel{ transform:translateX(0); }
 
+.eh-drawer.open .eh-drawer-panel{ 
+  transform:translateX(0); 
+}
+
+/* تحسينات متجاوبة للدرج */
+@media (max-width: 480px) {
+  .eh-drawer-panel {
+    width: 95vw;
+    padding: 16px;
+  }
+}
+
+/* بحث الدرج - محسن */
 .eh-drawer-search{
-  display:flex; gap:6px; margin-bottom:10px;
-  border:1px solid #e2e8f0; border-radius:12px; padding:6px 8px; background:#f8fafc;
+  display:flex; 
+  gap:8px; 
+  margin-bottom:20px;
+  border:2px solid rgba(220, 38, 38, 0.2); 
+  border-radius:16px; 
+  padding:12px 16px; 
+  background: linear-gradient(135deg, #fff 0%, #fef2f2 100%);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.1);
+  transition: all 0.3s ease;
 }
-.eh-drawer-search input{ flex:1; border:0; background:transparent; outline:none; }
-.eh-drawer-search button{ border:0; background:#fff; border-radius:10px; padding:6px 10px; }
 
-/* روابط الدرج */
-.eh-drawer-link{ display:block; padding:10px 8px; border-radius:10px; color:#0f172a; text-decoration:none; }
-.eh-drawer-link:hover{ background:#f8fafc; }
+.eh-drawer-search:focus-within {
+  border-color: var(--eh-brand);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
 
-.eh-drawer-group{ margin:8px 0; }
+.eh-drawer-search input{ 
+  flex:1; 
+  border:0; 
+  background:transparent; 
+  outline:none; 
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--eh-text);
+}
+
+.eh-drawer-search input::placeholder {
+  color: #9ca3af;
+}
+
+.eh-drawer-search button{ 
+  border:0; 
+  background: linear-gradient(135deg, var(--eh-brand) 0%, var(--eh-accent) 100%);
+  border-radius:12px; 
+  padding:8px 12px; 
+  color: white;
+  transition: all 0.3s ease;
+  font-weight: 600;
+}
+
+.eh-drawer-search button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+}
+
+/* روابط الدرج - محسنة */
+.eh-drawer-link{ 
+  display:flex;
+  align-items: center;
+  gap: 12px;
+  padding:14px 16px; 
+  border-radius:12px; 
+  color: var(--eh-text);
+  text-decoration:none; 
+  font-weight: 600;
+  transition: all 0.3s ease;
+  margin-bottom: 4px;
+}
+
+.eh-drawer-link:hover{ 
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  color: var(--eh-brand);
+  transform: translateX(8px);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.1);
+}
+
+.eh-drawer-link.active {
+  background: linear-gradient(135deg, var(--eh-brand) 0%, var(--eh-accent) 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+/* مجموعات الدرج */
+.eh-drawer-group{ 
+  margin:16px 0; 
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(220, 38, 38, 0.1);
+}
+
 .eh-drawer-group > summary{
-  cursor:pointer; padding:10px 8px; border-radius:10px; background:#f8fafc;
-  margin-bottom:6px; font-weight:700;
+  cursor:pointer; 
+  padding:16px 20px; 
+  border-radius:12px; 
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  margin-bottom:8px; 
+  font-weight:700;
+  color: var(--eh-brand);
+  transition: all 0.3s ease;
+  border-bottom: 1px solid rgba(220, 38, 38, 0.1);
 }
-.eh-drawer-group a{ display:block; padding:8px 10px; border-radius:8px; color:#0f172a; text-decoration:none; }
 
-/* إظهار/إخفاء حسب المقاسات */
+.eh-drawer-group > summary:hover {
+  background: linear-gradient(135deg, var(--eh-brand) 0%, var(--eh-accent) 100%);
+  color: white;
+}
+
+.eh-drawer-group a{ 
+  display:flex;
+  align-items:center;
+  gap: 12px;
+  padding:12px 20px; 
+  border-radius:0; 
+  color: var(--eh-text);
+  text-decoration:none; 
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border-bottom: 1px solid rgba(220, 38, 38, 0.05);
+}
+
+.eh-drawer-group a:last-child {
+  border-bottom: none;
+}
+
+.eh-drawer-group a:hover {
+  background: rgba(220, 38, 38, 0.05);
+  color: var(--eh-brand);
+  padding-right: 24px;
+}
+
+/* ===== Media Queries - تحسينات شاملة للتجاوب ===== */
+
+/* شاشات كبيرة جداً (1400px+) */
+@media (min-width: 1400px) {
+  .eh-container {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  
+  .eh-search-input {
+    width: 320px;
+  }
+}
+
+/* شاشات كبيرة (1200px - 1399px) */
+@media (min-width: 1200px) and (max-width: 1399px) {
+  .eh-container {
+    padding: 0 20px;
+  }
+}
+
+/* شاشات متوسطة-كبيرة (992px+) */
 @media (min-width: 992px){
   .eh-burger{ display:none; }
   .eh-nav{ display:flex; }
@@ -232,14 +817,131 @@
   .eh-login{ display:inline-flex; }
   .eh-user{ display:flex; }
 }
+
+/* شاشات متوسطة (768px - 991px) */
 @media (max-width: 991.98px){
   .eh-nav{ display:none; }
   .eh-search{ display:none; }
   .eh-mega{ display:none; }
+  
+  .eh-container {
+    height: var(--header-height-mobile);
+  }
+  
+  .eh-actions {
+    gap: 8px;
+  }
 }
+
+/* شاشات صغيرة-متوسطة (576px - 767px) */
+@media (max-width: 767.98px) {
+  .eh-container {
+    padding: 0 12px;
+    gap: 8px;
+  }
+  
+  .eh-brand {
+    margin-left: 8px;
+  }
+  
+  .eh-actions {
+    gap: 6px;
+  }
+}
+
+/* شاشات صغيرة (480px - 575px) */
+@media (max-width: 575.98px) {
+  .eh-brand-caption{ display:none; }
+  
+  .eh-container {
+    padding: 0 8px;
+    gap: 6px;
+  }
+  
+  .eh-brand {
+    margin-left: 4px;
+  }
+  
+  .eh-iconbtn {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .eh-burger {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* شاشات صغيرة جداً (أقل من 480px) */
+@media (max-width: 479.98px) {
+  .eh-container {
+    height: 50px;
+    padding: 0 6px;
+    gap: 4px;
+  }
+  
+  .eh-brand img {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .eh-iconbtn {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .eh-burger {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .eh-drawer-panel {
+    width: 100vw;
+    border-radius: 0;
+  }
+}
+
+/* تحسينات MegaMenu للشاشات المختلفة */
 @media (max-width: 1200px){
   .eh-mega-grid{ grid-template-columns: repeat(3, minmax(0,1fr)); }
 }
+
 @media (max-width: 768px){
   .eh-mega-grid{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+
+@media (max-width: 480px){
+  .eh-mega-grid{ grid-template-columns: 1fr; }
+  
+  .eh-mega-wrap {
+    padding: 12px 16px;
+  }
+}
+
+/* تحسينات إضافية للأجهزة اللوحية */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
+  .eh-container {
+    height: 65px;
+  }
+  
+  .eh-brand img {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* تحسينات للأجهزة اللوحية في الوضع الأفقي */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+  .eh-search-input {
+    width: 200px;
+  }
+}
+
+/* تحسين للشاشات عالية الكثافة */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .eh-brand img {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
 }

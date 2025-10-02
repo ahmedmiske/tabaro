@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Carousel } from 'react-bootstrap';
+import { Carousel } from './ui';
 import { Link } from 'react-router-dom';
 import './CarouselComponent.css';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';

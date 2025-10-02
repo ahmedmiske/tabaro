@@ -1,5 +1,5 @@
 import React from 'react';
-import { Form, Button, InputGroup, Alert } from 'react-bootstrap';
+import { Form, Button, InputGroup, Alert } from './ui';
 function DonationRequestConfirmation() {
     const [confirmMsg, setConfirmMsg] = React.useState('');
     const [confirmAmount, setConfirmAmount] = React.useState('');

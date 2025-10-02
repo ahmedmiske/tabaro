@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Container, Row, Col, Card, Button, Spinner, Alert } from 'react-bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import { Container, Row, Col, Card, Button, Spinner, Alert } from './ui';
+
 import './CampaignDetails.css';
 import BackButton from './BackButton';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';

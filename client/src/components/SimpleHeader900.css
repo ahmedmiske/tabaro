@@ -1,0 +1,109 @@
+/* CSS personalizado para breakpoint de 900px en SimpleHeader */
+
+/* Navegación principal - visible desde 900px */
+.nav-900 {
+  display: none;
+}
+
+@media (min-width: 1220px) {
+  .nav-900 {
+    display: flex !important;
+  }
+}
+
+/* Botón hamburguesa - visible hasta 900px */
+.burger-900 {
+  display: block;
+}
+
+@media (min-width: 1220px) {
+  .burger-900 {
+    display: none !important;
+  }
+}
+
+/* Asegurar que el botón hamburguesa aparezca al final en RTL */
+.burger-900 {
+  margin-left: auto;
+  order: 1;
+}
+
+/* Menú móvil - visible hasta 900px */
+.mobile-menu-900 {
+  display: block;
+}
+
+@media (min-width: 1220px) {
+  .mobile-menu-900 {
+    display: none !important;
+  }
+}
+
+/* Área de login/registro - visible desde 900px */
+.login-900 {
+  display: none;
+}
+
+@media (min-width: 1220px) {
+  .login-900 {
+    display: flex !important;
+  }
+}
+
+/* Espaciado del área de usuario */
+.user-900-space {
+  column-gap: 0.5rem; /* space-x-2 */
+}
+
+@media (min-width: 900px) {
+  .user-900-space {
+    column-gap: 1rem !important; /* space-x-4 */
+  }
+}
+
+/* Padding del área de usuario */
+.user-900-px {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+@media (min-width: 900px) {
+  .user-900-px {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+}
+
+/* Texto del área de usuario - visible desde 900px */
+.user-900-text {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .user-900-text {
+    display: inline !important;
+  }
+}
+
+/* Ajustes adicionales para mejor experiencia en diferentes tamaños */
+@media (min-width: 640px) and (max-width: 899px) {
+  /* En tablets medianos, mostrar algunos textos */
+  .user-900-text {
+    display: inline;
+  }
+}
+
+/* Asegurar que el menú hamburguesa funcione bien en tablets */
+@media (min-width: 768px) and (max-width: 899px) {
+  .burger-900 button {
+    padding: 0.75rem;
+  }
+  
+  .mobile-menu-900 {
+    font-size: 1rem;
+  }
+  
+  .mobile-menu-900 .space-y-1 > * + * {
+    margin-top: 0.5rem;
+  }
+}

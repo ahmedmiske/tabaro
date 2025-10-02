@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Container } from 'react-bootstrap';
+import { Card, Container } from './ui';
 import './FindeNot.css';
 
 const FindeNot = () => {

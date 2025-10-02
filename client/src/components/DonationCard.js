@@ -1,79 +1,77 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Card, ListGroup } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import "./DonationCard.css";
+import { Card, Badge } from "./ui";
 
 const DonationCard = ({ donation }) => {
   return (
-    <div className="donation-card">
-      <Card className="h-100 shadow-sm border-0 donation-card-box">
-        {/* رأس البطاقة مع نوع الدم + شارة المستعجل */}
-        <Card.Header
-          className="text-white position-relative"
-          style={{
-            backgroundImage: `url(${donation.headerImageUrl || "/images/blood-request-fundo.png"})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            height: "150px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontWeight: "bold",
-            fontSize: "1.4rem",
-          }}
-        >
-          {donation.bloodType || "نوع غير معروف"}
+    <Card className="h-full" shadow="md">
+      {/* رأس البطاقة مع نوع الدم + شارة المستعجل */}
+      <div
+        className="relative h-36 flex items-center justify-center text-white font-bold text-xl bg-cover bg-center"
+        style={{
+          backgroundImage: `url(${donation.headerImageUrl || "/images/blood-request-fundo.png"})`,
+        }}
+      >
+        <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+        <span className="relative z-10">{donation.bloodType || "نوع غير معروف"}</span>
 
-          {/* شارة المستعجل */}
-          {donation.isUrgent && (
-            <span className="urgent-badge position-absolute top-0 end-0 m-2">
-              <i className="fas fa-exclamation-triangle me-1"></i> مستعجل
+        {/* شارة المستعجل */}
+        {donation.isUrgent && (
+          <Badge 
+            variant="danger" 
+            className="absolute top-2 right-2 z-10"
+          >
+            <i className="fas fa-exclamation-triangle ml-1"></i> مستعجل
+          </Badge>
+        )}
+      </div>
+
+      {/* محتوى البطاقة */}
+      <Card.Body className="text-right">
+        <p className="font-bold text-text-color mb-3">
+          {donation.description || "لا يوجد وصف للحالة."}
+        </p>
+        
+        <div className="space-y-2 text-sm text-text-muted">
+          <p className="flex items-center">
+            <i className="fas fa-calendar-day text-red-500 ml-2"></i>
+            <strong>آخر أجل:</strong>
+            <span className="mr-2">
+              {donation.deadline ? new Date(donation.deadline).toLocaleDateString() : "غير متوفر"}
             </span>
-          )}
-        </Card.Header>
+          </p>
+          
+          <p className="flex items-center">
+            <i className="fas fa-map-marker-alt text-blue-500 ml-2"></i>
+            <strong>الموقع:</strong>
+            <span className="mr-2">{donation.location || "غير متوفر"}</span>
+          </p>
+          
+          <p className="flex items-center">
+            <i className="fas fa-clock text-gray-500 ml-2"></i>
+            <strong>تاريخ الإضافة:</strong>
+            <span className="mr-2">
+              {donation.createdAt ? new Date(donation.createdAt).toLocaleDateString() : "غير متوفر"}
+            </span>
+          </p>
+        </div>
+      </Card.Body>
 
-        {/* محتوى البطاقة */}
-        <Card.Body style={{ direction: "rtl", padding: "15px" }}>
-          <Card.Text className="fw-bold">
-            {donation.description || "لا يوجد وصف للحالة."}
-          </Card.Text>
-          <Card.Text>
-            <i className="fas fa-calendar-day text-danger me-2"></i>
-            <strong>آخر أجل:</strong>{" "}
-            {donation.deadline ? new Date(donation.deadline).toLocaleDateString() : "غير متوفر"}
-          </Card.Text>
-          <Card.Text>
-            <i className="fas fa-map-marker-alt text-primary me-2"></i>
-            <strong>الموقع:</strong> {donation.location || "غير متوفر"}
-          </Card.Text>
-        </Card.Body>
-
-        {/* تاريخ الإضافة */}
-        <ListGroup className="list-group-flush">
-          <ListGroup.Item className="text-muted" style={{ direction: "rtl" }}>
-            <i className="fas fa-clock me-2"></i>
-            <strong>تاريخ الإضافة:</strong>{" "}
-            {donation.createdAt ? new Date(donation.createdAt).toLocaleDateString() : "غير متوفر"}
-          </ListGroup.Item>
-        </ListGroup>
-
-        {/* الأزرار */}
-        <Card.Footer className="d-flex justify-content-between">
-          <Link to={`/blood-donation-details/${donation._id}`}>
-            <button className="btn-details">
-              <i className="fas fa-eye me-1"></i> تفاصيل
-            </button>
-          </Link>
-          <Link to={`/blood-donation-details/${donation._id}`}>
-            <button className="btn-donate">
-              <i className="fas fa-hand-holding-heart me-1"></i> ساهم بإنقاذ حياة
-            </button>
-          </Link>
-        </Card.Footer>
-        {/* نهاية الأزرار */}
-      </Card>
-    </div>
+      {/* الأزرار */}
+      <Card.Footer className="flex justify-between gap-3">
+        <Link to={`/blood-donation-details/${donation._id}`} className="flex-1">
+          <button className="w-full px-4 py-2 border border-ui-primary text-ui-primary rounded-lg hover:bg-ui-primary hover:text-white transition-colors text-sm font-medium">
+            <i className="fas fa-eye ml-1"></i> تفاصيل
+          </button>
+        </Link>
+        <Link to={`/blood-donation-details/${donation._id}`} className="flex-1">
+          <button className="w-full px-4 py-2 bg-ui-primary text-white rounded-lg hover:bg-ui-primary-600 transition-colors text-sm font-medium">
+            <i className="fas fa-hand-holding-heart ml-1"></i> ساهم بإنقاذ حياة
+          </button>
+        </Link>
+      </Card.Footer>
+    </Card>
   );
 };
 

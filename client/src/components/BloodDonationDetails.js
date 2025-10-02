@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Badge, Button, Card, Spinner, Table, Alert, Form } from 'react-bootstrap';
+import { Badge, Button, Card, Spinner, Alert, Form, FormControl, Table, TableHead, TableBody, TableRow, TableCell } from './ui';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { assetUrl } from '../utils/urls';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';

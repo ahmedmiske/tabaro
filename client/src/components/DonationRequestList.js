@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
-import { Card, Button, Form, Spinner, Badge, Row } from 'react-bootstrap';
+import { Card, Button, Form, Spinner, Badge, Row } from './ui';
 import { Link } from 'react-router-dom';
 import Title from './Title';
 import FindeNot from './FindeNot';

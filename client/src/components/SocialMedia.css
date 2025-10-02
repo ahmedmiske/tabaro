@@ -1,25 +1,26 @@
 /* يظهر في الجانب الأيمن على الشاشات الكبيرة */
 .social-media {
     position: fixed;
-    top: 50%;
-    right: 0;
-    transform: translateY(-50%);
+    z-index: 333;
+    top: 200px;
+    left: 10px;
     display: flex;
-    flex-direction: column;
+    flex-direction: column; 
     gap: 10px;
   }
   
   /* إخفاء على الشاشات الصغيرة */
   @media (max-width: 767.98px) {
     .social-media {
-      position: static;
+      position: fixed;
+      z-index: 333;
+      top: 170px;
+      left: 10px;
       transform: none;
-      flex-direction: row;
+      flex-direction: column;
       justify-content: center;
       padding: 10px;
       width: 100%;
-      bottom: 0;
-      background: #f8f9fa; /* لون الخلفية لتحديد الشريط */
     }
   }
   

@@ -1,33 +1,67 @@
-/* ====== Reset & base ====== */
-*{ box-sizing: border-box; }
-html{ scroll-behavior: smooth; }
-html:focus-within{ scroll-behavior: smooth; }
+/* ====== Reset & Base Styles ====== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-:root{
-  /* خطوط وأحجام عامة */
+html {
+  scroll-behavior: smooth;
+  height: 100%;
+}
+
+body {
+  height: 100%;
+  font-family: 'Cairo', system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  line-height: 1.6;
+  color: #1f2937;
+  background-color: #ffffff;
+  direction: rtl;
+  text-align: right;
+  overflow-x: hidden;
+}
+
+:root {
+  /* ألوان النظام الجديد */
+  --primary-red: #dc2626;
+  --primary-red-hover: #b91c1c;
+  --primary-red-light: #fef2f2;
+  --primary-red-dark: #991b1b;
+  
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+
+  --green-500: #10b981;
+  --green-600: #059669;
+
+  /* خطوط */
   --font-family: 'Cairo', system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
-  --font-family-alt: 'Roboto', system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
-  --font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  --font-size: 16px;
-  --font-size-small: 14px;
-  --font-size-large: 18px;
-  --font-weight-normal: 400;
-  --font-weight-bold: 700;
-  --font-weight-bolder: 900;
-  --line-height: 1.6;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
 
-  /* قيم المشروع القديمة (للتوافق) */
-  --main-color: #4CAF50;
-  --main-color-hover: #66BB6A;
-  --main-color-active: #388E3C;
-  --main-color-alt: #2E7D32;
-  --main-color-fundo: #EFEFEF;
-  --color-border:  #dfe2e2;
-  --color-primary: #1E88E5;
-  --color-secondary: #FF7043;
-
-  /* ألوان الشعار */
-  --brand-green: #12B279;
+  /* ظلال */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  
+  /* متغيرات التوافق مع الكود القديم */
+  --main-color: var(--primary-red);
+  --main-color-hover: var(--primary-red-hover);
+  --color-border: var(--gray-200);
   --brand-green-600: #0e9363;
   --brand-orange: #FF7A45;
   --brand-orange-600: #E46432;
@@ -44,74 +78,333 @@ html:focus-within{ scroll-behavior: smooth; }
 
   --radius-sm: 8px;
   --radius-md: 12px;
-  --radius-lg: 22px;
-
-  --shadow-1: 0 4px 16px rgba(0,0,0,.08);
-  --shadow-2: 0 12px 40px rgba(0,0,0,.14);
-
-  --main-transition: 0.3s;
 }
 
-body{
-  font-family: var(--font-family);
-  font-size: var(--font-size);
-  line-height: var(--line-height);
-  color: var(--text-color);
-  margin: 0;
-  min-height: 100vh;
-  background: var(--bg-page);
+/* ====== Layout الرئيسي ====== */
+#root {
+  height: 100%;
+}
+
+.page-app {
   display: flex;
   flex-direction: column;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  background-color: var(--gray-50);
 }
 
-/* صفحات عامة */
-.page-app{ display:flex; flex-direction:column; min-height:100vh; }
-.page-wrapper{ width:100%; padding:0; margin:0; flex:1; }
-
-/* عناصر عامة */
-img{ max-width:100%; height:auto; display:block; }
-a{ color: var(--ui-primary); text-decoration: none; }
-a:hover, a:focus-visible{ text-decoration: underline; }
-button, .btn{ cursor:pointer; }
-
-/* وصولية */
-:focus-visible{ outline: 3px solid var(--ui-accent); outline-offset: 2px; }
-
-/* تخصيص أزرار Bootstrap بسرعة */
-.btn-primary,
-.btn.go-landing{
-  background: var(--ui-primary) !important;
-  border: 0 !important;
-}
-.btn-primary:hover,
-.btn.go-landing:hover,
-.btn.go-landing:focus-visible{
-  background: var(--ui-primary-600) !important;
+.page-wrapper {
+  flex: 1;
+  padding: 0;
+  margin: 0;
+  background-color: #ffffff;
 }
 
-/* RTL helpers */
-[dir="rtl"] .text-start{ text-align: right !important; }
-[dir="rtl"] .text-end{ text-align: left !important; }
-
-@media (max-width: 360px){
-  body{ font-size: 15px; }
+/* ====== Typography ====== */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: 1rem;
 }
 
-/* ===== ربط الهيدر بالمحتوى ===== */
-.page-app{
-  /* يحجز فراغًا تحت الهيدر الثابت (يتغير تلقائيًا حسب نقطة الانكسار) */
-  padding-top: var(--appbar-h);
-  /* لمنع اختباء الأقسام المرتبطة بالهاش خلف الهيدر */
-  scroll-padding-top: var(--appbar-h);
+h1 {
+  font-size: var(--font-size-3xl);
 }
 
-/* إن كنت تستخدم سلوك إخفاء/إظهار في App.js */
-.header-container{ transition: transform .24s ease; }
-.header-container.hide{ transform: translateY(calc(-1 * var(--appbar-h))); }
+h2 {
+  font-size: var(--font-size-2xl);
+}
+
+h3 {
+  font-size: var(--font-size-xl);
+}
+
+p {
+  margin-bottom: 1rem;
+  color: var(--gray-700);
+}
+
+/* ====== Links ====== */
+a {
+  color: var(--primary-red);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--primary-red-hover);
+  text-decoration: underline;
+}
+
+/* ====== Buttons ====== */
+.btn-primary {
+  background-color: var(--primary-red);
+  border-color: var(--primary-red);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-red-hover);
+  border-color: var(--primary-red-hover);
+  color: white;
+}
+
+/* ====== Forms ====== */
+.form-control {
+  border: 1px solid var(--gray-300);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  font-size: var(--font-size-base);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--primary-red);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+/* ====== Cards ====== */
+.card {
+  background: white;
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--gray-200);
+  overflow: hidden;
+}
+
+.card-header {
+  background-color: var(--gray-50);
+  border-bottom: 1px solid var(--gray-200);
+  padding: 1rem;
+}
+
+.card-body {
+  padding: 1rem;
+}
+
+/* ====== Utilities ====== */
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-muted {
+  color: var(--gray-500);
+}
+
+.shadow-sm {
+  box-shadow: var(--shadow-sm);
+}
+
+.shadow {
+  box-shadow: var(--shadow);
+}
+
+.shadow-md {
+  box-shadow: var(--shadow-md);
+}
+
+.shadow-lg {
+  box-shadow: var(--shadow-lg);
+}
+
+/* ====== Responsive ====== */
+@media (max-width: 768px) {
+  .page-wrapper {
+    padding: 0;
+  }
+  
+  h1 {
+    font-size: var(--font-size-2xl);
+  }
+  
+  h2 {
+    font-size: var(--font-size-xl);
+  }
+}
+
+/* ====== RTL Support ====== */
+[dir="rtl"] .text-start { 
+  text-align: right !important; 
+}
+
+[dir="rtl"] .text-end { 
+  text-align: left !important; 
+}
+
+/* ====== Animations ====== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* ====== Header Transitions ====== */
+.header-container {
+  transition: transform 0.3s ease;
+}
+
+.header-container.hide {
+  transform: translateY(-100%);
+}
+
+/* ====== Scroll Behavior ====== */
+html {
+  scroll-padding-top: 4rem;
+}
 
 /* دعم حواف أجهزة iOS ذات النتوء */
 @supports (padding: max(0px)){
   .header-container{ padding-top: env(safe-area-inset-top); }
+}
+
+/* ====== Bootstrap Override & Layout Fixes ====== */
+
+/* إزالة جميع أنماط Bootstrap المتبقية */
+.container-fluid,
+.container,
+.row,
+.col,
+.col-md-6,
+.col-lg-4,
+.card,
+.card-body,
+.btn,
+.btn-primary,
+.btn-secondary,
+.form-control,
+.form-group {
+  all: unset;
+  display: revert;
+  box-sizing: border-box;
+}
+
+/* إصلاح مشاكل التداخل */
+.page-app > * {
+  position: relative;
+  z-index: auto;
+}
+
+.page-wrapper {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+}
+
+/* منع التداخل بين العناصر */
+.no-overlap {
+  clear: both;
+  position: relative;
+  z-index: auto;
+}
+
+.section-spacing {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  padding: 1rem 0;
+}
+
+/* إعداد مناسب للشاشات الكبيرة */
+@media (min-width: 1024px) {
+  .nav-menu {
+    display: flex !important;
+  }
+  
+  .mobile-menu-button {
+    display: none !important;
+  }
+}
+
+/* إصلاح عرض القوائم على الشاشات الكبيرة */
+@media (min-width: 768px) {
+  .desktop-nav {
+    display: flex;
+    align-items: center;
+  }
+  
+  .mobile-nav {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .desktop-nav {
+    display: none;
+  }
+  
+  .mobile-nav {
+    display: block;
+  }
+}
+
+/* تحسين أداء الـ layout */
+* {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-perspective: 1000px;
+  perspective: 1000px;
+}
+
+/* منع المحتوى من الخروج من الشاشة */
+.app-container {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* إصلاح مشاكل الـ z-index */
+.header-container {
+  z-index: 1000;
+}
+
+.social-media-component {
+  z-index: 999;
+}
+
+.footer {
+  z-index: 998;
+}
+
+.main-content {
+  z-index: 1;
+}
+
+/* تحسين الخطوط */
+body, * {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* إعادة تعيين النماذج */
+input, button, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+/* تحسين أداء التمرير */
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+body {
+  overflow-x: hidden;
 }

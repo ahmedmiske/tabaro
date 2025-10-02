@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Container, Card, Row, Col, Button, Form, Alert } from "react-bootstrap";
 import { useNavigate, Link } from "react-router-dom";
+import { Container, Card, Button, Form, Row, Col, Alert } from "./ui";
 import "./About.css";
 
 function About() {
@@ -92,202 +92,225 @@ function About() {
   };
 
   return (
-    <section className="about-container" aria-labelledby="about-title" ref={sectionRef}>
+    <section className="py-16 bg-bg-page" aria-labelledby="about-title" ref={sectionRef}>
       <Container>
         {/* تعريف المنصة */}
-        <header className="about-definition reveal" data-animate="up">
-          <h2 id="about-title" className="about-h2">عن منصة تبرع</h2>
-          <p className="about-lead">
+        <header className="text-center mb-16 reveal" data-animate="up">
+          <h2 id="about-title" className="text-4xl font-bold text-text-color mb-6">عن منصة تبرع</h2>
+          <p className="text-xl text-text-muted mb-4 max-w-4xl mx-auto leading-relaxed">
             منصة تبرع تجمع بين من يرغب في العطاء ومن يسعى للدعم، عبر تواصل مباشر وآمن.
             نسهل خطوات التبرع ونضاعف أثره في المجتمع.
           </p>
-          <p>
-            المنصّة تتيح طلبات <strong>التبرع بالدم</strong> و<strong>التبرع المالي</strong> و<strong>التبرع العيني</strong>،
-            مع إمكانية نشر <strong>الإعلانات الاجتماعية</strong> وتنظيم <strong>حملات الجمعيات</strong>.
+          <p className="text-lg text-text-muted max-w-3xl mx-auto">
+            المنصّة تتيح طلبات <strong className="text-ui-primary">التبرع بالدم</strong> و<strong className="text-ui-primary">التبرع المالي</strong> و<strong className="text-ui-primary">التبرع العيني</strong>،
+            مع إمكانية نشر <strong className="text-ui-accent">الإعلانات الاجتماعية</strong> وتنظيم <strong className="text-ui-accent">حملات الجمعيات</strong>.
           </p>
         </header>
 
-        {/* الخدمات / الأنواع (أضفنا 3 بطاقات للإعلانات الاجتماعية) */}
-        <section aria-label="الخدمات المتاحة" className="about-content">
-          <Row xs={1} md={3} className="g-4">
+        {/* الخدمات / الأنواع */}
+        <section aria-label="الخدمات المتاحة" className="mb-20">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* تبرع بالدم */}
-            <Col className="reveal" data-animate="right">
-              <Card {...cardProps("اذهب إلى صفحة التبرعات - التبرع بالدم", "/donations")}>
-                <div className="card-accent" aria-hidden="true" />
-                <Card.Body>
-                  <div className="card-icon" aria-hidden="true">🩸</div>
-                  <Card.Title as="h3" className="card-title">تبرع بالدم</Card.Title>
-                  <p>ساهم في إنقاذ الأرواح عبر تبرع آمن وسريع.</p>
-                  <Button variant="outline-success" size="sm">استكشف الطلبات</Button>
+            <div className="reveal" data-animate="right">
+              <Card 
+                {...cardProps("اذهب إلى صفحة التبرعات - التبرع بالدم", "/donations")}
+                className="h-full hover:shadow-lg transition-all duration-300 cursor-pointer border-t-4 border-t-red-500"
+                shadow="md"
+              >
+                <Card.Body className="text-center p-8">
+                  <div className="text-6xl mb-4" aria-hidden="true">🩸</div>
+                  <h3 className="text-xl font-bold text-text-color mb-3">تبرع بالدم</h3>
+                  <p className="text-text-muted mb-6">ساهم في إنقاذ الأرواح عبر تبرع آمن وسريع.</p>
+                  <Button variant="outline" size="sm">استكشف الطلبات</Button>
                 </Card.Body>
               </Card>
-            </Col>
+            </div>
 
             {/* تبرع مالي */}
-            <Col className="reveal" data-animate="up">
-              <Card {...cardProps("اذهب إلى صفحة التبرعات - التبرع المالي", "/donations")}>
-                <div className="card-accent" aria-hidden="true" />
-                <Card.Body>
-                  <div className="card-icon" aria-hidden="true">💳</div>
-                  <Card.Title as="h3" className="card-title">تبرع مالي</Card.Title>
-                  <p>ادعم حالات عاجلة بمساهمة آمنة وشفافة.</p>
-                  <Button variant="outline-success" size="sm">استكشف الطلبات</Button>
+            <div className="reveal" data-animate="up">
+              <Card 
+                {...cardProps("اذهب إلى صفحة التبرعات - التبرع المالي", "/donations")}
+                className="h-full hover:shadow-lg transition-all duration-300 cursor-pointer border-t-4 border-t-green-500"
+                shadow="md"
+              >
+                <Card.Body className="text-center p-8">
+                  <div className="text-6xl mb-4" aria-hidden="true">💳</div>
+                  <h3 className="text-xl font-bold text-text-color mb-3">تبرع مالي</h3>
+                  <p className="text-text-muted mb-6">ادعم حالات عاجلة بمساهمة آمنة وشفافة.</p>
+                  <Button variant="outline" size="sm">استكشف الطلبات</Button>
                 </Card.Body>
               </Card>
-            </Col>
+            </div>
 
             {/* تبرع عيني */}
-            <Col className="reveal" data-animate="left">
-              <Card {...cardProps("اذهب إلى صفحة التبرعات - التبرع العيني", "/donations")}>
-                <div className="card-accent" aria-hidden="true" />
-                <Card.Body>
-                  <div className="card-icon" aria-hidden="true">🎁</div>
-                  <Card.Title as="h3" className="card-title">تبرع عيني</Card.Title>
-                  <p>قدّم ملابس، طعامًا أو أدوات لتلبية احتياجات عاجلة.</p>
-                  <Button variant="outline-success" size="sm">استكشف الطلبات</Button>
+            <div className="reveal" data-animate="left">
+              <Card 
+                {...cardProps("اذهب إلى صفحة التبرعات - التبرع العيني", "/donations")}
+                className="h-full hover:shadow-lg transition-all duration-300 cursor-pointer border-t-4 border-t-blue-500"
+                shadow="md"
+              >
+                <Card.Body className="text-center p-8">
+                  <div className="text-6xl mb-4" aria-hidden="true">🎁</div>
+                  <h3 className="text-xl font-bold text-text-color mb-3">تبرع عيني</h3>
+                  <p className="text-text-muted mb-6">قدّم ملابس، طعامًا أو أدوات لتلبية احتياجات عاجلة.</p>
+                  <Button variant="outline" size="sm">استكشف الطلبات</Button>
                 </Card.Body>
               </Card>
-            </Col>
+            </div>
 
             {/* تطوّع */}
-            <Col className="reveal" data-animate="right">
-              <Card {...cardProps("اذهب إلى الإعلانات الاجتماعية - التطوع", "/announcements")}>
-                <div className="card-accent" aria-hidden="true" />
-                <Card.Body>
-                  <div className="card-icon" aria-hidden="true">🙋‍♂️</div>
-                  <Card.Title as="h3" className="card-title">تطوّع</Card.Title>
-                  <p>انضم لفرق مساعدة ميدانية أو رقمية حسب وقتك.</p>
-                  <Button variant="outline-success" size="sm">استكشف الفرص</Button>
+            <div className="reveal" data-animate="right">
+              <Card 
+                {...cardProps("اذهب إلى الإعلانات الاجتماعية - التطوع", "/announcements")}
+                className="h-full hover:shadow-lg transition-all duration-300 cursor-pointer border-t-4 border-t-purple-500"
+                shadow="md"
+              >
+                <Card.Body className="text-center p-8">
+                  <div className="text-6xl mb-4" aria-hidden="true">🙋‍♂️</div>
+                  <h3 className="text-xl font-bold text-text-color mb-3">تطوّع</h3>
+                  <p className="text-text-muted mb-6">انضم لفرق مساعدة ميدانية أو رقمية حسب وقتك.</p>
+                  <Button variant="outline" size="sm">استكشف الفرص</Button>
                 </Card.Body>
               </Card>
-            </Col>
+            </div>
 
             {/* أفكار ومبادرات */}
-            <Col className="reveal" data-animate="up">
-              <Card {...cardProps("اذهب إلى الإعلانات الاجتماعية - مشاركة الأفكار", "/announcements")}>
-                <div className="card-accent" aria-hidden="true" />
-                <Card.Body>
-                  <div className="card-icon" aria-hidden="true">💡</div>
-                  <Card.Title as="h3" className="card-title">أفكار ومبادرات</Card.Title>
-                  <p>شارك مبادرتك واجمع متطوعين لتنفيذها.</p>
-                  <Button variant="outline-success" size="sm">شارك فكرة</Button>
+            <div className="reveal" data-animate="up">
+              <Card 
+                {...cardProps("اذهب إلى الإعلانات الاجتماعية - مشاركة الأفكار", "/announcements")}
+                className="h-full hover:shadow-lg transition-all duration-300 cursor-pointer border-t-4 border-t-yellow-500"
+                shadow="md"
+              >
+                <Card.Body className="text-center p-8">
+                  <div className="text-6xl mb-4" aria-hidden="true">💡</div>
+                  <h3 className="text-xl font-bold text-text-color mb-3">أفكار ومبادرات</h3>
+                  <p className="text-text-muted mb-6">شارك مبادرتك واجمع متطوعين لتنفيذها.</p>
+                  <Button variant="outline" size="sm">شارك فكرة</Button>
                 </Card.Body>
               </Card>
-            </Col>
+            </div>
 
             {/* مفقودات */}
-            <Col className="reveal" data-animate="left">
-              <Card {...cardProps("اذهب إلى الإعلانات الاجتماعية - المفقودات", "/announcements")}>
-                <div className="card-accent" aria-hidden="true" />
-                <Card.Body>
-                  <div className="card-icon" aria-hidden="true">🔎</div>
-                  <Card.Title as="h3" className="card-title">مفقودات</Card.Title>
-                  <p>انشر/ابحث عن مفقودات وساعد أصحابها في استرجاعها.</p>
-                  <Button variant="outline-success" size="sm">اعرض الإعلانات</Button>
+            <div className="reveal" data-animate="left">
+              <Card 
+                {...cardProps("اذهب إلى الإعلانات الاجتماعية - المفقودات", "/announcements")}
+                className="h-full hover:shadow-lg transition-all duration-300 cursor-pointer border-t-4 border-t-orange-500"
+                shadow="md"
+              >
+                <Card.Body className="text-center p-8">
+                  <div className="text-6xl mb-4" aria-hidden="true">🔎</div>
+                  <h3 className="text-xl font-bold text-text-color mb-3">مفقودات</h3>
+                  <p className="text-text-muted mb-6">انشر/ابحث عن مفقودات وساعد أصحابها في استرجاعها.</p>
+                  <Button variant="outline" size="sm">اعرض الإعلانات</Button>
                 </Card.Body>
               </Card>
-            </Col>
-          </Row>
+            </div>
+          </div>
         </section>
 
         {/* أثر المنصة — شارات دائرية */}
         <section className="about-impact reveal" data-animate="up" aria-label="أثر المنصة بالأرقام">
-          <Row xs={1} md={3} className="g-3">
-            <Col>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
               <div className="kpi-card" role="group" aria-label="تبرعات ناجحة">
                 <div className="kpi-ring">
                   <div className="kpi-value" data-target="1240">0</div>
                 </div>
                 <div className="kpi-label">تبرعًا ناجحًا</div>
               </div>
-            </Col>
-            <Col>
+            </div>
+            <div>
               <div className="kpi-card" role="group" aria-label="حملات مفعّلة">
                 <div className="kpi-ring">
                   <div className="kpi-value" data-target="85">0</div>
                 </div>
                 <div className="kpi-label">حملة مفعّلة</div>
               </div>
-            </Col>
-            <Col>
+            </div>
+            <div>
               <div className="kpi-card" role="group" aria-label="متبرعين موثّقين">
                 <div className="kpi-ring">
                   <div className="kpi-value" data-target="530">0</div>
                 </div>
                 <div className="kpi-label">متبرعًا موثّقًا</div>
               </div>
-            </Col>
-          </Row>
+            </div>
+          </div>
         </section>
 
         {/* الاستمارة مع الشروط */}
         <section className="about-form reveal" data-animate="up" aria-labelledby="form-title">
           <h3 id="form-title" className="about-h3">استفسار سريع</h3>
           {!sent ? (
-            <Form noValidate onSubmit={handleSubmit} className="styled-form">
-              <Row className="g-3">
-                <Col md={6}>
-                  <Form.Label htmlFor="name">الاسم الكامل</Form.Label>
+            <Form onSubmit={handleSubmit} className="styled-form">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Form.Label htmlFor="name" required>الاسم الكامل</Form.Label>
                   <Form.Control
                     id="name" name="name" type="text" placeholder="مثال: أحمد مسكه"
                     value={form.name} onChange={handleChange} onBlur={handleBlur}
-                    aria-invalid={touched.name && !!errors.name} aria-describedby="nameHelp"
-                    required minLength={3} className={touched.name && errors.name ? "is-invalid" : ""}
+                    isInvalid={touched.name && !!errors.name}
+                    required
                   />
-                  <div id="nameHelp" className="invalid-feedback">{errors.name}</div>
-                </Col>
+                  {touched.name && errors.name && (
+                    <Form.Text variant="danger">{errors.name}</Form.Text>
+                  )}
+                </div>
 
-                <Col md={6}>
-                  <Form.Label htmlFor="email">البريد الإلكتروني</Form.Label>
+                <div>
+                  <Form.Label htmlFor="email" required>البريد الإلكتروني</Form.Label>
                   <Form.Control
                     id="email" name="email" type="email" placeholder="example@mail.com"
                     value={form.email} onChange={handleChange} onBlur={handleBlur}
-                    aria-invalid={touched.email && !!errors.email} aria-describedby="emailHelp"
-                    required className={touched.email && errors.email ? "is-invalid" : ""}
+                    isInvalid={touched.email && !!errors.email}
+                    required
                   />
-                  <div id="emailHelp" className="invalid-feedback">{errors.email}</div>
-                </Col>
+                  {touched.email && errors.email && (
+                    <Form.Text variant="danger">{errors.email}</Form.Text>
+                  )}
+                </div>
 
-                <Col xs={12}>
-                  <Form.Label htmlFor="message">سؤالك أو استفسارك</Form.Label>
-                  <Form.Control
-                    as="textarea" id="message" name="message" rows={4} placeholder="اكتب رسالتك هنا…"
+                <div className="md:col-span-2">
+                  <Form.Label htmlFor="message" required>سؤالك أو استفسارك</Form.Label>
+                  <Form.Textarea
+                    id="message" name="message" rows={4} placeholder="اكتب رسالتك هنا…"
                     value={form.message} onChange={handleChange} onBlur={handleBlur}
-                    aria-invalid={touched.message && !!errors.message} aria-describedby="msgHelp"
-                    required minLength={20} className={touched.message && errors.message ? "is-invalid" : ""}
+                    isInvalid={touched.message && !!errors.message}
+                    required
                   />
-                  <div id="msgHelp" className="invalid-feedback">{errors.message}</div>
-                </Col>
+                  {touched.message && errors.message && (
+                    <Form.Text variant="danger">{errors.message}</Form.Text>
+                  )}
+                </div>
 
-                <Col xs={12} className="d-flex align-items-start gap-2">
+                <div className="md:col-span-2 flex items-start gap-2">
                   <Form.Check
                     id="agree" name="agree" checked={form.agree}
                     onChange={handleChange} onBlur={handleBlur}
-                    aria-invalid={touched.agree && !!errors.agree}
-                    className={touched.agree && errors.agree ? "is-invalid" : ""} required
+                    required
                   />
-                  <Form.Label htmlFor="agree" className="m-0">
-                    أوافق على <Link to="/terms" className="link-terms">الشروط والأحكام</Link> وسياسة الخصوصية.
+                  <Form.Label htmlFor="agree" className="text-sm">
+                    أوافق على <Link to="/terms" className="text-ui-primary hover:underline">الشروط والأحكام</Link> وسياسة الخصوصية.
                   </Form.Label>
-                </Col>
+                </div>
                 {touched.agree && errors.agree && (
-                  <div className="invalid-feedback d-block mb-2">{errors.agree}</div>
+                  <Form.Text variant="danger" className="md:col-span-2">{errors.agree}</Form.Text>
                 )}
 
-                <Col xs={12} className="d-flex gap-2">
-                  <Button type="submit" variant="success" disabled={!isValid}>إرسال</Button>
-                  <Button as={Link} to="/add-user" variant="outline-secondary">التسجيل الآن</Button>
-                </Col>
-              </Row>
+                <div className="md:col-span-2 flex flex-col sm:flex-row gap-2">
+                  <Button type="submit" variant="primary" disabled={!isValid}>إرسال</Button>
+                  <Button as={Link} to="/add-user" variant="outline">التسجيل الآن</Button>
+                </div>
+              </div>
             </Form>
           ) : (
             <>
-              <Alert variant="success" className="mt-3" aria-live="polite">
+              <Alert variant="success" className="mt-4">
                 ✅ تم استلام استفسارك بنجاح. سنعاود التواصل معك قريبًا.
               </Alert>
-              <div className="cta-after mt-3 d-flex flex-wrap gap-2">
-                <Button as={Link} to="/add-user" variant="success">سجّل وابدأ رحلتك الآن</Button>
-                <Button as={Link} to="/donations" variant="outline-success">تصفّح الطلبات</Button>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Button as={Link} to="/add-user" variant="primary">سجّل وابدأ رحلتك الآن</Button>
+                <Button as={Link} to="/donations" variant="outline">تصفّح الطلبات</Button>
               </div>
             </>
           )}
@@ -319,9 +342,9 @@ function About() {
               <h3 className="cta-title">ابدأ رحلتك في دقائق</h3>
               <p className="cta-text">سجّل مجانًا أو تصفّح الطلبات العاجلة الآن.</p>
             </div>
-            <div className="cta-actions">
-              <Button as={Link} to="/add-user" variant="success">تسجيل جديد</Button>
-              <Button as={Link} to="/donations" variant="outline-success">تصفّح الطلبات</Button>
+            <div className="cta-actions flex flex-col sm:flex-row gap-3">
+              <Button as={Link} to="/add-user" variant="primary">تسجيل جديد</Button>
+              <Button as={Link} to="/donations" variant="outline">تصفّح الطلبات</Button>
             </div>
           </div>
         </section>

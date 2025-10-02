@@ -1,6 +1,6 @@
 // src/components/BloodDonationForm.jsx
 import React, { useState } from 'react';
-import { Form, Button, Alert } from 'react-bootstrap';
+import { Form, Button, Alert } from './ui';
 import { FaArrowRight, FaArrowLeft, FaCheck } from 'react-icons/fa';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import './BloodDonationForm.css';
