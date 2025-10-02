@@ -1,20 +1,21 @@
 /* ========= الإعدادات العامة ========= */
 :root{
-  --about-primary: var(--ui-primary, #12B279);
-  --about-accent:  var(--ui-accent,  #FF7A45);
-  --about-text:    var(--text-color, #1f2937);
-  --about-muted:   var(--text-muted, #4b5563);
+  --about-primary: var(--main-color, #4CAF50);
+  --about-accent:  var(--main-color-alt, #2E7D32);
+  --about-text:    var(--text-color, #1a202c);
+  --about-muted:   var(--text-muted, #64748b);
   --about-radius: 16px;
-  --about-shadow: 0 10px 30px rgba(0,0,0,.10);
+  --about-shadow: 0 10px 30px rgba(76,175,80,.10);
 }
 
 /* ========= الحاوية الرئيسية ========= */
 .about-container{
   padding-block: clamp(1.5rem, 3vw, 2.75rem);
   background:
-    linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.92)),
+    linear-gradient(135deg, var(--main-color, #4CAF50) 0%, var(--main-color-alt, #2E7D32) 100%),
     url('../images/fundo-about.png') center / cover no-repeat;
   color: var(--about-text);
+  box-shadow: 0 0 0 100vw rgba(76,175,80,0.35) inset;
 }
 
 /* ========= تأثيرات الكشف عند التمرير ========= */
@@ -92,7 +93,7 @@
 .card-title{
   font-size: clamp(1.1rem, 2.2vw, 1.3rem);
   font-weight: 900;
-  color: #0f172a;
+  color: var(--eh-text);
   margin-bottom: .35rem;
 }
 .info-card p{
@@ -128,7 +129,7 @@
 }
 .kpi-value{
   font-size: clamp(1.2rem, 3vw, 1.6rem);
-  font-weight: 900; color:#0f172a;
+  font-weight: 900; color:var(--eh-text);
   background:#fff; border-radius: 999px; padding:.15rem .5rem;
   min-width: 56px; text-align:center;
 }
@@ -149,7 +150,7 @@
   color: var(--about-primary);
   margin-bottom: .65rem;
 }
-.styled-form label{ font-weight: 700; color: #0f172a; }
+.styled-form label{ font-weight: 700; color: var(--eh-text); }
 .styled-form .form-control{
   border-radius: 10px;
   border-color: #e5e7eb;
@@ -169,7 +170,7 @@
   padding:.75rem 1rem; margin-bottom:.5rem; box-shadow: var(--about-shadow);
 }
 .faq summary{
-  cursor:pointer; font-weight:900; color:#0f172a; outline:none;
+  cursor:pointer; font-weight:900; color:var(--eh-text); outline:none;
 }
 .faq details[open]{ border-color: color-mix(in oklab, var(--about-primary) 30%, #ddd); }
 .faq p{ color: var(--about-muted); margin: .5rem 0 0; }

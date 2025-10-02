@@ -1,6 +1,6 @@
 // src/componentes/Notifications.jsx
 import React, { useEffect, useState } from 'react';
-import { Card, Button, Spinner, Row, Col, Image, Badge } from 'react-bootstrap';
+import { Card, Button, Spinner, Row, Col, Image, Badge } from './ui';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import './Notifications.css';
 

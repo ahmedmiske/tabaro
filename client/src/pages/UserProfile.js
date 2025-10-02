@@ -1,6 +1,6 @@
 // src/pages/UserProfile.jsx
 import React, { useState, useEffect, useMemo } from 'react';
-import { Button, Row, Col, Container, Badge } from 'react-bootstrap';
+import { Button, Row, Col, Container, Badge } from '../components/ui';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import UserDetails from '../components/UserDetails';

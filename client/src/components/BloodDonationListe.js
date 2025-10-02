@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Spinner, Button } from 'react-bootstrap';
+import { Row, Spinner, Button } from './ui';
 import './BloodDonationListe.css';
 import Title from './Title';
 import DonorFilter from './DonorFilter';
@@ -77,9 +77,7 @@ function BloodDonationListe() {
       );
 
       const { list, pages } = extractListAndPages(res.body);
-      // DEBUG مفيد مؤقتًا — احذف عند الانتهاء
-      console.log('BloodRequests payload →', res.body);
-      console.log('Extracted list length:', list.length, 'pages:', pages);
+      // تم تحميل البيانات بنجاح
 
       setDonations(list);
       setFilteredDonations(list);

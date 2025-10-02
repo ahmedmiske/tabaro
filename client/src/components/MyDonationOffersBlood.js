@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Table, Badge, Button, Toast, ToastContainer, Form, Collapse
-} from 'react-bootstrap';
+  Table, TableHead, TableBody, TableRow, TableCell, Badge, Button, Toast, ToastContainer, Form, Collapse
+} from './ui';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import { useNavigate, useLocation } from 'react-router-dom';
 import useTicker from '../hooks/useTicker';

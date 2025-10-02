@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Form, Button, Alert, ProgressBar } from 'react-bootstrap';
+import { Form, Button, Alert, ProgressBar } from './ui';
 import fetchWithInterceptors from '../services/fetchWithInterceptors'; // Make sure to import your fetch service
 import './PasswordReset.css';
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Badge } from 'react-bootstrap';
+import { Table, Button, Badge } from './ui';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import { useParams, useNavigate } from 'react-router-dom';
 import './DonationOffersForRequest.css';

@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaFacebook, FaWhatsapp, FaInstagram } from 'react-icons/fa';
-import 'bootstrap/dist/css/bootstrap.min.css';
+
 import './SocialMedia.css';
 
 function SocialMedia() {

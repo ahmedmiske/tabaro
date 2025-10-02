@@ -1,7 +1,7 @@
 // src/components/AccountDetails.js
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Form, Button, InputGroup, FormControl, Alert } from 'react-bootstrap';
+import { Button, Alert, Form, InputGroup } from './ui';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import './AccountDetails.css';
 
@@ -40,9 +40,11 @@ function AccountDetails({
 
   return (
     <div className="container-account-details">
-      <Form onSubmit={handleSubmit} dir="rtl">
+      <Form onSubmit={handleSubmit} className="space-y-6" dir="rtl">
         <div className="account-details-header">
-          <h5><i className="fas fa-user-cog me-2"></i>تحديث معلومات الحساب</h5>
+          <h5 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+            <i className="fas fa-user-cog ml-2"></i>تحديث معلومات الحساب
+          </h5>
         </div>
 
         {success && <Alert variant="success">تم تحديث كلمة المرور بنجاح.</Alert>}
@@ -50,13 +52,16 @@ function AccountDetails({
 
         <Form.Group>
           <Form.Label>اسم المستخدم</Form.Label>
-          <InputGroup>
-            <FormControl type="text" value={userDetails?.username || ''} readOnly />
-          </InputGroup>
+          <Form.Control 
+            type="text" 
+            value={userDetails?.username || ''} 
+            disabled
+            className="bg-gray-50 dark:bg-gray-700 cursor-not-allowed"
+          />
         </Form.Group>
 
         <Form.Group>
-          <Form.Label>كلمة المرور القديمة</Form.Label>
+          <Form.Label required>كلمة المرور القديمة</Form.Label>
           <Form.Control
             type="password"
             placeholder="أدخل كلمة المرور القديمة"
@@ -67,7 +72,7 @@ function AccountDetails({
         </Form.Group>
 
         <Form.Group>
-          <Form.Label>كلمة المرور الجديدة</Form.Label>
+          <Form.Label required>كلمة المرور الجديدة</Form.Label>
           <Form.Control
             type="password"
             placeholder="أدخل كلمة المرور الجديدة"
@@ -78,7 +83,7 @@ function AccountDetails({
         </Form.Group>
 
         <Form.Group>
-          <Form.Label>تأكيد كلمة المرور الجديدة</Form.Label>
+          <Form.Label required>تأكيد كلمة المرور الجديدة</Form.Label>
           <Form.Control
             type="password"
             placeholder="أعد إدخال كلمة المرور الجديدة"
@@ -88,7 +93,9 @@ function AccountDetails({
           />
         </Form.Group>
 
-        <Button variant="primary" type="submit">حفظ التغييرات</Button>
+        <div className="flex justify-end">
+          <Button variant="primary" type="submit">حفظ التغييرات</Button>
+        </div>
       </Form>
     </div>
   );

@@ -1,6 +1,6 @@
 // src/components/DonationRequestForm.jsx
 import React, { useEffect, useMemo, useState } from 'react';
-import { Form, Button, ListGroup, ListGroupItem, Spinner, Alert } from 'react-bootstrap';
+import { Form, Button, Spinner, Alert } from './ui';
 import './DonationRequestForm.css';
 import { useNavigate } from 'react-router-dom';
 
@@ -383,14 +383,14 @@ const DonationRequestForm = () => {
                 <small className="text-muted">PDF أو صور</small>
               </div>
               <Form.Control type="file" multiple accept=".pdf,image/*" onChange={handleFileUpload} />
-              <ListGroup className="mt-2">
+              <div style={{marginTop: '0.5rem', border: '1px solid #e5e7eb', borderRadius: '0.375rem'}}>
                 {donation.proofDocuments.map((file, idx) => (
-                  <ListGroupItem key={idx} className="d-flex justify-content-between align-items-center">
+                  <div key={idx} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem', borderBottom: idx < donation.proofDocuments.length - 1 ? '1px solid #e5e7eb' : 'none'}}>
                     <span>{file.name}</span>
                     <Button variant="danger" size="sm" onClick={() => handleRemoveFile(idx)}>حذف</Button>
-                  </ListGroupItem>
+                  </div>
                 ))}
-              </ListGroup>
+              </div>
             </Form.Group>
           </>
         )}

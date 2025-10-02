@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
-import { ListGroup, Dropdown, Button, Image, Badge, Spinner } from 'react-bootstrap';
+import { ListGroup, Dropdown, Button, Image, Badge, Spinner } from '../components/ui';
 import './NotificationsPage.css';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 

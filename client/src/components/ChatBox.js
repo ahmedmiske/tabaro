@@ -1,7 +1,7 @@
 // src/components/ChatBox.jsx
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Form, Button, Spinner, Alert } from 'react-bootstrap';
+import { Form, Button, Spinner, Alert } from './ui';
 import { connectSocket, getSocket, waitUntilConnected } from '../socket';
 import './ChatBox.css';
 

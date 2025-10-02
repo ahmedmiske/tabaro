@@ -1,6 +1,6 @@
 // src/components/DocumentsGallery.jsx
 import React, { useMemo, useState } from 'react';
-import { Modal, Button } from 'react-bootstrap';
+import { Modal, Button } from './ui';
 import { FaFilePdf, FaFileAlt, FaDownload, FaTimes } from 'react-icons/fa';
 
 const isImg = (url = '') => /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(url);

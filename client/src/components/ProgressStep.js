@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ProgressBar } from 'react-bootstrap';
+import { ProgressBar } from './ui';
 import './ProgressStep.css';
 
 const ProgressStep = ({ step, total }) => {

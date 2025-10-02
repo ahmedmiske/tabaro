@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { Card, Badge, Button, Spinner, Alert, Image } from 'react-bootstrap';
+import { Card, Badge, Button, Spinner, Alert, Image } from '../components/ui';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import './ConfirmationDetails.css';
 

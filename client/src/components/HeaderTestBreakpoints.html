@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Breakpoints - Tabaro Header</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .breakpoint-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: #000;
+            color: #fff;
+            padding: 8px 12px;
+            font-size: 12px;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body class="font-sans">
+    <!-- Indicador de breakpoint actual -->
+    <div class="breakpoint-indicator">
+        <span class="sm:hidden">XS (&lt;640px)</span>
+        <span class="hidden sm:inline md:hidden">SM (640-767px)</span>
+        <span class="hidden md:inline lg:hidden">MD (768-1023px) - TABLET</span>
+        <span class="hidden lg:inline xl:hidden">LG (1024-1279px) - DESKTOP PEQUEÑO</span>
+        <span class="hidden xl:inline">XL (≥1280px) - DESKTOP GRANDE</span>
+    </div>
+
+    <!-- Header de prueba -->
+    <header class="sticky top-6 z-50 border-b border-gray-200/80 bg-white/80 backdrop-blur">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="flex h-16 items-center justify-between gap-3">
+                
+                <!-- Left: burger + brand -->
+                <div class="flex items-center gap-2">
+                    <!-- Mobile & Tablet burger - Se muestra en pantallas < XL (1280px) -->
+                    <button class="xl:hidden inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white hover:bg-gray-50 transition">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                    
+                    <!-- Brand -->
+                    <div class="flex items-center gap-2">
+                        <img src="/logo.png" alt="Logo" class="h-10 w-10 rounded-lg bg-gray-100">
+                        <span class="hidden sm:block text-sm">
+                            <span class="block font-bold text-gray-900">المنصة الوطنية للتبرع</span>
+                            <span class="text-xs text-gray-500">المنصة الوطنية للتبرع</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Center: Desktop nav - Solo se muestra en XL+ (≥1280px) -->
+                <nav class="hidden xl:flex items-center gap-4">
+                    <a href="#" class="text-sm font-medium text-gray-700 hover:text-primary-600">الرئيسية</a>
+                    <a href="#" class="text-sm font-medium text-gray-700 hover:text-primary-600">التبرع بالدم</a>
+                    <a href="#" class="text-sm font-medium text-gray-700 hover:text-primary-600">تبرعات عامة</a>
+                    <a href="#" class="text-sm font-medium text-gray-700 hover:text-primary-600">حملات التبرع</a>
+                </nav>
+
+                <!-- Right: actions -->
+                <div class="flex items-center gap-2">
+                    <!-- Search - Solo se muestra en XL+ (≥1280px) -->
+                    <div class="hidden xl:flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-2 py-1.5">
+                        <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <input class="w-40 bg-transparent text-sm placeholder:text-gray-400 focus:outline-none" placeholder="بحث...">
+                    </div>
+                    
+                    <!-- Notifications - Siempre visible -->
+                    <button class="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white hover:bg-gray-50">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5-5v10z"></path>
+                        </svg>
+                        <span class="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">3</span>
+                    </button>
+                    
+                    <!-- User - Siempre visible -->
+                    <button class="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm">
+                        <div class="h-6 w-6 rounded-full bg-gray-300"></div>
+                        <span class="hidden sm:inline">أحمد</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenido de prueba -->
+    <div class="p-8 space-y-4">
+        <h1 class="text-2xl font-bold">تست Breakpoints للرأسية</h1>
+        
+        <div class="space-y-2 text-sm">
+            <p><strong>XS (< 640px):</strong> Móviles pequeños - Menú hamburguesa visible</p>
+            <p><strong>SM (640-767px):</strong> Móviles grandes - Menú hamburguesa visible</p>
+            <p><strong>MD (768-1023px):</strong> <span class="bg-yellow-200 px-2 py-1 rounded">TABLETS - Menú hamburguesa visible</span></p>
+            <p><strong>LG (1024-1279px):</strong> Desktop pequeño - Menú hamburguesa visible</p>
+            <p><strong>XL (≥ 1280px):</strong> Desktop grande - Navegación completa visible</p>
+        </div>
+
+        <div class="bg-blue-50 p-4 rounded-lg">
+            <h2 class="font-semibold mb-2">Configuración actual:</h2>
+            <ul class="space-y-1 text-sm">
+                <li>✅ Menú hamburguesa: Visible hasta XL (< 1280px)</li>
+                <li>✅ Navegación principal: Solo visible en XL+ (≥ 1280px)</li>
+                <li>✅ Búsqueda: Solo visible en XL+ (≥ 1280px)</li>
+                <li>✅ Panel móvil: Funciona hasta XL (< 1280px)</li>
+                <li>✅ Panel más ancho en tablets: 384px vs 320px en móvil</li>
+            </ul>
+        </div>
+
+        <div class="bg-green-50 p-4 rounded-lg">
+            <h2 class="font-semibold mb-2">Funcionalidad en Tablet (768-1023px):</h2>
+            <ul class="space-y-1 text-sm">
+                <li>✅ Botón hamburguesa visible y funcional</li>
+                <li>✅ Panel lateral más ancho (384px)</li>
+                <li>✅ Búsqueda dentro del panel lateral</li>
+                <li>✅ Navegación completa en el panel</li>
+                <li>✅ Logo con texto visible</li>
+                <li>✅ Notificaciones y menú de usuario visibles</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

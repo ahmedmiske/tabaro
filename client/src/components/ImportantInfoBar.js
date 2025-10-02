@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Container } from 'react-bootstrap';
+import { Container } from './ui';
 import Marquee from 'react-fast-marquee';
 
 import './ImportantInfoBar.css';

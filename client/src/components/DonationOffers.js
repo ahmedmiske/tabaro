@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Button, Spinner, Row, Col } from 'react-bootstrap';
+import { Card, Button, Spinner, Row, Col } from './ui';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import './Notifications.css';
 

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Badge, Button } from 'react-bootstrap';
+import { Table, Badge, Button } from './ui';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import { useNavigate } from 'react-router-dom';
-import { Toast, ToastContainer } from 'react-bootstrap';
+import { Toast, ToastContainer } from './ui';
 
 import './MyDonationOffers.css'; // Ensure you have this CSS file for styling
 

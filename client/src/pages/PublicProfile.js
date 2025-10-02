@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { Card, Button, Spinner, Alert, Image, Badge } from 'react-bootstrap';
+import { Card, Button, Spinner, Alert, Image, Badge } from '../components/ui';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import './PublicProfile.css';
 

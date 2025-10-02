@@ -1,10 +1,10 @@
 // src/components/UserForm.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Form, Button, Toast, Alert } from 'react-bootstrap';
+import { Form, Button, Alert } from './ui';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import ProgressStep from './ProgressStep';
-import { FaArrowRight, FaArrowLeft, FaCheck } from 'react-icons/fa';
+import { FaArrowRight, FaArrowLeft, FaCheck, FaUser, FaEnvelope, FaMapMarkerAlt, FaImage } from 'react-icons/fa';
 import './UserForm.css';
 
 const ALLOWED_IMAGE_TYPES = ['image/jpeg','image/jpg','image/png','image/webp','image/gif'];
@@ -178,15 +178,29 @@ function UserForm() {
               {user.userType === 'individual' ? (
                 <>
                   <h4>المعلومات الشخصية</h4>
-                  <Form.Group><Form.Label>الاسم الشخصي</Form.Label><Form.Control name="firstName" value={user.firstName} onChange={handleChange} required /></Form.Group>
-                  <Form.Group><Form.Label>الاسم العائلي</Form.Label><Form.Control name="lastName" value={user.lastName} onChange={handleChange} required /></Form.Group>
-                  <Form.Group><Form.Label>البريد الإلكتروني (اختياري)</Form.Label><Form.Control name="email" value={user.email} onChange={handleChange} /></Form.Group>
-                  <Form.Group><Form.Label>العنوان</Form.Label><Form.Control name="address" value={user.address} onChange={handleChange} /></Form.Group>
-                  <Form.Group>
-                    <Form.Label>الصورة الشخصية (اختياري)</Form.Label>
-                    <Form.Control type="file" accept="image/*" onChange={handleFileChange} />
-                    {profileImage && <small className="text-success">✅ {profileImage.name}</small>}
-                  </Form.Group>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+                    <Form.Group style={{ position: 'relative' }}>
+                      <Form.Label style={{ display: 'flex', alignItems: 'center', gap: 7 }}><FaUser style={{ color: '#dc2626' }} /> الاسم الشخصي</Form.Label>
+                      <Form.Control name="firstName" value={user.firstName} onChange={handleChange} required style={{ paddingRight: 38 }} />
+                    </Form.Group>
+                    <Form.Group style={{ position: 'relative' }}>
+                      <Form.Label style={{ display: 'flex', alignItems: 'center', gap: 7 }}><FaUser style={{ color: '#dc2626' }} /> الاسم العائلي</Form.Label>
+                      <Form.Control name="lastName" value={user.lastName} onChange={handleChange} required style={{ paddingRight: 38 }} />
+                    </Form.Group>
+                    <Form.Group style={{ position: 'relative' }}>
+                      <Form.Label style={{ display: 'flex', alignItems: 'center', gap: 7 }}><FaEnvelope style={{ color: '#dc2626' }} /> البريد الإلكتروني (اختياري)</Form.Label>
+                      <Form.Control name="email" value={user.email} onChange={handleChange} style={{ paddingRight: 38 }} />
+                    </Form.Group>
+                    <Form.Group style={{ position: 'relative' }}>
+                      <Form.Label style={{ display: 'flex', alignItems: 'center', gap: 7 }}><FaMapMarkerAlt style={{ color: '#dc2626' }} /> العنوان</Form.Label>
+                      <Form.Control name="address" value={user.address} onChange={handleChange} style={{ paddingRight: 38 }} />
+                    </Form.Group>
+                    <Form.Group style={{ position: 'relative' }}>
+                      <Form.Label style={{ display: 'flex', alignItems: 'center', gap: 7 }}><FaImage style={{ color: '#dc2626' }} /> الصورة الشخصية (اختياري)</Form.Label>
+                      <Form.Control type="file" accept="image/*" onChange={handleFileChange} style={{ background: '#f9fafb', border: '1.5px solid #e5e7eb', borderRadius: 10, padding: 10 }} />
+                      {profileImage && <small className="text-success">✅ {profileImage.name}</small>}
+                    </Form.Group>
+                  </div>
                 </>
               ) : (
                 <>
@@ -242,10 +256,38 @@ function UserForm() {
         </Form>
       )}
 
-      <Toast onClose={() => setShowToast(false)} show={showToast} delay={3000} autohide style={{ position: 'fixed', top: 20, right: 20 }}>
-        <Toast.Header><strong className="me-auto">تم التحقق</strong></Toast.Header>
-        <Toast.Body>✅ تم التحقق من رقم الهاتف بنجاح.</Toast.Body>
-      </Toast>
+      {showToast && (
+        <div style={{ 
+          position: 'fixed', 
+          top: '20px', 
+          right: '20px', 
+          backgroundColor: '#d4edda',
+          color: '#155724',
+          padding: '1rem',
+          borderRadius: '0.375rem',
+          border: '1px solid #c3e6cb',
+          zIndex: 9999,
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+        }}>
+          <div style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>تم التحقق</div>
+          <div>✅ تم التحقق من رقم الهاتف بنجاح.</div>
+          <button 
+            onClick={() => setShowToast(false)}
+            style={{
+              position: 'absolute',
+              top: '5px',
+              right: '10px',
+              background: 'none',
+              border: 'none',
+              fontSize: '1.25rem',
+              cursor: 'pointer',
+              color: '#155724'
+            }}
+          >
+            ×
+          </button>
+        </div>
+      )}
     </>
   );
 }

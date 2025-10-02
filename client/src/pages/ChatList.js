@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ListGroup, Badge } from 'react-bootstrap';
+import { ListGroup, Badge } from '../components/ui';
 import { useNavigate } from 'react-router-dom';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import './ChatList.css';

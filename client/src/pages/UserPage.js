@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Table, Button, Modal, Alert } from 'react-bootstrap';
+import { Table, Button, Modal, Alert } from '../components/ui';
 import './UserPage.css';
 import Title from '../components/Title';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';

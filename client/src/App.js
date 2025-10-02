@@ -1,45 +1,55 @@
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfUse from './pages/TermsOfUse';
 // src/App.js
 import React, { useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider } from './AuthContext';
-import Header from './components/Header';
-import UserPage from './pages/UserPage';
+import SimpleHeader from './components/SimpleHeader';
 import Footer from './components/Footer';
-import LandingPage from './pages/LandingPage';
-import Register from './pages/Register';
-import Login from './pages/Login';
-import BloodDonationList from './components/BloodDonationListe';
-import SocialMedia from './components/SocialMedia';
-import DonationDetails from './components/DonationDetails';
-import CampaignDetails from './components/CampaignDetails';
-import BloodDonationForm from './components/BloodDonationForm';
-import Donor from './components/Donor';
-import InfoBar from './components/InfoBar';
 import './App.css';
-import UserForm from './components/UserForm';
-import UserProfile from './pages/UserProfile';
+
+// صفحات عامة
+import LandingPageSimple from './pages/LandingPageSimple';
+import Login from './pages/Login';
+import UserPage from './pages/UserPage';
 import AddUserserPage from './pages/addUserPage';
-import PasswordReset from './components/PasswordReset';
-import DonationRequestForm from './components/DonationRequestForm';
-import DonorListe from './components/BloodDonationListe';
+import UserProfile from './pages/UserProfile';
+import PublicProfile from './pages/PublicProfile';
+
+// مكونات التبرع
+import BloodDonationList from './components/BloodDonationListeNew';
+import BloodDonationForm from './components/BloodDonationForm';
 import BloodDonationDetails from './components/BloodDonationDetails';
+import DonationDetails from './components/DonationDetails';
+import DonationRequestForm from './components/DonationRequestForm';
+import DonationRequestList from './components/DonationRequestList';
+import DonationRequestDetails from './components/DonationRequestDetails';
+
+// صفحات أخرى
+import About from './components/AboutSimple';
+import Contact from './pages/Contact';
+import BloodDonationInfo from './pages/BloodDonationInfo';
+import SocialMedia from './components/SocialMedia';
+import CampaignDetails from './components/CampaignDetails';
+import PasswordReset from './components/PasswordReset';
 import NotificationsPage from './pages/NotificationsPage';
 import ChatPage from './pages/ChatPage';
 import ChatList from './pages/ChatList';
 import MyRequestDetails from './pages/MyRequestDetails';
-import About from './components/About';
-import DonationRequestList from './components/DonationRequestList';
-import DonationRequestDetails from './components/DonationRequestDetails';
-import { connectSocket } from './socket';
-import PublicProfile from './pages/PublicProfile';
 
-// ✅ الحارس
+// صفحات التبرعات العامة
+import GeneralDonations from './pages/GeneralDonations';
+import CreateCampaign from './pages/CreateCampaign';
+import CampaignsList from './pages/CampaignsList';
+
+// مكونات الحماية والتأكيد
 import RequireAuth from './components/RequireAuth';
-
-// ✅ صفحة تفاصيل التبرّع/التأكيد/العرض
 import DonationConfirmationDetails from './pages/DonationConfirmationDetails';
 import DonationRequestConfirmationDetails from './pages/DonationRequestConfirmationDetails';
+
+// اتصال الـ Socket
+import { connectSocket } from './socket';
 
 function App() {
   const location = useLocation();
@@ -73,19 +83,27 @@ function App() {
   return (
     <AuthProvider>
       <div className='page-app'>
-        <Header />
+        <SimpleHeader />
         <SocialMedia />
         <div className="page-wrapper">
           <Routes>
             {/* عامّة */}
-            <Route path="/" element={<LandingPage />} />
+            <Route path="/" element={<LandingPageSimple />} />
             <Route path="/add-user" element={<AddUserserPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/reset-password" element={<PasswordReset />} />
             <Route path="/blood-donations" element={<BloodDonationList />} />
             <Route path="/donations" element={<DonationRequestList />} />
             <Route path="/about" element={<About />} />
-            <Route path="/users" element={<UserPage />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsOfUse />} />
+            <Route path="/users" element={<UserPage onEdit={(user) => console.log('edit', user)} onDelete={(user) => { console.log('delete', user); return Promise.resolve(); }} />} />
+            
+            {/* صفحات التبرعات العامة */}
+            <Route path="/general-donations" element={<GeneralDonations />} />
+            <Route path="/campaigns/list" element={<CampaignsList />} />
+            <Route path="/campaigns/create" element={<RequireAuth><CreateCampaign /></RequireAuth>} />
 
             {/* محميّة */}
             <Route path="/donation-details/:id" element={<RequireAuth><DonationDetails /></RequireAuth>} />
@@ -95,6 +113,8 @@ function App() {
             <Route path="/my-request-details/:id" element={<RequireAuth><MyRequestDetails /></RequireAuth>} />
             <Route path="/donation-requests" element={<RequireAuth><DonationRequestForm /></RequireAuth>} />
             <Route path="/blood-donation" element={<RequireAuth><BloodDonationForm /></RequireAuth>} />
+            {/* صفحة معلومات التبرع بالدم */}
+            <Route path="/blood-donation-info" element={<BloodDonationInfo />} />
             <Route path="/chat/:recipientId" element={<RequireAuth><ChatPage /></RequireAuth>} />
             <Route path="/messages" element={<RequireAuth><ChatList /></RequireAuth>} />
             <Route path="/notifications" element={<RequireAuth><NotificationsPage /></RequireAuth>} />

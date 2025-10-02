@@ -2,8 +2,8 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
-  Card, Badge, Button, Spinner, Alert, Form, InputGroup, ProgressBar, Table,
-} from 'react-bootstrap';
+  Card, Badge, Button, Spinner, Alert, Form, InputGroup, ProgressBar, Table, TableHead, TableBody, TableRow, TableCell,
+} from './ui';
 import { FaShareAlt, FaFlag, FaComments, FaArrowRight, FaPaperclip, FaInfoCircle } from 'react-icons/fa';
 import PropTypes from 'prop-types';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';

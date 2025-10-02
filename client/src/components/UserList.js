@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Button, Modal } from 'react-bootstrap';
+import { Table, Button, Modal } from './ui';
 import './UserList.css';
 import Title from './Title';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
