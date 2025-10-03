@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { FiDroplet, FiHeart, FiUsers, FiTrendingUp, FiStar, FiCheckCircle, FiClock, FiAward } from 'react-icons/fi';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 function LandingPageSimple() {
+  const navigate = useNavigate();
   const [counters, setCounters] = useState({
     donors: 0,
     donations: 0,
@@ -170,37 +171,40 @@ function LandingPageSimple() {
             flexWrap: 'wrap',
             marginBottom: '40px'
           }}>
-            <Link
-              to="/signup"
-              style={{
-                backgroundColor: 'white',
-                color: '#e74c3c',
-                padding: '18px 35px',
-                textDecoration: 'none',
-                borderRadius: '50px',
-                fontWeight: 'bold',
-                fontSize: '1.1em',
-                transition: 'all 0.4s ease',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '10px',
-                boxShadow: '0 8px 25px rgba(0,0,0,0.2)',
-                border: '2px solid white'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.transform = 'translateY(-3px) scale(1.05)';
-                e.target.style.boxShadow = '0 12px 35px rgba(0,0,0,0.3)';
-                e.target.style.backgroundColor = '#f8f9fa';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.transform = 'translateY(0) scale(1)';
-                e.target.style.boxShadow = '0 8px 25px rgba(0,0,0,0.2)';
-                e.target.style.backgroundColor = 'white';
-              }}
-            >
-              <FiHeart />
-              ابدأ التبرع الآن
-            </Link>
+
+<button
+  type="button"
+  style={{
+    backgroundColor: 'white',
+    color: '#e74c3c',
+    padding: '18px 35px',
+    textDecoration: 'none',
+    borderRadius: '50px',
+    fontWeight: 'bold',
+    fontSize: '1.1em',
+    transition: 'all 0.4s ease',
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '10px',
+    boxShadow: '0 8px 25px rgba(0,0,0,0.2)',
+    border: '2px solid white'
+  }}
+  onClick={() => navigate('/DonatePage')}
+  onMouseEnter={(e) => {
+    e.target.style.transform = 'translateY(-3px) scale(1.05)';
+    e.target.style.boxShadow = '0 12px 35px rgba(0,0,0,0.3)';
+    e.target.style.backgroundColor = '#f8f9fa';
+  }}
+  onMouseLeave={(e) => {
+    e.target.style.transform = 'translateY(0) scale(1)';
+    e.target.style.boxShadow = '0 8px 25px rgba(0,0,0,0.2)';
+    e.target.style.backgroundColor = 'white';
+  }}
+>
+  <FiHeart />
+  ابدأ التبرع الآن
+</button>
+ 
             <Link
               to="/blood-requests"
               style={{
