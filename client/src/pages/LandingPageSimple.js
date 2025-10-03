@@ -137,8 +137,9 @@ function LandingPageSimple() {
             fontSize: '0.9em',
             fontWeight: '500',
         backdropFilter: 'blur(10px)',
-        color: 'var(--eh-brand, #e74c3c)',
+        color: '#ffffff',
           }}>
+            
             🩸 المنصة الوطنية للتبرع الرائدة في المنطقة
           </div>
           
@@ -152,7 +153,7 @@ function LandingPageSimple() {
             المنصة الوطنية للتبرع
           </h1>
 
-          <p style={{
+          <h2 style={{
             fontSize: 'clamp(1.1rem, 3vw, 1.4rem)',
             marginBottom: '40px',
             opacity: 0.95,
@@ -161,7 +162,7 @@ function LandingPageSimple() {
             margin: '0 auto 40px auto'
           }}>
             انضم إلى مجتمع التبرع بالدم وكن جزءاً من إنقاذ الأرواح. كل قطرة دم تعني أملاً جديداً لمن يحتاجها.
-          </p>
+          </h2>
 
           
           <div style={{
