@@ -15,14 +15,12 @@
 
 /* البطاقة نفسها */
 .card {
-  max-width: 300px;
   height: 80%;
   width: 100% !important;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
- 
   border-radius: 8px;
   overflow: hidden;
 }
@@ -39,7 +37,6 @@
   justify-content: center;
   font-weight: bold;
   font-size: 24px;
-  background-color: #b71c1c;
 }
 
 /* شارة مستعجل */

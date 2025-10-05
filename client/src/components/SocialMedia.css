@@ -1,34 +1,77 @@
-/* يظهر في الجانب الأيمن على الشاشات الكبيرة */
+/* واتساب ثابت في أسفل الشاشة على اليمين */
 .social-media {
-    position: fixed;
-    top: 50%;
-    right: 0;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.whatsapp-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  background: #25D366;
+  color: white;
+  border-radius: 50%;
+  text-decoration: none;
+  font-size: 24px;
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+  transition: all 0.3s ease;
+  animation: pulse 2s infinite;
+}
+
+.whatsapp-btn:hover {
+  background: #20c157;
+  color: white;
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.6);
+  text-decoration: none;
+}
+
+.whatsapp-btn:focus {
+  outline: 3px solid rgba(37, 211, 102, 0.5);
+  outline-offset: 2px;
+}
+
+/* تأثير النبضة */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+  }
+  50% {
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4), 0 0 0 8px rgba(37, 211, 102, 0.2);
+  }
+  100% {
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+  }
+}
+
+/* تحسينات للشاشات الصغيرة */
+@media (max-width: 768px) {
+  .social-media {
+    bottom: 15px;
+    right: 15px;
   }
   
-  /* إخفاء على الشاشات الصغيرة */
-  @media (max-width: 767.98px) {
-    .social-media {
-      position: static;
-      transform: none;
-      flex-direction: row;
-      justify-content: center;
-      padding: 10px;
-      width: 100%;
-      bottom: 0;
-      background: #f8f9fa; /* لون الخلفية لتحديد الشريط */
-    }
+  .whatsapp-btn {
+    width: 55px;
+    height: 55px;
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .social-media {
+    bottom: 10px;
+    right: 10px;
   }
   
-  .social-media .btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
+  .whatsapp-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
   }
+}
   

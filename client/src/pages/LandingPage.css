@@ -1,112 +1,446 @@
-/* ===== Skip link (وصولية) ===== */
-.skip-link{
+/* ===== متغيرات اللوان والخطوط ===== */
+:root {
+  --primary-color: #d73527;
+  --primary-dark: #b91c0c;
+  --secondary-color: #f39c12;
+  --accent-color: #27ae60;
+  --text-dark: #2c3e50;
+  --text-light: #7f8c8d;
+  --background-light: #f8f9fa;
+  --white: #ffffff;
+  --shadow-light: 0 4px 6px rgba(0, 0, 0, 0.05);
+  --shadow-medium: 0 8px 25px rgba(0, 0, 0, 0.1);
+  --shadow-strong: 0 15px 40px rgba(0, 0, 0, 0.15);
+  --border-radius: 15px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== إعدادات عامة ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  color: var(--text-dark);
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  overflow-x: hidden;
+}
+
+/* ===== رابط تخطي المحتوى (وصولية) ===== */
+.skip-link {
   position: absolute;
-  left: .75rem; top: -100vh;
-  background: #000; color: #fff;
-  padding: .5rem .75rem; z-index: 1000; border-radius: 8px;
+  top: -40px;
+  left: 6px;
+  background: var(--primary-color);
+  color: white;
+  padding: 8px;
+  text-decoration: none;
+  border-radius: 4px;
+  z-index: 10000;
+  transition: var(--transition);
 }
-.skip-link:focus{ top: .75rem; }
 
-/* ===== خلفية الهيرو ===== */
-.landing-page{
-  min-height: 100svh;
-  display: flex; align-items: center; justify-content: center;
-  padding-inline: clamp(.75rem, 2vw, 1.25rem);
-  color: var(--text-color, #0f172a);
+.skip-link:focus {
+  top: 6px;
+}
 
-  /* عدّل المسار حسب مكان الصورة لديك */
+/* ===== الصفحة الرئيسية ===== */
+.landing-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  position: relative;
+  
+  /* استخدام الصورة كخلفية كما كانت */
   background: url('./tabarou.png') center / cover no-repeat fixed;
-
-  animation: lp-move 15s infinite alternate ease-in-out;
-}
-@media (prefers-reduced-motion: reduce){
-  .landing-page{ animation: none; background-attachment: scroll; }
-}
-@keyframes lp-move{
-  0%{ background-position: center bottom; }
-  50%{ background-position: center center; }
-  100%{ background-position: center top; }
+  overflow: hidden;
 }
 
-/* ===== حاوية داخلية مخصّصة (ليست Bootstrap Container) ===== */
-.container-landing{
-  max-width: 1100px;
-  margin-inline: auto;
-  padding-inline: 1rem;
-}
-
-/* ===== بطاقة الهيرو الزجاجية ===== */
-.card-landing{
-  background: rgba(255,255,255,0.68);
-  backdrop-filter: blur(10px) saturate(120%);
-  -webkit-backdrop-filter: blur(10px) saturate(120%);
-  border: 1px solid rgba(255,255,255,0.35);
-  border-radius: 22px;
-  padding: clamp(1.2rem, 2.4vw, 2.4rem);
-
-  /* عرض متجاوب ومتمركز */
-  width: clamp(540px, 70vw, 1100px);
-  margin-inline: auto;
-
-  box-shadow: 0 18px 50px rgba(0,0,0,.12);
-}
-@media (max-width: 576px){
-  .card-landing{ width: min(92vw, 560px); }
-}
-
-/* عمود النص الداخلـي—مريح للقراءة */
-.hero-content{
+/* ===== الحاوي الرئيسي ===== */
+.container-landing {
+  max-width: 1200px;
   width: 100%;
-  max-width: 860px;
-  margin-inline: auto;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== بطاقة الترحيب ===== */
+.card-landing {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: none;
+  border-radius: 25px;
+  box-shadow: var(--shadow-strong);
+  padding: 3rem 2rem;
   text-align: center;
+  position: relative;
+  overflow: hidden;
+  transition: var(--transition);
 }
 
-/* ===== نصوص ===== */
-.landing-title{
-  color: #0f172a;
-  font-size: clamp(2rem, 3.2vw, 3rem);
-  line-height: 1.22;
-  font-weight: 900;
-  margin: 0 0 1rem;
-}
-.highlight{ color: var(--ui-accent, #FF7043); }
-
-.lead-text{
-  font-size: clamp(1rem, 2.1vw, 1.2rem);
-  margin: 0 0 .5rem;
-  color: #334155;
+.card-landing::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(215, 53, 39, 0.03), transparent);
+  animation: shimmer 3s ease-in-out infinite;
 }
 
-/* ===== الأزرار ===== */
-.link-card{
-  display: flex; justify-content: center; gap: .8rem; margin-top: 1rem; flex-wrap: wrap;
+@keyframes shimmer {
+  0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+  50% { transform: translateX(0%) translateY(0%) rotate(45deg); }
+  100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
 }
-.go-landing, .log-landing{
-  display: inline-flex; align-items: center; justify-content: center;
-  min-height: 44px; min-width: 44px;
-  padding: .8rem 1.1rem;
-  font-size: 1rem; font-weight: 800;
-  border-radius: 12px; border: 0; text-decoration: none;
+
+.card-landing:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
 }
-.go-landing{ background-color: var(--ui-primary, #4CAF50); color: #fff; }
-.go-landing:hover, .go-landing:focus-visible{ background-color: var(--ui-primary-600, #2E7D32); }
-.log-landing{ background-color: #4b5563; color: #fff; }
-.log-landing:hover, .log-landing:focus-visible{ background-color: #374151; }
+
+/* ===== محتوى البطل ===== */
+.hero-content {
+  position: relative;
+  z-index: 2;
+}
+
+.landing-title {
+  font-size: clamp(2.2rem, 4.5vw, 3.5rem);
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 2rem;
+  line-height: 1.3;
+  text-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  letter-spacing: -0.5px;
+}
+
+.highlight {
+  background: linear-gradient(135deg, var(--primary-color), #ff6b35);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  position: relative;
+  display: inline-block;
+  font-weight: 800;
+  text-shadow: none;
+}
+
+.highlight::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  height: 4px;
+  background: linear-gradient(135deg, var(--primary-color), #ff6b35);
+  border-radius: 3px;
+  animation: expandLine 1s ease-out 0.8s backwards;
+  box-shadow: 0 2px 8px rgba(215, 53, 39, 0.3);
+}
+
+@keyframes expandLine {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+/* ===== النص التوضيحي ===== */
+.lead-text {
+  font-size: clamp(1.2rem, 2.8vw, 1.6rem);
+  color: #555;
+  margin-bottom: 1.2rem;
+  font-weight: 600;
+  opacity: 0;
+  animation: fadeInUp 0.8s ease-out 0.5s forwards;
+  text-align: center;
+  line-height: 1.8;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  position: relative;
+  padding: 0 1rem;
+}
+
+.lead-text:first-of-type {
+  font-size: clamp(1.3rem, 3vw, 1.8rem);
+  color: #333;
+  font-weight: 700;
+  margin-bottom: 0.8rem;
+  animation-delay: 0.3s;
+}
+
+.lead-text:first-of-type::before {
+  content: '✨';
+  margin-left: 0.5rem;
+  font-size: 1.2em;
+}
+
+.lead-text:last-of-type {
+  animation-delay: 0.7s;
+  margin-bottom: 2.5rem;
+  font-style: italic;
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.lead-text:last-of-type::after {
+  content: '🤝';
+  margin-right: 0.5rem;
+  font-size: 1.2em;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== روابط الإجراءات ===== */
+.link-card {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 3rem;
+  opacity: 0;
+  animation: fadeInUp 0.8s ease-out 0.7s forwards;
+}
+
+/* ===== أزرار الإجراءات ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 2.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: var(--border-radius);
+  transition: var(--transition);
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+  min-width: 200px;
+  transform: translateY(10px);
+  opacity: 0;
+  animation: slideInUp 0.6s ease-out 0.9s forwards;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: var(--transition);
+}
+
+.btn:hover::before {
+  left: 100%;
+}
+
+.go-landing {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  color: white;
+  box-shadow: var(--shadow-medium);
+}
+
+.go-landing:hover {
+  color: white;
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-strong);
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+}
+
+.log-landing {
+  background: transparent;
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-light);
+}
+
+.log-landing:hover {
+  background: var(--primary-color);
+  color: white;
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-medium);
+}
+
+@keyframes slideInUp {
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
 
 /* ===== سهم التمرير ===== */
-.scroll-down{ margin-top: 1rem; font-size: 2rem; }
-.scroll-link{
-  display: inline-flex; width: 44px; height: 44px; align-items: center; justify-content: center;
-  color: var(--ui-primary, #4CAF50);
-  animation: lp-bounce 1.4s infinite;
+.scroll-down {
+  opacity: 0;
+  animation: fadeIn 1s ease-out 1.2s forwards;
 }
-@media (prefers-reduced-motion: reduce){ .scroll-link{ animation:none; } }
-@keyframes lp-bounce{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(8px)} }
 
-/* ===== قسم “عن المنصة” أسفل الهيرو ===== */
-.about-section{
-  padding: clamp(1.25rem, 3vw, 2rem) 0;
-  background: #f3f4f6;
-  width: 100%;
+.scroll-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--primary-color);
+  border-radius: 50%;
+  text-decoration: none;
+  font-size: 1.2rem;
+  box-shadow: var(--shadow-light);
+  transition: var(--transition);
+  animation: bounce 2s infinite;
+}
+
+.scroll-link:hover {
+  background: var(--primary-color);
+  color: white;
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-medium);
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
+
+/* ===== قسم حول المنصة ===== */
+.about-section {
+  padding: 4rem 0;
+  background: var(--background-light);
+  position: relative;
+}
+
+.about-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: linear-gradient(to bottom, var(--primary-color), transparent);
+  opacity: 0.1;
+}
+
+/* ===== التجاوب مع الشاشات المختلفة ===== */
+@media (max-width: 768px) {
+  .landing-page {
+    padding: 1rem 0.5rem;
+    min-height: 100vh;
+  }
+  
+  .card-landing {
+    padding: 2rem 1.5rem;
+    border-radius: 20px;
+  }
+  
+  .landing-title {
+    font-size: 2.2rem;
+    margin-bottom: 1rem;
+  }
+  
+  .lead-text {
+    font-size: 1.1rem;
+    margin-bottom: 0.8rem;
+  }
+  
+  .link-card {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .btn {
+    width: 100%;
+    max-width: 300px;
+    padding: 0.9rem 2rem;
+    font-size: 1rem;
+  }
+  
+  .scroll-link {
+    width: 45px;
+    height: 45px;
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-landing {
+    padding: 1.5rem 1rem;
+    margin: 0 0.5rem;
+  }
+  
+  .landing-title {
+    font-size: 1.8rem;
+    line-height: 1.3;
+  }
+  
+  .lead-text {
+    font-size: 1rem;
+  }
+  
+  .btn {
+    padding: 0.8rem 1.5rem;
+    min-width: auto;
+  }
+}
+
+/* ===== تحسينات الأداء ===== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ===== تحسينات طباعة ===== */
+@media print {
+  .landing-page {
+    background: white;
+    color: black;
+  }
+  
+  .scroll-down {
+    display: none;
+  }
+  
+  .btn {
+    border: 2px solid black;
+    background: white;
+    color: black;
+  }
 }

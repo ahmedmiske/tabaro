@@ -1,19 +1,18 @@
 import React from 'react';
-import { FaFacebook, FaWhatsapp, FaInstagram } from 'react-icons/fa';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import { FaWhatsapp } from 'react-icons/fa';
 import './SocialMedia.css';
 
 function SocialMedia() {
   return (
     <div className="social-media">
-      <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" className="btn btn-primary mb-2">
-        <FaFacebook />
-      </a>
-      <a href="https://www.whatsapp.com" target="_blank" rel="noopener noreferrer" className="btn btn-success mb-2">
+      <a 
+        href="https://wa.me/1234567890" 
+        target="_blank" 
+        rel="noopener noreferrer" 
+        className="whatsapp-btn"
+        aria-label="تواصل معنا عبر واتساب"
+      >
         <FaWhatsapp />
-      </a>
-      <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" className="btn btn-danger mb-2">
-        <FaInstagram />
       </a>
     </div>
   );
