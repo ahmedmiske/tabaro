@@ -1,9 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   FiChevronDown, FiSearch, FiShoppingCart, FiUser, FiBell,
-  FiHeart, FiUsers, FiHelpCircle, FiDroplet, FiGrid, FiMenu, FiX, FiList
+  FiHeart, FiUsers, FiHelpCircle, FiDroplet, FiGrid, FiMenu, FiX, FiList,
+  FiHome
 } from 'react-icons/fi';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import './Header.css';
@@ -12,14 +13,16 @@ function Header({ notifCount }) {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // ===== حالة المستخدم + مزامنة فورية =====
+  // ===== User state + instant sync =====
   const [user, setUser] = useState(() => {
+    if (typeof window === 'undefined') return null;
     try { return JSON.parse(localStorage.getItem('user') || 'null'); }
     catch { return null; }
   });
   const isAuthed = !!user;
 
   const syncUser = useCallback(() => {
+    if (typeof window === 'undefined') return;
     try { setUser(JSON.parse(localStorage.getItem('user') || 'null')); }
     catch { setUser(null); }
   }, []);
@@ -27,6 +30,7 @@ function Header({ notifCount }) {
   useEffect(() => { syncUser(); }, [syncUser]);
   useEffect(() => { syncUser(); }, [location.key, syncUser]);
   useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
     const onFocus = () => syncUser();
     const onStorage = (e) => {
       if (!e.key || e.key === 'user' || e.key === 'token') syncUser();
@@ -43,7 +47,7 @@ function Header({ notifCount }) {
     };
   }, [syncUser]);
 
-  // اسم العرض + حرف الأفاتار
+  // Display name + avatar letter
   const displayName = useMemo(() => {
     if (!user) return '';
     const fn = user.firstName || user.given_name || '';
@@ -53,18 +57,18 @@ function Header({ notifCount }) {
   }, [user]);
   const avatarLetter = (displayName || 'ح').trim().charAt(0).toUpperCase();
 
-  // ===== باقي الحالة =====
+  // ===== Other state =====
   const [q, setQ] = useState('');
-  const [open, setOpen] = useState(null);          // 'blood' | 'general' | 'campaigns' | 'about' | null
+  const [open, setOpen] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [badgeCount, setBadgeCount] = useState(
-    Number.isFinite(notifCount) ? notifCount : 0
+  const [badgeCount, setBadgeCount] = useState(Number.isFinite(notifCount) ? notifCount : 0);
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  const isActive = useCallback((path) =>
+    location.pathname === path || (path !== '/' && location.pathname.startsWith(path)), [location.pathname]
   );
 
-  const isActive = (path) =>
-    location.pathname === path || (path !== '/' && location.pathname.startsWith(path));
-
-  const onSubmit = (e) => {
+  const onSubmit = useCallback((e) => {
     e.preventDefault();
     const s = q.trim();
     if (!s) return;
@@ -72,47 +76,89 @@ function Header({ notifCount }) {
     setQ('');
     setOpen(null);
     setMobileOpen(false);
-  };
+    setSearchOpen(false);
+  }, [navigate, q]);
 
-  // إغلاق عند النقر خارج/زر Esc
+  // Close on outside click / ESC
   const rootRef = useRef(null);
+  const prevFocusRef = useRef(null);
+  const firstDrawerFocusableRef = useRef(null);
+
   useEffect(() => {
-    const onDocClick = (e) => {
+    if (typeof document === 'undefined') return undefined;
+
+    const onDocPointer = (e) => {
       if (!rootRef.current) return;
-      if (!rootRef.current.contains(e.target)) { setOpen(null); setMobileOpen(false); }
+      if (!rootRef.current.contains(e.target)) { 
+        setOpen(null); 
+        setMobileOpen(false);
+        setSearchOpen(false);
+      }
     };
-    const onKey = (e) => { if (e.key === 'Escape') { setOpen(null); setMobileOpen(false); } };
-    document.addEventListener('mousedown', onDocClick);
+    const onKey = (e) => { 
+      if (e.key === 'Escape') { 
+        setOpen(null); 
+        setMobileOpen(false); 
+        setSearchOpen(false);
+      }
+    };
+
+    document.addEventListener('pointerdown', onDocPointer);
     document.addEventListener('keydown', onKey);
     return () => {
-      document.removeEventListener('mousedown', onDocClick);
+      document.removeEventListener('pointerdown', onDocPointer);
       document.removeEventListener('keydown', onKey);
     };
   }, []);
 
-  // ضبط ارتفاع الهيدر للميغا
+  // تحديث ارتفاع الهيدر
   useEffect(() => {
-    const el = document.querySelector('.eh-header');
-    if (!el) return;
-    const updateVar = () => el.style.setProperty('--header-height', `${Math.round(el.getBoundingClientRect().height)}px`);
-    updateVar();
-    window.addEventListener('resize', updateVar);
-    return () => window.removeEventListener('resize', updateVar);
+    if (typeof window === 'undefined') return undefined;
+    const el = rootRef.current;
+    if (!el) return undefined;
+
+    const updateHeaderHeight = () => {
+      const height = Math.round(el.getBoundingClientRect().height);
+      document.documentElement.style.setProperty('--header-height', `${height}px`);
+    };
+
+    updateHeaderHeight();
+    const handleResize = () => updateHeaderHeight();
+    window.addEventListener('resize', handleResize);
+    const interval = setInterval(updateHeaderHeight, 2000);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearInterval(interval);
+    };
   }, []);
 
-  // قفل تمرير الصفحة عند فتح الدرج
+  // Lock page scroll when drawer is open + focus management
   useEffect(() => {
-    document.body.style.overflow = mobileOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
+    if (typeof document === 'undefined') return undefined;
+    const body = document.body;
+    const prevOverflow = body.style.overflow;
+    if (mobileOpen) {
+      prevFocusRef.current = document.activeElement;
+      body.style.overflow = 'hidden';
+      setTimeout(() => firstDrawerFocusableRef.current?.focus(), 0);
+    } else {
+      body.style.overflow = prevOverflow || '';
+      const prev = prevFocusRef.current;
+      if (prev && typeof prev.focus === 'function') prev.focus();
+    }
+    return () => { body.style.overflow = prevOverflow || ''; };
   }, [mobileOpen]);
 
-  // جلب عدد الإشعارات إن لم يصل prop
+  // Fetch notifications count if prop not provided
   useEffect(() => {
     let stop = false;
     let timer;
+    const ctrl = new AbortController();
+
     const loadCount = async () => {
       try {
-        const { body, ok } = await fetchWithInterceptors('/api/notifications');
+        const { body, ok } = await fetchWithInterceptors('/api/notifications', { signal: ctrl.signal });
         if (!ok) return;
         const list = body?.data || body || [];
         const unread = Array.isArray(list) ? list.filter(n => !n.read).length : 0;
@@ -126,297 +172,375 @@ function Header({ notifCount }) {
     } else {
       setBadgeCount(notifCount);
     }
-    return () => { stop = true; if (timer) clearInterval(timer); };
+    return () => { stop = true; ctrl.abort(); if (timer) clearInterval(timer); };
   }, [notifCount]);
 
   const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.dispatchEvent(new Event('auth:changed'));
+    }
     setUser(null);
     setOpen(null);
     setMobileOpen(false);
-    window.dispatchEvent(new Event('auth:changed'));
     navigate('/login');
   };
 
+  // ARIA ids for groups
+  const bloodId = useId();
+  const generalId = useId();
+  const campaignsId = useId();
+  const aboutId = useId();
+
   return (
-    <header className="eh-header" dir="rtl" ref={rootRef}>
-      <div className="eh-container">
-        {/* الشعار + السطر التعريفي */}
-        <Link to="/" className="eh-brand" aria-label="الرئيسية">
-          <img src="/logo.png" alt="الشعار" />
-          <div className="eh-brand-caption" aria-hidden="true">
-            <span className="eh-brand-slogan">المنصة الوطنية للتبرع</span>
-          </div>
-        </Link>
-
-        {/* زر الهامبرغر */}
-        <button
-          className="eh-burger"
-          aria-label="فتح القائمة"
-          aria-expanded={mobileOpen}
-          onClick={() => setMobileOpen(v => !v)}
-        >
-          {mobileOpen ? <FiX /> : <FiMenu />}
-        </button>
-
-        {/* القائمة الرئيسية (سطح المكتب) */}
-        <nav className="eh-nav" role="menubar" aria-label="القائمة الرئيسية">
-          <Link to="/" className={`eh-link ${isActive('/') ? 'active' : ''}`}>الرئيسية</Link>
-
-          {/* التبرع بالدم */}
-          <div
-            className={`eh-item ${open==='blood' ? 'open' : ''}`}
-            onMouseEnter={() => setOpen('blood')}
-          >
-            <button
-              type="button"
-              className={`eh-link ${isActive('/blood-donations') ? 'active' : ''}`}
-              aria-haspopup="true"
-              aria-expanded={open==='blood'}
-              onClick={() => setOpen(prev => prev === 'blood' ? null : 'blood')}
-            >
-              التبرع بالدم <FiChevronDown className="eh-caret" />
-            </button>
-          </div>
-
-          {/* تبرعات عامة */}
-          <div
-            className={`eh-item ${open==='general' ? 'open' : ''}`}
-            onMouseEnter={() => setOpen('general')}
-          >
-            <button
-              type="button"
-              className={`eh-link ${isActive('/donations') ? 'active' : ''}`}
-              aria-haspopup="true"
-              aria-expanded={open==='general'}
-              onClick={() => setOpen(prev => prev === 'general' ? null : 'general')}
-            >
-              تبرعات عامة <FiChevronDown className="eh-caret" />
-            </button>
-          </div>
-
-          {/* حملات التبرع */}
-          <div
-            className={`eh-item ${open==='campaigns' ? 'open' : ''}`}
-            onMouseEnter={() => setOpen('campaigns')}
-          >
-            <button
-              type="button"
-              className={`eh-link ${isActive('/campaigns') ? 'active' : ''}`}
-              aria-haspopup="true"
-              aria-expanded={open==='campaigns'}
-              onClick={() => setOpen(prev => prev === 'campaigns' ? null : 'campaigns')}
-            >
-              حملات التبرع <FiChevronDown className="eh-caret" />
-            </button>
-          </div>
-
-          {/* عن المنصة */}
-          <div
-            className={`eh-item ${open==='about' ? 'open' : ''}`}
-            onMouseEnter={() => setOpen('about')}
-          >
-            <button
-              type="button"
-              className={`eh-link ${isActive('/about') ? 'active' : ''}`}
-              aria-haspopup="true"
-              aria-expanded={open==='about'}
-              onClick={() => setOpen(prev => prev === 'about' ? null : 'about')}
-            >
-              عن المنصة <FiChevronDown className="eh-caret" />
-            </button>
-          </div>
-        </nav>
-
-        {/* أدوات يمين */}
-        <div className="eh-actions">
-          <form className="eh-search" role="search" onSubmit={onSubmit}>
-            <input
-              className="eh-search-input"
-              type="search"
-              placeholder="ابحث عن حالة/متبرّع/مدينة…"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              aria-label="بحث"
-            />
-            <button className="eh-search-btn" type="submit" aria-label="بحث">
-              <FiSearch />
-            </button>
-          </form>
-
-          <Link to="/cart" className="eh-iconbtn" title="سلة التبرعات">
-            <FiShoppingCart />
-          </Link>
-
-          {!isAuthed ? (
-            <Link to="/login" className="eh-login">
-              <FiUser className="ms-1" /> تسجيل الدخول
+    <header className="eh-header-modern" dir="rtl" ref={rootRef}>
+      {/* الشريط العلوي */}
+      <div className="eh-top-bar">
+        <div className="eh-top-container">
+          <div className="eh-top-left">
+            <Link to="/" className="eh-top-link">
+              <FiHome />
+              <span>الرئيسية</span>
             </Link>
-          ) : (
-            <div className="eh-user">
-              <Link to="/notifications" className="eh-iconbtn eh-bell" aria-label="الإشعارات">
-                <FiBell />
-                { badgeCount > 0 && <span className="eh-badge">{badgeCount}</span> }
+            <Link to="/about" className="eh-top-link">
+              <span>عن المنصة</span>
+            </Link>
+          </div>
+          
+          <div className="eh-top-right">
+            {!isAuthed ? (
+              <Link to="/login" className="eh-login-btn">
+                <FiUser />
+                <span>تسجيل الدخول</span>
               </Link>
-
-              <div className="eh-userchip" title={displayName}>
-                <span className="eh-avatar" aria-hidden="true">{avatarLetter}</span>
-                <span className="eh-username">{displayName}</span>
+            ) : (
+              <div className="eh-user-mini">
+                <Link to="/notifications" className="eh-icon-mini" aria-label="الإشعارات">
+                  <FiBell />
+                  {badgeCount > 0 && <span className="eh-badge-mini">{badgeCount}</span>}
+                </Link>
+                <div className="eh-user-mini-info">
+                  <span className="eh-avatar-mini">{avatarLetter}</span>
+                  <span className="eh-username-mini">{displayName}</span>
+                </div>
               </div>
+            )}
+          </div>
+        </div>
+      </div>
 
-              <button className="eh-logout" onClick={logout}>خروج</button>
+      {/* الشريط الرئيسي */}
+      <div className="eh-main-bar">
+        <div className="eh-main-container">
+          {/* القائمة اليسرى */}
+          <nav className="eh-nav-left">
+            <div className={`eh-nav-item ${open==='blood' ? 'open' : ''}`}>
+              <button
+                className={`eh-nav-link ${isActive('/blood-donations') ? 'active' : ''}`}
+                onClick={() => setOpen(open === 'blood' ? null : 'blood')}
+                onMouseEnter={() => setOpen('blood')}
+              >
+                <FiDroplet />
+                <span>التبرع بالدم</span>
+                <FiChevronDown className="eh-caret" />
+              </button>
             </div>
-          )}
+
+            <div className={`eh-nav-item ${open==='general' ? 'open' : ''}`}>
+              <button
+                className={`eh-nav-link ${isActive('/donations') ? 'active' : ''}`}
+                onClick={() => setOpen(open === 'general' ? null : 'general')}
+                onMouseEnter={() => setOpen('general')}
+              >
+                <FiHeart />
+                <span>تبرعات عامة</span>
+                <FiChevronDown className="eh-caret" />
+              </button>
+            </div>
+          </nav>
+
+          {/* الشعار في المنتصف */}
+          <div className="eh-brand-center">
+            <Link to="/" className="eh-brand-modern">
+              <div className="eh-logo-wrapper">
+                <img src="/logo.png" alt="المنصة الوطنية للتبرع" />
+              </div>
+              <div className="eh-brand-text">
+                <span className="eh-brand-title">المنصة الوطنية</span>
+                <span className="eh-brand-subtitle">للتبرع</span>
+              </div>
+            </Link>
+          </div>
+
+          {/* القائمة اليمنى */}
+          <nav className="eh-nav-right">
+            <div className={`eh-nav-item ${open==='campaigns' ? 'open' : ''}`}>
+              <button
+                className={`eh-nav-link ${isActive('/campaigns') ? 'active' : ''}`}
+                onClick={() => setOpen(open === 'campaigns' ? null : 'campaigns')}
+                onMouseEnter={() => setOpen('campaigns')}
+              >
+                <FiUsers />
+                <span>حملات التبرع</span>
+                <FiChevronDown className="eh-caret" />
+              </button>
+            </div>
+
+            <div className="eh-nav-actions">
+              <button 
+                className={`eh-search-toggle ${searchOpen ? 'active' : ''}`}
+                onClick={() => setSearchOpen(!searchOpen)}
+                aria-label="بحث"
+              >
+                <FiSearch />
+              </button>
+              
+              <Link to="/cart" className="eh-cart-icon" aria-label="سلة التبرعات">
+                <FiShoppingCart />
+              </Link>
+              
+              <button 
+                className="eh-menu-toggle"
+                onClick={() => setMobileOpen(!mobileOpen)}
+                aria-label="القائمة"
+              >
+                <FiMenu />
+              </button>
+            </div>
+          </nav>
+        </div>
+
+        {/* شريط البحث المنزلق */}
+        <div className={`eh-search-slide ${searchOpen ? 'open' : ''}`}>
+          <div className="eh-search-container">
+            <form className="eh-search-form" onSubmit={onSubmit}>
+              <input
+                type="search"
+                placeholder="ابحث عن حالة تبرع، متبرع، أو مدينة..."
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                className="eh-search-input"
+                autoFocus
+              />
+              <button type="submit" className="eh-search-submit">
+                <FiSearch />
+              </button>
+            </form>
+            <button 
+              className="eh-search-close"
+              onClick={() => setSearchOpen(false)}
+              aria-label="إغلاق البحث"
+            >
+              <FiX />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* ===== Mega: التبرع بالدم ===== */}
-      <div
-        className={`eh-mega ${open==='blood' ? 'open' : ''}`}
-        onMouseEnter={() => setOpen('blood')}
-        onMouseLeave={() => setOpen(null)}
-      >
-        <div className="eh-mega-wrap">
+      {/* القوائم المنسدلة */}
+      <div className="eh-mega-modern">
+        {/* التبرع بالدم */}
+        <div
+          className={`eh-mega-panel ${open==='blood' ? 'open' : ''}`}
+          onMouseEnter={() => setOpen('blood')}
+          onMouseLeave={() => setOpen(null)}
+        >
           <div className="eh-mega-grid">
-            <Link to="/blood-donation" className="eh-mega-item" onClick={() => setOpen(null)}>
-              <span className="eh-mega-icon"><FiDroplet /></span>
-              <span className="eh-mega-title">زر التبرع بالدم</span>
-              <span className="eh-mega-sub">سجّل رغبتك بالتبرع الآن</span>
+            <Link to="/blood-donation" className="eh-mega-card" onClick={() => setOpen(null)}>
+              <div className="eh-mega-icon">
+                <FiDroplet />
+              </div>
+              <div className="eh-mega-content">
+                <h4>زر التبرع بالدم</h4>
+                <p>سجّل رغبتك بالتبرع الآن</p>
+              </div>
             </Link>
-            <Link to="/blood-donation" className="eh-mega-item" onClick={() => setOpen(null)}>
-              <span className="eh-mega-icon"><FiList /></span>
-              <span className="eh-mega-title">طلب التبرع</span>
-              <span className="eh-mega-sub">إضافة طلب جديد</span>
+            
+            <Link to="/blood-donation" className="eh-mega-card" onClick={() => setOpen(null)}>
+              <div className="eh-mega-icon">
+                <FiList />
+              </div>
+              <div className="eh-mega-content">
+                <h4>طلب التبرع</h4>
+                <p>إضافة طلب جديد</p>
+              </div>
             </Link>
-            <Link to="/blood-donations" className="eh-mega-item" onClick={() => setOpen(null)}>
-              <span className="eh-mega-icon"><FiGrid /></span>
-              <span className="eh-mega-title">قائمة الطلبات</span>
-              <span className="eh-mega-sub">تصفّح وفلترة</span>
+            
+            <Link to="/blood-donations" className="eh-mega-card" onClick={() => setOpen(null)}>
+              <div className="eh-mega-icon">
+                <FiGrid />
+              </div>
+              <div className="eh-mega-content">
+                <h4>قائمة الطلبات</h4>
+                <p>تصفّح وفلترة</p>
+              </div>
             </Link>
-            <Link to="/donors/blood" className="eh-mega-item" onClick={() => setOpen(null)}>
-              <span className="eh-mega-icon"><FiUsers /></span>
-              <span className="eh-mega-title">المتبرعون</span>
-              <span className="eh-mega-sub">المتبرعون المسجّلون</span>
+            
+            <Link to="/donors/blood" className="eh-mega-card" onClick={() => setOpen(null)}>
+              <div className="eh-mega-icon">
+                <FiUsers />
+              </div>
+              <div className="eh-mega-content">
+                <h4>المتبرعون</h4>
+                <p>المتبرعون المسجّلون</p>
+              </div>
+            </Link>
+          </div>
+        </div>
+
+        {/* تبرعات عامة */}
+        <div
+          className={`eh-mega-panel ${open==='general' ? 'open' : ''}`}
+          onMouseEnter={() => setOpen('general')}
+          onMouseLeave={() => setOpen(null)}
+        >
+          <div className="eh-mega-grid">
+            <Link to="/donation-requests" className="eh-mega-card" onClick={() => setOpen(null)}>
+              <div className="eh-mega-icon">
+                <FiHeart />
+              </div>
+              <div className="eh-mega-content">
+                <h4>تبرعات عامة</h4>
+                <p>ابدأ تبرعًا الآن</p>
+              </div>
+            </Link>
+            
+            <Link to="/donation-requests" className="eh-mega-card" onClick={() => setOpen(null)}>
+              <div className="eh-mega-icon">
+                <FiList />
+              </div>
+              <div className="eh-mega-content">
+                <h4>طلب التبرع</h4>
+                <p>أنشئ طلبًا عامًا</p>
+              </div>
+            </Link>
+            
+            <Link to="/donations" className="eh-mega-card" onClick={() => setOpen(null)}>
+              <div className="eh-mega-icon">
+                <FiGrid />
+              </div>
+              <div className="eh-mega-content">
+                <h4>قائمة الطلبات</h4>
+                <p>تصفية حسب النوع</p>
+              </div>
+            </Link>
+            
+            <Link to="/donors/general" className="eh-mega-card" onClick={() => setOpen(null)}>
+              <div className="eh-mega-icon">
+                <FiUsers />
+              </div>
+              <div className="eh-mega-content">
+                <h4>المتبرعون</h4>
+                <p>المتبرعون العامّون</p>
+              </div>
+            </Link>
+          </div>
+        </div>
+
+        {/* حملات التبرع */}
+        <div
+          className={`eh-mega-panel ${open==='campaigns' ? 'open' : ''}`}
+          onMouseEnter={() => setOpen('campaigns')}
+          onMouseLeave={() => setOpen(null)}
+        >
+          <div className="eh-mega-grid">
+            <Link to="/campaigns" className="eh-mega-card" onClick={() => setOpen(null)}>
+              <div className="eh-mega-icon">
+                <FiGrid />
+              </div>
+              <div className="eh-mega-content">
+                <h4>قائمة الحملات</h4>
+                <p>استكشف الحملات</p>
+              </div>
+            </Link>
+            
+            <Link to="/campaigns/create" className="eh-mega-card" onClick={() => setOpen(null)}>
+              <div className="eh-mega-icon">
+                <FiHeart />
+              </div>
+              <div className="eh-mega-content">
+                <h4>إنشاء حملة</h4>
+                <p>أطلق حملتك الآن</p>
+              </div>
             </Link>
           </div>
         </div>
       </div>
 
-      {/* ===== Mega: تبرعات عامة ===== */}
+      {/* القائمة الجانبية للجوّال */}
       <div
-        className={`eh-mega ${open==='general' ? 'open' : ''}`}
-        onMouseEnter={() => setOpen('general')}
-        onMouseLeave={() => setOpen(null)}
-      >
-        <div className="eh-mega-wrap">
-          <div className="eh-mega-grid">
-            <Link to="/donation-requests" className="eh-mega-item" onClick={() => setOpen(null)}>
-              <span className="eh-mega-icon"><FiHeart /></span>
-              <span className="eh-mega-title">تبرعات عامة</span>
-              <span className="eh-mega-sub">ابدأ تبرعًا الآن</span>
-            </Link>
-            <Link to="/donation-requests" className="eh-mega-item" onClick={() => setOpen(null)}>
-              <span className="eh-mega-icon"><FiList /></span>
-              <span className="eh-mega-title">طلب التبرع</span>
-              <span className="eh-mega-sub">أنشئ طلبًا عامًا</span>
-            </Link>
-            <Link to="/donations" className="eh-mega-item" onClick={() => setOpen(null)}>
-              <span className="eh-mega-icon"><FiGrid /></span>
-              <span className="eh-mega-title">قائمة الطلبات</span>
-              <span className="eh-mega-sub">تصفية حسب النوع</span>
-            </Link>
-            <Link to="/donors/general" className="eh-mega-item" onClick={() => setOpen(null)}>
-              <span className="eh-mega-icon"><FiUsers /></span>
-              <span className="eh-mega-title">المتبرعون</span>
-              <span className="eh-mega-sub">المتبرعون العامّون</span>
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* ===== Mega: حملات التبرع ===== */}
-      <div
-        className={`eh-mega ${open==='campaigns' ? 'open' : ''}`}
-        onMouseEnter={() => setOpen('campaigns')}
-        onMouseLeave={() => setOpen(null)}
-      >
-        <div className="eh-mega-wrap">
-          <div className="eh-mega-grid">
-            <Link to="/campaigns" className="eh-mega-item" onClick={() => setOpen(null)}>
-              <span className="eh-mega-icon"><FiGrid /></span>
-              <span className="eh-mega-title">قائمة الحملات</span>
-              <span className="eh-mega-sub">استكشف الحملات</span>
-            </Link>
-            <Link to="/campaigns/create" className="eh-mega-item" onClick={() => setOpen(null)}>
-              <span className="eh-mega-icon"><FiHeart /></span>
-              <span className="eh-mega-title">إنشاء حملة</span>
-              <span className="eh-mega-sub">أطلق حملتك الآن</span>
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* درج الموبايل/المتوسط — يغلق عند الضغط على الخلفية */}
-      <div
-        className={`eh-drawer ${mobileOpen ? 'open' : ''}`}
-        role="dialog"
-        aria-label="قائمة الموبايل"
-        aria-modal="true"
-        aria-hidden={!mobileOpen}
+        className={`eh-mobile-drawer ${mobileOpen ? 'open' : ''}`}
         onClick={() => setMobileOpen(false)}
       >
-        <div className="eh-drawer-panel" onClick={(e)=>e.stopPropagation()}>
-          <button
-            className="eh-burger"
-            aria-label="إغلاق القائمة"
-            onClick={() => setMobileOpen(false)}
-            style={{ marginInlineStart: 'auto', marginBottom: 8 }}
-          >
-            <FiX />
-          </button>
+        <div className="eh-drawer-content" onClick={(e) => e.stopPropagation()}>
+          <div className="eh-drawer-header">
+            <div className="eh-user-drawer">
+              {isAuthed ? (
+                <>
+                  <div className="eh-avatar-drawer">{avatarLetter}</div>
+                  <div className="eh-user-info-drawer">
+                    <div className="eh-username-drawer">{displayName}</div>
+                    <button className="eh-logout-drawer" onClick={logout}>تسجيل الخروج</button>
+                  </div>
+                </>
+              ) : (
+                <Link to="/login" className="eh-login-drawer" onClick={() => setMobileOpen(false)}>
+                  <FiUser />
+                  <span>تسجيل الدخول</span>
+                </Link>
+              )}
+            </div>
+            <button 
+              className="eh-close-drawer"
+              onClick={() => setMobileOpen(false)}
+            >
+              <FiX />
+            </button>
+          </div>
 
-          <form className="eh-drawer-search" role="search" onSubmit={onSubmit}>
-            <input
-              type="search"
-              placeholder="ابحث…"
-              value={q}
-              onChange={(e)=>setQ(e.target.value)}
-              aria-label="بحث في الموبايل"
-            />
-            <button type="submit"><FiSearch/></button>
-          </form>
+          <nav className="eh-drawer-nav">
+            <Link to="/" className="eh-drawer-link" onClick={() => setMobileOpen(false)}>
+              <FiHome />
+              <span>الرئيسية</span>
+            </Link>
 
-          <Link to="/" className="eh-drawer-link" onClick={()=>setMobileOpen(false)}>الرئيسية</Link>
+            <div className="eh-drawer-group">
+              <div className="eh-drawer-group-title">
+                <FiDroplet />
+                <span>التبرع بالدم</span>
+              </div>
+              <Link to="/blood-donation" onClick={() => setMobileOpen(false)}>زر التبرع بالدم</Link>
+              <Link to="/blood-donation" onClick={() => setMobileOpen(false)}>طلب التبرع</Link>
+              <Link to="/blood-donations" onClick={() => setMobileOpen(false)}>قائمة الطلبات</Link>
+              <Link to="/donors/blood" onClick={() => setMobileOpen(false)}>المتبرعون</Link>
+            </div>
 
-          <details className="eh-drawer-group">
-            <summary>التبرع بالدم</summary>
-            <Link to="/donations/blood/request" onClick={()=>setMobileOpen(false)}>زر التبرع بالدم</Link>
-            <Link to="/donations/blood/request" onClick={()=>setMobileOpen(false)}>طلب التبرع</Link>
-            <Link to="/donations/blood" onClick={()=>setMobileOpen(false)}>قائمة الطلبات</Link>
-            <Link to="/donors/blood" onClick={()=>setMobileOpen(false)}>المتبرعون</Link>
-          </details>
+            <div className="eh-drawer-group">
+              <div className="eh-drawer-group-title">
+                <FiHeart />
+                <span>تبرعات عامة</span>
+              </div>
+              <Link to="/donation-requests" onClick={() => setMobileOpen(false)}>تبرعات عامة</Link>
+              <Link to="/donation-requests" onClick={() => setMobileOpen(false)}>طلب التبرع</Link>
+              <Link to="/donations" onClick={() => setMobileOpen(false)}>قائمة الطلبات</Link>
+              <Link to="/donors/general" onClick={() => setMobileOpen(false)}>المتبرعون</Link>
+            </div>
 
-          <details className="eh-drawer-group">
-            <summary>تبرعات عامة</summary>
-            <Link to="/donations/general/give" onClick={()=>setMobileOpen(false)}>تبرعات عامة</Link>
-            <Link to="/donations/general/request" onClick={()=>setMobileOpen(false)}>طلب التبرع</Link>
-            <Link to="/donations/general" onClick={()=>setMobileOpen(false)}>قائمة الطلبات</Link>
-            <Link to="/donors/general" onClick={()=>setMobileOpen(false)}>المتبرعون</Link>
-          </details>
+            <div className="eh-drawer-group">
+              <div className="eh-drawer-group-title">
+                <FiUsers />
+                <span>حملات التبرع</span>
+              </div>
+              <Link to="/campaigns" onClick={() => setMobileOpen(false)}>قائمة الحملات</Link>
+              <Link to="/campaigns/create" onClick={() => setMobileOpen(false)}>إنشاء حملة</Link>
+            </div>
 
-          <details className="eh-drawer-group">
-            <summary>حملات التبرع</summary>
-            <Link to="/campaigns" onClick={()=>setMobileOpen(false)}>قائمة الحملات</Link>
-            <Link to="/campaigns/create" onClick={()=>setMobileOpen(false)}>إنشاء حملة</Link>
-          </details>
-
-          <details className="eh-drawer-group">
-            <summary>عن المنصة</summary>
-            <Link to="/about" onClick={()=>setMobileOpen(false)}>من نحن</Link>
-            <Link to="/about/team" onClick={()=>setMobileOpen(false)}>فريق العمل</Link>
-            <Link to="/about/contact" onClick={()=>setMobileOpen(false)}>تواصل معنا</Link>
-          </details>
+            <Link to="/about" className="eh-drawer-link" onClick={() => setMobileOpen(false)}>
+              <FiHelpCircle />
+              <span>عن المنصة</span>
+            </Link>
+          </nav>
         </div>
       </div>
     </header>
