@@ -475,7 +475,7 @@
   color: #64748b;
 }
 
-/* القائمة الجانبية للجوّال */
+/* القائمة الجانبية للجوّال - كاملة بدون cursor */
 .eh-mobile-drawer {
   position: fixed;
   inset: 0;
@@ -485,6 +485,7 @@
   transition: all 0.3s ease;
   z-index: 9999;
   pointer-events: none;
+  cursor: default; /* إزالة الكيرسور */
 }
 
 .eh-mobile-drawer.open {
@@ -494,15 +495,22 @@
 }
 
 .eh-drawer-content {
-  position: absolute;
-  inset-block: 0;
-  inset-inline-end: 0;
-  width: min(90vw, 400px);
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: min(85vw, 380px);
+  max-width: 380px;
   background: white;
   transform: translateX(100%);
   transition: transform 0.3s ease;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  cursor: default; /* إزالة الكيرسور */
+  height: 100vh; /* ضمان الارتفاع الكامل */
+  min-height: 100vh;
 }
 
 .eh-mobile-drawer.open .eh-drawer-content {
@@ -591,6 +599,8 @@
   flex: 1;
   padding: 20px 0;
   overflow-y: auto;
+  cursor: default; /* إزالة الكيرسور */
+  height: 100%;
 }
 
 .eh-drawer-link {
@@ -603,11 +613,13 @@
   font-weight: 600;
   transition: all 0.3s ease;
   border-left: 4px solid transparent;
+  cursor: default; /* إزالة الكيرسور من الروابط */
 }
 
 .eh-drawer-link:hover {
   background: var(--eh-lighter);
   border-left-color: var(--eh-primary);
+  cursor: default; /* إبقاء الكيرسور عادي حتى عند التحويم */
 }
 
 .eh-drawer-group {
@@ -631,14 +643,29 @@
   text-decoration: none;
   transition: all 0.3s ease;
   border-left: 4px solid transparent;
+  cursor: default; /* إزالة الكيرسور من روابط المجموعات */
 }
 
 .eh-drawer-group a:hover {
   background: var(--eh-lighter);
   border-left-color: var(--eh-secondary);
+  cursor: default; /* إبقاء الكيرسور عادي عند التحويم */
 }
 
-/* التجاوب مع الشاشات المختلفة */
+/* ========== التجاوب مع الشاشات المختلفة ========== */
+
+/* شاشات كبيرة (1024px فما فوق) */
+@media (min-width: 1025px) {
+  .eh-menu-toggle {
+    display: none !important; /* إخفاء زر الهامبرغر في الشاشات الكبيرة */
+  }
+  
+  .eh-nav-left, .eh-nav-right {
+    display: flex !important; /* إظهار القوائم في الشاشات الكبيرة */
+  }
+}
+
+/* شاشات متوسطة (768px - 1024px) */
 @media (max-width: 1024px) {
   .eh-main-container {
     grid-template-columns: 1fr auto;
@@ -646,14 +673,19 @@
   }
   
   .eh-nav-left {
-    display: none;
+    display: none; /* إخفاء القائمة اليسرى */
   }
   
   .eh-brand-center {
     justify-content: flex-start;
   }
+  
+  .eh-menu-toggle {
+    display: flex; /* إظهار زر الهامبرغر في الشاشات المتوسطة */
+  }
 }
 
+/* شاشات صغيرة (768px فما دون) */
 @media (max-width: 768px) {
   .eh-top-bar {
     display: none;
@@ -663,6 +695,35 @@
     padding: 12px 16px;
     grid-template-columns: auto 1fr auto;
     gap: 16px;
+  }
+  
+  /* ضمان ظهور القائمة كاملة في الموبايل */
+  .eh-mobile-drawer {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    cursor: default !important;
+  }
+  
+  .eh-drawer-content {
+    position: fixed !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    right: 0 !important;
+    width: 85vw !important;
+    max-width: 320px !important;
+    height: 100vh !important;
+    cursor: default !important;
+  }
+  
+  .eh-drawer-nav {
+    max-height: calc(100vh - 120px) !important;
+    overflow-y: auto !important;
+    cursor: default !important;
   }
   
   .eh-brand-text {
@@ -707,8 +768,13 @@
     padding: 20px 16px;
     gap: 16px;
   }
+  
+  .eh-menu-toggle {
+    display: flex; /* إظهار زر الهامبرغر في الشاشات الصغيرة */
+  }
 }
 
+/* شاشات جد صغيرة (480px فما دون) */
 @media (max-width: 480px) {
   .eh-main-container {
     gap: 12px;

@@ -233,6 +233,17 @@ function Header({ notifCount }) {
       {/* الشريط الرئيسي */}
       <div className="eh-main-bar">
         <div className="eh-main-container">
+           {/* الشعار في المنتصف */}
+          <div className="eh-brand-center">
+            <Link to="/" className="eh-brand-modern">
+              <div className="eh-logo-wrapper">
+                <img src="/logo.png" alt="المنصة الوطنية للتبرع" />
+              </div>
+              <div className="eh-brand-text">
+                <span className="eh-brand-title">المنصة الوطنية للتبرع</span>
+              </div>
+            </Link>
+          </div>
           {/* القائمة اليسرى */}
           <nav className="eh-nav-left">
             <div className={`eh-nav-item ${open==='blood' ? 'open' : ''}`}>
@@ -260,18 +271,7 @@ function Header({ notifCount }) {
             </div>
           </nav>
 
-          {/* الشعار في المنتصف */}
-          <div className="eh-brand-center">
-            <Link to="/" className="eh-brand-modern">
-              <div className="eh-logo-wrapper">
-                <img src="/logo.png" alt="المنصة الوطنية للتبرع" />
-              </div>
-              <div className="eh-brand-text">
-                <span className="eh-brand-title">المنصة الوطنية</span>
-                <span className="eh-brand-subtitle">للتبرع</span>
-              </div>
-            </Link>
-          </div>
+         
 
           {/* القائمة اليمنى */}
           <nav className="eh-nav-right">
@@ -300,12 +300,15 @@ function Header({ notifCount }) {
                 <FiShoppingCart />
               </Link>
               
+              {/* زر الهامبرغر - سيظهر فقط في التابلت والموبايل */}
               <button 
                 className="eh-menu-toggle"
                 onClick={() => setMobileOpen(!mobileOpen)}
-                aria-label="القائمة"
+                aria-label="فتح القائمة"
+                aria-expanded={mobileOpen}
+                aria-controls="mobile-drawer"
               >
-                <FiMenu />
+                {mobileOpen ? <FiX /> : <FiMenu />}
               </button>
             </div>
           </nav>
@@ -322,6 +325,7 @@ function Header({ notifCount }) {
                 onChange={(e) => setQ(e.target.value)}
                 className="eh-search-input"
                 autoFocus
+                ref={firstDrawerFocusableRef}
               />
               <button type="submit" className="eh-search-submit">
                 <FiSearch />
@@ -342,9 +346,12 @@ function Header({ notifCount }) {
       <div className="eh-mega-modern">
         {/* التبرع بالدم */}
         <div
+          id="mega-blood"
           className={`eh-mega-panel ${open==='blood' ? 'open' : ''}`}
           onMouseEnter={() => setOpen('blood')}
           onMouseLeave={() => setOpen(null)}
+          role="region"
+          aria-labelledby={bloodId}
         >
           <div className="eh-mega-grid">
             <Link to="/blood-donation" className="eh-mega-card" onClick={() => setOpen(null)}>
@@ -391,9 +398,12 @@ function Header({ notifCount }) {
 
         {/* تبرعات عامة */}
         <div
+          id="mega-general"
           className={`eh-mega-panel ${open==='general' ? 'open' : ''}`}
           onMouseEnter={() => setOpen('general')}
           onMouseLeave={() => setOpen(null)}
+          role="region"
+          aria-labelledby={generalId}
         >
           <div className="eh-mega-grid">
             <Link to="/donation-requests" className="eh-mega-card" onClick={() => setOpen(null)}>
@@ -440,9 +450,12 @@ function Header({ notifCount }) {
 
         {/* حملات التبرع */}
         <div
+          id="mega-campaigns"
           className={`eh-mega-panel ${open==='campaigns' ? 'open' : ''}`}
           onMouseEnter={() => setOpen('campaigns')}
           onMouseLeave={() => setOpen(null)}
+          role="region"
+          aria-labelledby={campaignsId}
         >
           <div className="eh-mega-grid">
             <Link to="/campaigns" className="eh-mega-card" onClick={() => setOpen(null)}>
@@ -470,8 +483,13 @@ function Header({ notifCount }) {
 
       {/* القائمة الجانبية للجوّال */}
       <div
+        id="mobile-drawer"
         className={`eh-mobile-drawer ${mobileOpen ? 'open' : ''}`}
         onClick={() => setMobileOpen(false)}
+        role="dialog"
+        aria-label="قائمة الهاتف"
+        aria-modal="true"
+        aria-hidden={!mobileOpen}
       >
         <div className="eh-drawer-content" onClick={(e) => e.stopPropagation()}>
           <div className="eh-drawer-header">
@@ -494,12 +512,13 @@ function Header({ notifCount }) {
             <button 
               className="eh-close-drawer"
               onClick={() => setMobileOpen(false)}
+              aria-label="إغلاق القائمة"
             >
               <FiX />
             </button>
           </div>
 
-          <nav className="eh-drawer-nav">
+          <nav className="eh-drawer-nav" role="navigation" aria-label="القائمة الرئيسية">
             <Link to="/" className="eh-drawer-link" onClick={() => setMobileOpen(false)}>
               <FiHome />
               <span>الرئيسية</span>

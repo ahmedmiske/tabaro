@@ -44,11 +44,11 @@ form input {
 }
 
 /* زر الحفظ */
-button[type="submit"] {
+/* button[type="submit"] {
   width: 100%;
   font-weight: bold;
 }
 button[type="submit"]:hover {
   background-color: #0056b3;
   color: white;
-}   
+}    */
