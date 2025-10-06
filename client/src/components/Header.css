@@ -56,7 +56,11 @@
   align-items: center;
   gap: 6px;
   transition: color 0.3s ease;
+  /* إن أردت دعماً أوسع، أضف السطرين التاليين وإلا اتركهما */
+  -webkit-transition: color 0.3s ease;
+  -o-transition: color 0.3s ease;
 }
+
 
 .eh-top-link:hover {
   color: white;
@@ -803,3 +807,34 @@
     background: rgba(255, 255, 255, 0.98);
   }
 }
+
+/* ========== حساب المستخدم في الشريط العلوي ========== */
+.eh-acc { position: relative; }
+.eh-acc-btn{
+  display:inline-flex; align-items:center; gap:8px;
+  background:transparent; color:#fff;
+  border:2px solid rgba(255,255,255,.2);
+  padding:6px 10px; border-radius:999px; cursor:pointer; transition:all .2s ease;
+}
+.eh-acc-btn:hover{ background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.35); }
+.eh-acc-caret{ opacity:.9; transition:transform .2s ease; }
+.eh-acc.open .eh-acc-caret{ transform:rotate(180deg); }
+
+.eh-acc-menu{
+  position:absolute; top:calc(100% + 10px); inset-inline-end:0;
+  min-width:220px; background:#fff; border:1px solid var(--eh-border);
+  border-radius:12px; box-shadow:var(--eh-shadow); padding:8px; z-index:4200;
+  opacity:0; visibility:hidden; transform:translateY(6px); transition:.15s ease;
+}
+.eh-acc.open .eh-acc-menu{ opacity:1; visibility:visible; transform:translateY(0); }
+
+.eh-acc-item{
+  width:100%; display:flex; align-items:center; gap:10px;
+  padding:10px 12px; border-radius:10px; text-decoration:none;
+  background:transparent; border:none; color:var(--eh-dark);
+  font-weight:600; cursor:pointer; transition:background .15s ease, color .15s ease;
+}
+.eh-acc-item:hover{ background:#f6f8fb; color:var(--eh-primary); }
+.eh-acc-item.danger:hover{ background:#fef2f2; color:#ef4444; }
+
+@media (max-width:768px){ .hide-on-sm{ display:none; } }

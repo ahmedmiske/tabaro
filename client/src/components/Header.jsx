@@ -1,14 +1,14 @@
+// src/components/Header.jsx
 import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
-  FiChevronDown, FiSearch, FiShoppingCart, FiUser, FiBell,
-  FiHeart, FiUsers, FiHelpCircle, FiDroplet, FiGrid, FiMenu, FiX, FiList,
-  FiHome
+  FiChevronDown, FiSearch, FiShoppingCart, FiUser,
+  FiHeart, FiUsers, FiHelpCircle, FiDroplet, FiGrid, FiMenu, FiX, FiList
 } from 'react-icons/fi';
-import fetchWithInterceptors from '../services/fetchWithInterceptors';
+import fetchWithInterceptors from '../services/fetchWithInterceptors.js';
+import TopBar from './TopBar.jsx';
 import './Header.css';
-
 function Header({ notifCount }) {
   const location = useLocation();
   const navigate = useNavigate();
@@ -32,9 +32,7 @@ function Header({ notifCount }) {
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
     const onFocus = () => syncUser();
-    const onStorage = (e) => {
-      if (!e.key || e.key === 'user' || e.key === 'token') syncUser();
-    };
+    const onStorage = (e) => { if (!e.key || e.key === 'user' || e.key === 'token') syncUser(); };
     const onAuthChanged = () => syncUser();
 
     window.addEventListener('focus', onFocus);
@@ -59,7 +57,7 @@ function Header({ notifCount }) {
 
   // ===== Other state =====
   const [q, setQ] = useState('');
-  const [open, setOpen] = useState(null);
+  const [open, setOpen] = useState(null); // 'blood' | 'general' | 'campaigns' | null
   const [mobileOpen, setMobileOpen] = useState(false);
   const [badgeCount, setBadgeCount] = useState(Number.isFinite(notifCount) ? notifCount : 0);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -89,16 +87,16 @@ function Header({ notifCount }) {
 
     const onDocPointer = (e) => {
       if (!rootRef.current) return;
-      if (!rootRef.current.contains(e.target)) { 
-        setOpen(null); 
+      if (!rootRef.current.contains(e.target)) {
+        setOpen(null);
         setMobileOpen(false);
         setSearchOpen(false);
       }
     };
-    const onKey = (e) => { 
-      if (e.key === 'Escape') { 
-        setOpen(null); 
-        setMobileOpen(false); 
+    const onKey = (e) => {
+      if (e.key === 'Escape') {
+        setOpen(null);
+        setMobileOpen(false);
         setSearchOpen(false);
       }
     };
@@ -126,7 +124,7 @@ function Header({ notifCount }) {
     const handleResize = () => updateHeaderHeight();
     window.addEventListener('resize', handleResize);
     const interval = setInterval(updateHeaderHeight, 2000);
-    
+
     return () => {
       window.removeEventListener('resize', handleResize);
       clearInterval(interval);
@@ -191,49 +189,22 @@ function Header({ notifCount }) {
   const bloodId = useId();
   const generalId = useId();
   const campaignsId = useId();
-  const aboutId = useId();
 
   return (
     <header className="eh-header-modern" dir="rtl" ref={rootRef}>
-      {/* الشريط العلوي */}
-      <div className="eh-top-bar">
-        <div className="eh-top-container">
-          <div className="eh-top-left">
-            <Link to="/" className="eh-top-link">
-              <FiHome />
-              <span>الرئيسية</span>
-            </Link>
-            <Link to="/about" className="eh-top-link">
-              <span>عن المنصة</span>
-            </Link>
-          </div>
-          
-          <div className="eh-top-right">
-            {!isAuthed ? (
-              <Link to="/login" className="eh-login-btn">
-                <FiUser />
-                <span>تسجيل الدخول</span>
-              </Link>
-            ) : (
-              <div className="eh-user-mini">
-                <Link to="/notifications" className="eh-icon-mini" aria-label="الإشعارات">
-                  <FiBell />
-                  {badgeCount > 0 && <span className="eh-badge-mini">{badgeCount}</span>}
-                </Link>
-                <div className="eh-user-mini-info">
-                  <span className="eh-avatar-mini">{avatarLetter}</span>
-                  <span className="eh-username-mini">{displayName}</span>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+      {/* ✅ TopBar مستقل */}
+      <TopBar
+        isAuthed={isAuthed}
+        displayName={displayName}
+        avatarLetter={avatarLetter}
+        badgeCount={badgeCount}
+        onLogout={logout}
+      />
 
       {/* الشريط الرئيسي */}
       <div className="eh-main-bar">
         <div className="eh-main-container">
-           {/* الشعار في المنتصف */}
+          {/* الشعار في المنتصف */}
           <div className="eh-brand-center">
             <Link to="/" className="eh-brand-modern">
               <div className="eh-logo-wrapper">
@@ -244,6 +215,7 @@ function Header({ notifCount }) {
               </div>
             </Link>
           </div>
+
           {/* القائمة اليسرى */}
           <nav className="eh-nav-left">
             <div className={`eh-nav-item ${open==='blood' ? 'open' : ''}`}>
@@ -271,8 +243,6 @@ function Header({ notifCount }) {
             </div>
           </nav>
 
-         
-
           {/* القائمة اليمنى */}
           <nav className="eh-nav-right">
             <div className={`eh-nav-item ${open==='campaigns' ? 'open' : ''}`}>
@@ -288,20 +258,20 @@ function Header({ notifCount }) {
             </div>
 
             <div className="eh-nav-actions">
-              <button 
+              <button
                 className={`eh-search-toggle ${searchOpen ? 'active' : ''}`}
                 onClick={() => setSearchOpen(!searchOpen)}
                 aria-label="بحث"
               >
                 <FiSearch />
               </button>
-              
+
               <Link to="/cart" className="eh-cart-icon" aria-label="سلة التبرعات">
                 <FiShoppingCart />
               </Link>
-              
-              {/* زر الهامبرغر - سيظهر فقط في التابلت والموبايل */}
-              <button 
+
+              {/* زر الهامبرغر */}
+              <button
                 className="eh-menu-toggle"
                 onClick={() => setMobileOpen(!mobileOpen)}
                 aria-label="فتح القائمة"
@@ -331,7 +301,7 @@ function Header({ notifCount }) {
                 <FiSearch />
               </button>
             </form>
-            <button 
+            <button
               className="eh-search-close"
               onClick={() => setSearchOpen(false)}
               aria-label="إغلاق البحث"
@@ -355,39 +325,28 @@ function Header({ notifCount }) {
         >
           <div className="eh-mega-grid">
             <Link to="/blood-donation" className="eh-mega-card" onClick={() => setOpen(null)}>
-              <div className="eh-mega-icon">
-                <FiDroplet />
-              </div>
+              <div className="eh-mega-icon"><FiDroplet /></div>
               <div className="eh-mega-content">
                 <h4>زر التبرع بالدم</h4>
                 <p>سجّل رغبتك بالتبرع الآن</p>
               </div>
             </Link>
-            
             <Link to="/blood-donation" className="eh-mega-card" onClick={() => setOpen(null)}>
-              <div className="eh-mega-icon">
-                <FiList />
-              </div>
+              <div className="eh-mega-icon"><FiList /></div>
               <div className="eh-mega-content">
                 <h4>طلب التبرع</h4>
                 <p>إضافة طلب جديد</p>
               </div>
             </Link>
-            
             <Link to="/blood-donations" className="eh-mega-card" onClick={() => setOpen(null)}>
-              <div className="eh-mega-icon">
-                <FiGrid />
-              </div>
+              <div className="eh-mega-icon"><FiGrid /></div>
               <div className="eh-mega-content">
                 <h4>قائمة الطلبات</h4>
                 <p>تصفّح وفلترة</p>
               </div>
             </Link>
-            
             <Link to="/donors/blood" className="eh-mega-card" onClick={() => setOpen(null)}>
-              <div className="eh-mega-icon">
-                <FiUsers />
-              </div>
+              <div className="eh-mega-icon"><FiUsers /></div>
               <div className="eh-mega-content">
                 <h4>المتبرعون</h4>
                 <p>المتبرعون المسجّلون</p>
@@ -407,39 +366,28 @@ function Header({ notifCount }) {
         >
           <div className="eh-mega-grid">
             <Link to="/donation-requests" className="eh-mega-card" onClick={() => setOpen(null)}>
-              <div className="eh-mega-icon">
-                <FiHeart />
-              </div>
+              <div className="eh-mega-icon"><FiHeart /></div>
               <div className="eh-mega-content">
                 <h4>تبرعات عامة</h4>
                 <p>ابدأ تبرعًا الآن</p>
               </div>
             </Link>
-            
             <Link to="/donation-requests" className="eh-mega-card" onClick={() => setOpen(null)}>
-              <div className="eh-mega-icon">
-                <FiList />
-              </div>
+              <div className="eh-mega-icon"><FiList /></div>
               <div className="eh-mega-content">
                 <h4>طلب التبرع</h4>
                 <p>أنشئ طلبًا عامًا</p>
               </div>
             </Link>
-            
             <Link to="/donations" className="eh-mega-card" onClick={() => setOpen(null)}>
-              <div className="eh-mega-icon">
-                <FiGrid />
-              </div>
+              <div className="eh-mega-icon"><FiGrid /></div>
               <div className="eh-mega-content">
                 <h4>قائمة الطلبات</h4>
                 <p>تصفية حسب النوع</p>
               </div>
             </Link>
-            
             <Link to="/donors/general" className="eh-mega-card" onClick={() => setOpen(null)}>
-              <div className="eh-mega-icon">
-                <FiUsers />
-              </div>
+              <div className="eh-mega-icon"><FiUsers /></div>
               <div className="eh-mega-content">
                 <h4>المتبرعون</h4>
                 <p>المتبرعون العامّون</p>
@@ -459,19 +407,14 @@ function Header({ notifCount }) {
         >
           <div className="eh-mega-grid">
             <Link to="/campaigns" className="eh-mega-card" onClick={() => setOpen(null)}>
-              <div className="eh-mega-icon">
-                <FiGrid />
-              </div>
+              <div className="eh-mega-icon"><FiGrid /></div>
               <div className="eh-mega-content">
                 <h4>قائمة الحملات</h4>
                 <p>استكشف الحملات</p>
               </div>
             </Link>
-            
             <Link to="/campaigns/create" className="eh-mega-card" onClick={() => setOpen(null)}>
-              <div className="eh-mega-icon">
-                <FiHeart />
-              </div>
+              <div className="eh-mega-icon"><FiHeart /></div>
               <div className="eh-mega-content">
                 <h4>إنشاء حملة</h4>
                 <p>أطلق حملتك الآن</p>
@@ -509,7 +452,7 @@ function Header({ notifCount }) {
                 </Link>
               )}
             </div>
-            <button 
+            <button
               className="eh-close-drawer"
               onClick={() => setMobileOpen(false)}
               aria-label="إغلاق القائمة"
@@ -520,14 +463,11 @@ function Header({ notifCount }) {
 
           <nav className="eh-drawer-nav" role="navigation" aria-label="القائمة الرئيسية">
             <Link to="/" className="eh-drawer-link" onClick={() => setMobileOpen(false)}>
-              <FiHome />
               <span>الرئيسية</span>
             </Link>
-
             <div className="eh-drawer-group">
               <div className="eh-drawer-group-title">
-                <FiDroplet />
-                <span>التبرع بالدم</span>
+                <FiDroplet /><span>التبرع بالدم</span>
               </div>
               <Link to="/blood-donation" onClick={() => setMobileOpen(false)}>زر التبرع بالدم</Link>
               <Link to="/blood-donation" onClick={() => setMobileOpen(false)}>طلب التبرع</Link>
@@ -537,8 +477,7 @@ function Header({ notifCount }) {
 
             <div className="eh-drawer-group">
               <div className="eh-drawer-group-title">
-                <FiHeart />
-                <span>تبرعات عامة</span>
+                <FiHeart /><span>تبرعات عامة</span>
               </div>
               <Link to="/donation-requests" onClick={() => setMobileOpen(false)}>تبرعات عامة</Link>
               <Link to="/donation-requests" onClick={() => setMobileOpen(false)}>طلب التبرع</Link>
@@ -548,16 +487,14 @@ function Header({ notifCount }) {
 
             <div className="eh-drawer-group">
               <div className="eh-drawer-group-title">
-                <FiUsers />
-                <span>حملات التبرع</span>
+                <FiUsers /><span>حملات التبرع</span>
               </div>
               <Link to="/campaigns" onClick={() => setMobileOpen(false)}>قائمة الحملات</Link>
               <Link to="/campaigns/create" onClick={() => setMobileOpen(false)}>إنشاء حملة</Link>
             </div>
 
             <Link to="/about" className="eh-drawer-link" onClick={() => setMobileOpen(false)}>
-              <FiHelpCircle />
-              <span>عن المنصة</span>
+              <FiHelpCircle /><span>عن المنصة</span>
             </Link>
           </nav>
         </div>
