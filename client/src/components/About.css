@@ -1,20 +1,47 @@
-/* ========= الإعدادات العامة ========= */
+/* ========= الإعدادات العامة المحدثة ========= */
 :root{
   --about-primary: var(--ui-primary, #12B279);
   --about-accent:  var(--ui-accent,  #FF7A45);
   --about-text:    var(--text-color, #1f2937);
   --about-muted:   var(--text-muted, #4b5563);
-  --about-radius: 16px;
-  --about-shadow: 0 10px 30px rgba(0,0,0,.10);
+  --about-radius: 20px;
+  --about-shadow: 0 15px 40px rgba(0,0,0,.12);
+  --glass-bg: rgba(255, 255, 255, 0.15);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --gradient-primary: linear-gradient(135deg, var(--about-primary) 0%, #0ea5e9 100%);
+  --gradient-accent: linear-gradient(135deg, var(--about-accent) 0%, #f59e0b 100%);
 }
 
-/* ========= الحاوية الرئيسية ========= */
+/* ========= الحاوية الرئيسية مع تأثيرات متقدمة ========= */
 .about-container{
   padding-block: clamp(1.5rem, 3vw, 2.75rem);
   background:
-    linear-gradient(180deg, rgba(255,255,255,.92), rgba(255,255,255,.92)),
+    radial-gradient(circle at 25% 25%, rgba(18, 178, 121, 0.06) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(255, 122, 69, 0.06) 0%, transparent 50%),
+    linear-gradient(180deg, rgba(255,255,255,.95), rgba(248,250,252,.92)),
     url('../images/fundo-about.png') center / cover no-repeat;
   color: var(--about-text);
+  position: relative;
+  overflow: hidden;
+}
+
+.about-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    linear-gradient(45deg, transparent 48%, rgba(255, 255, 255, 0.02) 50%, transparent 52%);
+  animation: shimmer 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
 /* ========= تأثيرات الكشف عند التمرير ========= */
@@ -74,19 +101,44 @@
   position: relative;
   height: 100%;
   border-radius: var(--about-radius);
-  border: 1px solid rgba(0,0,0,.06);
-  background: #fff;
-  box-shadow: var(--about-shadow);
-  transition: transform .25s ease, box-shadow .25s ease, background-color .25s ease, border-color .25s ease, filter .25s ease;
+  border: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: var(--glass-shadow);
+  transition: all .4s cubic-bezier(.25,.8,.25,1);
   text-align: right;
   overflow: hidden;
+}
+
+.info-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.2), 
+    transparent
+  );
+  transition: left 0.5s ease;
+  z-index: 0;
 }
 .card-accent{
   position: absolute;
   inset-inline: 0;
   top: 0;
   height: 6px;
-  background: linear-gradient(90deg, var(--about-primary), var(--about-accent));
+  background: var(--gradient-primary);
+  background-size: 200% 100%;
+  animation: gradientShift 3s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
 }
 .card-icon{ font-size: 1.8rem; margin-bottom: .4rem; }
 .card-title{
@@ -101,11 +153,22 @@
   margin-bottom: .75rem;
 }
 .info-card:hover{
-  transform: translateY(-6px);
-  box-shadow: 0 18px 48px rgba(0,0,0,.14);
-  border-color: color-mix(in oklab, var(--about-primary) 40%, #ccc);
-  background-color: #fbfbfb;
-  filter: saturate(1.08);
+  transform: translateY(-10px) scale(1.03);
+  box-shadow: 0 25px 60px rgba(0,0,0,.18);
+  border-color: rgba(18, 178, 121, 0.4);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  filter: saturate(1.1);
+}
+
+.info-card:hover::before {
+  left: 100%;
+}
+
+.info-card .card-body {
+  position: relative;
+  z-index: 1;
 }
 .about-content .info-card{ width: 100%; }
 
@@ -116,32 +179,93 @@
   gap:.5rem; text-align:center;
 }
 .kpi-ring{
-  --size: 110px;
+  --size: 120px;
   --thickness: 10px;
   width: var(--size); height: var(--size);
   border-radius: 50%;
   display:grid; place-items:center;
   background:
-    radial-gradient(closest-side, #fff 79%, transparent 80% 100%),
-    conic-gradient(var(--about-primary), var(--about-accent));
-  box-shadow: var(--about-shadow);
+    radial-gradient(closest-side, rgba(255, 255, 255, 0.9) 78%, transparent 80% 100%),
+    conic-gradient(from 0deg, var(--about-primary), var(--about-accent), var(--about-primary));
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  position: relative;
+  animation: pulseRing 2s ease-in-out infinite;
+}
+
+.kpi-ring::before {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, 
+    transparent, 
+    rgba(18, 178, 121, 0.2), 
+    transparent, 
+    rgba(255, 122, 69, 0.2), 
+    transparent
+  );
+  animation: rotate 3s linear infinite;
+  z-index: -1;
+}
+
+@keyframes pulseRing {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 .kpi-value{
   font-size: clamp(1.2rem, 3vw, 1.6rem);
-  font-weight: 900; color:#0f172a;
-  background:#fff; border-radius: 999px; padding:.15rem .5rem;
-  min-width: 56px; text-align:center;
+  font-weight: 900; 
+  color: #0f172a;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 999px; 
+  padding: .2rem .6rem;
+  min-width: 60px; 
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 1;
 }
 .kpi-label{ color: var(--about-muted); font-weight: 700; }
 
-/* ========= الاستمارة ========= */
+/* ========= الاستمارة مع Glassmorphism ========= */
 .about-form{
   margin-top: clamp(1.25rem, 3vw, 2rem);
-  background: #fff;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-radius: var(--about-radius);
-  box-shadow: var(--about-shadow);
-  border: 1px solid rgba(0,0,0,.05);
+  box-shadow: var(--glass-shadow);
+  border: 1px solid var(--glass-border);
   padding: clamp(1rem, 2.4vw, 1.6rem);
+  position: relative;
+  overflow: hidden;
+}
+
+.about-form::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: var(--gradient-primary);
+  border-radius: var(--about-radius);
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.about-form:hover::before {
+  opacity: 0.1;
 }
 .about-h3{
   font-size: clamp(1.1rem, 2.4vw, 1.35rem);
@@ -156,17 +280,50 @@
 }
 .styled-form .form-control:focus{
   border-color: var(--about-primary);
-  box-shadow: 0 0 0 0.2rem rgba(18,178,121,.15);
+  box-shadow: 
+    0 0 0 0.2rem rgba(18,178,121,.15),
+    0 4px 12px rgba(18,178,121,.1);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 .is-invalid{ border-color: #e11d48 !important; }
 .invalid-feedback{ display:block; color:#e11d48; }
 .link-terms{ color: var(--about-accent); text-decoration: underline; }
 
-/* ========= الأسئلة الشائعة ========= */
+/* ========= الأسئلة الشائعة مع تأثيرات متقدمة ========= */
 .about-faq{ margin-top: clamp(1rem, 2.4vw, 1.6rem); }
 .faq details{
-  background:#fff; border:1px solid rgba(0,0,0,.06); border-radius:12px;
-  padding:.75rem 1rem; margin-bottom:.5rem; box-shadow: var(--about-shadow);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid var(--glass-border); 
+  border-radius: 16px;
+  padding: .75rem 1rem; 
+  margin-bottom: .5rem; 
+  box-shadow: var(--glass-shadow);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.faq details::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(18, 178, 121, 0.05), 
+    transparent
+  );
+  transition: left 0.6s ease;
+}
+
+.faq details:hover::before {
+  left: 100%;
 }
 .faq summary{
   cursor:pointer; font-weight:900; color:#0f172a; outline:none;
