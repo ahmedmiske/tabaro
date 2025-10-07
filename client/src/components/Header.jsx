@@ -241,10 +241,6 @@ function Header({ notifCount }) {
                 <FiChevronDown className="eh-caret" />
               </button>
             </div>
-          </nav>
-
-          {/* القائمة اليمنى */}
-          <nav className="eh-nav-right">
             <div className={`eh-nav-item ${open==='campaigns' ? 'open' : ''}`}>
               <button
                 className={`eh-nav-link ${isActive('/campaigns') ? 'active' : ''}`}
@@ -256,6 +252,11 @@ function Header({ notifCount }) {
                 <FiChevronDown className="eh-caret" />
               </button>
             </div>
+          </nav>
+
+          {/* القائمة اليمنى */}
+          <nav className="eh-nav-right">
+            
 
             <div className="eh-nav-actions">
               <button

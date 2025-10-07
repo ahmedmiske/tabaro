@@ -26,16 +26,14 @@ function LandingPage() {
   return (
     <>
       {/* وصلة تخطي للمحتوى (وصولية) */}
-      <a className="skip-link" href="#main">تخطّي إلى المحتوى</a>
 
       {/* ===== بطل الصفحة (Hero) ===== */}
       <header className="landing-page" id="top" role="banner" aria-label="القسم الافتتاحي">
         <div className="container-landing">
           <Card className="card-landing shadow-lg" as="section" aria-labelledby="hero-title">
-            <Card.Body>
               <div className="hero-content">
                 <h1 id="hero-title" className="landing-title">
-                  تواصل مباشر بين <span className="highlight">المتبرع والمتعفف</span>
+                  تواصل مباشر بين المتبرع والمتعفف
                 </h1>
 
                 <p className="lead-text">معًا… نصل الخير بمن يستحق.</p>
@@ -58,7 +56,6 @@ function LandingPage() {
                   </a>
                 </div>
               </div>
-            </Card.Body>
           </Card>
         </div>
       </header>

@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider } from './AuthContext';
-import Header from './components/Header';
+import Header from './components/Header.jsx';
 import UserPage from './pages/UserPage';
 import Footer from './components/Footer';
 import LandingPage from './pages/LandingPage';
