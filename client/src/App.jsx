@@ -35,6 +35,7 @@ import { connectSocket } from './socket';
 import PublicProfile from './pages/PublicProfile';
 import OrangeButtonsShowcase from './components/OrangeButtonsShowcase';
 import ButtonsDemo from './components/ButtonsDemo';
+import NotFound from './pages/NotFound';
 
 // ✅ الحارس
 import RequireAuth from './components/RequireAuth';
@@ -50,6 +51,11 @@ function App() {
     const token = localStorage.getItem('token') || localStorage.getItem('authToken');
     if (token) connectSocket(token);
   }, []);
+
+  // تمرير الصفحة لأعلى عند تغيير المسار
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -90,6 +96,7 @@ function App() {
             <Route path="/users" element={<UserPage />} />
             <Route path="/buttons-showcase" element={<OrangeButtonsShowcase />} />
             <Route path="/buttons-demo" element={<ButtonsDemo />} />
+            <Route path="/404" element={<NotFound />} />
 
             {/* محميّة */}
             <Route path="/donation-details/:id" element={<RequireAuth><DonationDetails /></RequireAuth>} />
@@ -109,6 +116,9 @@ function App() {
             <Route path="/donation-request-confirmations/:id" element={<RequireAuth><DonationRequestConfirmationDetails /></RequireAuth>} />
 
             <Route path="/profile" element={<RequireAuth><UserProfile /></RequireAuth>} />
+            
+            {/* صفحة 404 - يجب أن تكون آخر route */}
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
         <Footer />
