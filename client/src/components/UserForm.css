@@ -1,12 +1,28 @@
 .user-form {
-  max-width: 700px;
-  width: 39vw;
+  max-width: 100%;
+  width: 100%;
   margin: auto;
-  padding: 30px;
-  background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  box-shadow: 
+    0 20px 40px rgba(255, 122, 69, 0.1),
+    0 8px 25px rgba(0, 0, 0, 0.05);
   text-align: right;
+  position: relative;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 122, 69, 0.1);
+}
+
+.user-form::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #FF7A45 0%, #FF9A6C 50%, #E05A2E 100%);
+  border-radius: 20px 20px 0 0;
 }
 
 .info-section {
@@ -14,37 +30,147 @@
 }
 
 .user-form h4 {
-  color: var(--main-color);
-  margin-bottom: 20px;
-  font-weight: bold;
+  background: linear-gradient(135deg, #FF7A45 0%, #FF9A6C 50%, #E05A2E 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 25px;
+  font-weight: 800;
+  font-size: 1.5rem;
+  text-align: center;
 }
 
 .user-form .form-control {
-  margin-bottom: 15px;
+  margin-bottom: 20px;
   text-align: right;
+  border: 2px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.user-form .form-control:focus {
+  border-color: #FF7A45;
+  box-shadow: 0 0 0 3px rgba(255, 122, 69, 0.1);
+  outline: none;
+  background: white;
+}
+
+
+
+.action-buttons {
+  display: flex;
+  flex-direction: row; /* دائماً في نفس السطر */
+  gap: 20px;
+  justify-content: center;
+  align-items: center;
+  margin-top: 30px;
+  flex-wrap: nowrap; /* منع التفاف الأزرار لسطر جديد */
 }
 
 .action-buttons button {
-  min-width: 120px;
-  font-weight: bold;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  min-width: 120px; /* عرض أدنى متساوي */
+  text-align: center;
+  white-space: nowrap; /* منع كسر النص */
 }
 
 .button-prev {
-  background-color: #6c757d;
-  color: white;
-  border: none;
+  background: transparent;
+  color: #FF7A45;
+  border: 2px solid #FF7A45;
 }
 
-.button-next {
-  background-color: var(--main-color-alt);
+.button-prev:hover {
+  background: #FF7A45;
   color: white;
-  border: none;
+  transform: translateY(-2px);
 }
 
+.button-next,
 .button-submit {
-  background-color: var(--color-secondary);
+  background: linear-gradient(135deg, #FF7A45 0%, #FF9A6C 50%, #E05A2E 100%);
   color: white;
-  border: none;
+  box-shadow: 0 4px 15px rgba(255, 122, 69, 0.3);
+}
+
+.button-next:hover,
+.button-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 122, 69, 0.4);
+}
+
+/* تحسينات إضافية */
+.form-label {
+  font-weight: 600;
+  color: #2D3748;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.form-select {
+  border: 2px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.9);
+  transition: all 0.3s ease;
+}
+
+.form-select:focus {
+  border-color: #FF7A45;
+  box-shadow: 0 0 0 3px rgba(255, 122, 69, 0.1);
+  outline: none;
+}
+
+.success-message-box {
+  background: linear-gradient(135deg, 
+    rgba(255, 122, 69, 0.1) 0%, 
+    rgba(18, 178, 121, 0.1) 100%);
+  border: 1px solid #FF7A45;
+  border-radius: 15px;
+  padding: 30px;
+  text-align: center;
+  margin: 20px 0;
+}
+
+.success-message-box h3 {
+  color: #FF7A45;
+  margin-bottom: 15px;
+  font-weight: 700;
+}
+
+.success-message-box p {
+  color: #4A5568;
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+/* التصميم المتجاوب للفورم */
+@media (max-width: 768px) {
+  .user-form {
+    padding: 25px 20px;
+  }
+  
+  .action-buttons {
+    flex-direction: column; /* عمودياً في الشاشات الصغيرة */
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .action-buttons button {
+    width: 100%;
+    max-width: 280px;
+    padding: 12px 20px;
+    font-size: 1rem;
+  }
 }
 
 .success-message-box {

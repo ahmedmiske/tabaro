@@ -1,47 +1,185 @@
 .signup-layout {
   display: flex;
   justify-content: space-between;
-  width: 80vw;
+  width: 100vw;
   min-height: 100vh;
   margin-top: 0;
   font-family: 'Cairo', sans-serif;
   direction: rtl;
+  position: relative;
+  overflow: hidden;
 }
 
 .signup-form-section {
   flex: 1;
-  width: 40vw;
-  background-color: #f9f9f9;
-  padding: 40px;
+  width: 50vw;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.95) 0%, 
+    rgba(248, 250, 252, 0.9) 100%);
+  padding: 60px 50px;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  position: relative;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.signup-form-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 200px;
+  height: 200px;
+  background: linear-gradient(135deg, rgba(255, 122, 69, 0.1) 0%, transparent 70%);
+  border-radius: 50%;
+  z-index: 0;
 }
 
 .signup-section {
   flex: 1;
-  background: linear-gradient(to bottom right, #3f8e53, #45a363);
+  background: linear-gradient(135deg, 
+    #FF7A45 0%, 
+    #FF9A6C 25%, 
+    #FFB347 50%, 
+    #FF8C42 75%, 
+    #E05A2E 100%);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.signup-section::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, 
+    rgba(255, 255, 255, 0.1) 0%, 
+    transparent 70%);
+  animation: rotateBackground 20s linear infinite;
+}
+
+.verse {
+  position: relative;
+  z-index: 2;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  backdrop-filter: blur(15px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  max-width: 90%;
+  /* إزالة الانيميشن ليبقى ثابتاً ومهيباً */
 }
 
 .verse p {
-  font-size: 26px;
-  font-weight: bold;
-  line-height: 2;
-  padding: 20px;
-  max-width: 80%;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 2.2;
+  margin: 0;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.verse p::before {
+  content: '✨';
+  position: absolute;
+  top: -15px;
+  right: -15px;
+  font-size: 20px;
+  /* إزالة الانيميشن */
+}
+
+.verse p::after {
+  content: '🤲';
+  position: absolute;
+  bottom: -15px;
+  left: -15px;
+  font-size: 20px;
+  /* إزالة الانيميشن */
+}
+
+/* الانيميشن */
+@keyframes rotateBackground {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+/* تم إزالة انيميشن sparkle لجعل الآية ثابتة ومهيبة */
+
+/* تحسينات إضافية للقسم الأيسر */
+.signup-form-section > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* التصميم المتجاوب المحسن */
+@media (max-width: 1024px) {
+  .signup-layout {
+    width: 100vw;
+  }
+  
+  .signup-form-section {
+    padding: 40px 30px;
+  }
+  
+  .verse p {
+    font-size: 24px;
+  }
 }
 
 @media (max-width: 768px) {
   .signup-layout {
     flex-direction: column;
+    height: auto;
+  }
+  
+  .signup-form-section {
+    width: 100%;
+    padding: 30px 20px;
+    min-height: auto;
   }
 
   .signup-section {
-    display: none;
+    height: 200px;
+    min-height: 200px;
+  }
+  
+  .verse {
+    padding: 20px;
+    max-width: 95%;
+  }
+  
+  .verse p {
+    font-size: 20px;
+    line-height: 1.8;
+  }
+}
+
+@media (max-width: 480px) {
+  .signup-form-section {
+    padding: 20px 15px;
+  }
+  
+  .verse p {
+    font-size: 18px;
+    line-height: 1.6;
+  }
+  
+  .signup-section {
+    height: 150px;
   }
 }

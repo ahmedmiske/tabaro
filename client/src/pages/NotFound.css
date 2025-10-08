@@ -13,10 +13,6 @@
   position: relative;
   overflow: hidden;
   font-family: 'Cairo', sans-serif;
-  /* ضمان البدء من أعلى الصفحة */
-  padding-top: 2rem;
-  margin-top: 0;
-  scroll-margin-top: 0;
 }
 
 .not-found-container {
