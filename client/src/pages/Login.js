@@ -93,7 +93,7 @@ function Login() {
 
           <div className="signup-link d-flex justify-content-between w-100 mt-3">
             <Link to="/reset-password" className="text-decoration-none text-danger">هل نسيت كلمة السر؟</Link>
-            <Link to="/add-user" className="btn btn-outline-secondary btn-sm">إنشاء حساب جديد</Link>
+            <Link to="/add-user" className="form-secondary-btn">إنشاء حساب جديد</Link>
           </div>
         </Form>
       </div>

@@ -33,6 +33,8 @@ import DonationRequestList from './components/DonationRequestList';
 import DonationRequestDetails from './components/DonationRequestDetails';
 import { connectSocket } from './socket';
 import PublicProfile from './pages/PublicProfile';
+import OrangeButtonsShowcase from './components/OrangeButtonsShowcase';
+import ButtonsDemo from './components/ButtonsDemo';
 
 // ✅ الحارس
 import RequireAuth from './components/RequireAuth';
@@ -86,6 +88,8 @@ function App() {
             <Route path="/donations" element={<DonationRequestList />} />
             <Route path="/about" element={<About />} />
             <Route path="/users" element={<UserPage />} />
+            <Route path="/buttons-showcase" element={<OrangeButtonsShowcase />} />
+            <Route path="/buttons-demo" element={<ButtonsDemo />} />
 
             {/* محميّة */}
             <Route path="/donation-details/:id" element={<RequireAuth><DonationDetails /></RequireAuth>} />

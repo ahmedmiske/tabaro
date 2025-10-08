@@ -4,7 +4,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(18, 178, 121, 0.7) 0%, rgba(182, 209, 183, 0.1) 100%), url('./tabarou.png');
+  background: linear-gradient(135deg, 
+    rgba(var(--primary-rgb), 0) 0%, 
+    rgba(var(--primary-light-rgb), 0.1) 100%), url('./tabarou.png');
   background-size: 110%;
   background-position: center;
   background-attachment: fixed;
@@ -12,71 +14,31 @@
   position: relative;
   animation: backgroundMove 20s ease-in-out infinite;
 }
-
- 
-
 .container-landing {
   position: relative;
+  text-align: center;
   z-index: 2;
 }
-
-.container-landing {
+/* .container-landing {
   max-width: 900px;
   width: 100%;
 }
-
-.card-landing {
-  background: transparent !important;
-  border: none !important;
-  border-radius: 0 !important;
-  padding: 4rem;
-  text-align: center;
-  box-shadow: none !important;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-  transform-style: preserve-3d;
-}
-
-.card-landing .card-body {
-  background: transparent !important;
-  padding: 0 !important;
-}
-
-.card-landing.card {
-  background-color: transparent !important;
-  background: transparent !important;
-}
-
-.card-landing .card-body {
-  background-color: transparent !important;
-  background: transparent !important;
-}
-
-.card-landing::before {
-  display: none;
-}
-
-.card-landing::after {
-  display: none;
-}
-
-.card-landing:hover {
-  transform: none;
-  box-shadow: none;
-}
- 
+  */
 .landing-title {
-  font-size: 4.8rem;
+  font-size: 4rem;
   font-weight: 900;
-  color: var(--text);
+  background: linear-gradient(135deg, #FF7A45 0%, #FF9A6C 25%, #FFB347 50%, #FF8C42 75%, #E05A2E 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin-bottom: 1rem;
   line-height: 1.1;
   letter-spacing: -0.03em;
   position: relative;
   text-align: center;
   padding: 1rem 0;
- 
+  text-shadow: 0 4px 20px rgba(255, 122, 69, 0.3);
+  animation: textGlow 3s ease-in-out infinite alternate;
 }
 
  
@@ -89,128 +51,28 @@
 }
 
 .lead-text {
-  font-size: 1.5rem;
-  color: var(--text);
-  margin-bottom: 1rem;
-  font-weight: 700;
+  font-size: 1.8rem;
+  background: linear-gradient(135deg, #2D3748 0%, #4A5568 30%, #FF7A45 60%, #E05A2E 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 2rem;
+  font-weight: 800;
   opacity: 1; 
   line-height: 1.7;
   position: relative;
-  padding: 0.5rem 0;
+  padding: 1rem 0;
+  text-shadow: 0 2px 15px rgba(255, 122, 69, 0.2);
+  animation: subtitlePulse 4s ease-in-out infinite;
 }
 
- 
-
- .go-landing {
-  background: linear-gradient(135deg, 
-    rgba(18, 178, 121, 0.9) 0%, 
-    rgba(46, 204, 113, 0.95) 50%, 
-    rgba(18, 178, 121, 0.9) 100%);
-  background-size: 200% 200%;
-  color: white;
-  font-weight: 700;
-  font-size: 1rem;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: 12px;
-  padding: 14px 28px;
-  margin: 0 10px;
-  box-shadow: 
-    0 8px 25px rgba(18, 178, 121, 0.25),
-    0 4px 15px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  position: relative;
-  overflow: hidden;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-  text-decoration: none;
-  display: inline-block;
-} 
-
-.go-landing::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s ease;
-}
-
-.go-landing:hover::before {
-  left: 100%;
-}
- 
- .go-landing:hover {
-  color: white;
-  transform: translateY(-3px);
-  box-shadow: 
-    0 12px 35px rgba(18, 178, 121, 0.4),
-    0 6px 20px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.5);
-  background: linear-gradient(135deg, 
-    rgba(18, 178, 121, 1) 0%, 
-    rgba(46, 204, 113, 1) 50%, 
-    rgba(18, 178, 121, 1) 100%);
-}
-
-.go-landing:active {
-  transform: translateY(-1px);
-  transition: all 0.1s ease;
-}
- 
-/* تم حذف الأنيميشن لأننا لم نعد نحتاجها */
- 
- .log-landing {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  color: #ffffff;
-  font-weight: 700;
-  font-size: 1rem;
-  border: 2px solid rgba(255, 255, 255, 0.4);
-  border-radius: 12px;
-  padding: 14px 28px;
-  margin: 0 10px;
-  box-shadow: 
-    0 8px 25px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-  position: relative;
-  overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-  text-decoration: none;
-  display: inline-block;
-}
-
-.log-landing::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  transition: left 0.5s ease;
-}
-
-.log-landing:hover::before {
-  left: 100%;
-}
  
  .log-landing:hover {
   background: rgba(255, 255, 255, 0.25);
-  color: #ffffff;
+  color: var(--background);
   transform: translateY(-3px);
   border-color: rgba(255, 255, 255, 0.6);
-  box-shadow: 
-    0 12px 30px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  box-shadow: var(--shadow-xl);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }
@@ -230,11 +92,11 @@
 .scroll-down::before {
   content: 'اكتشف المزيد';
   position: absolute;
-  top: -35px;
+  top: -50px;
   left: 50%;
   transform: translateX(-50%);
   font-size: 0.9rem;
-  color: rgba(44, 62, 80, 0.7);
+  color: rgba(44, 62, 80, 0.9);
   font-weight: 500;
   letter-spacing: 0.5px;
   opacity: 0;
@@ -293,7 +155,7 @@
 }
 
 .about-section {
-  padding: 5rem 0;
+  padding:  0;
   background: #f8f9fa;
 }
 
@@ -326,9 +188,64 @@
   margin-top: 2rem;
 }
 
+/* الأزرار المبسطة للهيرو */
+.hero-btn-primary {
+  background: linear-gradient(135deg, #FF7A45 0%, #FF9A6C 25%, #FF8C42 50%, #FF7A45 75%, #E05A2E 100%) !important;
+  color: white !important;
+  text-decoration: none !important;
+  padding: 16px 32px !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  border-radius: 25px !important;
+  box-shadow: 0 8px 30px rgba(255, 122, 69, 0.5) !important;
+  transition: all 0.3s ease !important;
+  display: inline-block !important;
+  text-align: center !important;
+  border: none !important;
+}
+
+.hero-btn-primary:hover {
+  background: linear-gradient(135deg, #FF8C42 0%, #FF9A6C 25%, #FF7A45 50%, #FF6B35 75%, #E05A2E 100%) !important;
+  transform: translateY(-5px) scale(1.05) !important;
+  box-shadow: 0 15px 45px rgba(255, 122, 69, 0.6) !important;
+  color: white !important;
+  text-decoration: none !important;
+}
+
+.hero-btn-secondary {
+  background: transparent !important;
+  color: #FF7A45 !important;
+  text-decoration: none !important;
+  padding: 16px 32px !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  border-radius: 25px !important;
+  border: 2px solid #FF7A45 !important;
+  backdrop-filter: blur(10px) !important;
+  transition: all 0.3s ease !important;
+  display: inline-block !important;
+  text-align: center !important;
+  box-shadow: 0 4px 15px rgba(255, 122, 69, 0.2) !important;
+}
+
+.hero-btn-secondary:hover {
+  background: linear-gradient(135deg, #FF7A45 0%, #FF9A6C 50%, #E05A2E 100%) !important;
+  border-color: #FF7A45 !important;
+  transform: translateY(-3px) scale(1.05) !important;
+  color: white !important;
+  text-decoration: none !important;
+  box-shadow: 0 8px 25px rgba(255, 122, 69, 0.4) !important;
+}
+
 @media (max-width: 768px) {
   .landing-title {
     font-size: 2.5rem;
+    animation: textGlowMobile 2s ease-in-out infinite alternate;
+  }
+  
+  .lead-text {
+    font-size: 1.4rem;
+    animation: subtitlePulseMobile 3s ease-in-out infinite;
   }
   
   .link-card {
@@ -341,12 +258,10 @@
     gap: 15px;
   }
   
-  .go-landing,
-  .log-landing {
-    margin: 0;
+  .hero-btn-primary,
+  .hero-btn-secondary {
     width: 100%;
     max-width: 280px;
-    text-align: center;
   }
   
   .landing-page {
@@ -365,5 +280,92 @@
   }
   100% {
     background-position: center center;
+  }
+}
+
+/* انيميشن توهج العنوان الرئيسي */
+@keyframes textGlow {
+  0% {
+    text-shadow: 
+      0 4px 20px rgba(255, 122, 69, 0.3),
+      0 0 30px rgba(255, 122, 69, 0.2),
+      0 0 50px rgba(255, 122, 69, 0.1);
+    transform: scale(1);
+  }
+  100% {
+    text-shadow: 
+      0 6px 30px rgba(255, 122, 69, 0.5),
+      0 0 50px rgba(255, 122, 69, 0.3),
+      0 0 80px rgba(255, 122, 69, 0.2);
+    transform: scale(1.02);
+  }
+}
+
+/* انيميشن نبضة العنوان الفرعي */
+@keyframes subtitlePulse {
+  0%, 100% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+  50% {
+    opacity: 0.9;
+    transform: translateY(-2px);
+  }
+}
+
+/* تأثيرات إضافية للنصوص */
+.landing-title::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 150px;
+  height: 6px;
+  background: linear-gradient(90deg, transparent, #FF7A45, transparent);
+  border-radius: 3px;
+  animation: sparkline 2s ease-in-out infinite;
+}
+
+.lead-text::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #FF9A6C, transparent);
+  border-radius: 2px;
+  animation: sparkline 3s ease-in-out infinite reverse;
+}
+
+@keyframes sparkline {
+  0%, 100% {
+    opacity: 0.3;
+    width: 100px;
+  }
+  50% {
+    opacity: 1;
+    width: 200px;
+  }
+}
+
+/* انيميشن محسن للموبايل */
+@keyframes textGlowMobile {
+  0% {
+    text-shadow: 0 2px 15px rgba(255, 122, 69, 0.4);
+  }
+  100% {
+    text-shadow: 0 4px 25px rgba(255, 122, 69, 0.6);
+  }
+}
+
+@keyframes subtitlePulseMobile {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
   }
 }

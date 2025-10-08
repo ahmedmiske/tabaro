@@ -1,16 +1,97 @@
+/* تم نقل متغيرات الألوان إلى index.css للاستخدام الموحد */
+/* استخدام الألوان المركزية من index.css */
 :root {
-  --eh-primary: #059669;
-  --eh-primary-dark: #047857;
-  --eh-secondary: #10b981;
-  --eh-accent: #34d399;
-  --eh-light: #f8fafc;
+  --eh-primary: var(--primary);
+  --eh-primary-dark: var(--primary-dark);
+  --eh-secondary: var(--primary-light);
+  --eh-accent: var(--accent);
+  --eh-light: var(--background-alt);
   --eh-lighter: #f1f5f9;
-  --eh-dark: #1e293b;
+  --eh-dark: var(--text);
   --eh-darker: #0f172a;
-  --eh-border: #e2e8f0;
-  --eh-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --eh-glow: 0 0 20px rgba(5, 150, 105, 0.15);
+  --eh-border: var(--border);
+  --eh-shadow: var(--shadow-lg);
+  --eh-glow: 0 0 20px rgba(var(--primary-rgb), 0.15);
   --header-height: 140px;
+  :root {
+  /* ==================================== */
+  /* 🎨 الألوان              */
+  /* ==================================== */
+  
+  /* الألوان الأساسية */
+  --color-primary-base: #12B279; /* اللون الرئيسي */
+  --color-primary-light: #45C897; /* أخف من الرئيسي */
+  --color-primary-dark: #0E8D5F; /* أغمق من الرئيسي */
+  
+  /* الألوان الثانوية/المميزة (Accent) */
+  --color-secondary-base: #FF7A45; /* اللون الثانوي/المميز */
+  --color-secondary-light: #FF9A6C; /* أخف من الثانوي */
+  --color-secondary-dark: #E05A2E; /* أغمق من الثانوي */
+  
+  /* ألوان النصوص والخلفيات والحدود */
+  --color-text-default: #1F2937; /* النص الافتراضي */
+  --color-text-medium: #6B7280; /* النص المتوسط/الخافت */
+  --color-text-light: #9CA3AF; /* النص الفاتح جداً */
+  --color-background-default: #FFFFFF; /* الخلفية الرئيسية */
+  --color-background-alt: #F8FAFC; /* خلفية بديلة/فاتحة */
+  --color-background-dark: #0F172A; /* خلفية داكنة (للوضع الداكن مثلاً) */
+  --color-border: #E5E7EB; /* لون الحدود */
+  
+  /* قيم RGB للألوان (للاستخدام مع rgba) */
+  --rgb-primary: 18, 178, 121;
+  --rgb-primary-light: 69, 200, 151;
+  --rgb-primary-dark: 14, 141, 95;
+  --rgb-secondary: 255, 122, 69;
+  --rgb-secondary-light: 255, 154, 108;
+  --rgb-secondary-dark: 224, 90, 46;
+
+  /* ==================================== */
+  /* 📏 المسافات/الأحجام          */
+  /* ==================================== */
+  
+  /* متغيرات إضافية للمسافات (لتوحيد نظام المسافات) */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  
+  /* ==================================== */
+  /* 📐 الحدود والزوايا         */
+  /* ==================================== */
+  
+  --border-radius-default: 16px; /* استخدمت 'default' بدلاً من 'radius' */
+  --border-radius-large: 24px; /* استخدمت 'large' بدلاً من 'lg' */
+  
+  /* ==================================== */
+  /* ✨ الظلال والتأثيرات      */
+  /* ==================================== */
+  
+  --shadow-small: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* استخدمت 'small' بدلاً من 'shadow' */
+  --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* استخدمت 'medium' بدلاً من 'shadow-lg' */
+  --shadow-large: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); /* استخدمت 'large' بدلاً من 'shadow-xl' */
+  
+  --shadow-primary-small: 0 4px 20px rgba(var(--rgb-primary), 0.05);
+  --shadow-primary-medium: 0 10px 30px rgba(var(--rgb-primary), 0.2);
+  --shadow-secondary-small: 0 4px 20px rgba(var(--rgb-secondary), 0.05); /* تغيرت 'accent' إلى 'secondary' */
+  
+  /* ==================================== */
+  /* ⏱️ الانتقالات (Transition) */
+  /* ==================================== */
+  
+  --transition-default: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ==================================== */
+  /* 🔗 متغيرات التوافق (Legacy)    */
+  /* ==================================== */
+  
+  /* إذا كنت لا تستطيع تغيير جميع الأماكن في الكود القديم، يمكنك الاحتفاظ بهذه المتغيرات لتوفير التوافق */
+  --main-color: var(--color-primary-base);
+  --eh-primary: var(--color-primary-base);
+  --eh-primary-dark: var(--color-primary-dark);
+  --eh-secondary: var(--color-primary-light);
+  --eh-accent: var(--color-secondary-base);
+} 
 }
 
 /* ===== التصميم الحديث للهيدر ===== */
@@ -28,7 +109,7 @@
 
 /* الشريط العلوي */
 .eh-top-bar {
-  background: var(--eh-darker);
+  background: var(--color-primary-dark);
   color: white;
   padding: 8px 0;
   font-size: 14px;
@@ -67,7 +148,7 @@
 }
 
 .eh-login-btn {
-  background: var(--eh-primary);
+  background: var(--color-secondary-dark);
   color: white;
   padding: 6px 16px;
   border-radius: 20px;
@@ -80,7 +161,7 @@
 }
 
 .eh-login-btn:hover {
-  background: var(--eh-primary-dark);
+  background: var(--color-secondary-base);
   transform: translateY(-1px);
 }
 
@@ -228,7 +309,6 @@
 .eh-logo-wrapper {
   width: 60px;
   height: 60px;
-  background: linear-gradient(135deg, var(--eh-primary), var(--eh-secondary));
   border-radius: 16px;
   display: flex;
   align-items: center;
@@ -347,7 +427,7 @@
 
 .eh-search-input:focus {
   border-color: var(--eh-primary);
-  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
 }
 
 .eh-search-submit {

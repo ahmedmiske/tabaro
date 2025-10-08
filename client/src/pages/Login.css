@@ -12,9 +12,7 @@
   padding: 10px 40px;
 
 }
-.login-container{
 
-}
 
 .login-img {
   flex: 1 1 50%;
@@ -86,27 +84,21 @@
 }
 
 .form-login button[type="submit"] {
-  background-color: var(--main-color-alt);
+  background: linear-gradient(135deg, #FF7A45 0%, #FF9A6C 50%, #E05A2E 100%);
   border: none;
   color: white;
   font-size: 17px;
   font-weight: bold;
   padding: 10px;
   border-radius: 8px;
-  transition: 0.3s ease-in-out;
-  -webkit-transition: 0.3s ease-in-out;
-  -moz-transition: 0.3s ease-in-out;
-  -ms-transition: 0.3s ease-in-out;
-  -o-transition: 0.3s ease-in-out;
-  -webkit-border-radius: 8px;
-  -moz-border-radius: 8px;
-  -ms-border-radius: 8px;
-  -o-border-radius: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 122, 69, 0.3);
 }
 
 .form-login button[type="submit"]:hover {
-  background-color: var(--color-secondary);
-  border: 2px solid var(--color-primary);
+  background: linear-gradient(135deg, #FF8C42 0%, #FF9A6C 50%, #FF6B35 100%);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(255, 122, 69, 0.5);
 }
 
 .signup-link,
@@ -138,6 +130,55 @@
 .new-account .btn-new-aacount:hover {
   background-color: var(--color-secondary);
   border: 2px solid var(--color-primary);
+}
+
+/* أزرار الفورم المبسطة */
+.form-submit-btn {
+  background: linear-gradient(135deg, #FF7A45 0%, #FF9A6C 50%, #E05A2E 100%);
+  color: white;
+  padding: 14px 28px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 25px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-block;
+  text-decoration: none;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(255, 122, 69, 0.3);
+}
+
+.form-submit-btn:hover {
+  background: linear-gradient(135deg, #FF8C42 0%, #FF9A6C 50%, #FF6B35 100%);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 8px 25px rgba(255, 122, 69, 0.5);
+  color: white;
+  text-decoration: none;
+}
+
+.form-secondary-btn {
+  background: transparent !important;
+  color: var(--text) !important;
+  padding: 10px 20px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  border-radius: 20px !important;
+  border: 2px solid rgba(44, 62, 80, 0.3) !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  display: inline-block !important;
+  text-decoration: none !important;
+  text-align: center !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.form-secondary-btn:hover {
+  background: rgba(44, 62, 80, 0.1) !important;
+  border-color: var(--text) !important;
+  transform: translateY(-2px) !important;
+  color: var(--text) !important;
+  text-decoration: none !important;
 }
 
 @media (max-width: 768px) {

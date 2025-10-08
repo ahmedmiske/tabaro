@@ -189,17 +189,73 @@ function About() {
   return (
     <section className="about-container" aria-labelledby="about-title" ref={sectionRef}>
       <Container>
-        {/* تعريف المنصة */}
+        {/* تعريف المنصة مع التصميم الاحترافي */}
         <header className="about-definition reveal" data-animate="up">
-          <h2 id="about-title" className="about-h2">عن منصة تبرع</h2>
-          <p className="about-lead">
-            منصة تبرع تجمع بين من يرغب في العطاء ومن يسعى للدعم، عبر تواصل مباشر وآمن.
-            نسهل خطوات التبرع ونضاعف أثره في المجتمع.
-          </p>
-          <p>
-            المنصّة تتيح طلبات <strong>التبرع بالدم</strong> و<strong>التبرع المالي</strong> و<strong>التبرع العيني</strong>،
-            مع إمكانية نشر <strong>الإعلانات الاجتماعية</strong> وتنظيم <strong>حملات الجمعيات</strong>.
-          </p>
+          <div className="about-hero-section">
+            <div className="about-hero-content">
+              <div className="about-hero-badge">
+                <span className="badge-icon">🌟</span>
+                <span className="badge-text">منصة تبرع الرسمية</span>
+              </div>
+              
+              <h2 id="about-title" className="about-h2 about-hero-title">
+                عن منصة تبرع
+                <span className="title-decoration"></span>
+              </h2>
+              
+              <div className="about-hero-description">
+                <p className="about-lead enhanced-lead">
+                  منصة تبرع تجمع بين من يرغب في العطاء ومن يسعى للدعم، عبر تواصل مباشر وآمن.
+                  <span className="highlight-text">نسهل خطوات التبرع ونضاعف أثره في المجتمع.</span>
+                </p>
+                
+                <div className="features-list">
+                  <div className="feature-item">
+                    <span className="feature-icon">🩸</span>
+                    <span className="feature-text"><strong>التبرع بالدم</strong></span>
+                  </div>
+                  <div className="feature-item">
+                    <span className="feature-icon">💳</span>
+                    <span className="feature-text"><strong>التبرع المالي</strong></span>
+                  </div>
+                  <div className="feature-item">
+                    <span className="feature-icon">🎁</span>
+                    <span className="feature-text"><strong>التبرع العيني</strong></span>
+                  </div>
+                  <div className="feature-item">
+                    <span className="feature-icon">📢</span>
+                    <span className="feature-text"><strong>الإعلانات الاجتماعية</strong></span>
+                  </div>
+                  <div className="feature-item">
+                    <span className="feature-icon">🏛️</span>
+                    <span className="feature-text"><strong>حملات الجمعيات</strong></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="about-hero-image">
+              <div className="image-container">
+                <img 
+                  src="/images/tabar7.jpg" 
+                  alt="منصة تبرع - تواصل مباشر بين المتبرع والمحتاج" 
+                  className="hero-image"
+                />
+                <div className="image-overlay">
+                  <div className="floating-stats">
+                    <div className="stat-bubble">
+                      <span className="stat-number">1000+</span>
+                      <span className="stat-label">متبرع</span>
+                    </div>
+                    <div className="stat-bubble">
+                      <span className="stat-number">500+</span>
+                      <span className="stat-label">حالة</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </header>
 
         {/* الخدمات */}
@@ -312,10 +368,10 @@ function About() {
               </div>
 
               <div className="form-actions">
-                <button type="submit" className="btn-primary" disabled={!isValid}>
+                <button type="submit" className="form-submit-btn" disabled={!isValid}>
                   إرسال الرسالة
                 </button>
-                <Link to="/add-user" className="btn-outline">
+                <Link to="/add-user" className="form-secondary-btn">
                   إنشاء حساب جديد
                 </Link>
               </div>
@@ -327,10 +383,10 @@ function About() {
                 <p className="mb-0">سنقوم بالرد عليك في أقرب وقت ممكن</p>
               </Alert>
               <div className="form-actions mt-3">
-                <Link to="/add-user" className="btn-primary">
+                <Link to="/add-user" className="form-submit-btn">
                   إنشاء حساب جديد
                 </Link>
-                <Link to="/donations" className="btn-outline">
+                <Link to="/donations" className="form-secondary-btn">
                   تصفح التبرعات
                 </Link>
               </div>
@@ -361,10 +417,10 @@ function About() {
               انضم إلى آلاف المتبرعين والمتطوعين الذين يساهمون في صنع فرق حقيقي في المجتمع
             </p>
             <div className="cta-actions">
-              <Link to="/add-user" className="cta-btn-primary">
+              <Link to="/add-user" className="btn btn-accent btn-lg btn-rounded">
                 سجل الآن مجاناً
               </Link>
-              <Link to="/donations" className="cta-btn-secondary">
+              <Link to="/donations" className="btn btn-ghost btn-lg btn-rounded">
                 تصفح التبرعات
               </Link>
             </div>

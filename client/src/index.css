@@ -1,3 +1,51 @@
+/* ========= مجموعة الألوان الموحدة للتطبيق ========= */
+:root {
+  /* الألوان الرئيسية */
+  --primary: #12B279;
+  --primary-light: #45C897;
+  --primary-dark: #0E8D5F;
+  --accent: #FF7A45;
+  --accent-light: #FF9A6C;
+  --accent-dark: #E05A2E;
+  
+  /* قيم RGB للألوان (للاستخدام مع rgba) */
+  --primary-rgb: 18, 178, 121;
+  --primary-light-rgb: 69, 200, 151;
+  --primary-dark-rgb: 14, 141, 95;
+  --accent-rgb: 255, 122, 69;
+  --accent-light-rgb: 255, 154, 108;
+  --accent-dark-rgb: 224, 90, 46;
+  
+  /* ألوان النصوص والخلفيات */
+  --text: #1F2937;
+  --text-light: #6B7280;
+  --text-lighter: #9CA3AF;
+  --background: #FFFFFF;
+  --background-alt: #F8FAFC;
+  --background-dark: #0F172A;
+  --border: #E5E7EB;
+  
+  /* الظلال والتأثيرات */
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-primary: 0 4px 20px rgba(var(--primary-rgb), 0.05);
+  --shadow-primary-lg: 0 10px 30px rgba(var(--primary-rgb), 0.2);
+  --shadow-accent: 0 4px 20px rgba(var(--accent-rgb), 0.05);
+  
+  /* الحدود والزوايا */
+  --radius: 16px;
+  --radius-lg: 24px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* ألوان إضافية للتوافق مع الكود الموجود */
+  --main-color: var(--primary);
+  --eh-primary: var(--primary);
+  --eh-primary-dark: var(--primary-dark);
+  --eh-secondary: var(--primary-light);
+  --eh-accent: var(--accent);
+}
+
 html, body {
   height: 100%;
   margin: 0;
@@ -32,5 +80,717 @@ body {
   font-weight: bold;
   font-size: 20px;
   margin: 0;
+}
+
+/* ========= نظام الأزرار الموحد الجديد ========= */
+@import './components/ButtonSystem.css';
+
+/* الأزرار الأساسية المحسنة */
+.btn, .button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 28px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-decoration: none;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
+  font-family: inherit;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-user-select: none;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transform-origin: center;
+}
+
+/* الزر الرئيسي الجميل مع البرتقالي */
+.btn-primary {
+  background: linear-gradient(135deg, 
+    var(--primary) 0%, 
+    var(--accent) 30%, 
+    var(--primary-light) 70%, 
+    var(--accent-light) 100%);
+  color: white;
+  box-shadow: 
+    0 8px 25px rgba(var(--primary-rgb), 0.3),
+    0 4px 12px rgba(var(--accent-rgb), 0.2);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  border: none;
+  font-weight: 600;
+}
+
+ 
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, 
+    var(--accent) 0%, 
+    var(--accent-light) 25%, 
+    var(--primary) 50%, 
+    var(--accent) 75%, 
+    var(--accent-dark) 100%);
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 
+    0 15px 40px rgba(var(--accent-rgb), 0.4),
+    0 8px 20px rgba(var(--primary-rgb), 0.3);
+  filter: brightness(1.1) saturate(1.2);
+}
+
+.btn-primary:hover::before {
+  left: 100%;
+}
+
+.btn-primary:active {
+  transform: translateY(-1px) scale(0.98);
+  box-shadow: 
+    0 5px 15px rgba(var(--primary-rgb), 0.3),
+    0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* الزر الثانوي المحسن مع البرتقالي */
+.btn-secondary {
+  background: rgba(var(--accent-rgb), 0.1);
+  color: var(--accent);
+  border: 2px solid var(--accent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(var(--accent-rgb), 0.1);
+}
+
+.btn-secondary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--accent);
+  opacity: 0;
+  transition: all 0.3s ease;
+  border-radius: inherit;
+}
+
+.btn-secondary:hover {
+  color: white;
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 10px 30px rgba(var(--accent-rgb), 0.3);
+}
+
+.btn-secondary:hover::before {
+  opacity: 1;
+}
+
+.btn-secondary:hover > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* زر البرتقالي الجميل والمميز */
+.btn-accent {
+  background: linear-gradient(135deg, 
+    var(--accent) 0%, 
+    var(--accent-light) 25%, 
+    #FF8C42 50%, 
+    var(--accent) 75%, 
+    var(--accent-dark) 100%);
+  color: white;
+  box-shadow: 
+    0 8px 30px rgba(var(--accent-rgb), 0.5),
+    0 4px 15px rgba(255, 140, 66, 0.3);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.btn-accent:hover {
+  background: linear-gradient(135deg, 
+    #FF8C42 0%, 
+    var(--accent-light) 25%, 
+    var(--accent) 50%, 
+    #FF6B35 75%, 
+    var(--accent-dark) 100%);
+  transform: translateY(-5px) scale(1.05);
+  box-shadow: 
+    0 15px 45px rgba(var(--accent-rgb), 0.6),
+    0 8px 25px rgba(255, 140, 66, 0.4);
+  filter: brightness(1.15) saturate(1.3);
+}
+
+/* الزر الشبح المحسن */
+.btn-ghost {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  border: 2px solid rgba(var(--primary-rgb), 0.2);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  box-shadow: 
+    0 4px 15px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.btn-ghost::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  opacity: 0;
+  transition: all 0.4s ease;
+  border-radius: inherit;
+}
+
+.btn-ghost:hover {
+  border-color: var(--primary);
+  color: white;
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 
+    0 8px 25px rgba(var(--primary-rgb), 0.2),
+    0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.btn-ghost:hover::before {
+  opacity: 1;
+}
+
+.btn-ghost:hover > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* أحجام الأزرار المحسنة */
+.btn-sm {
+  padding: 10px 18px;
+  font-size: 13px;
+  border-radius: 8px;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.btn-lg {
+  padding: 18px 36px;
+  font-size: 17px;
+  border-radius: 16px;
+  gap: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  font-weight: 700;
+}
+
+.btn-xl {
+  padding: 22px 44px;
+  font-size: 19px;
+  border-radius: 20px;
+  gap: 14px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* أزرار مستديرة محسنة */
+.btn-rounded {
+  border-radius: 50px;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-rounded::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.6s ease;
+}
+
+.btn-rounded:hover::after {
+  width: 200px;
+  height: 200px;
+}
+
+/* الزر الكامل العرض */
+.btn-block {
+  width: 100%;
+  justify-content: center;
+}
+
+/* الزر المعطل */
+.btn:disabled, .btn.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* تأثيرات خاصة */
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.5s ease;
+  z-index: 0;
+}
+
+.btn:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.btn > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* التوافق مع الشاشات الصغيرة */
+@media (max-width: 768px) {
+  .btn {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+  
+  .btn-lg {
+    padding: 14px 28px;
+    font-size: 16px;
+  }
+  
+  .btn-xl {
+    padding: 16px 32px;
+    font-size: 18px;
+  }
+}
+
+/* ========= أزرار برتقالية خاصة ومميزة ========= */
+
+/* زر برتقالي متدرج جميل */
+.btn-orange {
+  background: linear-gradient(135deg, 
+    #FF7A45 0%, 
+    #FF9A6C 25%, 
+    #FF8C42 50%, 
+    #FF6B35 75%, 
+    #E05A2E 100%);
+  color: white;
+  border: none;
+  box-shadow: 
+    0 8px 30px rgba(255, 122, 69, 0.4),
+    0 4px 15px rgba(255, 107, 53, 0.3),
+    inset 0 2px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -2px 0 rgba(224, 90, 46, 0.3);
+  position: relative;
+  overflow: hidden;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.btn-orange::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(45deg, 
+    transparent 20%, 
+    rgba(255, 255, 255, 0.2) 50%, 
+    transparent 80%);
+  transform: translateX(-100%) skewX(25deg);
+  transition: transform 0.8s ease;
+}
+
+.btn-orange:hover::before {
+  transform: translateX(100%) skewX(25deg);
+}
+
+.btn-orange:hover {
+  background: linear-gradient(135deg, 
+    #FF8C42 0%, 
+    #FFB088 25%, 
+    #FF9A6C 50%, 
+    #FF7A45 75%, 
+    #FF6B35 100%);
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 
+    0 15px 45px rgba(255, 122, 69, 0.5),
+    0 8px 25px rgba(255, 140, 66, 0.4),
+    inset 0 3px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -3px 0 rgba(224, 90, 46, 0.4);
+  filter: brightness(1.1) saturate(1.2);
+}
+
+/* زر برتقالي شفاف أنيق */
+.btn-orange-ghost {
+  background: rgba(255, 122, 69, 0.1);
+  color: var(--accent);
+  border: 2px solid var(--accent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+  font-weight: 600;
+}
+
+.btn-orange-ghost::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, 
+    var(--accent) 0%, 
+    var(--accent-light) 100%);
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btn-orange-ghost:hover::before {
+  opacity: 1;
+}
+
+.btn-orange-ghost:hover {
+  color: white;
+  border-color: var(--accent-light);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 
+    0 10px 30px rgba(var(--accent-rgb), 0.3),
+    0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.btn-orange-ghost:hover > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* زر برتقالي دائري مميز */
+.btn-orange-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, 
+    var(--accent) 0%, 
+    var(--accent-light) 50%, 
+    var(--accent-dark) 100%);
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  box-shadow: 
+    0 8px 25px rgba(var(--accent-rgb), 0.4),
+    inset 0 2px 0 rgba(255, 255, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-orange-circle::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.2) 0%, 
+    transparent 50%);
+  pointer-events: none;
+}
+
+.btn-orange-circle:hover {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 
+    0 12px 35px rgba(var(--accent-rgb), 0.5),
+    inset 0 3px 0 rgba(255, 255, 255, 0.4);
+  filter: brightness(1.15);
+}
+
+/* زر برتقالي بتأثير النيون */
+.btn-orange-neon {
+  background: linear-gradient(135deg, 
+    var(--accent) 0%, 
+    var(--accent-light) 100%);
+  color: white;
+  border: 2px solid var(--accent-light);
+  position: relative;
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+  box-shadow: 
+    0 0 20px rgba(var(--accent-rgb), 0.5),
+    0 0 40px rgba(var(--accent-rgb), 0.3),
+    inset 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+.btn-orange-neon:hover {
+  transform: translateY(-3px);
+  box-shadow: 
+    0 0 30px rgba(var(--accent-rgb), 0.7),
+    0 0 60px rgba(var(--accent-rgb), 0.4),
+    0 5px 20px rgba(var(--accent-rgb), 0.3),
+    inset 0 0 30px rgba(255, 255, 255, 0.2);
+  text-shadow: 0 0 15px rgba(255, 255, 255, 1);
+  filter: brightness(1.2);
+}
+
+/* زر برتقالي متحرك */
+.btn-orange-animated {
+  background: var(--accent);
+  color: white;
+  border: none;
+  position: relative;
+  overflow: hidden;
+  font-weight: 600;
+}
+
+.btn-orange-animated::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    var(--accent-light), 
+    transparent);
+  animation: slideIn 2s infinite;
+}
+
+@keyframes slideIn {
+  0% { left: -100%; }
+  50% { left: 100%; }
+  100% { left: 100%; }
+}
+
+.btn-orange-animated:hover {
+  background: var(--accent-light);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(var(--accent-rgb), 0.4);
+}
+
+/* ========= أزرار إضافية من ملف المعاينة ========= */
+
+/* زر التبرع مع القلب النابض */
+.btn-donate {
+  background: linear-gradient(135deg, 
+    var(--accent) 0%, 
+    #FF8C42 25%, 
+    var(--accent-light) 50%, 
+    #FFB088 75%, 
+    var(--accent) 100%);
+  color: white;
+  border-radius: 25px;
+  padding: 16px 32px 16px 50px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  position: relative;
+  box-shadow: 
+    0 10px 30px rgba(var(--accent-rgb), 0.4),
+    0 4px 15px rgba(255, 140, 66, 0.3);
+  border: none;
+}
+
+.btn-donate::before {
+  content: '❤️';
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  animation: heartbeat 2s infinite;
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: translateY(-50%) scale(1); }
+  50% { transform: translateY(-50%) scale(1.2); }
+}
+
+.btn-donate:hover {
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 15px 45px rgba(var(--accent-rgb), 0.5);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* زر الطوارئ مع تأثير وامض */
+.btn-emergency {
+  background: linear-gradient(135deg, 
+    #FF4757 0%, 
+    var(--accent) 50%, 
+    #FF6B35 100%);
+  color: white;
+  border: 2px solid #FF4757;
+  padding: 14px 28px 14px 45px;
+  font-weight: 700;
+  position: relative;
+  animation: pulse-emergency 2s infinite;
+  border-radius: 12px;
+}
+
+.btn-emergency::before {
+  content: '🚨';
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18px;
+  animation: blink 1s infinite;
+}
+
+@keyframes pulse-emergency {
+  0%, 100% { 
+    box-shadow: 
+      0 0 20px rgba(255, 71, 87, 0.5),
+      0 8px 25px rgba(var(--accent-rgb), 0.3);
+  }
+  50% { 
+    box-shadow: 
+      0 0 30px rgba(255, 71, 87, 0.8),
+      0 12px 35px rgba(var(--accent-rgb), 0.5);
+  }
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0.5; }
+}
+
+.btn-emergency:hover {
+  transform: scale(1.05);
+}
+
+/* زر دائري محسن */
+.btn-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  padding: 0;
+  box-shadow: 0 8px 25px rgba(var(--accent-rgb), 0.4);
+  border: none;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btn-circle:hover {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 12px 35px rgba(var(--accent-rgb), 0.5);
+  filter: brightness(1.1);
+}
+
+/* زر برتقالي شفاف جميل */
+.btn-orange-ghost {
+  background: rgba(255, 122, 69, 0.1);
+  color: var(--accent);
+  border: 2px solid var(--accent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-weight: 600;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-orange-ghost::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, 
+    var(--accent) 0%, 
+    var(--accent-light) 100%);
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btn-orange-ghost:hover::before {
+  opacity: 1;
+}
+
+.btn-orange-ghost:hover {
+  color: white;
+  border-color: var(--accent-light);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 10px 30px rgba(var(--accent-rgb), 0.3);
+}
+
+.btn-orange-ghost:hover > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* أحجام محسنة للأزرار */
+.btn-sm {
+  padding: 10px 20px;
+  font-size: 14px;
+}
+
+.btn-lg {
+  padding: 18px 36px;
+  font-size: 18px;
+}
+
+.btn-xl {
+  padding: 22px 44px;
+  font-size: 20px;
+}
+
+/* شكل دائري للأزرار */
+.btn-rounded {
+  border-radius: 50px;
+}
+
+/* قواعد خاصة لضمان ظهور الألوان البرتقالية في الأزرار */
+button.form-submit-btn,
+a.form-submit-btn,
+.form-actions button.form-submit-btn,
+.form-actions a.form-submit-btn {
+  background: linear-gradient(135deg, #FF7A45 0%, #FF9A6C 50%, #E05A2E 100%) !important;
+  color: white !important;
+  border: none !important;
+  box-shadow: 0 4px 15px rgba(255, 122, 69, 0.3) !important;
+}
+
+button.form-submit-btn:hover,
+a.form-submit-btn:hover,
+.form-actions button.form-submit-btn:hover,
+.form-actions a.form-submit-btn:hover {
+  background: linear-gradient(135deg, #FF8C42 0%, #FF9A6C 50%, #FF6B35 100%) !important;
+  color: white !important;
+  text-decoration: none !important;
+  transform: translateY(-3px) scale(1.05) !important;
+  box-shadow: 0 8px 25px rgba(255, 122, 69, 0.5) !important;
+}
+
+/* قواعد إضافية لأزرار الهيرو */
+a.hero-btn-primary,
+.hero-btn-primary {
+  background: linear-gradient(135deg, #FF7A45 0%, #FF9A6C 25%, #FF8C42 50%, #FF7A45 75%, #E05A2E 100%) !important;
+  color: white !important;
+  border: none !important;
+}
+
+a.hero-btn-secondary,
+.hero-btn-secondary {
+  background: transparent !important;
+  color: #FF7A45 !important;
+  border: 2px solid #FF7A45 !important;
+}
+
+a.hero-btn-secondary:hover,
+.hero-btn-secondary:hover {
+  background: linear-gradient(135deg, #FF7A45 0%, #FF9A6C 50%, #E05A2E 100%) !important;
+  color: white !important;
 }
 

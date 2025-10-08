@@ -25,10 +25,7 @@ const Footer = () => {
               <div className="f-brand">
                 <div className="f-brand-row">
                   <div className="f-logo">
-                    <svg width="56" height="56" viewBox="0 0 24 24" fill="none">
-                      <rect width="24" height="24" rx="6" fill="#059669"/>
-                      <path d="M7 12l3 3 7-8" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
+                    <img src="/logoTabaro.png" alt="شعار المنصة الوطنية للتبرع" />
                   </div>
                   <div className="f-brand-texts">
                     <h3 className="f-title">المنصة الوطنية للتبرع</h3>

@@ -30,33 +30,31 @@ function LandingPage() {
       {/* ===== بطل الصفحة (Hero) ===== */}
       <header className="landing-page" id="top" role="banner" aria-label="القسم الافتتاحي">
         <div className="container-landing">
-          <Card className="card-landing shadow-lg" as="section" aria-labelledby="hero-title">
-              <div className="hero-content">
-                <h1 id="hero-title" className="landing-title">
-                  تواصل مباشر بين المتبرع والمتعفف
-                </h1>
+          <div className="hero-content">
+            <h1 id="hero-title" className="landing-title">
+              تواصل مباشر بين المتبرع والمتعفف
+            </h1>
 
-                <p className="lead-text">معًا… نصل الخير بمن يستحق.</p>
-                <p className="lead-text">الجسر الذي يربط الخير بأهله.</p>
+            <p className="lead-text">نربط الأيدي البيضاء بالقلوب المحتاجة
+            </p>
 
-                {/* أزرار الإجراءات الرئيسية */}
-                <div className="link-card" role="group" aria-label="روابط الإجراءات الرئيسية">
-                  <Link to="/add-user" className="btn go-landing" aria-label="ابدأ التسجيل كمستخدم جديد">
-                    ابدأ رحلتك الآن
-                  </Link>
-                  <Link to="/login" className="btn log-landing" aria-label="انتقال إلى صفحة تسجيل الدخول">
-                    تسجيل الدخول
-                  </Link>
-                </div>
+            {/* أزرار الإجراءات الرئيسية */}
+            <div className="buttons-container" role="group" aria-label="روابط الإجراءات الرئيسية">
+              <Link to="/add-user" className="hero-btn-primary" aria-label="ابدأ التسجيل كمستخدم جديد">
+                ابدأ رحلتك الآن
+              </Link>
+              <Link to="/login" className="hero-btn-secondary" aria-label="انتقال إلى صفحة تسجيل الدخول">
+                تسجيل الدخول
+              </Link>
+            </div>
 
-                {/* سهم الانتقال للأسفل */}
-                <div className="scroll-down" aria-hidden="true">
-                  <a href="#about" className="scroll-link" aria-label="الانتقال إلى قسم التعريف">
-                    <i className="fas fa-chevron-down" />
-                  </a>
-                </div>
-              </div>
-          </Card>
+            {/* سهم الانتقال للأسفل */}
+            <div className="scroll-down" aria-hidden="true">
+              <a href="#about" className="scroll-link" aria-label="الانتقال إلى قسم التعريف">
+                <i className="fas fa-chevron-down" />
+              </a>
+            </div>
+          </div>
         </div>
       </header>
 

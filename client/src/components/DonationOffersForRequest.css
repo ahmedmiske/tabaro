@@ -58,15 +58,21 @@
 
 /* ====== زر قبول التبرع ====== */
 .blood-list-offer-container .btn-success {
+  background: linear-gradient(135deg, #FF7A45 0%, #E05A2E 100%);
+  color: white;
   font-size: 0.85rem;
   padding: 5px 10px;
   border-radius: 6px;
   font-weight: bold;
-  transition: background-color 0.3s ease;
+  border: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(255, 122, 69, 0.3);
 }
 
 .blood-list-offer-container .btn-success:hover {
-  background-color: #1e8449;
+  background: linear-gradient(135deg, #FF8C42 0%, #FF6B35 100%);
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 4px 12px rgba(255, 122, 69, 0.4);
 }
 
 /* ====== استجابة للأجهزة ====== */

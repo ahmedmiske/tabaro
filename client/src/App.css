@@ -26,17 +26,17 @@ html:focus-within{ scroll-behavior: smooth; }
   --color-primary: #1E88E5;
   --color-secondary: #FF7043;
 
-  /* ألوان الشعار */
-  --brand-green: #12B279;
-  --brand-green-600: #0e9363;
-  --brand-orange: #FF7A45;
-  --brand-orange-600: #E46432;
+  /* ألوان الشعار - استخدام المتغيرات المركزية */
+  --brand-green: var(--primary);
+  --brand-green-600: var(--primary-dark);
+  --brand-orange: var(--accent);
+  --brand-orange-600: var(--accent-dark);
 
   /* هوية موحّدة */
-  --ui-primary: var(--brand-green);
-  --ui-primary-600: var(--brand-green-600);
-  --ui-accent: var(--brand-orange);
-  --ui-accent-600: var(--brand-orange-600);
+  --ui-primary: var(--primary);
+  --ui-primary-600: var(--primary-dark);
+  --ui-accent: var(--accent);
+  --ui-accent-600: var(--accent-dark);
 
   --bg-page: var(--main-color-fundo);
   --text-color: #1f2937;
@@ -82,13 +82,16 @@ button, .btn{ cursor:pointer; }
 /* تخصيص أزرار Bootstrap بسرعة */
 .btn-primary,
 .btn.go-landing{
-  background: var(--ui-primary) !important;
+  background: linear-gradient(135deg, #FF7A45 0%, #FF9A6C 50%, #E05A2E 100%) !important;
   border: 0 !important;
+  box-shadow: 0 4px 15px rgba(255, 122, 69, 0.3) !important;
 }
 .btn-primary:hover,
 .btn.go-landing:hover,
 .btn.go-landing:focus-visible{
-  background: var(--ui-primary-600) !important;
+  background: linear-gradient(135deg, #FF8C42 0%, #FF9A6C 50%, #FF6B35 100%) !important;
+  transform: translateY(-2px) scale(1.05) !important;
+  box-shadow: 0 8px 25px rgba(255, 122, 69, 0.5) !important;
 }
 
 /* RTL helpers */
