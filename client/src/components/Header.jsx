@@ -9,6 +9,7 @@ import {
 import fetchWithInterceptors from '../services/fetchWithInterceptors.js';
 import TopBar from './TopBar.jsx';
 import './Header.css';
+
 function Header({ notifCount }) {
   const location = useLocation();
   const navigate = useNavigate();
@@ -45,19 +46,32 @@ function Header({ notifCount }) {
     };
   }, [syncUser]);
 
-  // Display name + avatar letter
+  // Display name + avatar
   const displayName = useMemo(() => {
     if (!user) return '';
     const fn = user.firstName || user.given_name || '';
-    const ln = user.lastName || user.family_name || '';
-    const full = `${fn} ${ln}`.trim();
+    // const ln = user.lastName || user.family_name || '';
+    const full = `${fn}`.trim();
     return full || user.username || user.email || 'الحساب';
   }, [user]);
+
+  // حاول تلقّي رابط الصورة من أسماء حقول شائعة
+// Header.jsx
+const avatarUrl = useMemo(() => {
+  if (!user) return '';
+  const raw = user.profileImage || '';
+  if (!raw) return '';
+  // لو جاء رابط كامل http اتركه كما هو، وإلا ابنِه على /uploads/profileImages
+  if (/^https?:\/\//i.test(raw) || raw.startsWith('/uploads/')) return raw;
+  return `/uploads/profileImages/${raw}`;
+}, [user]);
+
+
   const avatarLetter = (displayName || 'ح').trim().charAt(0).toUpperCase();
 
   // ===== Other state =====
   const [q, setQ] = useState('');
-  const [open, setOpen] = useState(null); // 'blood' | 'general' | 'campaigns' | null
+  const [open, setOpen] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [badgeCount, setBadgeCount] = useState(Number.isFinite(notifCount) ? notifCount : 0);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -84,23 +98,15 @@ function Header({ notifCount }) {
 
   useEffect(() => {
     if (typeof document === 'undefined') return undefined;
-
     const onDocPointer = (e) => {
       if (!rootRef.current) return;
       if (!rootRef.current.contains(e.target)) {
-        setOpen(null);
-        setMobileOpen(false);
-        setSearchOpen(false);
+        setOpen(null); setMobileOpen(false); setSearchOpen(false);
       }
     };
     const onKey = (e) => {
-      if (e.key === 'Escape') {
-        setOpen(null);
-        setMobileOpen(false);
-        setSearchOpen(false);
-      }
+      if (e.key === 'Escape') { setOpen(null); setMobileOpen(false); setSearchOpen(false); }
     };
-
     document.addEventListener('pointerdown', onDocPointer);
     document.addEventListener('keydown', onKey);
     return () => {
@@ -114,21 +120,15 @@ function Header({ notifCount }) {
     if (typeof window === 'undefined') return undefined;
     const el = rootRef.current;
     if (!el) return undefined;
-
     const updateHeaderHeight = () => {
       const height = Math.round(el.getBoundingClientRect().height);
       document.documentElement.style.setProperty('--header-height', `${height}px`);
     };
-
     updateHeaderHeight();
     const handleResize = () => updateHeaderHeight();
     window.addEventListener('resize', handleResize);
     const interval = setInterval(updateHeaderHeight, 2000);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      clearInterval(interval);
-    };
+    return () => { window.removeEventListener('resize', handleResize); clearInterval(interval); };
   }, []);
 
   // Lock page scroll when drawer is open + focus management
@@ -148,7 +148,7 @@ function Header({ notifCount }) {
     return () => { body.style.overflow = prevOverflow || ''; };
   }, [mobileOpen]);
 
-  // Fetch notifications count if prop not provided
+  // Fetch notifications count if prop not provided (unread only)
   useEffect(() => {
     let stop = false;
     let timer;
@@ -159,14 +159,17 @@ function Header({ notifCount }) {
         const { body, ok } = await fetchWithInterceptors('/api/notifications', { signal: ctrl.signal });
         if (!ok) return;
         const list = body?.data || body || [];
-        const unread = Array.isArray(list) ? list.filter(n => !n.read).length : 0;
+        // دعم أسماء حقول مختلفة: read / isRead / status === 'unread'
+        const unread = Array.isArray(list)
+          ? list.filter(n => n && (n.read === false || n.isRead === false || n.status === 'unread')).length
+          : 0;
         if (!stop) setBadgeCount(unread);
       } catch { /* silent */ }
     };
 
     if (!Number.isFinite(notifCount)) {
       loadCount();
-      timer = setInterval(loadCount, 30000);
+      timer = setInterval(loadCount, 20000);
     } else {
       setBadgeCount(notifCount);
     }
@@ -192,11 +195,12 @@ function Header({ notifCount }) {
 
   return (
     <header className="eh-header-modern" dir="rtl" ref={rootRef}>
-      {/* ✅ TopBar مستقل */}
+      {/* ✅ TopBar مستقل مع صورة المستخدم وعدّاد الإشعارات */}
       <TopBar
         isAuthed={isAuthed}
         displayName={displayName}
         avatarLetter={avatarLetter}
+        avatarUrl={avatarUrl}
         badgeCount={badgeCount}
         onLogout={logout}
       />
@@ -224,21 +228,16 @@ function Header({ notifCount }) {
                 onClick={() => setOpen(open === 'blood' ? null : 'blood')}
                 onMouseEnter={() => setOpen('blood')}
               >
-                <FiDroplet />
-                <span>التبرع بالدم</span>
-                <FiChevronDown className="eh-caret" />
+                <FiDroplet /><span>التبرع بالدم</span><FiChevronDown className="eh-caret" />
               </button>
             </div>
-
             <div className={`eh-nav-item ${open==='general' ? 'open' : ''}`}>
               <button
                 className={`eh-nav-link ${isActive('/donations') ? 'active' : ''}`}
                 onClick={() => setOpen(open === 'general' ? null : 'general')}
                 onMouseEnter={() => setOpen('general')}
               >
-                <FiHeart />
-                <span>تبرعات عامة</span>
-                <FiChevronDown className="eh-caret" />
+                <FiHeart /><span>تبرعات عامة</span><FiChevronDown className="eh-caret" />
               </button>
             </div>
             <div className={`eh-nav-item ${open==='campaigns' ? 'open' : ''}`}>
@@ -247,17 +246,13 @@ function Header({ notifCount }) {
                 onClick={() => setOpen(open === 'campaigns' ? null : 'campaigns')}
                 onMouseEnter={() => setOpen('campaigns')}
               >
-                <FiUsers />
-                <span>حملات التبرع</span>
-                <FiChevronDown className="eh-caret" />
+                <FiUsers /><span>حملات التبرع</span><FiChevronDown className="eh-caret" />
               </button>
             </div>
           </nav>
 
           {/* القائمة اليمنى */}
           <nav className="eh-nav-right">
-            
-
             <div className="eh-nav-actions">
               <button
                 className={`eh-search-toggle ${searchOpen ? 'active' : ''}`}
@@ -302,11 +297,7 @@ function Header({ notifCount }) {
                 <FiSearch />
               </button>
             </form>
-            <button
-              className="eh-search-close"
-              onClick={() => setSearchOpen(false)}
-              aria-label="إغلاق البحث"
-            >
+            <button className="eh-search-close" onClick={() => setSearchOpen(false)} aria-label="إغلاق البحث">
               <FiX />
             </button>
           </div>
@@ -327,31 +318,19 @@ function Header({ notifCount }) {
           <div className="eh-mega-grid">
             <Link to="/blood-donation" className="eh-mega-card" onClick={() => setOpen(null)}>
               <div className="eh-mega-icon"><FiDroplet /></div>
-              <div className="eh-mega-content">
-                <h4>زر التبرع بالدم</h4>
-                <p>سجّل رغبتك بالتبرع الآن</p>
-              </div>
+              <div className="eh-mega-content"><h4>زر التبرع بالدم</h4><p>سجّل رغبتك بالتبرع الآن</p></div>
             </Link>
             <Link to="/blood-donation" className="eh-mega-card" onClick={() => setOpen(null)}>
               <div className="eh-mega-icon"><FiList /></div>
-              <div className="eh-mega-content">
-                <h4>طلب التبرع</h4>
-                <p>إضافة طلب جديد</p>
-              </div>
+              <div className="eh-mega-content"><h4>طلب التبرع</h4><p>إضافة طلب جديد</p></div>
             </Link>
             <Link to="/blood-donations" className="eh-mega-card" onClick={() => setOpen(null)}>
               <div className="eh-mega-icon"><FiGrid /></div>
-              <div className="eh-mega-content">
-                <h4>قائمة الطلبات</h4>
-                <p>تصفّح وفلترة</p>
-              </div>
+              <div className="eh-mega-content"><h4>قائمة الطلبات</h4><p>تصفّح وفلترة</p></div>
             </Link>
             <Link to="/donors/blood" className="eh-mega-card" onClick={() => setOpen(null)}>
               <div className="eh-mega-icon"><FiUsers /></div>
-              <div className="eh-mega-content">
-                <h4>المتبرعون</h4>
-                <p>المتبرعون المسجّلون</p>
-              </div>
+              <div className="eh-mega-content"><h4>المتبرعون</h4><p>المتبرعون المسجّلون</p></div>
             </Link>
           </div>
         </div>
@@ -368,31 +347,19 @@ function Header({ notifCount }) {
           <div className="eh-mega-grid">
             <Link to="/donation-requests" className="eh-mega-card" onClick={() => setOpen(null)}>
               <div className="eh-mega-icon"><FiHeart /></div>
-              <div className="eh-mega-content">
-                <h4>تبرعات عامة</h4>
-                <p>ابدأ تبرعًا الآن</p>
-              </div>
+              <div className="eh-mega-content"><h4>تبرعات عامة</h4><p>ابدأ تبرعًا الآن</p></div>
             </Link>
             <Link to="/donation-requests" className="eh-mega-card" onClick={() => setOpen(null)}>
               <div className="eh-mega-icon"><FiList /></div>
-              <div className="eh-mega-content">
-                <h4>طلب التبرع</h4>
-                <p>أنشئ طلبًا عامًا</p>
-              </div>
+              <div className="eh-mega-content"><h4>طلب التبرع</h4><p>أنشئ طلبًا عامًا</p></div>
             </Link>
             <Link to="/donations" className="eh-mega-card" onClick={() => setOpen(null)}>
               <div className="eh-mega-icon"><FiGrid /></div>
-              <div className="eh-mega-content">
-                <h4>قائمة الطلبات</h4>
-                <p>تصفية حسب النوع</p>
-              </div>
+              <div className="eh-mega-content"><h4>قائمة الطلبات</h4><p>تصفية حسب النوع</p></div>
             </Link>
             <Link to="/donors/general" className="eh-mega-card" onClick={() => setOpen(null)}>
               <div className="eh-mega-icon"><FiUsers /></div>
-              <div className="eh-mega-content">
-                <h4>المتبرعون</h4>
-                <p>المتبرعون العامّون</p>
-              </div>
+              <div className="eh-mega-content"><h4>المتبرعون</h4><p>المتبرعون العامّون</p></div>
             </Link>
           </div>
         </div>
@@ -409,17 +376,11 @@ function Header({ notifCount }) {
           <div className="eh-mega-grid">
             <Link to="/campaigns" className="eh-mega-card" onClick={() => setOpen(null)}>
               <div className="eh-mega-icon"><FiGrid /></div>
-              <div className="eh-mega-content">
-                <h4>قائمة الحملات</h4>
-                <p>استكشف الحملات</p>
-              </div>
+              <div className="eh-mega-content"><h4>قائمة الحملات</h4><p>استكشف الحملات</p></div>
             </Link>
             <Link to="/campaigns/create" className="eh-mega-card" onClick={() => setOpen(null)}>
               <div className="eh-mega-icon"><FiHeart /></div>
-              <div className="eh-mega-content">
-                <h4>إنشاء حملة</h4>
-                <p>أطلق حملتك الآن</p>
-              </div>
+              <div className="eh-mega-content"><h4>إنشاء حملة</h4><p>أطلق حملتك الآن</p></div>
             </Link>
           </div>
         </div>
@@ -440,7 +401,9 @@ function Header({ notifCount }) {
             <div className="eh-user-drawer">
               {isAuthed ? (
                 <>
-                  <div className="eh-avatar-drawer">{avatarLetter}</div>
+                  <div className="eh-avatar-drawer">
+                    {avatarUrl ? <img src={avatarUrl} alt={displayName} className="eh-avatar-img" /> : avatarLetter}
+                  </div>
                   <div className="eh-user-info-drawer">
                     <div className="eh-username-drawer">{displayName}</div>
                     <button className="eh-logout-drawer" onClick={logout}>تسجيل الخروج</button>
@@ -448,28 +411,19 @@ function Header({ notifCount }) {
                 </>
               ) : (
                 <Link to="/login" className="eh-login-drawer" onClick={() => setMobileOpen(false)}>
-                  <FiUser />
-                  <span>تسجيل الدخول</span>
+                  <FiUser /><span>تسجيل الدخول</span>
                 </Link>
               )}
             </div>
-            <button
-              className="eh-close-drawer"
-              onClick={() => setMobileOpen(false)}
-              aria-label="إغلاق القائمة"
-            >
+            <button className="eh-close-drawer" onClick={() => setMobileOpen(false)} aria-label="إغلاق القائمة">
               <FiX />
             </button>
           </div>
 
           <nav className="eh-drawer-nav" role="navigation" aria-label="القائمة الرئيسية">
-            <Link to="/" className="eh-drawer-link" onClick={() => setMobileOpen(false)}>
-              <span>الرئيسية</span>
-            </Link>
+            <Link to="/" className="eh-drawer-link" onClick={() => setMobileOpen(false)}><span>الرئيسية</span></Link>
             <div className="eh-drawer-group">
-              <div className="eh-drawer-group-title">
-                <FiDroplet /><span>التبرع بالدم</span>
-              </div>
+              <div className="eh-drawer-group-title"><FiDroplet /><span>التبرع بالدم</span></div>
               <Link to="/blood-donation" onClick={() => setMobileOpen(false)}>زر التبرع بالدم</Link>
               <Link to="/blood-donation" onClick={() => setMobileOpen(false)}>طلب التبرع</Link>
               <Link to="/blood-donations" onClick={() => setMobileOpen(false)}>قائمة الطلبات</Link>
@@ -477,9 +431,7 @@ function Header({ notifCount }) {
             </div>
 
             <div className="eh-drawer-group">
-              <div className="eh-drawer-group-title">
-                <FiHeart /><span>تبرعات عامة</span>
-              </div>
+              <div className="eh-drawer-group-title"><FiHeart /><span>تبرعات عامة</span></div>
               <Link to="/donation-requests" onClick={() => setMobileOpen(false)}>تبرعات عامة</Link>
               <Link to="/donation-requests" onClick={() => setMobileOpen(false)}>طلب التبرع</Link>
               <Link to="/donations" onClick={() => setMobileOpen(false)}>قائمة الطلبات</Link>
@@ -487,9 +439,7 @@ function Header({ notifCount }) {
             </div>
 
             <div className="eh-drawer-group">
-              <div className="eh-drawer-group-title">
-                <FiUsers /><span>حملات التبرع</span>
-              </div>
+              <div className="eh-drawer-group-title"><FiUsers /><span>حملات التبرع</span></div>
               <Link to="/campaigns" onClick={() => setMobileOpen(false)}>قائمة الحملات</Link>
               <Link to="/campaigns/create" onClick={() => setMobileOpen(false)}>إنشاء حملة</Link>
             </div>
@@ -504,12 +454,6 @@ function Header({ notifCount }) {
   );
 }
 
-Header.propTypes = {
-  notifCount: PropTypes.number,
-};
-
-Header.defaultProps = {
-  notifCount: null,
-};
-
+Header.propTypes = { notifCount: PropTypes.number };
+Header.defaultProps = { notifCount: null };
 export default Header;
