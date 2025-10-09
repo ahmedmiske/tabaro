@@ -11,7 +11,7 @@
 }
 
 .signup-form-section {
-  flex: 1 1 50%;
+  flex: 1 1 ;
   width: 50vw;
   background: linear-gradient(135deg, 
     rgba(255, 255, 255, 0.95) 0%, 
@@ -38,10 +38,13 @@
 }
 
 .signup-section {
-  flex: 1 1 50%;
+  flex: 1 1;
   background: linear-gradient(135deg, 
-    #66BB6A 25%, 
-    #388E3C 100%);
+    #00A443 0%, 
+    #00C853 25%, 
+    #4CAF50 50%, 
+    #00A443 75%, 
+    #00802F 100%);
   color: white;
   display: flex;
   align-items: center;

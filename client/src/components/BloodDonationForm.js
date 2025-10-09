@@ -30,6 +30,69 @@ const BloodDonationForm = () => {
 
   const bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "غير معروف"];
   const contactOptions = ["phone", "whatsapp"];
+  const placesList = [
+    'ألاك',
+    'أمباني', 
+    'امبود',
+    'آمرج',
+    'انتيكان',
+    'أوجفت',
+    'أطار',
+    'باسكنو',
+    'بابابي',
+    'باركيول',
+    'بير أم أكرين',
+    'بوكي',
+    'بومديد',
+    'بوتلميت',
+    'تفرغ زينة',
+    'تجكجة',
+    'تمبدغة',
+    'توجنين',
+    'تيارت',
+    'تيشيت',
+    'جلوار (بوغور)',
+    'جكني',
+    'دار النعيم',
+    'روصو',
+    'الرياض',
+    'الزويرات',
+    'السبخة',
+    'الشامي',
+    'شنقيط',
+    'الطويل',
+    'الطينطان',
+    'عرفات',
+    'عدل بكرو',
+    'فديرك',
+    'كرمسين',
+    'كرو',
+    'كنكوصة',
+    'كوبني',
+    'كيهيدي',
+    'كيفة',
+    'لكصر',
+    'لكصيبة',
+    'لعيون',
+    'مال',
+    'مقامة',
+    'مقطع لحجار',
+    'المذرذرة',
+    'المجرية',
+    'الميناء',
+    'مونكل',
+    'نواذيبو',
+    'نواكشوط',
+    'النعمة',
+    'وادان',
+    'واد الناقة',
+    'ولد ينج',
+    'ولاتة',
+    'ومبو',
+    'سيليبابي',
+    'تامشكط',
+    'أكجوجت'
+  ];
   const validatePhoneNumber = (value) => /^\d{8}$/.test(value);
 
   const handleChange = (e) => {
@@ -151,7 +214,8 @@ const BloodDonationForm = () => {
 
                 <Form.Group>
                   <Form.Label>الموقع</Form.Label>
-                  <Form.Control type="text" name="location" value={bloodDonation.location} onChange={handleChange} placeholder="المدينة أو المستشفى" isInvalid={errors.location} required/>
+                  <Form.Control list="locations" name="location" value={bloodDonation.location} onChange={handleChange} placeholder="اكتب أو اختر المقاطعة" isInvalid={errors.location} required/>
+                  <datalist id="locations">{placesList.map(place => <option key={place} value={place} />)}</datalist>
                   {errors.location && <Form.Control.Feedback type="invalid">هذا الحقل مطلوب</Form.Control.Feedback>}
                 </Form.Group>
               </>

@@ -112,7 +112,7 @@
 .error-title {
   font-size: 3rem;
   font-weight: 900;
-  background: linear-gradient(135deg, #2D3748 0%, #FF7A45 50%, #E05A2E 100%);
+  background: linear-gradient(135deg, #2D3748 0%, #00A443 50%, #00802F 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -158,7 +158,7 @@
 .stat-number {
   font-size: 2.5rem;
   font-weight: 900;
-  background: linear-gradient(135deg, #FF7A45 0%, #12B279 100%);
+  background: linear-gradient(135deg, #00A443 0%, #12B279 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -210,13 +210,13 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #FF7A45 0%, #12B279 100%);
+  background: linear-gradient(90deg, #00A443 0%, #12B279 100%);
 }
 
 .suggestion-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 30px rgba(255, 122, 69, 0.2);
-  border-color: #FF7A45;
+  border-color: #00A443;
 }
 
 .card-icon {
@@ -244,7 +244,7 @@
   padding: 2rem;
   border-radius: 20px;
   margin: 3rem 0;
-  border-right: 5px solid #FF7A45;
+  border-right: 5px solid #00A443;
 }
 
 .inspiring-message blockquote {
@@ -287,7 +287,7 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #FF7A45 0%, #FF9A6C 50%, #E05A2E 100%);
+  background: linear-gradient(135deg, #00A443 0%, #00C853 50%, #00802F 100%);
   color: white;
   box-shadow: 0 4px 20px rgba(255, 122, 69, 0.3);
 }
@@ -301,12 +301,12 @@
 
 .btn-secondary {
   background: transparent;
-  color: #FF7A45;
-  border: 2px solid #FF7A45;
+  color: #00A443;
+  border: 2px solid #00A443;
 }
 
 .btn-secondary:hover {
-  background: #FF7A45;
+  background: #00A443;
   color: white;
   text-decoration: none;
 }
@@ -339,7 +339,7 @@
 .circle-1 {
   width: 300px;
   height: 300px;
-  background: #FF7A45;
+  background: #00A443;
   top: 10%;
   right: -150px;
   animation: floatCircle 20s linear infinite;
@@ -357,7 +357,7 @@
 .circle-3 {
   width: 150px;
   height: 150px;
-  background: #FF9A6C;
+  background: #00C853;
   top: 60%;
   right: 5%;
   animation: floatCircle 30s linear infinite;

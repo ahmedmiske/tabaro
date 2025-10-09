@@ -58,7 +58,7 @@
 
 /* ====== زر قبول التبرع ====== */
 .blood-list-offer-container .btn-success {
-  background: linear-gradient(135deg, #FF7A45 0%, #E05A2E 100%);
+  background: linear-gradient(135deg, #00A443 0%, #00802F 100%);
   color: white;
   font-size: 0.85rem;
   padding: 5px 10px;
@@ -70,7 +70,7 @@
 }
 
 .blood-list-offer-container .btn-success:hover {
-  background: linear-gradient(135deg, #FF8C42 0%, #FF6B35 100%);
+  background: linear-gradient(135deg, #00B548 0%, #00963A 100%);
   transform: translateY(-1px) scale(1.02);
   box-shadow: 0 4px 12px rgba(255, 122, 69, 0.4);
 }

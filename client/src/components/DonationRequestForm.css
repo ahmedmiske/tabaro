@@ -45,6 +45,111 @@ input, select, textarea {
   border: 1px solid #ccc;
   border-radius: 5px;
   text-align: right;
+  transition: all 0.3s ease;
+}
+
+/* تحسين مظهر القائمة المنسدلة */
+input[list] {
+  background: linear-gradient(45deg, #ffffff 98%, #00A443 98%, #00A443 100%);
+  border: 2px solid #e0e0e0;
+  position: relative;
+  cursor: pointer;
+}
+
+input[list]:focus {
+  border-color: #00A443;
+  box-shadow: 0 0 8px rgba(0, 164, 67, 0.3);
+  outline: none;
+}
+
+input[list]:hover {
+  border-color: #00C853;
+  background: linear-gradient(45deg, #f8fff9 98%, #00A443 98%, #00A443 100%);
+}
+
+/* تنسيق datalist */
+datalist {
+  position: absolute;
+  background-color: white;
+  border: 1px solid #00A443;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 164, 67, 0.15);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+datalist option {
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #333;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+datalist option:hover {
+  background-color: #e8f5e8;
+  color: #00A443;
+}
+
+/* إضافة رمز السهم للإشارة إلى القائمة المنسدلة */
+input[list]::after {
+  content: "▼";
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #00A443;
+  font-size: 12px;
+  pointer-events: none;
+}
+
+/* تحسين شكل placeholder */
+input[list]::placeholder {
+  color: #999;
+  font-style: italic;
+  opacity: 0.8;
+}
+
+/* تأثير عند التركيز على الحقل */
+input[list]:focus::placeholder {
+  opacity: 0.5;
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
+}
+
+/* تنسيق خاص للوضع الليلي إذا كان مطلوباً */
+@media (prefers-color-scheme: dark) {
+  datalist {
+    background-color: #2d2d2d;
+    border-color: #00A443;
+  }
+  
+  datalist option {
+    color: #e0e0e0;
+  }
+  
+  datalist option:hover {
+    background-color: #1a3d20;
+    color: #00C853;
+  }
+}
+
+/* تحسين للشاشات الصغيرة */
+@media (max-width: 768px) {
+  input[list] {
+    font-size: 16px; /* منع التكبير التلقائي في iOS */
+    padding: 12px;
+  }
+  
+  datalist {
+    max-height: 150px;
+  }
+  
+  datalist option {
+    padding: 10px 15px;
+    font-size: 16px;
+  }
 }
 
 textarea {
