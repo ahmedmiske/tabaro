@@ -26,19 +26,6 @@ const GeneralDonors = () => {
     'أخرى'
   ];
 
-  // إذا لم يكن المستخدم مسجلاً، إعادة توجيه لصفحة تسجيل الدخول
-  if (!user) {
-    return <Navigate to="/login?next=/donors/general" replace />;
-  }
-
-  useEffect(() => {
-    fetchDonors();
-  }, []);
-
-  useEffect(() => {
-    filterDonors();
-  }, [donors, searchTerm, filterCategory, filterLocation]);
-
   const fetchDonors = async () => {
     try {
       setLoading(true);
@@ -137,6 +124,22 @@ const GeneralDonors = () => {
     };
     return colors[category] || 'secondary';
   };
+
+  // استخدام useEffect للتحكم في التوجيه وجلب البيانات
+  useEffect(() => {
+    if (user) {
+      fetchDonors();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    filterDonors();
+  }, [donors, searchTerm, filterCategory, filterLocation]);
+
+  // إذا لم يكن المستخدم مسجلاً، إعادة توجيه لصفحة تسجيل الدخول
+  if (!user) {
+    return <Navigate to="/login?next=/donors/general" replace />;
+  }
 
   if (loading) {
     return (

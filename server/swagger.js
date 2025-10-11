@@ -6,9 +6,9 @@ const swaggerOptions = {
   swaggerDefinition: {
     openapi: "3.0.0",
     info: {
-      title: "Tabaro API",
+      title: "PNDD API",
       version: "1.0.0",
-      description: "Tabaro API documentation",
+      description: "PNDD API documentation",
       //   contact: {
       //     name: 'Ahmed Misca',
       //     email: 'ahmedmisca@example.com',

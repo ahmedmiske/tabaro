@@ -8,7 +8,7 @@ import './addUserPage.css';
  * 🎨 صفحة التسجيل المتطورة - تجربة مستخدم استثنائية
  * 
  * @description مكون متقدم لإنشاء حسابات المستخدمين مع تصميم أنيق ومبهر
- * @author Tabaro Development Team
+ * @author PNDD Development Team
  * @version 2.0.0
  */
 function AddUserPage() {
@@ -204,7 +204,7 @@ function AddUserPage() {
         <div className="image-container fullscreen-container">
           <img 
             src={userAddImage} 
-            alt="رسم توضيحي لإنشاء حساب جديد في تطبيق Tabaro" 
+            alt="رسم توضيحي لإنشاء حساب جديد في تطبيق PNDD" 
             className="user-add-image fullscreen-image-element"
             loading="eager"
             decoding="async"
@@ -310,7 +310,7 @@ function AddUserPage() {
             </div>
             
             <div className="success-content">
-              <h3 className="success-title">🎉 مرحباً بك في Tabaro!</h3>
+              <h3 className="success-title">🎉 مرحباً بك في PNDD!</h3>
               <p className="success-message">{successMessage}</p>
               
               <div className="success-stats">

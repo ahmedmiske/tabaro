@@ -19,19 +19,6 @@ const BloodDonors = () => {
 
   const bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
-  // إذا لم يكن المستخدم مسجلاً، إعادة توجيه لصفحة تسجيل الدخول
-  if (!user) {
-    return <Navigate to="/login?next=/donors/blood" replace />;
-  }
-
-  useEffect(() => {
-    fetchDonors();
-  }, []);
-
-  useEffect(() => {
-    filterDonors();
-  }, [donors, searchTerm, filterBloodType, filterLocation]);
-
   const fetchDonors = async () => {
     try {
       setLoading(true);
@@ -121,6 +108,22 @@ const BloodDonors = () => {
     };
     return colors[bloodType] || 'secondary';
   };
+
+  // استخدام useEffect للتحكم في التوجيه وجلب البيانات
+  useEffect(() => {
+    if (user) {
+      fetchDonors();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    filterDonors();
+  }, [donors, searchTerm, filterBloodType, filterLocation]);
+
+  // إذا لم يكن المستخدم مسجلاً، إعادة توجيه لصفحة تسجيل الدخول
+  if (!user) {
+    return <Navigate to="/login?next=/donors/blood" replace />;
+  }
 
   if (loading) {
     return (
