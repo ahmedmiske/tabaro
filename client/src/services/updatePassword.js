@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const User = require('../../../server/models/user');
 
 // اتصل بقاعدة البيانات
-mongoose.connect('mongodb://localhost:27017/tabaro', {
+mongoose.connect('mongodb://localhost:27017/pndd', {
     useNewUrlParser: true,
     useUnifiedTopology: true
 }).then(() => console.log('MongoDB Connected'))

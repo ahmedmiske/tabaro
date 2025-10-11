@@ -1,0 +1,389 @@
+/* صفحة المتبرعين العامين */
+.donors-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, rgba(0, 164, 67, 0.02) 0%, rgba(0, 200, 83, 0.05) 100%);
+  font-family: 'Cairo', sans-serif;
+}
+
+/* العنوان الرئيسي */
+.page-header {
+  padding: 2rem 0;
+}
+
+.page-title {
+  font-size: 2.5rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #00A443 0%, #00C853 50%, #00802F 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+  font-size: 1.1rem;
+  color: #6B7280;
+  margin-bottom: 1.5rem;
+}
+
+.title-divider {
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(90deg, #00A443 0%, #00C853 100%);
+  margin: 0 auto;
+  border-radius: 2px;
+}
+
+/* بطاقة التصفية */
+.filters-card {
+  border: none;
+  box-shadow: 0 4px 20px rgba(0, 164, 67, 0.1);
+  border-radius: 16px;
+  border-top: 4px solid #00A443;
+}
+
+.filters-card .form-control,
+.filters-card .form-select {
+  border: 2px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  transition: all 0.3s ease;
+}
+
+.filters-card .form-control:focus,
+.filters-card .form-select:focus {
+  border-color: #00A443;
+  box-shadow: 0 0 0 3px rgba(0, 164, 67, 0.1);
+}
+
+.filters-card .input-group-text {
+  background: #00A443;
+  color: white;
+  border: none;
+  border-radius: 8px 0 0 8px;
+}
+
+/* إحصائيات */
+.stats-row .stat-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 164, 67, 0.1);
+  border-top: 3px solid #00A443;
+  transition: transform 0.3s ease;
+}
+
+.stats-row .stat-card:hover {
+  transform: translateY(-5px);
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: #00A443;
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: #6B7280;
+  font-weight: 600;
+}
+
+/* بطاقة المتبرع */
+.donor-card {
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+.donor-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #00A443 0%, #00C853 100%);
+}
+
+.donor-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0, 164, 67, 0.15);
+}
+
+/* رأس بطاقة المتبرع */
+.donor-header {
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #F3F4F6;
+}
+
+.donor-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin-left: 1rem;
+  position: relative;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #00A443 0%, #00C853 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.donor-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1F2937;
+  margin-bottom: 0.5rem;
+}
+
+.donor-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.category-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* تفاصيل المتبرع */
+.donor-details {
+  margin: 1rem 0;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: #4B5563;
+}
+
+.detail-icon {
+  margin-left: 0.5rem;
+  color: #00A443;
+  flex-shrink: 0;
+}
+
+/* وصف المتبرع */
+.donor-description {
+  margin: 1rem 0;
+  padding: 0.75rem;
+  background: rgba(0, 164, 67, 0.05);
+  border-radius: 8px;
+  border-right: 3px solid #00A443;
+}
+
+.donor-description p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #4B5563;
+  line-height: 1.5;
+}
+
+/* أزرار الإجراءات */
+.donor-actions {
+  padding-top: 1rem;
+  border-top: 1px solid #F3F4F6;
+}
+
+.donor-actions .btn {
+  border-radius: 8px;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  transition: all 0.3s ease;
+}
+
+.donor-actions .btn-outline-primary {
+  border-color: #00A443;
+  color: #00A443;
+}
+
+.donor-actions .btn-outline-primary:hover {
+  background-color: #00A443;
+  border-color: #00A443;
+}
+
+.donor-actions .btn-success {
+  background-color: #00C853;
+  border-color: #00C853;
+}
+
+.donor-actions .btn-success:hover {
+  background-color: #00A443;
+  border-color: #00A443;
+}
+
+/* بطاقة الدعوة للتبرع */
+.call-to-action-card {
+  background: linear-gradient(135deg, rgba(0, 164, 67, 0.05) 0%, rgba(0, 200, 83, 0.1) 100%);
+  border: 2px solid rgba(0, 164, 67, 0.1);
+  border-radius: 20px;
+  box-shadow: 0 8px 30px rgba(0, 164, 67, 0.1);
+}
+
+.call-to-action-card .btn-primary {
+  background: linear-gradient(135deg, #00A443 0%, #00C853 100%);
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 25px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+}
+
+.call-to-action-card .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 164, 67, 0.3);
+}
+
+/* تصميم متجاوب */
+@media (max-width: 768px) {
+  .page-title {
+    font-size: 2rem;
+  }
+  
+  .stats-row {
+    margin-bottom: 2rem;
+  }
+  
+  .stat-card {
+    margin-bottom: 1rem;
+  }
+  
+  .donor-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .donor-avatar {
+    margin: 0 0 1rem 0;
+  }
+  
+  .donor-actions {
+    text-align: center;
+  }
+  
+  .donor-actions .btn {
+    margin-bottom: 0.5rem;
+    width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .filters-card .row {
+    gap: 1rem;
+  }
+  
+  .filters-card .col-md-4,
+  .filters-card .col-md-3,
+  .filters-card .col-md-2 {
+    width: 100%;
+  }
+  
+  .page-header {
+    padding: 1rem 0;
+  }
+  
+  .page-title {
+    font-size: 1.8rem;
+  }
+  
+  .call-to-action-card .btn-primary {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+/* تأثيرات التحميل */
+.donors-page .spinner-border {
+  color: #00A443;
+}
+
+/* تحسين ألوان الشارات */
+.badge.bg-danger {
+  background-color: #DC2626 !important;
+}
+
+.badge.bg-primary {
+  background-color: #2563EB !important;
+}
+
+.badge.bg-warning {
+  background-color: #D97706 !important;
+  color: white !important;
+}
+
+.badge.bg-info {
+  background-color: #0891B2 !important;
+}
+
+.badge.bg-success {
+  background-color: #00A443 !important;
+}
+
+.badge.bg-secondary {
+  background-color: #6B7280 !important;
+}
+
+/* تأثير الانيميشن عند التحميل */
+.donor-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* تخصيص إضافي للشارات */
+.category-badge.bg-danger {
+  background: linear-gradient(135deg, #DC2626 0%, #EF4444 100%) !important;
+}
+
+.category-badge.bg-primary {
+  background: linear-gradient(135deg, #2563EB 0%, #3B82F6 100%) !important;
+}
+
+.category-badge.bg-warning {
+  background: linear-gradient(135deg, #D97706 0%, #F59E0B 100%) !important;
+}
+
+.category-badge.bg-info {
+  background: linear-gradient(135deg, #0891B2 0%, #06B6D4 100%) !important;
+}
+
+.category-badge.bg-success {
+  background: linear-gradient(135deg, #00A443 0%, #00C853 100%) !important;
+}

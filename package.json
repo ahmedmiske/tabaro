@@ -1,5 +1,5 @@
 {
-  "name": "tabaroua-server",
+  "name": "pndd-server",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -28,6 +28,7 @@
     "mongoose": "^8.9.2",
     "morgan": "^1.10.0",
     "multer": "^2.0.1",
+    "openai": "^6.2.0",
     "react-icons": "^5.5.0",
     "react-toastify": "^11.0.5",
     "socket.io": "^4.8.1",

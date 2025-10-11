@@ -2,23 +2,10 @@
  margin-top: 0 !important;
 }
 .title-box .prog-step-container {
-  height: 80px !important;
-  padding: 10px !important;
-  border-radius: 16px;
   overflow: hidden;
-  margin-bottom: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.3s ease-in-out;
-  -webkit-transition: background-color 0.3s ease-in-out;
-  -moz-transition: background-color 0.3s ease-in-out;
-  -ms-transition: background-color 0.3s ease-in-out;
-  -o-transition: background-color 0.3s ease-in-out;
-  -webkit-border-radius: 16px;
-  -moz-border-radius: 16px;
-  -ms-border-radius: 16px;
-  -o-border-radius: 16px;
 }
 
 .title-box .prog-step-container .prog-bar-inner{

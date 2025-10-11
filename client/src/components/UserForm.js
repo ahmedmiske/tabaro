@@ -1,9 +1,9 @@
 // src/components/UserForm.jsx
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import { Form, Button, Toast, Alert } from 'react-bootstrap';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
-import ProgressStep from './ProgressStep';
 import { FaArrowRight, FaArrowLeft, FaCheck } from 'react-icons/fa';
 import './UserForm.css';
 
@@ -11,7 +11,15 @@ const ALLOWED_IMAGE_TYPES = ['image/jpeg','image/jpg','image/png','image/webp','
 const MAX_IMAGE_MB = 5;
 const isAllowedImage = (f) => f && ALLOWED_IMAGE_TYPES.includes(f.type) && f.size <= MAX_IMAGE_MB*1024*1024;
 
-function UserForm() {
+function UserForm({ 
+  addUser, 
+  isLoading, 
+  className, 
+  currentStep = 1, 
+  onStepChange, 
+  onNextStep, 
+  onPreviousStep 
+}) {
   const [user, setUser] = useState({
     firstName: '', lastName: '',
     phoneNumber: '',
@@ -27,7 +35,8 @@ function UserForm() {
   });
   const [profileImage, setProfileImage] = useState(null);
 
-  const [step, setStep] = useState(1);
+  // استخدام الخطوة من المعامل بدلاً من الحالة الداخلية
+  const step = currentStep;
   const [error, setError] = useState('');
   const [verificationCode, setVerificationCode] = useState('');
   const [sentCode, setSentCode] = useState(false);
@@ -81,7 +90,8 @@ function UserForm() {
       });
       setShowToast(true);
       setTimeout(() => setShowToast(false), 3000);
-      setStep((s) => s + 1);
+      // استخدام onNextStep بدلاً من setStep
+      if (onNextStep) onNextStep();
       setError('');
     } catch {
       setError('فشل التحقق، حاول لاحقًا');
@@ -103,6 +113,16 @@ function UserForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // إذا تم تمرير addUser كمعامل، استخدمه
+    if (addUser) {
+      const userData = { ...user };
+      if (profileImage) userData.profileImage = profileImage;
+      await addUser(userData);
+      return;
+    }
+
+    // وإلا، استخدم السلوك الافتراضي
     const fd = new FormData();
     Object.entries(user).forEach(([k, v]) => fd.append(k, v ?? ''));
     if (profileImage) fd.append('profileImage', profileImage);
@@ -122,8 +142,6 @@ function UserForm() {
 
   return (
     <>
-      <ProgressStep step={step} total={5} />
-
       {showValidationAlert && (
         <Alert variant="danger" className="text-center">⚠️ يرجى ملء جميع الحقول المطلوبة بشكل صحيح قبل المتابعة.</Alert>
       )}
@@ -136,10 +154,9 @@ function UserForm() {
           <Button className="go-login-button" onClick={() => navigate('/login')}>الانتقال إلى صفحة تسجيل الدخول</Button>
         </div>
       ) : (
-        <Form onSubmit={handleSubmit} className="user-form">
+        <Form onSubmit={handleSubmit} className={`user-form ${className || ''}`}>
           {step === 1 && (
             <div className="info-section">
-              <h4>اختيار نوع الحساب</h4>
               <Form.Group>
                 <Form.Label>نوع الحساب</Form.Label>
                 <Form.Select name="userType" value={user.userType} onChange={handleChange} required>
@@ -153,7 +170,6 @@ function UserForm() {
 
           {step === 2 && (
             <div className="info-section">
-              <h4>التحقق من رقم الهاتف</h4>
               <Form.Group>
                 <Form.Label>رقم الهاتف</Form.Label>
                 <Form.Control type="text" name="phoneNumber" value={user.phoneNumber} onChange={handleChange} required />
@@ -177,7 +193,6 @@ function UserForm() {
             <div className="info-section">
               {user.userType === 'individual' ? (
                 <>
-                  <h4>المعلومات الشخصية</h4>
                   <Form.Group><Form.Label>الاسم الشخصي</Form.Label><Form.Control name="firstName" value={user.firstName} onChange={handleChange} required /></Form.Group>
                   <Form.Group><Form.Label>الاسم العائلي</Form.Label><Form.Control name="lastName" value={user.lastName} onChange={handleChange} required /></Form.Group>
                   <Form.Group><Form.Label>البريد الإلكتروني (اختياري)</Form.Label><Form.Control name="email" value={user.email} onChange={handleChange} /></Form.Group>
@@ -190,7 +205,6 @@ function UserForm() {
                 </>
               ) : (
                 <>
-                  <h4>بيانات المؤسسة</h4>
                   <Form.Group><Form.Label>اسم المؤسسة</Form.Label><Form.Control name="institutionName" value={user.institutionName} onChange={handleChange} required /></Form.Group>
                   <Form.Group><Form.Label>رقم الترخيص</Form.Label><Form.Control name="institutionLicenseNumber" value={user.institutionLicenseNumber} onChange={handleChange} required /></Form.Group>
                   <Form.Group><Form.Label>عنوان المؤسسة</Form.Label><Form.Control name="institutionAddress" value={user.institutionAddress} onChange={handleChange} required /></Form.Group>
@@ -201,7 +215,6 @@ function UserForm() {
 
           {step === 4 && (
             <div className="info-section">
-              <h4>معلومات الحساب</h4>
               <Form.Group><Form.Label>اسم المستخدم</Form.Label><Form.Control name="username" value={user.username} onChange={handleChange} required /></Form.Group>
               <Form.Group><Form.Label>كلمة المرور</Form.Label><Form.Control type="password" name="password" value={user.password} onChange={handleChange} required /></Form.Group>
               <Form.Group><Form.Label>تأكيد كلمة المرور</Form.Label><Form.Control type="password" name="confirmPassword" value={user.confirmPassword} onChange={handleChange} required /></Form.Group>
@@ -209,7 +222,9 @@ function UserForm() {
             </div>
           )}
 
-          <div className="action-buttons mt-4 d-flex flex-column align-items-center gap-3">
+          <div className={`action-buttons mt-4 d-flex align-items-center gap-3 ${
+            (step > 1 && step < 5) ? 'has-both-buttons' : 'flex-column'
+          }`}>
             {step === 5 && !confirmed && (
               <>
                 <Alert variant="info" className="confirmation-alert w-100 text-center">
@@ -222,19 +237,23 @@ function UserForm() {
             )}
 
             {step === 5 && confirmed && (
-              <Button className="button-submit" type="submit">
-                <FaCheck className="ms-2" /> تسجيل
+              <Button className="button-submit" type="submit" disabled={isLoading}>
+                <FaCheck className="ms-2" /> {isLoading ? 'جاري التسجيل...' : 'تسجيل'}
               </Button>
             )}
 
             {step > 1 && step < 6 && (
-              <Button className="button-prev" onClick={() => setStep(step - 1)}>
+              <Button className="button-prev" onClick={() => onPreviousStep && onPreviousStep()}>
                 <FaArrowRight className="ms-2" /> السابق
               </Button>
             )}
 
             {step < 5 && (
-              <Button className="button-next" onClick={() => validateStep() && setStep(step + 1)}>
+              <Button 
+                className="button-next" 
+                onClick={() => validateStep() && onNextStep && onNextStep()}
+                disabled={isLoading}
+              >
                 التالي <FaArrowLeft className="me-2" />
               </Button>
             )}
@@ -249,5 +268,27 @@ function UserForm() {
     </>
   );
 }
+
+// تعريفات PropTypes
+UserForm.propTypes = {
+  addUser: PropTypes.func,
+  isLoading: PropTypes.bool,
+  className: PropTypes.string,
+  currentStep: PropTypes.number,
+  onStepChange: PropTypes.func,
+  onNextStep: PropTypes.func,
+  onPreviousStep: PropTypes.func,
+};
+
+// القيم الافتراضية
+UserForm.defaultProps = {
+  addUser: null,
+  isLoading: false,
+  className: '',
+  currentStep: 1,
+  onStepChange: null,
+  onNextStep: null,
+  onPreviousStep: null,
+};
 
 export default UserForm;
