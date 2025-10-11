@@ -978,3 +978,76 @@
 
 /* إخفاء الاسم على الشاشات الصغيرة */
 @media (max-width: 640px) { .hide-on-sm { display:none; } }
+
+/* ===== تحسين أيقونة الجرس ===== */
+.eh-icon-mini.eh-bell {
+  position: relative;
+  width: 36px; height: 36px;
+  border-radius: 999px;
+  display: inline-flex; align-items: center; justify-content: center;
+  color: rgba(255,255,255,.92);
+  border: 2px solid rgba(255,255,255,.65);
+  background:
+    radial-gradient(ellipse at center, rgba(255,255,255,.12), transparent 70%),
+    linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,0));
+  box-shadow: 0 6px 16px rgba(0,0,0,.10);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .2s ease, background-color .2s ease;
+}
+.eh-icon-mini.eh-bell:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(0,0,0,.16);
+  border-color: #fff;
+}
+.eh-icon-mini.eh-bell:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(var(--rgb-secondary), .45);
+}
+
+/* الشارة: 99+، أصغر قليلاً وثابتة */
+.eh-badge-mini {
+  position: absolute;
+  top: -6px; left: -6px;
+  min-width: 20px; height: 20px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 10px; font-weight: 800;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 2px solid rgba(0,0,0,.35);  /* تمايز على خلفية داكنة */
+}
+
+/* نبضة لطيفة خلف الشارة */
+.eh-bell-ping {
+  position: absolute;
+  top: -6px; left: -6px;
+  width: 20px; height: 20px; border-radius: 999px;
+  pointer-events: none;
+  box-shadow: 0 0 0 0 rgba(239,68,68,.55);
+  animation: eh-ping 1.3s cubic-bezier(0.22, 1, 0.36, 1) 2;
+}
+@keyframes eh-ping {
+  0%   { box-shadow: 0 0 0 0 rgba(239,68,68,.55); opacity: .9; }
+  70%  { box-shadow: 0 0 0 8px rgba(239,68,68,0); opacity: 0; }
+  100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); opacity: 0; }
+}
+
+/* اهتزاز خفيف للجرس عند وصول جديد */
+.eh-icon-mini.eh-bell.has-new svg {
+  animation: eh-bell-shake .8s ease-in-out 1;
+  transform-origin: 50% 8px;
+}
+@keyframes eh-bell-shake {
+  0%   { transform: rotate(0deg); }
+  15%  { transform: rotate(-18deg); }
+  30%  { transform: rotate(14deg); }
+  45%  { transform: rotate(-10deg); }
+  60%  { transform: rotate(6deg); }
+  75%  { transform: rotate(-3deg); }
+  100% { transform: rotate(0); }
+}
+
+/* احترام تفضيل المستخدم لتقليل الحركة */
+@media (prefers-reduced-motion: reduce) {
+  .eh-bell-ping, .eh-icon-mini.eh-bell.has-new svg { animation: none; }
+}

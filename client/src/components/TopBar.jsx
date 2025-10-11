@@ -2,11 +2,25 @@
 import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import { FiHome, FiUser, FiBell, FiSettings, FiLogOut, FiChevronDown } from 'react-icons/fi';
+import { FiHome, FiUser, FiBell, FiSettings, FiLogOut, FiChevronDown, FiPlus } from 'react-icons/fi';
 
 function TopBar({ isAuthed, displayName, avatarUrl, badgeCount, onLogout }) {
   const [accOpen, setAccOpen] = useState(false);
   const accRef = useRef(null);
+
+  // 🔔 تحريك الجرس عند زيادة العدّاد
+  const prevCountRef = useRef(badgeCount || 0);
+  const [justArrived, setJustArrived] = useState(false);
+  useEffect(() => {
+    const prev = prevCountRef.current;
+    const curr = Number(badgeCount || 0);
+    if (curr > prev) {
+      setJustArrived(true);
+      const t = setTimeout(() => setJustArrived(false), 1200);
+      return () => clearTimeout(t);
+    }
+    prevCountRef.current = curr;
+  }, [badgeCount]);
 
   useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape') setAccOpen(false); };
@@ -15,6 +29,11 @@ function TopBar({ isAuthed, displayName, avatarUrl, badgeCount, onLogout }) {
     document.addEventListener('pointerdown', onDoc);
     return () => { document.removeEventListener('keydown', onKey); document.removeEventListener('pointerdown', onDoc); };
   }, []);
+
+  // 🔢 عرض الشارة (99+)
+  const countNum = Number.isFinite(badgeCount) ? Math.max(0, badgeCount) : 0;
+  const displayCount = countNum > 99 ? '99+' : `${countNum}`;
+  const hasUnread = countNum > 0;
 
   return (
     <div className="eh-top-bar" dir="rtl">
@@ -26,18 +45,32 @@ function TopBar({ isAuthed, displayName, avatarUrl, badgeCount, onLogout }) {
 
         <div className="eh-top-right">
           {!isAuthed ? (
-            <Link to="/login" className="eh-login-btn"><FiUser /><span>تسجيل الدخول</span></Link>
+            <>
+              <Link to="/login" className="eh-login-btn"><FiUser /><span>تسجيل الدخول</span></Link>
+              <Link to="/add-user" className="eh-login-btn"><FiPlus /><span>انشاء حساب</span></Link>
+            </>
           ) : (
             <>
-              <Link to="/notifications" className="eh-icon-mini" aria-label="الإشعارات">
-                <FiBell className='not'/>
-                {badgeCount > 0 && <span className="eh-badge-mini">{badgeCount}</span>}
+              {/* 🔔 أيقونة الإشعارات المُحسّنة */}
+              <Link
+                to="/notifications"
+                className={`eh-icon-mini eh-bell ${justArrived ? 'has-new' : ''}`}
+                aria-label={hasUnread ? `لديك ${displayCount} إشعار غير مقروء` : 'لا إشعارات جديدة'}
+                title={hasUnread ? `${displayCount} إشعار غير مقروء` : 'الإشعارات'}
+              >
+                <FiBell aria-hidden="true" />
+                {hasUnread && (
+                  <>
+                    <span className="eh-badge-mini" aria-hidden="true">{displayCount}</span>
+                    <span className="eh-bell-ping" aria-hidden="true" />
+                  </>
+                )}
               </Link>
 
+              {/* حساب المستخدم */}
               <div className={`eh-acc ${accOpen ? 'open' : ''}`} ref={accRef}>
                 <button className="eh-acc-btn" onClick={() => setAccOpen(v => !v)}
                         aria-haspopup="menu" aria-expanded={accOpen} aria-label="قائمة الحساب">
-                
                   <span className="eh-avatar-mini">
                     {avatarUrl ? <img src={avatarUrl} alt={displayName} className="eh-avatar-img" /> : <FiUser />}
                   </span>

@@ -43,6 +43,7 @@ import RequireAuth from './components/RequireAuth';
 // ✅ صفحة تفاصيل التبرّع/التأكيد/العرض
 import DonationConfirmationDetails from './pages/DonationConfirmationDetails';
 import DonationRequestConfirmationDetails from './pages/DonationRequestConfirmationDetails';
+import ChatBox from './components/ChatBox.js';
 
 function App() {
   const location = useLocation();
@@ -106,7 +107,7 @@ function App() {
             <Route path="/my-request-details/:id" element={<RequireAuth><MyRequestDetails /></RequireAuth>} />
             <Route path="/donation-requests" element={<RequireAuth><DonationRequestForm /></RequireAuth>} />
             <Route path="/blood-donation" element={<RequireAuth><BloodDonationForm /></RequireAuth>} />
-            <Route path="/chat/:recipientId" element={<RequireAuth><ChatPage /></RequireAuth>} />
+            <Route path="/chat/:recipientId" element={<RequireAuth><ChatPage/></RequireAuth>} />
             <Route path="/messages" element={<RequireAuth><ChatList /></RequireAuth>} />
             <Route path="/notifications" element={<RequireAuth><NotificationsPage /></RequireAuth>} />
             <Route path="/users/:id" element={<RequireAuth><PublicProfile /></RequireAuth>} />

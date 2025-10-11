@@ -63,7 +63,7 @@
 .toolbar-filter .show > .dropdown-toggle-clean {
   background: #f8fafc !important;
   color: #111827 !important;
-  border-color: var(--color-border) !important; /* نفس السماكة — لا قفز */
+  border-color: var(--color-border) !important;
   box-shadow: 0 1px 2px rgba(0,0,0,0.06) !important;
   outline: none !important;
 }
@@ -113,7 +113,7 @@
 .notification-item {
   width: 100%;
   transition: background-color .15s ease, border-color .15s ease;
-  border-right: none; /* إزالة أي خط */
+  border-right: none;
 }
 .notification-item.compact { padding: 10px; }
 .notification-item:hover { background-color: #eef2f6; cursor: pointer; }
@@ -141,7 +141,7 @@
 .msg { color: #444; font-size: .92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .msg.line-2 {
   display: -webkit-box;
-  -webkit-line-clamp: 2; /* سطران فقط */
+  -webkit-line-clamp: 2;  /* سطران فقط */
   -webkit-box-orient: vertical;
   white-space: normal;
   overflow: hidden;
@@ -186,4 +186,88 @@ html[dir="rtl"] .page-fabs { inset-inline-end: auto; inset-inline-start: 18px; }
   .toolbar { flex-direction: column; align-items: stretch; }
   .notification-item.compact { padding: 8px; }
   .fab-btn { width: 44px; height: 44px; }
+}
+
+/* ===== وضع مضغوط ===== */
+.container-notifications.compact {
+  padding: 10px;
+  border-radius: 10px;
+  max-width: 60vw;
+  margin: 0 auto;
+  border:  1px solid var(--color-border);
+}
+
+/* الشريط العلوي */
+.container-notifications.compact .notif-header {
+  padding: 6px 8px;
+  gap: 8px;
+}
+.container-notifications.compact .notif-header h3 {
+  font-size: 1.05rem;
+}
+
+/* أزرار وشيبس أصغر */
+.container-notifications.compact .btn-soft {
+  padding: 6px 10px;
+  font-size: .9rem;
+  border-radius: 10px;
+}
+.container-notifications.compact .dropdown-toggle-clean {
+  padding: 6px 10px !important;
+  font-size: .9rem;
+  border-radius: 10px !important;
+}
+.container-notifications.compact .badge,
+.container-notifications.compact .chip-type,
+.container-notifications.compact .chip-cat {
+  font-size: .72rem;
+  padding: 2px 7px;
+}
+
+/* العناوين والمسافات */
+.container-notifications.compact .section-heading {
+  margin: 6px 0;
+  font-size: .95rem;
+}
+
+/* عناصر القائمة */
+.container-notifications.compact .notification-item.compact {
+  padding: 8px;
+}
+.container-notifications.compact .title {
+  font-size: .92rem;
+}
+.container-notifications.compact .msg {
+  font-size: .88rem;
+}
+.container-notifications.compact .date {
+  font-size: .78rem;
+}
+
+/* الصور الرمزية أصغر */
+.container-notifications.compact .thread-item img {
+  width: 34px; height: 34px;
+}
+.container-notifications.compact .notification-item img {
+  width: 30px; height: 30px;
+}
+
+/* زر التفاصيل أصغر */
+.container-notifications.compact .btn-details {
+  padding: 3px 8px;
+  font-size: .8rem;
+  border-radius: 8px;
+}
+
+/* أزرار الصعود/الهبوط أصغر قليلاً */
+.container-notifications.compact .fab-btn {
+  width: 42px; height: 42px; font-size: 16px;
+}
+
+/* استجابة للموبايل: مزيد من الدمج */
+@media (max-width: 576px) {
+  .container-notifications.compact .notification-item.compact { padding: 7px; }
+  .container-notifications.compact .title { font-size: .9rem; }
+  .container-notifications.compact .msg { font-size: .86rem; }
+  .container-notifications.compact .date { font-size: .76rem; }
 }

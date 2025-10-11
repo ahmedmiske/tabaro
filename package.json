@@ -4,13 +4,11 @@
   "description": "",
   "main": "index.js",
   "private": true,
- "scripts": {
+  "scripts": {
     "start": "node server/server.js",
     "dev": "nodemon server/server.js",
-
     "lint:server": "eslint server --ext .js,.mjs,.cjs",
     "lint:server:fix": "eslint server --ext .js,.mjs,.cjs --fix",
-
     "format:server": "prettier -w server"
   },
   "keywords": [],
@@ -20,6 +18,7 @@
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
+    "dayjs": "^1.11.18",
     "dotenv": "^16.4.7",
     "express": "^4.19.2",
     "firebase": "^10.12.5",
@@ -32,6 +31,7 @@
     "react-icons": "^5.5.0",
     "react-toastify": "^11.0.5",
     "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "twilio": "^5.2.2"

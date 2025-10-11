@@ -31,7 +31,11 @@ const ChatPage = () => {
       </h4>
 
       {conversationId ? (
-        <ChatBox conversationId={conversationId} recipientId={recipientId} />
+       <ChatBox
+  conversationId={conversationId}
+  recipientId={recipientId}
+  recipient={{ firstName: '...', profileImage: '...' }} // إذا توفر لديك
+/>
       ) : (
         <div className="alert alert-warning text-center">لا يمكن فتح المحادثة: معرفات ناقصة.</div>
       )}

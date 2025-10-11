@@ -14,5 +14,6 @@
     "no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
     "import/order": ["warn", { "alphabetize": { "order": "asc", "caseInsensitive": true }, "newlines-between": "always" }]
   },
+  
   "settings": { "react": { "version": "detect" } }
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import { ListGroup, Dropdown, Button, Image, Badge, Spinner } from 'react-bootstrap';
 import './NotificationsPage.css';
@@ -16,6 +16,7 @@ const DONATION_CONFIRM_ROUTE         = process.env.REACT_APP_DONATION_CONFIRMATI
 const DONATION_ENTITY_ROUTE          = process.env.REACT_APP_DONATION_ENTITY_ROUTE            || '/donation-details';
 const DONATION_REQUEST_CONFIRM_ROUTE = process.env.REACT_APP_DONATION_REQUEST_CONFIRM_ROUTE   || '/donation-request-confirmations';
 
+/* ====== Utils ====== */
 const resolveAvatar = (p) => {
   if (!p) return '/default-avatar.png';
   if (/^https?:\/\//i.test(p)) return p;
@@ -78,7 +79,6 @@ const categoryLabelAr = (n) => {
 const extractIds = (n) => {
   const m = n?.meta || {};
 
-  // معرّف "الطلب"
   const requestId =
     m.requestId ||
     m.donationRequestId ||
@@ -87,22 +87,19 @@ const extractIds = (n) => {
     n?.request?._id ||
     null;
 
-  // معرّف "التبرع ككيان" (تفاصيل التبرع العام)
   const donationEntityId =
     m.donationId ||
     m.donation?._id ||
     null;
 
-  // معرّف "تأكيد/عرض التبرع"
   const confirmationId =
     m.confirmationId ||
     m.donationConfirmationId ||
     m.offerId ||
-    n?.referenceId ||   // 🟢 مهم جداً مع إشعارات fulfilled/rated
+    n?.referenceId ||
     m.id ||
     null;
 
-  // معرّف "تأكيد طلب التبرع"
   const requestConfId =
     m.requestConfirmationId ||
     m.donationRequestConfirmationId ||
@@ -140,33 +137,31 @@ const isDonationRequestConfirmation = (n) => {
 /* 🧭 تحديد الوجهة */
 const buildNavigateTarget = (n) => {
   const { requestId, donationEntityId, confirmationId, requestConfId } = extractIds(n);
-  const t = (n?.type || n?.meta?.type || '').toLowerCase();
 
-  // 1) إشعار حول "طلب"
   if (requestId) {
     const base = isBloodStrict(n) ? BLOOD_REQUEST_ROUTE : GENERAL_REQUEST_ROUTE;
     return `${base}/${requestId}`;
   }
 
-  // 2) إشعار حول "تأكيد طلب تبرع" — استخدم requestConfId أو referenceId
   if (isDonationRequestConfirmation(n) && (requestConfId || confirmationId)) {
     const id = requestConfId || confirmationId;
     return `${DONATION_REQUEST_CONFIRM_ROUTE}/${id}`;
   }
 
-  // 3) إشعار حول "تأكيد/عرض/تنفيذ/تقييم التبرع"
   if (isDonationConfirmation(n) && confirmationId) {
     return `${DONATION_CONFIRM_ROUTE}/${confirmationId}`;
   }
 
-  // 4) إشعار حول "كيان تبرع عام"
   if (donationEntityId) {
     return `${DONATION_ENTITY_ROUTE}/${donationEntityId}`;
   }
 
-  // لا يوجد ما نفتح له تفاصيل
   return null;
 };
+
+/* ====== مفاتيح الكاش ====== */
+const CACHE_KEY = 'notif:list';
+const CACHE_TTL_MS = 20 * 1000; // 20 ثانية
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState([]);
@@ -186,25 +181,85 @@ export default function NotificationsPage() {
     setSearchParams(next, { replace: true });
   }, [searchParams, setSearchParams]);
 
-  const fetchNotifications = useCallback(async () => {
+  /* ====== جلب مع كاش + Revalidate ====== */
+  const aborter = useRef(null);
+  const lastFetchAtRef = useRef(0);
+
+  const readCache = () => {
     try {
-      setLoading(true);
-      const res = await fetchWithInterceptors('/api/notifications');
-      if (res.ok) setNotifications(res.body?.data || res.body || []);
+      const raw = sessionStorage.getItem(CACHE_KEY);
+      if (!raw) return null;
+      const { at, items } = JSON.parse(raw);
+      if (!Array.isArray(items)) return null;
+      if (Date.now() - at > CACHE_TTL_MS) return null;
+      return items;
+    } catch { return null; }
+  };
+
+  const writeCache = (items) => {
+    try {
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), items }));
+    } catch {}
+  };
+
+  const fetchNotifications = useCallback(async (opts = { force: false }) => {
+    // منع الجلب المتكرر جدًا
+    const now = Date.now();
+    if (!opts.force && now - lastFetchAtRef.current < 1500) return;
+    lastFetchAtRef.current = now;
+
+    // ألغِ الطلب السابق لو موجود
+    if (aborter.current) aborter.current.abort();
+    aborter.current = new AbortController();
+
+    setLoading(true);
+    try {
+      const res = await fetchWithInterceptors('/api/notifications', { signal: aborter.current.signal });
+      if (res.ok) {
+        const list = res.body?.data || res.body || [];
+        setNotifications(list);
+        writeCache(list);
+      }
     } finally {
       setLoading(false);
     }
   }, []);
 
-  const markAsRead = async (id) => {
-    try { await fetchWithInterceptors(`/api/notifications/${id}/read`, { method: 'PATCH' }); } catch {}
-  };
-
+  // عرض كاش سريع ثم إعادة التحقق
   useEffect(() => {
-    fetchNotifications();
-    const t = setInterval(fetchNotifications, 30000);
-    return () => clearInterval(t);
+    const cached = readCache();
+    if (cached) {
+      setNotifications(cached);
+      setLoading(false);
+      fetchNotifications({ force: true }); // revalidate
+    } else {
+      fetchNotifications({ force: true });
+    }
+    // تنظيف عند التفكيك
+    return () => aborter.current && aborter.current.abort();
   }, [fetchNotifications]);
+
+  /* تحديث تلقائي عند الدخول/العودة للصفحة */
+  useEffect(() => {
+    const onFocus = () => fetchNotifications({ force: true });
+    const onVisible = () => { if (document.visibilityState === 'visible') fetchNotifications({ force: true }); };
+    const onPageShow = () => fetchNotifications({ force: true }); // يشمل الرجوع من bfcache
+
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('pageshow', onPageShow);
+
+    return () => {
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('pageshow', onPageShow);
+    };
+  }, [fetchNotifications]);
+
+  // أيضًا لو تغيّر مفتاح الموقع (دخول لنفس المسار من رابط داخلي)
+  useEffect(() => {
+    fetchNotifications({ force: true });
+  }, [location.key, fetchNotifications]);
 
   /* ===== تجميع رسائل المحادثات كـ Threads ===== */
   const { messageThreads, others } = useMemo(() => {
@@ -254,17 +309,22 @@ export default function NotificationsPage() {
     return { mode: 'all', threads: messageThreads, items: others };
   }, [filter, messageThreads, others]);
 
+  /* API: تمييز كمقروء */
+  const markAsRead = async (id) => {
+    try { await fetchWithInterceptors(`/api/notifications/${id}/read`, { method: 'PATCH' }); } catch {}
+  };
+
   /* فتح محادثة */
   const openChat = async (thread) => {
     if (!thread?.senderId || thread.senderId === 'unknown') return;
     await Promise.all(thread.ids.map(id => markAsRead(id)));
     navigate(`/chat/${thread.senderId}`, { state: { from: location.pathname + location.search } });
-    fetchNotifications();
+    fetchNotifications({ force: true });
   };
 
   /* فتح تفاصيل (طلب/تبرع/تأكيد) */
   const openDetails = async (n) => {
-    if (!n.read) { await markAsRead(n._id); fetchNotifications(); }
+    if (!n.read) { await markAsRead(n._id); fetchNotifications({ force: true }); }
     const route = buildNavigateTarget(n);
     if (route) navigate(route, { state: { from: location.pathname + location.search } });
   };
@@ -273,7 +333,7 @@ export default function NotificationsPage() {
   const scrollToBottom = () => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 
   return (
-    <div className="container-notifications">
+    <div className="container-notifications compact">
       <div className="notif-header sticky">
         <h3 className="m-0 fw-bold text-secondary">🔔 جميع الإشعارات</h3>
 
@@ -309,8 +369,8 @@ export default function NotificationsPage() {
 
           {/* زر تحديث */}
           <div className="toolbar-actions">
-            <Button className="btn-soft" onClick={fetchNotifications}>
-              <span className="icon">🔄</span> تحديث
+            <Button className="btn-soft" onClick={() => fetchNotifications({ force: true })} disabled={loading}>
+              <span className="icon">🔄</span> {loading ? 'جارٍ التحديث…' : 'تحديث'}
             </Button>
           </div>
         </div>
