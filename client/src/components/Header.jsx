@@ -316,9 +316,9 @@ const avatarUrl = useMemo(() => {
           aria-labelledby={bloodId}
         >
           <div className="eh-mega-grid">
-            <Link to="/blood-donation" className="eh-mega-card" onClick={() => setOpen(null)}>
+            <Link to="/ready-blood" className="eh-mega-card" onClick={() => setOpen(null)}>
               <div className="eh-mega-icon"><FiDroplet /></div>
-              <div className="eh-mega-content"><h4>زر التبرع بالدم</h4><p>سجّل رغبتك بالتبرع الآن</p></div>
+              <div className="eh-mega-content"><h4>اعلان تبرع </h4><p>سجّل رغبتك بالتبرع الآن</p></div>
             </Link>
             <Link to="/blood-donation" className="eh-mega-card" onClick={() => setOpen(null)}>
               <div className="eh-mega-icon"><FiList /></div>
@@ -329,7 +329,7 @@ const avatarUrl = useMemo(() => {
               <div className="eh-mega-content"><h4>قائمة الطلبات</h4><p>تصفّح وفلترة</p></div>
             </Link>
             <Link to="/donors/blood" className="eh-mega-card" onClick={() => setOpen(null)}>
-              <div className="eh-mega-icon"><FiUsers /></div>
+              <div className="eh-mega-icon"><FiUsers /></div>بالدم
               <div className="eh-mega-content"><h4>المتبرعون</h4><p>المتبرعون المسجّلون</p></div>
             </Link>
           </div>
