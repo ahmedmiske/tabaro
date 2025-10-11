@@ -2,31 +2,27 @@
   max-width: 100%;
   width: 100%;
   margin: auto;
-  padding: 40px;
+  padding: 15px 25px; /* تقليل padding */
   background: rgba(255, 255, 255, 0.95);
-  border-radius: 20px;
+  border-radius: 16px;
   box-shadow: 
-    0 20px 40px rgba(255, 122, 69, 0.1),
-    0 8px 25px rgba(0, 0, 0, 0.05);
+    0 15px 30px rgba(255, 122, 69, 0.1),
+    0 6px 20px rgba(0, 0, 0, 0.05);
   text-align: right;
   position: relative;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 122, 69, 0.1);
-}
-
-.user-form::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #FF7A45 0%, #FF9A6C 50%, #E05A2E 100%);
-  border-radius: 20px 20px 0 0;
+  height: auto;
+  min-height: fit-content;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* توزيع المساحة بين المحتوى والأزرار */
 }
 
 .info-section {
-  margin-bottom: 20px;
+  margin-bottom: 10px; /* تقليل المسافة أكثر */
+  flex: 1; /* ليأخذ المساحة المتاحة */
+  overflow-y: visible; /* السماح بالعرض الكامل للحقول */
 }
 
 .user-form h4 {
@@ -34,19 +30,19 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 25px;
+  margin-bottom: 18px; /* تقليل المسافة */
   font-weight: 800;
-  font-size: 1.5rem;
+  font-size: 1.3rem; /* تقليل حجم الخط */
   text-align: center;
 }
 
 .user-form .form-control {
-  margin-bottom: 20px;
+  margin-bottom: 14px; /* تقليل المسافة بين الحقول */
   text-align: right;
   border: 2px solid #E5E7EB;
-  border-radius: 12px;
-  padding: 12px 16px;
-  font-size: 1rem;
+  border-radius: 10px; /* تقليل border radius */
+  padding: 10px 14px; /* تقليل padding */
+  font-size: 0.95rem; /* تقليل حجم الخط قليلاً */
   transition: all 0.3s ease;
   background: rgba(255, 255, 255, 0.9);
 }
@@ -61,51 +57,185 @@
 
 
 .action-buttons {
-  display: flex;
+  display: flex !important;
   flex-direction: row; /* دائماً في نفس السطر */
-  gap: 20px;
+  gap: 15px; /* تقليل المسافة بين الأزرار */
   justify-content: center;
   align-items: center;
-  margin-top: 30px;
+  margin-top: 20px; /* تقليل المسافة العلوية */
+  margin-bottom: 10px; /* مسافة سفلية */
   flex-wrap: nowrap; /* منع التفاف الأزرار لسطر جديد */
+  position: sticky; /* لضمان بقاء الأزرار مرئية */
+  bottom: 0;
+  background: white;
+  padding: 10px 0;
+  z-index: 10;
 }
 
 .action-buttons button {
-  padding: 12px 24px;
-  border-radius: 25px;
+  padding: 8px 16px; /* حجم أصغر */
+  border-radius: 18px;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.9rem; /* خط أصغر */
   transition: all 0.3s ease;
   border: none;
   cursor: pointer;
-  min-width: 120px; /* عرض أدنى متساوي */
+  min-width: 100px; /* عرض أصغر */
   text-align: center;
-  white-space: nowrap; /* منع كسر النص */
+  white-space: nowrap;
 }
 
+/* زر السابق - يحتفظ باللون الحالي (البرتقالي) */
 .button-prev {
-  background: transparent;
-  color: #FF7A45;
-  border: 2px solid #FF7A45;
+  background: transparent !important;
+  color: #FF7A45 !important;
+  border: 2px solid #FF7A45 !important;
 }
 
 .button-prev:hover {
-  background: #FF7A45;
-  color: white;
+  background: #FF7A45 !important;
+  color: white !important;
+  border-color: #FF7A45 !important;
   transform: translateY(-2px);
 }
 
-.button-next,
+/* زر التالي - باللون الأخضر الجديد */
+.button-next {
+  background: linear-gradient(135deg, #00A443 0%, #4CAF50 50%, #2E7D32 100%) !important;
+  color: white !important;
+  border: 2px solid transparent !important;
+  box-shadow: 0 4px 15px rgba(0, 164, 67, 0.3) !important;
+}
+
+.button-next:hover {
+  background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 50%, #388E3C 100%) !important;
+  color: white !important;
+  border-color: transparent !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 164, 67, 0.4) !important;
+}
+
+/* زر الإرسال - يحتفظ باللون البرتقالي */
 .button-submit {
-  background: linear-gradient(135deg, #FF7A45 0%, #FF9A6C 50%, #E05A2E 100%);
-  color: white;
-  box-shadow: 0 4px 15px rgba(255, 122, 69, 0.3);
+  background: linear-gradient(135deg, #FF7A45 0%, #FF9A6C 50%, #E05A2E 100%) !important;
+  color: white !important;
+  border: 2px solid transparent !important;
+  box-shadow: 0 4px 15px rgba(255, 122, 69, 0.3) !important;
 }
 
-.button-next:hover,
 .button-submit:hover {
+  background: linear-gradient(135deg, #FF7A45 0%, #FF9A6C 50%, #E05A2E 100%) !important;
+  color: white !important;
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(255, 122, 69, 0.4);
+  box-shadow: 0 8px 25px rgba(255, 122, 69, 0.4) !important;
+}
+
+/* حالات الأزرار المعطلة */
+.button-next:disabled {
+  background: #E0E0E0 !important;
+  color: #9E9E9E !important;
+  border-color: #E0E0E0 !important;
+  box-shadow: none !important;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.button-prev:disabled {
+  background: transparent !important;
+  color: #BDBDBD !important;
+  border-color: #E0E0E0 !important;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.button-submit:disabled {
+  background: #E0E0E0 !important;
+  color: #9E9E9E !important;
+  border-color: #E0E0E0 !important;
+  box-shadow: none !important;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* تأكيد أنماط React Bootstrap Button */
+.btn.button-prev,
+.btn-secondary.button-prev {
+  background: transparent !important;
+  color: #FF7A45 !important;
+  border: 2px solid #FF7A45 !important;
+}
+
+.btn.button-prev:hover,
+.btn-secondary.button-prev:hover {
+  background: #FF7A45 !important;
+  color: white !important;
+  border-color: #FF7A45 !important;
+}
+
+.btn.button-next,
+.btn-primary.button-next {
+  background: linear-gradient(135deg, #00A443 0%, #4CAF50 50%, #2E7D32 100%) !important;
+  color: white !important;
+  border: 2px solid transparent !important;
+}
+
+.btn.button-next:hover,
+.btn-primary.button-next:hover {
+  background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 50%, #388E3C 100%) !important;
+  color: white !important;
+  border-color: transparent !important;
+}
+
+.btn.button-submit,
+.btn-primary.button-submit {
+  background: linear-gradient(135deg, #FF7A45 0%, #FF9A6C 50%, #E05A2E 100%) !important;
+  color: white !important;
+  border: 2px solid transparent !important;
+}
+
+/* تخطيط خاص عندما يظهر كلا الزرين - الشاشات الكبيرة */
+.action-buttons.has-both-buttons {
+  flex-direction: row;
+  justify-content: center;
+  gap: 1rem; /* مسافة بين الزرين */
+  align-items: center;
+}
+
+.action-buttons.has-both-buttons .button-prev {
+  margin: 0;
+  order: 1; /* زر السابق على اليسار */
+}
+
+.action-buttons.has-both-buttons .button-next {
+  margin: 0;
+  order: 2; /* زر التالي على اليمين */
+}
+
+/* تحسينات للموبايل - زر التالي فوق زر السابق */
+@media (max-width: 768px) {
+  .action-buttons {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .action-buttons button {
+    min-width: 90%;
+    padding: 10px 20px; /* حجم أكبر قليلاً للموبايل */
+  }
+  
+  .action-buttons.has-both-buttons {
+    flex-direction: column;
+  }
+  
+  .action-buttons.has-both-buttons .button-next {
+    order: 1; /* زر التالي في الأعلى */
+    margin: 0;
+  }
+  
+  .action-buttons.has-both-buttons .button-prev {
+    order: 2; /* زر السابق في الأسفل */
+    margin: 0;
+  }
 }
 
 /* تحسينات إضافية */
@@ -195,4 +325,49 @@
 
 .go-login-button:hover {
   background-color: var(--color-secondary);
+}
+
+/* تحسينات إضافية للمساحة */
+.form-group {
+  margin-bottom: 8px !important; /* تقليل أكثر */
+}
+
+.form-label {
+  font-size: 0.85rem !important; /* خط أصغر */
+  margin-bottom: 4px !important; /* مسافة أقل */
+}
+
+/* تحسين Bootstrap Form.Group */
+.user-form .form-group {
+  margin-bottom: 8px !important;
+}
+
+.user-form .form-group .form-label {
+  margin-bottom: 4px !important;
+  font-size: 0.85rem !important;
+}
+
+/* ضمان التوافق مع أحجام الشاشات المختلفة */
+@media (max-height: 700px) {
+  .user-form {
+    padding: 0 20px;
+  }
+  
+  .info-section {
+    margin-bottom: 10px;
+  }
+  
+  .user-form h4 {
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+  }
+  
+  .user-form .form-control {
+    margin-bottom: 10px;
+    padding: 8px 12px;
+  }
+  
+  .action-buttons {
+    margin-top: 15px;
+  }
 }

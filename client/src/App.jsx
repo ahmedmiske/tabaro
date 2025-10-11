@@ -36,6 +36,8 @@ import PublicProfile from './pages/PublicProfile';
 import OrangeButtonsShowcase from './components/OrangeButtonsShowcase';
 import ButtonsDemo from './components/ButtonsDemo';
 import NotFound from './pages/NotFound';
+import BloodDonors from './pages/BloodDonors';
+import GeneralDonors from './pages/GeneralDonors';
 
 // ✅ الحارس
 import RequireAuth from './components/RequireAuth';
@@ -110,6 +112,10 @@ function App() {
             <Route path="/messages" element={<RequireAuth><ChatList /></RequireAuth>} />
             <Route path="/notifications" element={<RequireAuth><NotificationsPage /></RequireAuth>} />
             <Route path="/users/:id" element={<RequireAuth><PublicProfile /></RequireAuth>} />
+            
+            {/* صفحات المتبرعين - محمية للمستخدمين المسجلين فقط */}
+            <Route path="/donors/blood" element={<BloodDonors />} />
+            <Route path="/donors/general" element={<GeneralDonors />} />
 
             {/* تفاصيل التأكيد */}
             <Route path="/donation-confirmations/:id" element={<RequireAuth><DonationConfirmationDetails /></RequireAuth>} />
