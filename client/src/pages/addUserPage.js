@@ -4,6 +4,26 @@ import TitleMain from '../components/TitleMain';
 import userAddImage from '../images/useradd.png';
 import './addUserPage.css';
 
+// 🛠️ معالج خطأ ResizeObserver لتحسين الأداء
+const handleResizeObserverError = (e) => {
+  if (e.message && e.message.includes('ResizeObserver loop completed with undelivered notifications')) {
+    // منع ظهور الخطأ في وحدة التحكم
+    e.preventDefault();
+    return true;
+  }
+  return false;
+};
+
+// إضافة معالج الخطأ العام
+if (typeof window !== 'undefined') {
+  window.addEventListener('error', handleResizeObserverError);
+  window.addEventListener('unhandledrejection', (event) => {
+    if (handleResizeObserverError(event.reason)) {
+      event.preventDefault();
+    }
+  });
+}
+
 /**
  * 🎨 صفحة التسجيل المتطورة - تجربة مستخدم استثنائية
  * 
@@ -22,6 +42,16 @@ function AddUserPage() {
   
   // 📊 إعدادات الخطوات المتعددة
   const totalSteps = 5;
+
+  // 🛠️ معالج تنظيف الأخطاء عند إلغاء تركيب المكون
+  useEffect(() => {
+    return () => {
+      // تنظيف معالج الأخطاء عند إلغاء تركيب المكون
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('error', handleResizeObserverError);
+      }
+    };
+  }, []);
 
   // ✨ تأثيرات بصرية عند تحميل الصفحة
   useEffect(() => {
@@ -64,25 +94,26 @@ function AddUserPage() {
     }
   }), []);
 
-  // 📈 دوال التنقل بين الخطوات
+  // 📈 دوال التنقل بين الخطوات - محسنة للأداء
   const nextStep = useCallback(() => {
     if (currentStep < totalSteps) {
       setCurrentStep(prev => prev + 1);
-      setAnimationClass('step-forward');
+      // تقليل التأثيرات البصرية لتحسين الأداء
+      setTimeout(() => setAnimationClass('step-forward'), 0);
     }
   }, [currentStep, totalSteps]);
 
   const previousStep = useCallback(() => {
     if (currentStep > 1) {
       setCurrentStep(prev => prev - 1);
-      setAnimationClass('step-backward');
+      setTimeout(() => setAnimationClass('step-backward'), 0);
     }
   }, [currentStep]);
 
   const goToStep = useCallback((step) => {
     if (step >= 1 && step <= totalSteps) {
       setCurrentStep(step);
-      setAnimationClass('step-jump');
+      setTimeout(() => setAnimationClass('step-jump'), 0);
     }
   }, [totalSteps]);
 
@@ -146,21 +177,17 @@ function AddUserPage() {
   }, []);
 
   /**
-   * 🔄 معالج إعادة تعيين النموذج الأنيق
+   * 🔄 معالج إعادة تعيين النموذج الأنيق - محسن للأداء
    */
   const handleResetForm = useCallback(() => {
-    setAnimationClass('reset-transition');
-    
-    setTimeout(() => {
+    // تبسيط التأثيرات لتحسين الأداء
+    requestAnimationFrame(() => {
       setFormSubmitted(false);
       setSuccessMessage('');
       setErrorMessage('');
       setIsLoading(false);
-      setAnimationClass('fresh-start');
-      
-      // عودة للحالة العادية بعد التأثير
-      setTimeout(() => setAnimationClass(''), 300);
-    }, 200);
+      setAnimationClass('');
+    });
   }, []);
 
   /**
