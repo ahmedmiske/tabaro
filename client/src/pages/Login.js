@@ -51,7 +51,9 @@ function Login() {
 
   return (
     <div className='login-page'>
-      <div className="login-img"><img src={loginImg} alt="Login" /></div>
+      <div className="login-img">
+        <img src={loginImg} alt="صورة تسجيل الدخول - منصة PNDD" />
+      </div>
       <div className="login-container">
         <h2>تسجيل الدخول</h2>
         <Form onSubmit={handleSubmit} className='form-login'>
@@ -91,9 +93,19 @@ function Login() {
             {loading ? (<><Spinner animation="border" size="sm" className="ms-2" /> جاري الدخول...</>) : ('تسجيل الدخول')}
           </Button>
 
-          <div className="signup-link d-flex justify-content-between w-100 mt-3">
-            <Link to="/reset-password" className="text-decoration-none text-danger">هل نسيت كلمة السر؟</Link>
-            <Link to="/add-user" className="form-secondary-btn">إنشاء حساب جديد</Link>
+          <div className="signup-link d-flex justify-content-between align-items-center w-100 mt-3">
+            <Link 
+              to="/reset-password" 
+              className="text-decoration-none text-danger fw-bold forgot-password-link"
+            >
+              هل نسيت كلمة السر؟
+            </Link>
+            <Link 
+              to="/add-user" 
+              className="form-secondary-btn"
+            >
+              إنشاء حساب جديد
+            </Link>
           </div>
         </Form>
       </div>

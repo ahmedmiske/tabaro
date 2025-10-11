@@ -2,20 +2,22 @@
 
 .login-page {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: center;
-  min-width: 70vw;
-  min-height: 80vh;
+  justify-content: center;
+  min-width: 100%;
+  min-height: 85vh;
   margin-top: 40px;
   margin-bottom: 60px;
-  gap: 20px;
-  padding: 10px 40px;
-
+  gap: 30px;
+  padding: 20px 40px;
+  box-sizing: border-box;
 }
 
 
 .login-img {
-  flex: 1 1 50%;
+  flex: 1 1 45%;
+  min-width: 300px;
   padding: 0px;
   display: flex;
   justify-content: center;
@@ -35,14 +37,17 @@
 
 .login-container {
   flex: 1 1 400px;
+  min-width: 350px;
   background-color: #fff;
-  margin-right: 40px;
-  border:none;
+  margin-right: 20px;
+  border: none;
   padding: 30px;
   border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
   text-align: right;
   max-width: 500px;
+  width: 100%;
+  box-sizing: border-box;
   -webkit-border-radius: 12px;
   -moz-border-radius: 12px;
   -ms-border-radius: 12px;
@@ -71,16 +76,26 @@
 }
 
 .form-login input {
-  padding: 10px;
+  padding: 12px 15px;
   font-size: 15px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
   background-color: #f9f9f9;
   text-align: right;
-  -webkit-border-radius: 6px;
-  -moz-border-radius: 6px;
-  -ms-border-radius: 6px;
-  -o-border-radius: 6px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  -ms-border-radius: 8px;
+  -o-border-radius: 8px;
+}
+
+.form-login input:focus {
+  outline: none;
+  border-color: #FF7A45;
+  box-shadow: 0 0 0 3px rgba(255, 122, 69, 0.1);
+  background-color: #fff;
 }
 
 .form-login button[type="submit"] {
@@ -181,13 +196,189 @@
   text-decoration: none !important;
 }
 
-@media (max-width: 768px) {
-  .login-img {
-    display: none;
+/* رابط نسيان كلمة السر المحسن */
+.forgot-password-link {
+  padding: 8px 12px !important;
+  border-radius: 6px !important;
+  transition: all 0.3s ease !important;
+  font-size: 14px !important;
+}
+
+.forgot-password-link:hover {
+  background-color: rgba(220, 53, 69, 0.1) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* 📱 تصميم متجاوب محسن للأجهزة المختلفة */
+
+/* الأجهزة اللوحية الكبيرة والشاشات الصغيرة */
+@media (max-width: 992px) {
+  .login-page {
+    flex-direction: column;
+    min-height: 90vh;
+    padding: 20px;
+    margin-top: 20px;
+    gap: 30px;
   }
-  .login-container {
-    max-width: 90%;
+  
+  .login-img {
+    flex: 0 0 300px;
     width: 100%;
-    margin: 0 auto 40px auto;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .login-container {
+    flex: 1;
+    margin-right: 0;
+    margin: 0 auto;
+    max-width: 500px;
+    width: 100%;
+  }
+}
+
+/* الأجهزة اللوحية المتوسطة */
+@media (max-width: 768px) {
+  .login-page {
+    min-height: 85vh;
+    padding: 15px;
+    gap: 25px;
+  }
+  
+  .login-img {
+    flex: 0 0 250px;
+    max-width: 400px;
+  }
+  
+  .login-container {
+    padding: 25px;
+    margin: 0 auto;
+    max-width: 450px;
+  }
+  
+  .login-container h2 {
+    font-size: 22px;
+    margin-bottom: 25px;
+  }
+  
+  .form-login {
+    gap: 18px;
+  }
+}
+
+/* الهواتف الذكية الكبيرة */
+@media (max-width: 576px) {
+  .login-page {
+    min-height: 100vh;
+    padding: 10px;
+    margin-top: 0;
+    gap: 20px;
+    justify-content: center;
+  }
+  
+  .login-img {
+    flex: 0 0 200px;
+    max-width: 300px;
+  }
+  
+  .login-img img {
+    border-radius: 8px;
+  }
+  
+  .login-container {
+    padding: 20px;
+    margin: 0;
+    max-width: 100%;
+    width: 95%;
+    border-radius: 8px;
+  }
+  
+  .login-container h2 {
+    font-size: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .form-login {
+    gap: 15px;
+  }
+  
+  .form-login input {
+    padding: 12px;
+    font-size: 16px; /* منع التكبير في iOS */
+  }
+  
+  .form-login button[type="submit"] {
+    padding: 12px;
+    font-size: 16px;
+  }
+  
+  .signup-link {
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+  }
+  
+  .form-secondary-btn {
+    width: 100% !important;
+    text-align: center !important;
+    padding: 12px 20px !important;
+  }
+}
+
+/* الهواتف الذكية الصغيرة جداً */
+@media (max-width: 380px) {
+  .login-page {
+    padding: 8px;
+    gap: 15px;
+  }
+  
+  .login-img {
+    flex: 0 0 150px;
+    max-width: 250px;
+  }
+  
+  .login-container {
+    padding: 15px;
+    width: 98%;
+  }
+  
+  .login-container h2 {
+    font-size: 18px;
+    margin-bottom: 15px;
+  }
+  
+  .form-login {
+    gap: 12px;
+  }
+  
+  .form-login .input label {
+    font-size: 14px;
+  }
+  
+  .form-login input {
+    padding: 10px;
+    font-size: 15px;
+  }
+}
+
+/* الشاشات العريضة جداً */
+@media (min-width: 1400px) {
+  .login-page {
+    max-width: 1200px;
+    margin: 40px auto 60px auto;
+    padding: 20px 60px;
+  }
+  
+  .login-img {
+    max-width: 600px;
+  }
+  
+  .login-container {
+    max-width: 550px;
+    padding: 40px;
+  }
+  
+  .login-container h2 {
+    font-size: 28px;
   }
 }

@@ -20,9 +20,9 @@
 }
 
 .info-section {
-  margin-bottom: 10px; /* تقليل المسافة أكثر */
-  flex: 1; /* ليأخذ المساحة المتاحة */
-  overflow-y: visible; /* السماح بالعرض الكامل للحقول */
+  margin-bottom: 10px; 
+  flex: 1; 
+  overflow-y: visible; 
 }
 
 .user-form h4 {
