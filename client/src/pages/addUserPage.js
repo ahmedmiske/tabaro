@@ -26,8 +26,7 @@ if (typeof window !== 'undefined') {
 
 /**
  * 🎨 صفحة التسجيل المتطورة - تجربة مستخدم استثنائية
- * 
- * @description مكون متقدم لإنشاء حسابات المستخدمين مع تصميم أنيق ومبهر
+ * * @description مكون متقدم لإنشاء حسابات المستخدمين مع تصميم أنيق ومبهر
  * @author PNDD Development Team
  * @version 2.0.0
  */
@@ -39,7 +38,7 @@ function AddUserPage() {
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [animationClass, setAnimationClass] = useState('');
-  
+
   // 📊 إعدادات الخطوات المتعددة
   const totalSteps = 5;
 
@@ -56,7 +55,7 @@ function AddUserPage() {
   // ✨ تأثيرات بصرية عند تحميل الصفحة
   useEffect(() => {
     setAnimationClass('fade-in-entrance');
-    
+
     // إضافة تأثير الترحيب المتحرك
     const welcomeTimer = setTimeout(() => {
       setAnimationClass('welcome-ready');
@@ -67,28 +66,28 @@ function AddUserPage() {
 
   // 🔢 معلومات الخطوات للتنقل
   const stepInfo = useMemo(() => ({
-    1: { 
-      title: 'نوع الحساب', 
+    1: {
+      title: 'نوع الحساب',
       description: 'اختر نوع الحساب المناسب لك',
-      icon: '�'
+      icon: '👤' // تم تغيير الأيقونة من علامات استفهام إلى أيقونات واضحة
     },
-    2: { 
-      title: 'التحقق من رقم الهاتف', 
+    2: {
+      title: 'التحقق من رقم الهاتف',
       description: 'أدخل رقم الهاتف وتأكد من صحته',
-      icon: '�'
+      icon: '📞'
     },
-    3: { 
-      title: 'المعلومات الشخصية', 
+    3: {
+      title: 'المعلومات الشخصية',
       description: 'أدخل بياناتك الشخصية الأساسية',
-      icon: '�'
+      icon: '📝'
     },
-    4: { 
-      title: 'معلومات الحساب', 
+    4: {
+      title: 'معلومات الحساب',
       description: 'كلمة المرور والإعدادات الأمنية',
       icon: '🔐'
     },
-    5: { 
-      title: 'اكتمل التسجيل', 
+    5: {
+      title: 'اكتمل التسجيل',
       description: 'تم إنشاء حسابك بنجاح',
       icon: '🎉'
     }
@@ -119,8 +118,7 @@ function AddUserPage() {
 
   /**
    * 🚀 معالج إضافة المستخدم المتطور
-   * 
-   * @param {Object} user - بيانات المستخدم الجديد
+   * * @param {Object} user - بيانات المستخدم الجديد
    * @returns {Promise<void>}
    */
   const addUser = useCallback(async (user) => {
@@ -143,15 +141,15 @@ function AddUserPage() {
       // 🎉 رسالة نجاح مخصصة وجذابة
       const successMessages = [
         '🎉 أهلاً وسهلاً! تم إنشاء حسابك بنجاح',
-        '✨ رائع! انضممت الآن إلى مجتمع  المتبرعين',
+        '✨ رائع! انضممت الآن إلى مجتمع المتبرعين',
         '🌟 مبروك! حسابك جاهز للاستخدام'
       ];
-      
+
       const randomMessage = successMessages[Math.floor(Math.random() * successMessages.length)];
       setSuccessMessage(randomMessage);
       setFormSubmitted(true);
       setAnimationClass('success-celebration');
-      
+
       // 🎯 الانتقال للخطوة الأخيرة (اكتمال التسجيل)
       setCurrentStep(totalSteps);
 
@@ -168,13 +166,13 @@ function AddUserPage() {
       console.error('💥 خطأ في إنشاء المستخدم:', error);
       setErrorMessage('⚠️ عذراً! حدث خطأ غير متوقع. دعنا نحاول مرة أخرى بطريقة أفضل.');
       setAnimationClass('error-shake');
-      
+
       // إزالة تأثير الاهتزاز بعد ثانيتين
       setTimeout(() => setAnimationClass(''), 2000);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [totalSteps]);
 
   /**
    * 🔄 معالج إعادة تعيين النموذج الأنيق - محسن للأداء
@@ -201,42 +199,31 @@ function AddUserPage() {
     }, 300);
   }, []);
 
-  // 🎨 محتوى ديناميكي للآية الكريمة
-  const verseContent = useMemo(() => ({
-    arabic: "وَأَحْسِنُوا إِنَّ اللَّهَ يُحِبُّ الْمُحْسِنِينَ",
-    reference: "سورة البقرة: 195",
-    meaning: "كونوا من المحسنين في أعمالكم"
-  }), []);
 
   return (
     <div className={`signup-layout ${animationClass}`} role="main" aria-label="صفحة التسجيل">
       {/* 🎨 القسم البصري المبهر - تجربة بصرية استثنائية */}
-      <section 
-        className="signup-image-section fullscreen-image" 
+      <section
+        className="signup-image-section fullscreen-image"
         aria-label="منطقة الترحيب البصرية"
       >
-        {/* الآية الكريمة في الأعلى مع تصميم راقي */}
-        <article className="verse verse-top" role="complementary">
-          <blockquote className="verse-text">
-            <p className="arabic-text">﴿ {verseContent.arabic} ﴾</p>
-            <cite className="verse-reference">{verseContent.reference}</cite>
-            <small className="verse-meaning">{verseContent.meaning}</small>
-          </blockquote>
-        </article>
+        {/*
+          تم حذف الجزء الخاص بالآية الكريمة هنا بناءً على طلبك.
+        */}
 
         {/* طبقة التأثيرات البصرية */}
         <div className="image-overlay" aria-hidden="true"></div>
-        
+
         {/* الصورة الرئيسية تحتل كامل المساحة */}
         <div className="image-container fullscreen-container">
-          <img 
-            src={userAddImage} 
-            alt="رسم توضيحي لإنشاء حساب جديد في تطبيق PNDD" 
+          <img
+            src={userAddImage}
+            alt="رسم توضيحي لإنشاء حساب جديد في تطبيق PNDD"
             className="user-add-image fullscreen-image-element"
             loading="eager"
             decoding="async"
           />
-          
+
           {/* مؤشر التحميل الأنيق */}
           {isLoading && (
             <div className="loading-overlay" aria-live="polite">
@@ -250,16 +237,16 @@ function AddUserPage() {
       </section>
 
       {/* 📋 منطقة النموذج التفاعلي المتطور */}
-      <section 
-        className="signup-form-section" 
+      <section
+        className="signup-form-section"
         aria-label="نموذج إنشاء الحساب"
       >
         {/* رأس النموذج الأنيق */}
         <header className="form-header">
-          <TitleMain 
-            text1="إنشاء حساب جديد" 
+          <TitleMain
+            text1="إنشاء حساب جديد"
           />
-          
+
           {/* شريط التقدم متعدد الخطوات */}
           <div className="steps-progress-container" role="progressbar" aria-valuenow={currentStep} aria-valuemin="1" aria-valuemax={totalSteps}>
             <div className="steps-info">
@@ -270,7 +257,7 @@ function AddUserPage() {
                   <p className="step-description">{stepInfo[currentStep]?.description}</p>
                 </div>
               </div>
-              
+
               {/* نقاط الخطوات بدلاً من العداد النصي */}
               <div className="steps-dots-header">
                 {Array.from({ length: totalSteps }, (_, index) => (
@@ -284,10 +271,10 @@ function AddUserPage() {
                 ))}
               </div>
             </div>
-            
+
             {/* شريط التقدم البصري */}
             <div className="progress-indicator">
-              <div 
+              <div
                 className={`progress-bar ${formSubmitted ? 'complete' : isLoading ? 'processing' : ''}`}
                 style={{ width: `${(currentStep / totalSteps) * 100}%` }}
               ></div>
@@ -297,15 +284,15 @@ function AddUserPage() {
 
         {/* منطقة الرسائل التفاعلية */}
         {errorMessage && (
-          <div 
-            className="alert alert-error sophisticated-alert" 
+          <div
+            className="alert alert-error sophisticated-alert"
             role="alert"
             aria-live="assertive"
           >
             <div className="alert-icon">⚠️</div>
             <div className="alert-content">
               <p className="alert-message">{errorMessage}</p>
-              <button 
+              <button
                 className="alert-dismiss-btn"
                 onClick={handleDismissError}
                 aria-label="إغلاق رسالة الخطأ"
@@ -313,7 +300,7 @@ function AddUserPage() {
                 <span>✕</span>
               </button>
             </div>
-            <button 
+            <button
               className="retry-btn elegant-btn"
               onClick={handleDismissError}
               disabled={isLoading}
@@ -323,7 +310,7 @@ function AddUserPage() {
             </button>
           </div>
         )}
-        
+
         {/* منطقة النجاح المبهرة */}
         {formSubmitted ? (
           <div className="success-container celebration-mode" role="status" aria-live="polite">
@@ -335,11 +322,11 @@ function AddUserPage() {
                 </div>
               </div>
             </div>
-            
+
             <div className="success-content">
               <h3 className="success-title">🎉 مرحباً بك في PNDD!</h3>
               <p className="success-message">{successMessage}</p>
-              
+
               <div className="success-stats">
                 <div className="stat-item">
                   <span className="stat-number">+1</span>
@@ -351,9 +338,9 @@ function AddUserPage() {
                 </div>
               </div>
             </div>
-            
+
             <div className="success-actions">
-              <button 
+              <button
                 className="btn btn-primary premium-btn"
                 onClick={() => window.location.href = '/'}
                 disabled={isLoading}
@@ -361,8 +348,8 @@ function AddUserPage() {
                 <span className="btn-text">ابدأ رحلتك</span>
                 <span className="btn-icon">→</span>
               </button>
-              
-              <button 
+
+              <button
                 className="btn btn-secondary elegant-btn"
                 onClick={handleResetForm}
                 disabled={isLoading}
@@ -375,8 +362,8 @@ function AddUserPage() {
         ) : (
           /* منطقة النموذج الذكي */
           <div className="form-container">
-            <UserForm 
-              addUser={addUser} 
+            <UserForm
+              addUser={addUser}
               isLoading={isLoading}
               className="premium-form"
               currentStep={currentStep}
@@ -384,17 +371,17 @@ function AddUserPage() {
               onNextStep={nextStep}
               onPreviousStep={previousStep}
             />
-            
+
             {/* معلومات إضافية مفيدة */}
             <footer className="form-footer">
               <div className="security-badge">
                 <span className="badge-icon">🔒</span>
                 <span className="badge-text">بياناتك محمية بأعلى معايير الأمان</span>
               </div>
-              
+
               <div className="support-info">
                 <p className="support-text">
-                  تحتاج مساعدة؟ 
+                  تحتاج مساعدة؟
                   <a href="/support" className="support-link">تواصل معنا</a>
                 </p>
               </div>
@@ -419,12 +406,10 @@ OptimizedAddUserPage.propTypes = {
 
 /**
  * 🚀 تصدير المكون المحسن
- * 
- * @exports {React.Component} AddUserPage - صفحة التسجيل المتطورة
- * 
- * Features:
+ * * @exports {React.Component} AddUserPage - صفحة التسجيل المتطورة
+ * * Features:
  * ✅ تجربة مستخدم متطورة
- * ✅ تأثيرات بصرية مبهرة  
+ * ✅ تأثيرات بصرية مبهرة  
  * ✅ إمكانية الوصول الكاملة
  * ✅ استجابة مثالية
  * ✅ أداء محسن
