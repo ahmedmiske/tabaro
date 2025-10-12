@@ -1,5 +1,4 @@
-﻿/* Landing Page Styles */
-.landing-page {
+﻿.landing-page {
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -13,16 +12,17 @@
   animation: backgroundMove 20s ease-in-out infinite;
   -webkit-animation: backgroundMove 20s ease-in-out infinite;
 }
+
 .container-landing {
   position: relative;
   text-align: center;
   z-index: 2;
 }
-/* .container-landing {
+ .container-landing {
   max-width: 900px;
   width: 100%;
 }
-  */
+  
 .landing-title {
   font-size: 4rem;
   font-weight: 900;
@@ -155,7 +155,6 @@
 
 .about-section {
   padding:  0;
-  background: #f8f9fa;
 }
 
 /* Animation for background movement */
