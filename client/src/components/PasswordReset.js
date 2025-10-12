@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
-import { Form, Button, Alert, ProgressBar } from 'react-bootstrap';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Form, Button, Alert } from 'react-bootstrap';
+
 import fetchWithInterceptors from '../services/fetchWithInterceptors'; // Make sure to import your fetch service
+
+import TitleMain from './TitleMain';
 import './PasswordReset.css';
 
 function PasswordReset() {
@@ -11,6 +14,22 @@ function PasswordReset() {
   const [step, setStep] = useState(1);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  const stepInfo = useMemo(() => ({
+    1: { title: "🔐 إعادة تعيين كلمة المرور", subtitle: "📱 إدخال رقم الهاتف" },
+    2: { title: "🔐 إعادة تعيين كلمة المرور", subtitle: "🔢 تأكيد الرمز" },
+    3: { title: "🔐 إعادة تعيين كلمة المرور", subtitle: "🆕 كلمة المرور الجديدة" }
+  }), []);
+
+  useEffect(() => {
+    const currentStep = stepInfo[step];
+    if (currentStep) {
+      document.title = `${currentStep.title} - ${currentStep.subtitle}`;
+    }
+    return () => {
+      document.title = 'تبارو - Tabaro';
+    };
+  }, [step, stepInfo]);
 
   const handleSendOtp = async () => {
     try {
@@ -90,9 +109,36 @@ const verifyOtp = (phoneNumber,otp) => {
 
   return (
     <div className="container">
-      <h2>تجديد كلمة المرور</h2>
-      <ProgressBar className='progress-bar' now={(step / 3) * 100} label={`الخطوة ${step} على 3`} />
-      {step > 1 && <Button onClick={handleBack} variant="secondary" className="mb-3 btn-back">العودة</Button>}
+      <TitleMain 
+        text1={stepInfo[step].title}
+        text2={stepInfo[step].subtitle}
+      />
+      
+      {/* Progress indicator with dots */}
+      <div className="progress-dots">
+        {[1, 2, 3].map((dotStep) => (
+          <div
+            key={dotStep}
+            className={`progress-dot ${step >= dotStep ? 'active' : ''} ${step === dotStep ? 'current' : ''}`}
+          >
+            <span className="dot-number">{dotStep}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Action buttons container */}
+      <div className="action-buttons">
+        {step > 1 && (
+          <button 
+            type="button" 
+            className="btn btn-outline-secondary me-2"
+            onClick={handleBack}
+          >
+            ← السابق
+          </button>
+        )}
+      </div>
+
       {error && <Alert variant="danger">{error}</Alert>}
       {success && <Alert variant="success">{success}</Alert>}
 
