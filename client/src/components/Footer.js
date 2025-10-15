@@ -25,7 +25,7 @@ const Footer = () => {
               <div className="f-brand">
                 <div className="f-brand-row">
                   <div className="f-logo">
-                    <img src="/logoPNDD.png" alt="شعار المنصة الوطنية للتبرع والتضامن" />
+                    <img src="/logoTabaro.png" alt="شعار المنصة الوطنية للتبرع والتضامن" />
                   </div>
                   <div className="f-brand-texts">
                     <h3 className="f-title">المنصة الوطنية للتبرع</h3>

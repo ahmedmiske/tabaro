@@ -1,8 +1,11 @@
 // src/components/DonationRequestForm.jsx
 import React, { useEffect, useMemo, useState } from 'react';
-import { Form, Button, ListGroup, ListGroupItem, Spinner, Alert } from 'react-bootstrap';
+import { Form, Button, ListGroup, ListGroupItem, Alert } from 'react-bootstrap';
+import { FaCheck } from 'react-icons/fa';
+
 import './DonationRequestForm.css';
 import { useNavigate } from 'react-router-dom';
+import TitleMain from './TitleMain';
 
 const ALLOWED_FILE_TYPES = ['application/pdf','image/png','image/jpeg','image/jpg','image/webp','image/gif'];
 const MAX_FILE_MB = 10;
@@ -10,6 +13,14 @@ const isAllowed = (f) => f && ALLOWED_FILE_TYPES.includes(f.type) && f.size <= M
 
 const DonationRequestForm = () => {
   const navigate = useNavigate();
+
+  // تحديث عنوان الصفحة
+  React.useEffect(() => {
+    document.title = 'طلب تبرع عام - تبارو';
+    return () => {
+      document.title = 'تبارو - منصة التبرعات';
+    };
+  }, []);
 
   const [donation, setDonation] = useState({
     category: '',
@@ -122,8 +133,32 @@ const DonationRequestForm = () => {
     return phonesOk && amountOk;
   }, [donation.paymentMethods, donation.amount, isFinancial]);
 
+  // معلومات الخطوات للتنقل (4 خطوات)
+  const stepInfo = {
+    1: { 
+      title: 'نوع التبرع والوصف', 
+      description: 'اختر المجال ونوع التبرع واكتب الوصف',
+      icon: '📋'
+    },
+    2: { 
+      title: 'الموقع والتواصل', 
+      description: 'حدد المكان ووسائل التواصل',
+      icon: '📍'
+    },
+    3: { 
+      title: 'التفاصيل المالية', 
+      description: 'المبلغ وطرق الدفع (للطلبات المالية)',
+      icon: '💰'
+    },
+    4: { 
+      title: 'الموعد والمراجعة', 
+      description: 'حدد الموعد النهائي وراجع الطلب',
+      icon: '⏰'
+    }
+  };
+
   // الخطوة الظاهرة للمستخدم (عند عدم الحاجة للمالية نقلّل العدد)
-  const totalSteps = isFinancial ? 5 : 4;
+  const totalSteps = isFinancial ? 4 : 3;
   const displayedStep = Math.min(step, totalSteps);
 
   const minDeadline = useMemo(() => {
@@ -294,19 +329,51 @@ const DonationRequestForm = () => {
 
   return (
     <div className="donation-form-container" dir="rtl">
-      <h2>طلب تبرع جديد</h2>
-
-      <div className="progress-container">
-        <div className="progress-bar" style={{ width: `${(displayedStep / totalSteps) * 100}%` }} />
-        <span className="progress-text">{`الخطوة ${displayedStep} من ${totalSteps}`}</span>
-      </div>
+      {/* رأس النموذج الأنيق */}
+      <header className="form-header">
+        <TitleMain title="طلب تبرع عام 🤝" />
+        
+        {/* شريط التقدم متعدد الخطوات */}
+        <div className="steps-progress-container" role="progressbar" aria-valuenow={displayedStep} aria-valuemin="1" aria-valuemax={totalSteps}>
+          <div className="steps-info">
+            <div className="current-step-info">
+              <span className="step-icon">{stepInfo[displayedStep]?.icon}</span>
+              <div className="step-details">
+                <h3 className="step-title">{stepInfo[displayedStep]?.title}</h3>
+                <p className="step-description">{stepInfo[displayedStep]?.description}</p>
+              </div>
+            </div>
+            
+            {/* نقاط الخطوات بدلاً من العداد النصي */}
+            <div className="steps-dots-header">
+              {Array.from({ length: totalSteps }, (_, index) => (
+                <div
+                  key={index + 1}
+                  className={`step-dot-header ${displayedStep >= index + 1 ? 'completed' : ''} ${displayedStep === index + 1 ? 'active' : ''}`}
+                  aria-label={`الخطوة ${index + 1}: ${stepInfo[index + 1]?.title}`}
+                >
+                  {displayedStep > index + 1 ? '✓' : index + 1}
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* شريط التقدم البصري */}
+          <div className="progress-indicator">
+            <div 
+              className="progress-bar"
+              style={{ width: `${(displayedStep / totalSteps) * 100}%` }}
+            ></div>
+          </div>
+        </div>
+      </header>
 
       {fileError && <Alert variant="warning">{fileError}</Alert>}
 
       <Form onSubmit={handleSubmit}>
         {/* 1) المجال/النوع/الوصف */}
         {displayedStep === 1 && (
-          <>
+          <div className="step-content">
             <Form.Group>
               <Form.Label>اختر المجال</Form.Label>
               <Form.Control as="select" name="category" value={donation.category} onChange={handleCategoryChange} required>
@@ -329,12 +396,12 @@ const DonationRequestForm = () => {
               <Form.Label>وصف الحالة</Form.Label>
               <Form.Control as="textarea" name="description" value={donation.description} onChange={handleChange} placeholder="أدخل وصفًا مختصرًا للحالة أو الاحتياج" />
             </Form.Group>
-          </>
+          </div>
         )}
 
         {/* 2) المكان + وسائل التواصل */}
         {displayedStep === 2 && (
-          <>
+          <div className="step-content">
             <Form.Group>
               <Form.Label>الموقع (اسم المكان)</Form.Label>
               <Form.Control list="places" name="place" value={donation.place} onChange={handleChange} placeholder="اكتب أو اختر اسم المكان" required />
@@ -373,12 +440,12 @@ const DonationRequestForm = () => {
                 );
               })}
             </Form.Group>
-          </>
+          </div>
         )}
 
         {/* 3) المبلغ + وسائل الدفع (مالية فقط) */}
         {displayedStep === 3 && isFinancial && (
-          <>
+          <div className="step-content">
             <Form.Group>
               <Form.Label>المبلغ المطلوب</Form.Label>
               <Form.Control type="number" name="amount" value={donation.amount} onChange={handleChange} min="1" required />
@@ -416,11 +483,12 @@ const DonationRequestForm = () => {
               })}
               {!paymentsValid && <div className="text-danger mt-1">أدخل المبلغ واختر وسيلة دفع واحدة على الأقل مع رقم صحيح.</div>}
             </Form.Group>
-          </>
+          </div>
         )}
 
         {/* 4) التاريخ + الاستعجال (أو 3 لغير المالية) */}
         {displayedStep === (isFinancial ? 4 : 3) && (
+          <div className="step-content">
           <div className="row">
             <div className="col-md-6">
               <Form.Group>
@@ -434,11 +502,12 @@ const DonationRequestForm = () => {
               </Form.Group>
             </div>
           </div>
+          </div>
         )}
 
-        {/* 5) الملفات (أو 4 لغير المالية) */}
+        {/* الخطوة الأخيرة: الملفات والمراجعة */}
         {displayedStep === totalSteps && (
-          <>
+          <div className="step-content">
             <Form.Group>
               <div className="d-flex justify-content-between">
                 <Form.Label>وثائق داعمة</Form.Label>
@@ -454,18 +523,28 @@ const DonationRequestForm = () => {
                 ))}
               </ListGroup>
             </Form.Group>
-          </>
+          </div>
         )}
 
         {/* أزرار */}
         <div className="action-buttons mt-3 d-flex gap-2">
           {displayedStep > 1 && (
-            <Button variant="secondary" onClick={goPrev} disabled={submitting}>السابق</Button>
+            <Button 
+              variant="secondary" 
+              onClick={goPrev} 
+              disabled={submitting}
+              size="md"
+              className="px-4 py-2"
+            >
+              السابق
+            </Button>
           )}
           {displayedStep < totalSteps && (
             <Button
               variant="primary"
               onClick={goNext}
+              size="md"
+              className="px-4 py-2"
               disabled={
                 submitting ||
                 (displayedStep === 1 && !isStep1Valid) ||
@@ -477,8 +556,15 @@ const DonationRequestForm = () => {
             </Button>
           )}
           {displayedStep === totalSteps && (
-            <Button type="submit" variant="success" disabled={submitting}>
-              {submitting ? (<><Spinner size="sm" className="me-2" /> جارٍ الإرسال...</>) : 'إرسال'}
+            <Button 
+              type="submit" 
+              variant="success" 
+              disabled={submitting}
+              size="md"
+              className="px-4 py-2"
+            >
+              <FaCheck className="me-2" />
+              {submitting ? 'جارٍ الإرسال...' : 'إرسال الطلب'}
             </Button>
           )}
         </div>

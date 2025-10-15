@@ -79,9 +79,9 @@
 }
 /* ===== Container & Font ===== */
 .modern-footer {
-  background-color: var(--color-primary-dark);
+  background-color: var(--color-primary-dark) !important;
   /* لون النص: فاتح (للتناسق مع الخلفية الداكنة) */
-  color: var( --color-background-default); 
+  color: var(--color-background-default) !important; 
   font-family: "Tajawal", sans-serif;
   /* المسافات: استخدام قيم توحيدية */
   padding: 60px 0 var(--spacing-lg); /* 60px 0 24px */
@@ -93,7 +93,7 @@
 
 .modern-footer a {
   /* لون الرابط: فاتح قليلاً */
-  color: var( --color-background-default);
+  color: var(--color-background-default) !important;
   text-decoration: none;
   /* الانتقال: موحد */
   transition: var(--transition-default);
@@ -101,7 +101,7 @@
 
 .modern-footer a:hover {
   /* التفاعل: اللون الرئيسي الفاتح */
-  color: var( --color-background-default);
+  color: var(--color-primary-light) !important;
 }
 
 /* ===== Brand Section ===== */
@@ -112,11 +112,16 @@
 }
 
 .f-logo img {
-  width: 48px;
-  height: 48px;
+  width: 48px !important;
+  height: 48px !important;
   /* الزوايا: موحدة */
   border-radius: var(--border-radius-default); /* 16px (كان 8px، تم توحيده) */
-  object-fit: cover;
+  object-fit: contain; /* تغيير من cover إلى contain لعرض الشعار كاملاً */
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  background: rgba(255, 255, 255, 0.1); /* خلفية خفيفة لتحسين الوضوح */
+  padding: 4px; /* مسافة داخلية بسيطة */
 }
 
 .f-title {
@@ -127,7 +132,7 @@
 
 .f-sub {
   font-size: 0.9rem;
-  color: var( --color-background-default);
+  color: var(--color-background-default) !important;
   margin: 0;
 }
 
@@ -135,7 +140,7 @@
   margin: var(--spacing-md) 0; /* 16px 0 (كان 15px) */
   font-size: 0.95rem;
   line-height: 1.6;
-  color: var(--color-background-default);
+  color: var(--color-background-default) !important;
 }
 
 .f-actions a {
@@ -175,7 +180,7 @@
   font-weight: 700;
   /* المسافات: موحدة */
   margin-bottom: var(--spacing-sm); /* 8px (كان 12px، قمت بتوحيده) */
-  color: var(--color-background-default); /* لضمان وضوح العنوان على الخلفية الداكنة */
+  color: var(--color-background-default) !important; /* لضمان وضوح العنوان على الخلفية الداكنة */
 }
 
 .f-list {
@@ -213,7 +218,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-text-light);
+  color: var(--color-background-default) !important;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -271,4 +276,31 @@
 .f-legal a {
   /* المسافات: موحدة */
   margin-inline-start: var(--spacing-md); /* 16px (كان 15px، قمت بتوحيده) */
+}
+
+/* قواعد إضافية لضمان الألوان الصحيحة */
+.modern-footer,
+.modern-footer .container,
+.modern-footer .footer-top,
+.modern-footer .footer-bottom {
+  background-color: var(--color-primary-dark) !important;
+  color: var(--color-background-default) !important;
+}
+
+.modern-footer *:not(img):not(svg) {
+  color: var(--color-background-default) !important;
+}
+
+.modern-footer .f-title {
+  color: var(--color-background-default) !important;
+}
+
+.modern-footer .f-copy {
+  color: var(--color-background-default) !important;
+}
+
+/* تجاهل أي CSS من ملفات أخرى */
+footer.modern-footer {
+  background: var(--color-primary-dark) !important;
+  background-color: var(--color-primary-dark) !important;
 }

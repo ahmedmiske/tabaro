@@ -8,6 +8,113 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   text-align: right;
   font-family: 'Cairo', sans-serif;
+  position: relative;
+  overflow: visible;
+}
+
+/* رأس النموذج */
+.form-header {
+  margin-bottom: 30px;
+}
+
+/* شريط التقدم متعدد الخطوات */
+.steps-progress-container {
+  margin-top: 20px;
+  margin-bottom: 30px;
+}
+
+.steps-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.current-step-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.step-icon {
+  font-size: 24px;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 50%;
+  min-width: 40px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.step-details h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #1d643b;
+  font-weight: 600;
+}
+
+.step-details p {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+}
+
+/* نقاط الخطوات */
+.steps-dots-header {
+  display: flex;
+  gap: 10px;
+  direction: rtl;
+  justify-content: flex-end;
+}
+
+.step-dot-header {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  background: #f8f9fa;
+  color: #666;
+  border: 2px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.step-dot-header.active {
+  background: #1d643b;
+  color: white;
+  border-color: #1d643b;
+}
+
+.step-dot-header.completed {
+  background: #28a745;
+  color: white;
+  border-color: #28a745;
+}
+
+/* شريط التقدم البصري */
+.progress-indicator {
+  height: 4px;
+  background: #e9ecef;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #1d643b 0%, #28a745 100%);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+/* شريط التقدم */
+.form-title-box {
+  margin-bottom: 25px;
+  text-align: center;
 }
 
 /* عنوان النموذج */
@@ -29,6 +136,18 @@
   padding-bottom: 5px;
 }
 
+/* محتوى الخطوات */
+.step-content {
+  background: #f8f9fa;
+  padding: 25px;
+  border-radius: 12px;
+  margin-bottom: 25px;
+  border: 1px solid #e9ecef;
+  position: relative;
+  z-index: 0;
+  overflow: visible;
+}
+
 /* عناصر الإدخال */
 .form-group {
   margin-bottom: 20px;
@@ -38,8 +157,15 @@ label {
   font-size: 15px;
   font-weight: 600;
   color: #333;
-  margin-bottom: 5px;
+  margin-bottom: 8px;
   display: block;
+}
+
+.step-content .form-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1d643b;
+  margin-bottom: 10px;
 }
 
 input,
@@ -53,6 +179,15 @@ textarea {
   text-align: right;
   background-color: #f9f9f9;
   transition: border 0.2s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #1d643b;
+  outline: none;
+  background-color: #fff;
+  box-shadow: 0 0 5px rgba(29, 100, 59, 0.2);
 }
 
 /* تعطيل الحدود الحمراء الافتراضية */
@@ -74,6 +209,85 @@ textarea {
   align-items: center;
   gap: 8px;
   font-weight: 500;
+}
+
+/* تصميم مخصص للـ checkboxes */
+.form-check {
+  margin-bottom: 12px;
+}
+
+.form-check-input {
+  width: 22px;
+  height: 22px;
+  margin-top: 0;
+  margin-right: 10px;
+  background-color: #fff;
+  border: 2px solid #28a745;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.form-check-input:checked {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  border-color: #28a745;
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.4);
+}
+
+.form-check-input:checked::before {
+  content: '✓';
+  position: absolute;
+  top: -2px;
+  left: 4px;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 900;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+  animation: checkmark 0.3s ease-in-out;
+}
+
+@keyframes checkmark {
+  0% {
+    opacity: 0;
+    transform: scale(0.2) rotate(-45deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2) rotate(0deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.form-check-input:focus {
+  border-color: #28a745;
+  box-shadow: 0 0 0 0.25rem rgba(40, 167, 69, 0.25);
+  outline: none;
+}
+
+.form-check-input:hover {
+  border-color: #1e7e34;
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+}
+
+.form-check-label {
+  cursor: pointer;
+  color: #333;
+  font-size: 15px;
+  font-weight: 500;
+  user-select: none;
+  transition: color 0.3s ease;
+}
+
+.form-check-label:hover {
+  color: #28a745;
 }
 
 /* أخطاء */
@@ -100,221 +314,76 @@ input.is-invalid {
 ul.uploaded-files {
   list-style: none;
   padding: 0;
-  margin-top: 10px;
+  margin-top: 15px;
 }
 
 ul.uploaded-files li {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background-color: #f0f4f7;
+  background: #f8f9fa;
   padding: 8px 12px;
-  border-radius: 6px;
-  margin-bottom: 6px;
-  font-size: 14px;
+  margin-bottom: 5px;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #e9ecef;
 }
 
+/* الأزرار */
 .action-buttons {
   display: flex;
-  justify-content: space-between;
-  border: #b1d5c3 2px solid !important;
-  margin-top: 30px;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.button-prev,
-.button-next,
-.button-submit {
-  flex: 1 1 48%;
-  padding: 12px;
-  border: none;
-  font-size: 16px;
-  font-weight: bold;
-  border-radius: 6px;
-  transition: background 0.3s ease;
-}
-
-.button-prev {
-  background-color: #a0b5c8;
-  color: white;
-}
-
-.button-next {
-  background-color: #007bff;
-  color: white;
-}
-
-.button-submit {
-  background-color: #28a745;
-  color: white;
-}
-
-
-
-/* نموذج التبرع بالدم */
-.blood-form {
-  width: 100%;
-  padding: 30px;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  text-align: right;
-}
-
-select[name="bloodType"] option {
-  padding: 10px;
-  font-size: 15px;
-  text-align: right;
-}
-
-/* الشريط التدريجي */
-.prog-step-container {
-  background-color: #d1e7dd;
-  padding: 10px;
-  border-radius: 16px;
-  margin-bottom: 20px;
-}
-
-.prog-step-container .progress-bar {
-  background-color: #28a745 !important;
-  font-weight: bold;
-  font-size: 18px;
-  text-align: center;
-  color: white !important;
-  height: 50px;
-  display: flex;
+  justify-content: flex-start;
   align-items: center;
-  justify-content: center;
-  border-radius: 12px;
+  margin-top: 30px;
+  flex-wrap: wrap;
+  gap: 10px;
+  direction: rtl;
+  position: relative;
+  z-index: 1;
+  clear: both;
+  width: 100%;
+  padding-top: 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-/* استجابة للشاشات الصغيرة */
+.action-buttons .btn {
+  min-width: 100px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 2;
+}
+
+
+
+/* التصميم المتجاوب */
 @media (max-width: 768px) {
   .donation-form-container {
-    width: 95%;
-    padding: 15px;
-  }
-
-  .action-buttons {
-    flex-direction: column;
-    gap: 10px;
+    margin: 10px;
     padding: 20px;
   }
 
-
-  .button-submit {
-    width: 100%;
-    margin: auto;
-  }
-}
-
-  
-@media (max-width: 576px) {
   .action-buttons {
     flex-direction: column;
     align-items: stretch;
-    gap: 10px;
-    border: none !important; /* إزالة الحدود التجريبية */
   }
 
-  .action-buttons .button-prev,
-  .action-buttons .button-next,
-  .action-buttons .button-submit {
-    width: 100% !important;
-    margin: 0 !important;
+  .button-prev,
+  .button-next {
+    width: 100%;
+    margin-bottom: 10px;
   }
 }
 
-/* تحسين مظهر القائمة المنسدلة */
-input[list] {
-  background: linear-gradient(45deg, #ffffff 98%, #00A443 98%, #00A443 100%);
-  border: 2px solid #e0e0e0;
-  position: relative;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-input[list]:focus {
-  border-color: #00A443;
-  box-shadow: 0 0 8px rgba(0, 164, 67, 0.3);
-  outline: none;
-}
-
-input[list]:hover {
-  border-color: #00C853;
-  background: linear-gradient(45deg, #f8fff9 98%, #00A443 98%, #00A443 100%);
-}
-
-/* تنسيق datalist */
-datalist {
-  position: absolute;
-  background-color: white;
-  border: 1px solid #00A443;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 164, 67, 0.15);
-  max-height: 200px;
-  overflow-y: auto;
-  z-index: 1000;
-}
-
-datalist option {
-  padding: 8px 12px;
-  font-size: 14px;
-  color: #333;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-datalist option:hover {
-  background-color: #e8f5e8;
-  color: #00A443;
-}
-
-/* تحسين شكل placeholder */
-input[list]::placeholder {
-  color: #999;
-  font-style: italic;
-  opacity: 0.8;
-}
-
-/* تأثير عند التركيز على الحقل */
-input[list]:focus::placeholder {
-  opacity: 0.5;
-  transform: translateY(-2px);
-  transition: all 0.3s ease;
-}
-
-/* تنسيق خاص للوضع الليلي إذا كان مطلوباً */
-@media (prefers-color-scheme: dark) {
-  datalist {
-    background-color: #2d2d2d;
-    border-color: #00A443;
+@media (max-width: 576px) {
+  .donation-form-container {
+    margin: 5px;
+    padding: 15px;
   }
   
-  datalist option {
-    color: #e0e0e0;
-  }
-  
-  datalist option:hover {
-    background-color: #1a3d20;
-    color: #00C853;
-  }
-}
-
-/* تحسين للشاشات الصغيرة */
-@media (max-width: 768px) {
-  input[list] {
-    font-size: 16px; /* منع التكبير التلقائي في iOS */
-    padding: 12px;
-  }
-  
-  datalist {
-    max-height: 150px;
-  }
-  
-  datalist option {
-    padding: 10px 15px;
-    font-size: 16px;
+  input,
+  select,
+  textarea {
+    font-size: 16px; /* منع تكبير الصفحة على iOS */
   }
 }

@@ -8,6 +8,121 @@
   text-align: right;
 }
 
+/* رأس النموذج */
+.form-header {
+  margin-bottom: 30px;
+}
+
+/* شريط التقدم متعدد الخطوات */
+.steps-progress-container {
+  margin-top: 20px;
+  margin-bottom: 30px;
+}
+
+.steps-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.current-step-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.step-icon {
+  font-size: 24px;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 50%;
+  min-width: 40px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.step-details h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #1d643b;
+  font-weight: 600;
+}
+
+.step-details p {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+}
+
+/* نقاط الخطوات */
+.steps-dots-header {
+  display: flex;
+  gap: 10px;
+  direction: rtl;
+  justify-content: flex-end;
+}
+
+.step-dot-header {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  background: #f8f9fa;
+  color: #666;
+  border: 2px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.step-dot-header.active {
+  background: #1d643b;
+  color: white;
+  border-color: #1d643b;
+}
+
+.step-dot-header.completed {
+  background: #28a745;
+  color: white;
+  border-color: #28a745;
+}
+
+/* شريط التقدم البصري */
+.progress-indicator {
+  height: 4px;
+  background: #e9ecef;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #1d643b 0%, #28a745 100%);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+}
+
+/* محتوى الخطوات */
+.step-content {
+  background: #f8f9fa;
+  padding: 25px;
+  border-radius: 12px;
+  margin-bottom: 25px;
+  border: 1px solid #e9ecef;
+}
+
+.step-content .form-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1d643b;
+  margin-bottom: 10px;
+}
+
 .donation-form-container h2 {
   text-align: center;
   color: #333;
@@ -232,14 +347,25 @@ button[type="submit"]:hover {
  */
 .action-buttons {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   margin-top: 20px;
-  border: #28a745 1px solid;
-  border-radius: 10px;
+  gap: 10px;
+  direction: rtl;
+  position: relative;
+  z-index: 1;
+  clear: both;
+  width: 100%;
+  padding-top: 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-.action-buttons button {
-  margin: 10px;
+.action-buttons .btn {
+  min-width: 100px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 2;
 }
 
 .progress-container {

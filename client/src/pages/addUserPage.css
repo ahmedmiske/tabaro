@@ -48,7 +48,7 @@
   top: 0; 
   left: 0;
   width: 100%;
-   height: 100%;
+  height: 100%;
   background: rgba(0, 0, 0, 0.3);
   z-index: 1;
 }
@@ -103,50 +103,6 @@
   transform: scale(1.01);
 }
 
-.verse {
-  position: absolute;
-  bottom: 40px;
-  text-align: center;
-  color: white;
-  z-index: 3;
-}
-
-/* 📿 الآية في الأعلى */
-.verse.verse-top {
-  position: absolute;
-  top: 30px;
-  bottom: auto;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
-  background: 
-    linear-gradient(135deg, 
-      rgba(0, 0, 0, 0.7) 0%, 
-      rgba(0, 0, 0, 0.5) 100%);
-  backdrop-filter: blur(15px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.4),
-    0 0 60px rgba(255, 255, 255, 0.1);
-  animation: verseTopGlow 3s ease-in-out infinite;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 15px 25px;
-  border-radius: 16px;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-}
-
-.verse p {
-  font-size: 22px;
-  margin: 0;
-  font-weight: bold;
-}
-
-.verse-reference {
-  font-size: 14px;
-  opacity: 0.9;
-}
-
 /* ✅ حركة الصورة */
 @keyframes floatImage {
   0%, 100% { transform: translateY(0); }
@@ -182,31 +138,6 @@
 
   .user-add-image {
     width: 60%;
-  }
-
-  .verse {
-    bottom: 10px;
-    font-size: 16px;
-    padding: 10px 15px;
-  }
-
-  .verse.verse-top {
-    top: 15px;
-    max-width: 90%;
-    padding: 12px 18px;
-    font-size: 14px;
-  }
-
-  .verse.verse-top .arabic-text {
-    font-size: 18px;
-  }
-
-  .verse.verse-top .verse-reference {
-    font-size: 12px;
-  }
-
-  .verse.verse-top .verse-meaning {
-    font-size: 10px;
   }
 }
 
@@ -273,48 +204,6 @@
 .loading-text {
   font-size: 14px;
   font-weight: 600;
-}
-
-/* تحسين النص العربي */
-.arabic-text {
-  font-family: 'Amiri', 'Times New Roman', serif;
-  font-size: 24px;
-  line-height: 1.8;
-  color: #1f2937; /* لون داكن أنيق */
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  font-weight: 600;
-}
-
-.verse-meaning {
-  display: block;
-  margin-top: 5px;
-  font-size: 12px;
-  opacity: 0.9;
-  font-style: italic;
-  color: #1f2937; /* لون رمادي داكن أنيق */
-  position: relative;
-  padding: 0 15px;
-}
-
-/* علامات تنصيص أنيقة */
-.verse-meaning::before {
-  content: '"';
-  position: absolute;
-  left: 0;
-  top: -2px;
-  font-size: 20px;
-  color: #10b981;
-  font-weight: bold;
-}
-
-.verse-meaning::after {
-  content: '"';
-  position: absolute;
-  right: 0;
-  top: -2px;
-  font-size: 20px;
-  color: #10b981;
-  font-weight: bold;
 }
 
 /* شريط التقدم */
@@ -540,19 +429,6 @@
   100% { transform: scale(1); }
 }
 
-/* حركة الآية في الأعلى */
-@keyframes verseTopGlow {
-  0%, 100% { 
-    box-shadow: 
-      0 8px 32px rgba(0, 0, 0, 0.4),
-      0 0 60px rgba(255, 255, 255, 0.1);
-  }
-  50% { 
-    box-shadow: 
-      0 12px 40px rgba(0, 0, 0, 0.5),
-      0 0 80px rgba(255, 255, 255, 0.15);
-  }
-}
 
 /* 🚀 أنماط نظام الخطوات المتعددة - تصميم متطور */
 
@@ -740,8 +616,6 @@
   cursor: not-allowed;
 }
 
-/* ملاحظة: تم إزالة أزرار التنقل المستقلة - التنقل يتم من خلال النموذج مباشرة */
-
 /* حركات CSS للخطوات */
 @keyframes stepContainerGlow {
   0%, 100% { 
@@ -865,8 +739,6 @@
     height: 35px;
     font-size: 0.8rem;
   }
-  
-  /* تم إزالة أنماط أزرار التنقل للموبايل */
 }
 
 @media (max-width: 480px) {

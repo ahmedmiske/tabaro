@@ -1,313 +1,521 @@
-// src/components/BloodDonationForm.jsx
+// src/components/BloodDonationForm.js
 import React, { useState } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
-import { FaArrowRight, FaArrowLeft, FaCheck } from 'react-icons/fa';
-import fetchWithInterceptors from '../services/fetchWithInterceptors';
-import './BloodDonationForm.css';
-import TitleMain from './TitleMain';
-import ProgressStep from './ProgressStep';
+import { FaCheck } from 'react-icons/fa';
 
-const ALLOWED_FILE_TYPES = ['application/pdf','image/png','image/jpeg','image/jpg','image/webp','image/gif'];
-const MAX_FILE_MB = 10;
-const isAllowed = (f) => f && ALLOWED_FILE_TYPES.includes(f.type) && f.size <= MAX_FILE_MB*1024*1024;
+import fetchWithInterceptors from '../services/fetchWithInterceptors';
+import TitleMain from './TitleMain';
+
+import './BloodDonationForm.css';
 
 const BloodDonationForm = () => {
-  const [step, setStep] = useState(1);
-  const [formSubmitted, setFormSubmitted] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
-  const [errors, setErrors] = useState({});
-  const [supportDocs, setSupportDocs] = useState([]);
-  const [fileError, setFileError] = useState('');
-  const [showValidationAlert, setShowValidationAlert] = useState(false);
   const [bloodDonation, setBloodDonation] = useState({
     bloodType: '',
     location: '',
-    deadline: '',
     description: '',
+    deadline: '',
     isUrgent: false,
-    contactMethods: [],
+    contactMethods: []
   });
 
-  const bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "غير معروف"];
-  const contactOptions = ["phone", "whatsapp"];
-  const placesList = [
-    'ألاك',
-    'أمباني', 
-    'امبود',
-    'آمرج',
-    'انتيكان',
-    'أوجفت',
-    'أطار',
-    'باسكنو',
-    'بابابي',
-    'باركيول',
-    'بير أم أكرين',
-    'بوكي',
-    'بومديد',
-    'بوتلميت',
-    'تفرغ زينة',
-    'تجكجة',
-    'تمبدغة',
-    'توجنين',
-    'تيارت',
-    'تيشيت',
-    'جلوار (بوغور)',
-    'جكني',
-    'دار النعيم',
-    'روصو',
-    'الرياض',
-    'الزويرات',
-    'السبخة',
-    'الشامي',
-    'شنقيط',
-    'الطويل',
-    'الطينطان',
-    'عرفات',
-    'عدل بكرو',
-    'فديرك',
-    'كرمسين',
-    'كرو',
-    'كنكوصة',
-    'كوبني',
-    'كيهيدي',
-    'كيفة',
-    'لكصر',
-    'لكصيبة',
-    'لعيون',
-    'مال',
-    'مقامة',
-    'مقطع لحجار',
-    'المذرذرة',
-    'المجرية',
-    'الميناء',
-    'مونكل',
-    'نواذيبو',
-    'نواكشوط',
-    'النعمة',
-    'وادان',
-    'واد الناقة',
-    'ولد ينج',
-    'ولاتة',
-    'ومبو',
-    'سيليبابي',
-    'تامشكط',
-    'أكجوجت'
-  ];
-  const validatePhoneNumber = (value) => /^\d{8}$/.test(value);
+  // تحديث عنوان الصفحة
+  React.useEffect(() => {
+    document.title = 'طلب تبرع بالدم - تبارو';
+    return () => {
+      document.title = 'تبارو - منصة التبرعات';
+    };
+  }, []);
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setBloodDonation(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+  const [step, setStep] = useState(1);
+  const [supportDocs, setSupportDocs] = useState([]);
+  const [errors, setErrors] = useState({});
+  const [showValidationAlert, setShowValidationAlert] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [formSubmitted, setFormSubmitted] = useState(false);
+  const [fileError, setFileError] = useState('');
+
+  const bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "غير معروف"];
+  const contactOptions = ['phone', 'whatsapp'];
+  
+  const placesList = [
+    'اترارزة',
+    'أدرار',
+    'آسابا',
+    'أكجوجت',
+    'ألاك',
+    'أم التونسي',
+    'أمورج',
+    'أوجفت',
+    'بئر أم اݕرين',
+    'بوتلميت',
+    'بنشاب',
+    'تيجكة',
+    'تيشيت',
+    'تمبدغة',
+    'جعوار',
+    'حاسي الشيخ',
+    'رأس البئر',
+    'الرشيد',
+    'روصو',
+    'زمال',
+    'سيليبابي',
+    'صنقرقة',
+    'طارة',
+    'فم لعبرة',
+    'قيدي مقة',
+    'كوبني',
+    'كرار',
+    'كنكوصة',
+    'كيفة',
+    'لبديا',
+    'لعصابة',
+    'لكصر',
+    'نواكشوط',
+    'نواذيبو',
+    'وألة',
+    'ولاتة',
+    'واد الناگة',
+    'وسو',
+    'يورلي'
+  ];
+
+  const validateStep = (stepNumber) => {
+    const newErrors = {};
+    
+    switch(stepNumber) {
+      case 1:
+        if (!bloodDonation.bloodType) newErrors.bloodType = 'نوع الدم مطلوب';
+        if (!bloodDonation.location) newErrors.location = 'المكان مطلوب';
+        break;
+      case 2:
+        if (!bloodDonation.description) newErrors.description = 'الوصف مطلوب';
+        break;
+      case 3:
+        if (!bloodDonation.deadline) newErrors.deadline = 'الموعد النهائي مطلوب';
+        break;
+      case 4:
+        if (bloodDonation.contactMethods.length === 0) {
+          newErrors.contactMethods = 'يجب اختيار طريقة اتصال واحدة على الأقل';
+        }
+        break;
+      default:
+        break;
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
-  const handleContactChange = (method, value) => {
-    setBloodDonation(prev => {
-      const updated = [...prev.contactMethods];
-      const index = updated.findIndex(m => m.method === method);
-      if (index !== -1) updated[index].number = value;
-      else updated.push({ method, number: value });
-      return { ...prev, contactMethods: updated };
-    });
+  const handleInputChange = (field, value) => {
+    setBloodDonation({ ...bloodDonation, [field]: value });
+    if (errors[field]) {
+      setErrors({ ...errors, [field]: '' });
+    }
+  };
+
+  const handleContactMethodChange = (method) => {
+    const updatedMethods = bloodDonation.contactMethods.includes(method)
+      ? bloodDonation.contactMethods.filter(m => m !== method)
+      : [...bloodDonation.contactMethods, method];
+    
+    setBloodDonation({ ...bloodDonation, contactMethods: updatedMethods });
+    if (errors.contactMethods) {
+      setErrors({ ...errors, contactMethods: '' });
+    }
+  };
+
+  const nextStep = () => {
+    if (validateStep(step)) {
+      setStep(step + 1);
+      setShowValidationAlert(false);
+    } else {
+      setShowValidationAlert(true);
+    }
+  };
+
+  const prevStep = () => {
+    setStep(step - 1);
+    setShowValidationAlert(false);
   };
 
   const handleFileChange = (e) => {
-    const incoming = Array.from(e.target.files || []);
-    const ok = [];
-    const rejected = [];
-    incoming.forEach(f => (isAllowed(f) ? ok.push(f) : rejected.push(f)));
-    setSupportDocs(prev => [...prev, ...ok]);
-    if (rejected.length) {
-      setFileError(`❌ تم تجاهل ${rejected.length} ملف (مسموح فقط صور/PDF وبحجم ≤ ${MAX_FILE_MB}MB).`);
-      setTimeout(()=>setFileError(''), 4000);
+    const files = Array.from(e.target.files);
+    if (files.length > 5) {
+      setFileError('لا يمكن رفع أكثر من 5 ملفات');
+      return;
     }
-    e.target.value = '';
-  };
-
-  const removeFile = (index) => {
-    setSupportDocs(prev => prev.filter((_,i)=>i!==index));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    const newErrors = {};
-    bloodDonation.contactMethods.forEach(({ method, number }) => {
-      if (!validatePhoneNumber(number)) newErrors[method] = true;
+    
+    const validFiles = files.filter(file => {
+      const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      return validTypes.includes(file.type) && file.size <= maxSize;
     });
+    
+    if (validFiles.length !== files.length) {
+      setFileError('بعض الملفات غير صالحة. يُسمح بملفات JPG، PNG، PDF فقط بحجم أقصى 5MB');
+    } else {
+      setFileError('');
+    }
+    
+    setSupportDocs(validFiles);
+  };
 
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!validateStep(4)) {
+      setShowValidationAlert(true);
       return;
     }
 
-    const formData = new FormData();
-    const { contactMethods, ...rest } = bloodDonation;
-    Object.entries(rest).forEach(([k, v]) => formData.append(k, v));
-    formData.append('contactMethods', JSON.stringify(contactMethods));
-    supportDocs.forEach((file) => formData.append('files', file));
+    try {
+      const formData = new FormData();
+      formData.append('bloodType', bloodDonation.bloodType);
+      formData.append('location', bloodDonation.location);
+      formData.append('description', bloodDonation.description);
+      formData.append('deadline', bloodDonation.deadline);
+      formData.append('isUrgent', bloodDonation.isUrgent);
+      formData.append('contactMethods', JSON.stringify(bloodDonation.contactMethods));
 
-    fetchWithInterceptors('/api/blood-requests', {
-      method: 'POST',
-      body: formData
-    })
-      .then(() => {
-        setSuccessMessage("✅ تم إرسال طلب التبرع بنجاح!");
-        setFormSubmitted(true);
-      })
-      .catch(err => console.error("Submission error:", err));
-  };
-
-  const validateStep = () => {
-    const newErrors = {};
-    let valid = true;
-
-    if (step === 1) {
-      if (!bloodDonation.bloodType) { newErrors.bloodType = true; valid = false; }
-      if (!bloodDonation.location.trim()) { newErrors.location = true; valid = false; }
-    }
-    if (step === 2) {
-      if (!bloodDonation.description.trim()) { newErrors.description = true; valid = false; }
-      if (!bloodDonation.deadline) { newErrors.deadline = true; valid = false; }
-    }
-    if (step === 3) {
-      contactOptions.forEach((method) => {
-        const current = bloodDonation.contactMethods.find(m => m.method === method);
-        const number = current?.number || '';
-        if (!validatePhoneNumber(number)) { newErrors[method] = true; valid = false; }
+      supportDocs.forEach((file) => {
+        formData.append('supportDocs', file);
       });
-    }
 
-    setErrors(newErrors);
-    setShowValidationAlert(!valid);
-    return valid;
+      const response = await fetchWithInterceptors('/api/blood-request', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        setSuccessMessage('تم إرسال طلب التبرع بالدم بنجاح!');
+        setFormSubmitted(true);
+        
+        // Reset form after successful submission
+        setTimeout(() => {
+          setBloodDonation({
+            bloodType: '',
+            location: '',
+            description: '',
+            deadline: '',
+            isUrgent: false,
+            contactMethods: []
+          });
+          setSupportDocs([]);
+          setStep(1);
+          setFormSubmitted(false);
+          setSuccessMessage('');
+        }, 3000);
+      }
+    } catch (error) {
+      console.error('Error submitting blood donation request:', error);
+      setErrors({ general: 'حدث خطأ أثناء إرسال الطلب' });
+    }
   };
+
+  const resetForm = () => {
+    setBloodDonation({
+      bloodType: '',
+      location: '',
+      description: '',
+      deadline: '',
+      isUrgent: false,
+      contactMethods: []
+    });
+    setSupportDocs([]);
+    setStep(1);
+    setErrors({});
+    setShowValidationAlert(false);
+    setSuccessMessage('');
+    setFormSubmitted(false);
+  };
+
+  // معلومات الخطوات للتنقل (4 خطوات)
+  const stepInfo = {
+    1: { 
+      title: 'نوع الدم والمكان', 
+      description: 'اختر نوع الدم المطلوب وحدد المكان',
+      icon: '🩸'
+    },
+    2: { 
+      title: 'وصف الحالة', 
+      description: 'اكتب وصفاً مفصلاً وارفق الملفات الداعمة',
+      icon: '📝'
+    },
+    3: { 
+      title: 'الموعد والإعدادات', 
+      description: 'حدد الموعد النهائي وإعداد الطوارئ',
+      icon: '⏰'
+    },
+    4: { 
+      title: 'معلومات الاتصال', 
+      description: 'اختر طرق التواصل وراجع الطلب',
+      icon: '📞'
+    }
+  };
+
+  const totalSteps = 4;
+
+  if (formSubmitted && successMessage) {
+    return (
+      <div className="donation-form-container">
+        <TitleMain title="طلب تبرع بالدم" />
+        <Alert variant="success" className="text-center">
+          <FaCheck className="me-2" />
+          {successMessage}
+        </Alert>
+        <div className="text-center">
+          <Button variant="primary" onClick={resetForm}>
+            إنشاء طلب جديد
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <>
-      <TitleMain text1="التبرع بالدم" text2="اعلان طلب" />
-      <div className="donation-form-container">
-        <div className="form-title-box">
-          <ProgressStep step={step} total={5} />
+    <div className="donation-form-container">
+      {/* رأس النموذج الأنيق */}
+      <header className="form-header">
+        <TitleMain title="طلب تبرع بالدم 🩸" />
+        
+        {/* شريط التقدم متعدد الخطوات */}
+        <div className="steps-progress-container" role="progressbar" aria-valuenow={step} aria-valuemin="1" aria-valuemax={totalSteps}>
+          <div className="steps-info">
+            <div className="current-step-info">
+              <span className="step-icon">{stepInfo[step]?.icon}</span>
+              <div className="step-details">
+                <h3 className="step-title">{stepInfo[step]?.title}</h3>
+                <p className="step-description">{stepInfo[step]?.description}</p>
+              </div>
+            </div>
+            
+            {/* نقاط الخطوات بدلاً من العداد النصي */}
+            <div className="steps-dots-header">
+              {Array.from({ length: totalSteps }, (_, index) => (
+                <div
+                  key={index + 1}
+                  className={`step-dot-header ${step >= index + 1 ? 'completed' : ''} ${step === index + 1 ? 'active' : ''}`}
+                  aria-label={`الخطوة ${index + 1}: ${stepInfo[index + 1]?.title}`}
+                >
+                  {step > index + 1 ? '✓' : index + 1}
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* شريط التقدم البصري */}
+          <div className="progress-indicator">
+            <div 
+              className={`progress-bar ${formSubmitted ? 'complete' : ''}`}
+              style={{ width: `${(step / totalSteps) * 100}%` }}
+            ></div>
+          </div>
         </div>
+      </header>
 
-        {fileError && <Alert variant="warning">{fileError}</Alert>}
-        {showValidationAlert && (
-          <Alert variant="danger" onClose={() => setShowValidationAlert(false)} dismissible>
-            ⚠️ يرجى ملء جميع الحقول الإلزامية قبل المتابعة.
+      {showValidationAlert && (
+        <Alert variant="danger" className="text-center">
+          يرجى ملء جميع الحقول المطلوبة قبل المتابعة
+        </Alert>
+      )}
+
+      <Form onSubmit={handleSubmit}>
+        {/* Step 1: Blood Type & Location */}
+        {step === 1 && (
+          <div className="step-content">
+            <Form.Group className="mb-3">
+              <Form.Label>نوع الدم المطلوب *</Form.Label>
+              <Form.Select
+                value={bloodDonation.bloodType}
+                onChange={(e) => handleInputChange('bloodType', e.target.value)}
+                isInvalid={!!errors.bloodType}
+              >
+                <option value="">اختر نوع الدم</option>
+                {bloodTypes.map((type) => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </Form.Select>
+              {errors.bloodType && (
+                <Form.Control.Feedback type="invalid">
+                  {errors.bloodType}
+                </Form.Control.Feedback>
+              )}
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>المكان *</Form.Label>
+              <Form.Select
+                value={bloodDonation.location}
+                onChange={(e) => handleInputChange('location', e.target.value)}
+                isInvalid={!!errors.location}
+              >
+                <option value="">اختر المكان</option>
+                {placesList.map((place) => (
+                  <option key={place} value={place}>{place}</option>
+                ))}
+              </Form.Select>
+              {errors.location && (
+                <Form.Control.Feedback type="invalid">
+                  {errors.location}
+                </Form.Control.Feedback>
+              )}
+            </Form.Group>
+          </div>
+        )}
+
+        {/* Step 2: Description */}
+        {step === 2 && (
+          <div className="step-content">
+            <h4 className="step-title">وصف الحالة</h4>
+            <Form.Group className="mb-3">
+              <Form.Label>وصف الحالة *</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={4}
+                value={bloodDonation.description}
+                onChange={(e) => handleInputChange('description', e.target.value)}
+                placeholder="اكتب وصفاً مفصلاً عن الحالة والحاجة للتبرع..."
+                isInvalid={!!errors.description}
+              />
+              {errors.description && (
+                <Form.Control.Feedback type="invalid">
+                  {errors.description}
+                </Form.Control.Feedback>
+              )}
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>الملفات الداعمة (اختياري)</Form.Label>
+              <Form.Control
+                type="file"
+                multiple
+                accept="image/*,.pdf"
+                onChange={handleFileChange}
+              />
+              <Form.Text className="text-muted">
+                يمكنك رفع حتى 5 ملفات (صور أو PDF، حجم أقصى 5MB لكل ملف)
+              </Form.Text>
+              {fileError && <div className="text-danger mt-2">{fileError}</div>}
+              {supportDocs.length > 0 && (
+                <div className="mt-2">
+                  <small className="text-success">تم اختيار {supportDocs.length} ملف(ات)</small>
+                </div>
+              )}
+            </Form.Group>
+          </div>
+        )}
+
+        {/* Step 3: Deadline */}
+        {step === 3 && (
+          <div className="step-content">
+            <h4 className="step-title">الموعد النهائي</h4>
+            <Form.Group className="mb-3">
+              <Form.Label>الموعد النهائي للتبرع *</Form.Label>
+              <Form.Control
+                type="datetime-local"
+                value={bloodDonation.deadline}
+                onChange={(e) => handleInputChange('deadline', e.target.value)}
+                isInvalid={!!errors.deadline}
+              />
+              {errors.deadline && (
+                <Form.Control.Feedback type="invalid">
+                  {errors.deadline}
+                </Form.Control.Feedback>
+              )}
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Check
+                type="checkbox"
+                label="حالة طارئة"
+                checked={bloodDonation.isUrgent}
+                onChange={(e) => handleInputChange('isUrgent', e.target.checked)}
+              />
+            </Form.Group>
+          </div>
+        )}
+
+        {/* Step 4: Contact Methods */}
+        {step === 4 && (
+          <div className="step-content">
+            <h4 className="step-title">طرق التواصل</h4>
+            <Form.Group className="mb-3">
+              <Form.Label>اختر طرق التواصل المفضلة *</Form.Label>
+              <div>
+                {contactOptions.map((method) => (
+                  <Form.Check
+                    key={method}
+                    type="checkbox"
+                    label={method === 'phone' ? 'هاتف' : 'واتساب'}
+                    checked={bloodDonation.contactMethods.includes(method)}
+                    onChange={() => handleContactMethodChange(method)}
+                  />
+                ))}
+              </div>
+              {errors.contactMethods && (
+                <div className="text-danger mt-2">{errors.contactMethods}</div>
+              )}
+            </Form.Group>
+
+            {/* Summary */}
+            <div className="summary-section">
+              <h5>ملخص الطلب:</h5>
+              <ul>
+                <li><strong>نوع الدم:</strong> {bloodDonation.bloodType}</li>
+                <li><strong>المكان:</strong> {bloodDonation.location}</li>
+                <li><strong>الموعد النهائي:</strong> {new Date(bloodDonation.deadline).toLocaleString('ar-MR')}</li>
+                <li><strong>طرق التواصل:</strong> {bloodDonation.contactMethods.map(method => method === 'phone' ? 'هاتف' : 'واتساب').join(', ')}</li>
+                {bloodDonation.isUrgent && <li><strong>حالة طارئة</strong></li>}
+                {supportDocs.length > 0 && <li><strong>الملفات الداعمة:</strong> {supportDocs.length} ملف(ات)</li>}
+              </ul>
+            </div>
+          </div>
+        )}
+
+        {errors.general && (
+          <Alert variant="danger" className="mt-3">
+            {errors.general}
           </Alert>
         )}
 
-        {formSubmitted ? (
-          <Alert variant="success">{successMessage}</Alert>
-        ) : (
-          <Form onSubmit={handleSubmit}>
-            {step === 1 && (
-              <>
-                <Form.Group>
-                  <Form.Label>فصيلة الدم</Form.Label>
-                  <Form.Control as="select" name="bloodType" value={bloodDonation.bloodType} onChange={handleChange} isInvalid={errors.bloodType} required>
-                    <option value="">-- اختر الفصيلة --</option>
-                    {bloodTypes.map(type => (<option key={type} value={type}>{type}</option>))}
-                  </Form.Control>
-                  {errors.bloodType && <Form.Control.Feedback type="invalid">الرجاء اختيار فصيلة الدم</Form.Control.Feedback>}
-                </Form.Group>
-
-                <Form.Group>
-                  <Form.Label>الموقع</Form.Label>
-                  <Form.Control list="locations" name="location" value={bloodDonation.location} onChange={handleChange} placeholder="اكتب أو اختر المقاطعة" isInvalid={errors.location} required/>
-                  <datalist id="locations">{placesList.map(place => <option key={place} value={place} />)}</datalist>
-                  {errors.location && <Form.Control.Feedback type="invalid">هذا الحقل مطلوب</Form.Control.Feedback>}
-                </Form.Group>
-              </>
-            )}
-
-            {step === 2 && (
-              <>
-                <Form.Group>
-                  <Form.Label>وصف الحالة</Form.Label>
-                  <Form.Control as="textarea" name="description" value={bloodDonation.description} onChange={handleChange} isInvalid={errors.description} required />
-                  {errors.description && <Form.Control.Feedback type="invalid">يرجى إدخال وصف الحالة</Form.Control.Feedback>}
-                </Form.Group>
-
-                <Form.Group>
-                  <Form.Label>الموعد النهائي</Form.Label>
-                  <Form.Control type="date" name="deadline" value={bloodDonation.deadline} onChange={handleChange} isInvalid={errors.deadline} required />
-                  {errors.deadline && <Form.Control.Feedback type="invalid">حدد موعدًا نهائيًا صالحًا</Form.Control.Feedback>}
-                </Form.Group>
-
-                <Form.Group className="mt-2">
-                  <Form.Check type="checkbox" label="طلب مستعجل" name="isUrgent" checked={bloodDonation.isUrgent} onChange={handleChange} />
-                </Form.Group>
-              </>
-            )}
-
-            {step === 3 && (
-              <Form.Group>
-                <Form.Label>وسائل التواصل</Form.Label>
-                {contactOptions.map(method => {
-                  const current = bloodDonation.contactMethods.find(m => m.method === method);
-                  const numberValue = current ? current.number : '';
-                  return (
-                    <div key={method} className="mb-3">
-                      <Form.Label>{method === 'phone' ? 'الهاتف' : 'واتساب'}</Form.Label>
-                      <Form.Control
-                        type="text"
-                        placeholder={`${method}`}
-                        value={numberValue}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          handleContactChange(method, value);
-                          setErrors(prev => ({ ...prev, [method]: !/^\d{8}$/.test(value) }));
-                        }}
-                        isInvalid={errors[method]}
-                        required
-                      />
-                      <Form.Control.Feedback type="invalid">يجب إدخال رقم صالح مكوّن من 8 أرقام</Form.Control.Feedback>
-                    </div>
-                  );
-                })}
-              </Form.Group>
-            )}
-
-            {step === 4 && (
-              <Form.Group>
-                <Form.Label>الوثائق الداعمة (صور / PDF)</Form.Label>
-                <Form.Control type="file" multiple accept=".pdf,image/*" onChange={handleFileChange} />
-                <ul className="mt-2 list-unstyled">
-                  {supportDocs.map((file, idx) => (
-                    <li key={idx}>📎 {file.name}
-                      <Button variant="outline-danger" size="sm" onClick={() => removeFile(idx)} className="ms-2">حذف</Button>
-                    </li>
-                  ))}
-                </ul>
-              </Form.Group>
-            )}
-
-            {step === 5 && (
-              <Alert variant="info" className="text-center">✅ أنت على وشك إرسال الطلب بعد مراجعة جميع المعلومات.</Alert>
-            )}
-
-            <div className="action-buttons">
-              {step > 1 && (
-                <Button className="button-prev" onClick={() => setStep(step - 1)}>
-                  السابق <FaArrowRight className="ms-2" size={25} />
-                </Button>
-              )}
-              {step < 5 && (
-                <Button className="button-next" onClick={() => { if (validateStep()) setStep(step + 1); }}>
-                  <FaArrowLeft className="me-2" size={25} /> التالي
-                </Button>
-              )}
-              {step === 5 && (
-                <Button className="button-submit" type="submit">
-                  <FaCheck className="ms-2" size={25} /> إرسال الطلب
-                </Button>
-              )}
-            </div>
-          </Form>
-        )}
-      </div>
-    </>
+        {/* Navigation Buttons */}
+        <div className="action-buttons mt-3 d-flex gap-2">
+          {step > 1 && (
+            <Button 
+              variant="secondary" 
+              onClick={prevStep}
+              size="md"
+              className="px-4 py-2"
+            >
+              السابق
+            </Button>
+          )}
+          
+          {step < 4 && (
+            <Button 
+              variant="primary" 
+              onClick={nextStep}
+              size="md"
+              className="px-4 py-2"
+            >
+              التالي
+            </Button>
+          )}
+          
+          {step === 4 && (
+            <Button 
+              type="submit" 
+              variant="success"
+              size="md"
+              className="px-4 py-2"
+            >
+              <FaCheck className="me-2" />
+              إرسال الطلب
+            </Button>
+          )}
+        </div>
+      </Form>
+    </div>
   );
 };
 
