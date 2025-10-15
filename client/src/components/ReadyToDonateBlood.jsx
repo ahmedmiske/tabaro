@@ -1,6 +1,7 @@
 // src/components/ReadyToDonateBlood.jsx
 import React, { useState, useEffect } from 'react';
 import { Form, Button, Alert, Modal } from 'react-bootstrap';
+
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 
 const placesList = [
@@ -83,7 +84,6 @@ export default function ReadyToDonateBlood() {
 
   return (
     <>
-      {/* البطاقة + الرابط الذي يفتح المودال */}
       <div className="card border-0 shadow-sm p-3 d-flex align-items-center justify-content-between flex-row"
            style={{ borderRadius: 16 }}>
         <div>
