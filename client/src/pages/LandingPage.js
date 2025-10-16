@@ -63,6 +63,7 @@ function LandingPage() {
         <section className="about-section" id="about" aria-label="عن المنصّة">
           <About />
         </section>
+
       </main>
     </>
   );

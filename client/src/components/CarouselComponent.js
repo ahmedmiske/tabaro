@@ -43,14 +43,21 @@ const CarouselComponent = () => {
   }
 
   return (
-    <Carousel className="carousel">
+    <Carousel 
+      className="carousel" 
+      controls={true} 
+      indicators={true}
+      interval={4000}
+      pause="hover"
+      dir="rtl"
+    >
       {campaigns.map((campaign, index) => (
         <Carousel.Item key={campaign.id}>
           <Link to={`/campaign/${campaign.id}`}>
             <img
               className="d-block w-100"
               src={campaign.imageUrls[0]}
-              alt={`SLIDE ${index + 1}`}
+              alt={`شريحة ${index + 1}: ${campaign.title}`}
             />
             <Carousel.Caption>
               <h3>{campaign.title}</h3>

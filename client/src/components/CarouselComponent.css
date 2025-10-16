@@ -1,13 +1,13 @@
+/* تصميم الكاروسيل مناسب للعربية */
 .carousel {
     width: 100%;
-    /* max-width: 800px; */
     height: 200px;
-    /* margin: auto; */
     display: flex;
     flex-direction: column;
-  }
+    direction: rtl; /* اتجاه من اليمين إلى اليسار */
+}
   
-  .carousel img {
+.carousel img {
     max-height: 200px;
     object-fit: cover;
     width: 100%;
@@ -20,5 +20,89 @@
     -moz-border-radius: 5px;
     -ms-border-radius: 5px;
     -o-border-radius: 5px;
+}
+
+/* تخصيص أسهم التنقل للعربية */
+.carousel .carousel-control-prev,
+.carousel .carousel-control-next {
+    width: 5%;
+    color: #FF7A45;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.carousel .carousel-control-prev:hover,
+.carousel .carousel-control-next:hover {
+    opacity: 1;
+}
+
+/* عكس موضع الأسهم - السهم الأيسر يصبح يمين والعكس */
+.carousel .carousel-control-prev {
+    right: 0;
+    left: auto;
+}
+
+.carousel .carousel-control-next {
+    left: 0;
+    right: auto;
+}
+
+/* تخصيص أيقونات الأسهم */
+.carousel .carousel-control-prev-icon,
+.carousel .carousel-control-next-icon {
+    background-color: #FF7A45;
+    border-radius: 50%;
+    padding: 10px;
+    box-shadow: 0 4px 10px rgba(255, 122, 69, 0.3);
+}
+
+/* عكس اتجاه الأسهم */
+.carousel .carousel-control-prev-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23fff'%3e%3cpath d='m8.25 1.25 3.5 3.5a.75.75 0 0 1 0 1.06L8.25 9.31a.75.75 0 0 1-1.06-1.06L9.44 6H2.75a.75.75 0 0 1 0-1.5h6.69L7.19 2.25a.75.75 0 0 1 1.06-1.06z'/%3e%3c/svg%3e") !important;
+}
+
+.carousel .carousel-control-next-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23fff'%3e%3cpath d='m7.75 1.25-3.5 3.5a.75.75 0 0 0 0 1.06l3.5 3.5a.75.75 0 0 0 1.06-1.06L6.56 6h6.69a.75.75 0 0 0 0-1.5H6.56l2.25-2.25a.75.75 0 0 0-1.06-1.06z'/%3e%3c/svg%3e") !important;
+}
+
+/* تخصيص المؤشرات (النقاط) */
+.carousel .carousel-indicators {
+    right: 50%;
+    left: auto;
+    transform: translateX(50%);
+}
+
+.carousel .carousel-indicators [data-bs-target] {
+    background-color: #FF7A45;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    width: 12px;
+    height: 12px;
+    margin: 0 3px;
+    opacity: 0.6;
+}
+
+.carousel .carousel-indicators .active {
+    opacity: 1;
+    transform: scale(1.2);
+}
+
+/* تخصيص العناوين */
+.carousel .carousel-caption {
+    text-align: right;
+    right: 15%;
+    left: auto;
+    padding-bottom: 1.25rem;
+}
+
+.carousel .carousel-caption h3 {
+    color: #fff;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+.carousel .carousel-caption p {
+    color: #f8f9fa;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.6);
 }
   
