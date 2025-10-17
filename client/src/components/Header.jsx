@@ -6,6 +6,7 @@ import {
   FiChevronDown, FiSearch, FiShoppingCart, FiUser,
   FiHeart, FiUsers, FiHelpCircle, FiDroplet, FiGrid, FiMenu, FiX, FiList
 } from 'react-icons/fi';
+
 import fetchWithInterceptors from '../services/fetchWithInterceptors.js';
 import TopBar from './TopBar.jsx';
 import './Header.css';
@@ -50,22 +51,17 @@ function Header({ notifCount }) {
   const displayName = useMemo(() => {
     if (!user) return '';
     const fn = user.firstName || user.given_name || '';
-    // const ln = user.lastName || user.family_name || '';
     const full = `${fn}`.trim();
     return full || user.username || user.email || 'الحساب';
   }, [user]);
 
-  // حاول تلقّي رابط الصورة من أسماء حقول شائعة
-// Header.jsx
-const avatarUrl = useMemo(() => {
-  if (!user) return '';
-  const raw = user.profileImage || '';
-  if (!raw) return '';
-  // لو جاء رابط كامل http اتركه كما هو، وإلا ابنِه على /uploads/profileImages
-  if (/^https?:\/\//i.test(raw) || raw.startsWith('/uploads/')) return raw;
-  return `/uploads/profileImages/${raw}`;
-}, [user]);
-
+  const avatarUrl = useMemo(() => {
+    if (!user) return '';
+    const raw = user.profileImage || '';
+    if (!raw) return '';
+    if (/^https?:\/\//i.test(raw) || raw.startsWith('/uploads/')) return raw;
+    return `/uploads/profileImages/${raw}`;
+  }, [user]);
 
   const avatarLetter = (displayName || 'ح').trim().charAt(0).toUpperCase();
 
@@ -76,8 +72,9 @@ const avatarUrl = useMemo(() => {
   const [badgeCount, setBadgeCount] = useState(Number.isFinite(notifCount) ? notifCount : 0);
   const [searchOpen, setSearchOpen] = useState(false);
 
-  const isActive = useCallback((path) =>
-    location.pathname === path || (path !== '/' && location.pathname.startsWith(path)), [location.pathname]
+  const isActive = useCallback(
+    (path) => location.pathname === path || (path !== '/' && location.pathname.startsWith(path)),
+    [location.pathname]
   );
 
   const onSubmit = useCallback((e) => {
@@ -148,31 +145,45 @@ const avatarUrl = useMemo(() => {
     return () => { body.style.overflow = prevOverflow || ''; };
   }, [mobileOpen]);
 
-  // Fetch notifications count if prop not provided (unread only)
+  // Fetch notifications count (unread) — ONLY if authenticated
   useEffect(() => {
     let stop = false;
     let timer;
     const ctrl = new AbortController();
+
+    const token =
+      (typeof window !== 'undefined' && (localStorage.getItem('token') || localStorage.getItem('authToken'))) || null;
 
     const loadCount = async () => {
       try {
         const { body, ok } = await fetchWithInterceptors('/api/notifications', { signal: ctrl.signal });
         if (!ok) return;
         const list = body?.data || body || [];
-        // دعم أسماء حقول مختلفة: read / isRead / status === 'unread'
         const unread = Array.isArray(list)
           ? list.filter(n => n && (n.read === false || n.isRead === false || n.status === 'unread')).length
           : 0;
         if (!stop) setBadgeCount(unread);
-      } catch { /* silent */ }
+      } catch {
+        // ignore
+      }
     };
 
-    if (!Number.isFinite(notifCount)) {
-      loadCount();
-      timer = setInterval(loadCount, 20000);
-    } else {
+    // إذا تم تمرير القيمة كمُدخل نستخدمها مباشرة
+    if (Number.isFinite(notifCount)) {
       setBadgeCount(notifCount);
+      return () => {};
     }
+
+    // بدون توكن لا نطلب شيئًا
+    if (!token) {
+      setBadgeCount(0);
+      return () => {};
+    }
+
+    // مع توكن: اطلب بشكل دوري
+    loadCount();
+    timer = setInterval(loadCount, 20000);
+
     return () => { stop = true; ctrl.abort(); if (timer) clearInterval(timer); };
   }, [notifCount]);
 
@@ -316,18 +327,22 @@ const avatarUrl = useMemo(() => {
           aria-labelledby={bloodId}
         >
           <div className="eh-mega-grid">
-            <Link to="/blood-donation" className="eh-mega-card" onClick={() => setOpen(null)}>
+            {/* إعلان الاستعداد للتبرّع بالدم */}
+            <Link to="/ready/blood" className="eh-mega-card" onClick={() => setOpen(null)}>
               <div className="eh-mega-icon"><FiDroplet /></div>
-              <div className="eh-mega-content"><h4>زر التبرع بالدم</h4><p>سجّل رغبتك بالتبرع الآن</p></div>
+              <div className="eh-mega-content"><h4>اعلان تبرع</h4><p>سجّل رغبتك بالتبرع الآن</p></div>
             </Link>
+
             <Link to="/blood-donation" className="eh-mega-card" onClick={() => setOpen(null)}>
               <div className="eh-mega-icon"><FiList /></div>
               <div className="eh-mega-content"><h4>طلب التبرع</h4><p>إضافة طلب جديد</p></div>
             </Link>
+
             <Link to="/blood-donations" className="eh-mega-card" onClick={() => setOpen(null)}>
               <div className="eh-mega-icon"><FiGrid /></div>
               <div className="eh-mega-content"><h4>قائمة الطلبات</h4><p>تصفّح وفلترة</p></div>
             </Link>
+
             <Link to="/donors/blood" className="eh-mega-card" onClick={() => setOpen(null)}>
               <div className="eh-mega-icon"><FiUsers /></div>
               <div className="eh-mega-content"><h4>المتبرعون</h4><p>المتبرعون المسجّلون</p></div>
@@ -345,18 +360,22 @@ const avatarUrl = useMemo(() => {
           aria-labelledby={generalId}
         >
           <div className="eh-mega-grid">
-            <Link to="/donation-requests" className="eh-mega-card" onClick={() => setOpen(null)}>
+            {/* إعلان الاستعداد للتبرّع العام */}
+            <Link to="/ready/general" className="eh-mega-card" onClick={() => setOpen(null)}>
               <div className="eh-mega-icon"><FiHeart /></div>
-              <div className="eh-mega-content"><h4>تبرعات عامة</h4><p>ابدأ تبرعًا الآن</p></div>
+              <div className="eh-mega-content"><h4>اعلان تبرع</h4><p>ابدأ التبرع الآن</p></div>
             </Link>
+
             <Link to="/donation-requests" className="eh-mega-card" onClick={() => setOpen(null)}>
               <div className="eh-mega-icon"><FiList /></div>
               <div className="eh-mega-content"><h4>طلب التبرع</h4><p>أنشئ طلبًا عامًا</p></div>
             </Link>
+
             <Link to="/donations" className="eh-mega-card" onClick={() => setOpen(null)}>
               <div className="eh-mega-icon"><FiGrid /></div>
               <div className="eh-mega-content"><h4>قائمة الطلبات</h4><p>تصفية حسب النوع</p></div>
             </Link>
+
             <Link to="/donors/general" className="eh-mega-card" onClick={() => setOpen(null)}>
               <div className="eh-mega-icon"><FiUsers /></div>
               <div className="eh-mega-content"><h4>المتبرعون</h4><p>المتبرعون العامّون</p></div>
@@ -422,9 +441,10 @@ const avatarUrl = useMemo(() => {
 
           <nav className="eh-drawer-nav" role="navigation" aria-label="القائمة الرئيسية">
             <Link to="/" className="eh-drawer-link" onClick={() => setMobileOpen(false)}><span>الرئيسية</span></Link>
+
             <div className="eh-drawer-group">
               <div className="eh-drawer-group-title"><FiDroplet /><span>التبرع بالدم</span></div>
-              <Link to="/blood-donation" onClick={() => setMobileOpen(false)}>زر التبرع بالدم</Link>
+              <Link to="/ready/blood" onClick={() => setMobileOpen(false)}>اعلان تبرع</Link>
               <Link to="/blood-donation" onClick={() => setMobileOpen(false)}>طلب التبرع</Link>
               <Link to="/blood-donations" onClick={() => setMobileOpen(false)}>قائمة الطلبات</Link>
               <Link to="/donors/blood" onClick={() => setMobileOpen(false)}>المتبرعون</Link>
@@ -432,7 +452,7 @@ const avatarUrl = useMemo(() => {
 
             <div className="eh-drawer-group">
               <div className="eh-drawer-group-title"><FiHeart /><span>تبرعات عامة</span></div>
-              <Link to="/donation-requests" onClick={() => setMobileOpen(false)}>تبرعات عامة</Link>
+              <Link to="/ready/general" onClick={() => setMobileOpen(false)}>اعلان تبرع عام</Link>
               <Link to="/donation-requests" onClick={() => setMobileOpen(false)}>طلب التبرع</Link>
               <Link to="/donations" onClick={() => setMobileOpen(false)}>قائمة الطلبات</Link>
               <Link to="/donors/general" onClick={() => setMobileOpen(false)}>المتبرعون</Link>
@@ -456,4 +476,5 @@ const avatarUrl = useMemo(() => {
 
 Header.propTypes = { notifCount: PropTypes.number };
 Header.defaultProps = { notifCount: null };
+
 export default Header;
