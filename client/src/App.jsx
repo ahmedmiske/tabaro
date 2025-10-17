@@ -21,8 +21,6 @@ import UserProfile from './pages/UserProfile';
 import AddUserserPage from './pages/addUserPage';
 import About from './components/About';
 import NotFound from './pages/NotFound';
-import ReadyToDonateBloodPage from './pages/ReadyToDonateBloodPage.jsx';
-import ReadyToDonateGeneralPage from './pages/ReadyToDonateGeneralPage';
 
 // Lists & details
 import BloodDonationList from './components/BloodDonationListe';
@@ -52,9 +50,7 @@ import NotificationsPage from './pages/NotificationsPage';
 import OrangeButtonsShowcase from './components/OrangeButtonsShowcase';
 import ButtonsDemo from './components/ButtonsDemo';
 
-// Global modals (ready to donate)
-import ReadyToDonateBlood from './components/ReadyToDonateBlood.jsx';
-import ReadyToDonateGeneral from './components/ReadyToDonateGeneral.jsx';
+// Global modals (ready to donate) - مكونات أصبحت جزءاً من التصميم الجديد
 
 // Guards & socket
 import RequireAuth from './components/RequireAuth';
@@ -131,8 +127,6 @@ function App() {
             <Route path="/messages" element={<RequireAuth><ChatList /></RequireAuth>} />
             <Route path="/notifications" element={<RequireAuth><NotificationsPage /></RequireAuth>} />
             <Route path="/users/:id" element={<RequireAuth><PublicProfile /></RequireAuth>} />
-            <Route path="/ready/blood" element={<RequireAuth><ReadyToDonateBloodPage /></RequireAuth>} />
-            <Route path="/ready/general" element={<RequireAuth><ReadyToDonateGeneralPage /></RequireAuth>} />
 
             {/* صفحات المتبرعين */}
             <Route path="/donors/blood" element={<BloodDonors />} />
@@ -148,12 +142,6 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
-
-        {/* مودالات الإعلان متاحة عالميًا وتعمل بالـ hash */}
-        <RequireAuth>
-          <ReadyToDonateBlood />
-          <ReadyToDonateGeneral />
-        </RequireAuth>
 
         <Footer />
       </div>

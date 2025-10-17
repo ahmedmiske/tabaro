@@ -6,10 +6,18 @@ import { isAuthenticated } from '../utils/auth';
 
 const RequireAuth = ({ children }) => {
   const location = useLocation();
+  
+  // تجنب إعادة التوجيه اللانهائية للمسارات العامة
+  const publicPaths = ['/login', '/register', '/reset-password', '/add-user', '/', '/about'];
+  if (publicPaths.includes(location.pathname)) {
+    return children;
+  }
+  
   if (!isAuthenticated()) {
     const next = encodeURIComponent(location.pathname + location.search);
     return <Navigate to={`/login?next=${next}`} replace />;
   }
+  
   return children;
 };
 

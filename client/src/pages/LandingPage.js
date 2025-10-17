@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Card } from 'react-bootstrap';
 import './LandingPage.css';
 import About from '../components/About';
+import ReadyToDonateSection from '../components/ReadyToDonateSection.jsx';
 import useSEO from '../hooks/useSEO';
 
 function LandingPage() {
@@ -63,6 +64,9 @@ function LandingPage() {
         <section className="about-section" id="about" aria-label="عن المنصّة">
           <About />
         </section>
+        
+        {/* قسم التبرع الجديد والأنيق */}
+        <ReadyToDonateSection />
 
       </main>
     </>
