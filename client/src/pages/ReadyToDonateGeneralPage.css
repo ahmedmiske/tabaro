@@ -1,0 +1,49 @@
+/* ===== Ready To Donate - GENERAL HERO ===== */
+.general-hero {
+  --bg: url('../images/fundo-about.png'); /* بدّل المسار إذا لزم */
+  --overlay: rgba(0,0,0,0.45);
+  --blur: 2px;
+  --accent: #e63946; /* لون القلب */
+  position: relative;
+  min-height: 320px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: #fff;
+  overflow: clip;
+  isolation: isolate;
+  background:
+    radial-gradient(1000px 420px at 85% -5%, rgba(230,57,70,0.22), transparent 60%),
+    radial-gradient(900px 380px at 15% 110%, rgba(230,57,70,0.18), transparent 60%),
+    linear-gradient(180deg, rgba(0,0,0,0.10), rgba(0,0,0,0.35)),
+    var(--bg) center/cover no-repeat fixed;
+  backdrop-filter: blur(var(--blur));
+}
+.general-hero::before{
+  content:"";
+  position:absolute; inset:0;
+  background: linear-gradient(180deg, transparent 0%, var(--overlay) 60%, var(--overlay) 100%);
+  z-index:-1;
+}
+/* زخرفة قلوب */
+.general-hero::after{
+  content:"";
+  position:absolute; inset:auto 0 0 0; height:90px;
+  background:
+    radial-gradient(12px 12px at 8% 50%, var(--accent), transparent 42%),
+    radial-gradient(10px 10px at 22% 62%, var(--accent), transparent 44%),
+    radial-gradient(11px 11px at 38% 55%, var(--accent), transparent 44%),
+    radial-gradient(13px 13px at 60% 65%, var(--accent), transparent 40%),
+    radial-gradient(12px 12px at 80% 52%, var(--accent), transparent 42%),
+    linear-gradient(0deg, rgba(0,0,0,0.15), transparent);
+  opacity:.12;
+}
+.general-hero .hero-content{ padding:48px 12px; }
+.general-hero h1{ font-weight:800; letter-spacing:.5px; margin-bottom:.35rem; }
+.general-hero p{ margin:0; font-size:1.05rem; opacity:.95; }
+@media (min-width:768px){
+  .general-hero{ min-height:380px; }
+  .general-hero .hero-content{ padding:64px 16px; }
+  .general-hero h1{ font-size:2.25rem; }
+  .general-hero p{ font-size:1.1rem; }
+}

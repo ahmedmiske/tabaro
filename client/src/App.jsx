@@ -22,8 +22,7 @@ import AddUserserPage from './pages/addUserPage';
 import About from './components/About';
 import NotFound from './pages/NotFound';
 import ReadyToDonateBloodPage from './pages/ReadyToDonateBloodPage.jsx';
-import ReadyToDonateGeneralPage from './pages/ReadyToDonateGeneralPage';
-
+ import ReadyToDonateGeneralPage from './pages/ReadyToDonateGeneralPage.jsx';
 // Lists & details
 import BloodDonationList from './components/BloodDonationListe';
 import DonationRequestList from './components/DonationRequestList';
@@ -149,11 +148,6 @@ function App() {
           </Routes>
         </div>
 
-        {/* مودالات الإعلان متاحة عالميًا وتعمل بالـ hash */}
-        <RequireAuth>
-          <ReadyToDonateBlood />
-          <ReadyToDonateGeneral />
-        </RequireAuth>
 
         <Footer />
       </div>

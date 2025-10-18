@@ -18,8 +18,10 @@ const donationConfirmationRoutes = require("./routes/donationConfirmationRoutes"
 const bloodRequestRoutes = require("./routes/bloodRequestRoute");
 const messageRoutes = require("./routes/messageRoute");
 const notificationRoutes = require("./routes/notificationRoutes");
-
+const readyToDonateBloodRoute = require('./routes/readyToDonateBloodRoute');
+const readyToDonateGeneralRoute = require('./routes/readyToDonateGeneralRoute');
 const setupSocket = require("./socket");
+
 
 dotenv.config();
 ensureUploadTree();
@@ -87,7 +89,8 @@ app.use("/api/notifications", notificationRoutes);
 if (!process.env.NODE_ENV || process.env.NODE_ENV !== "production") {
   require("./swagger")(app);
 }
-
+app.use('/api/ready-to-donate', readyToDonateBloodRoute);
+app.use('/api/ready-to-donate-general', readyToDonateGeneralRoute);
 app.use('/api/public', publicProfileRoutes);
 /* Errors */
 app.use(notFound);

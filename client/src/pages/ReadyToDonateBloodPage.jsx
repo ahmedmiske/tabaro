@@ -1,7 +1,11 @@
-import React, { useState } from 'react';
+// src/pages/ReadyToDonateBloodPage.jsx
+import React, { useState, useMemo } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
 import { FiDroplet } from 'react-icons/fi';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
+
+// استيراد ملف الخلفية
+import './ReadyToDonateBloodPage.css';
 
 const placesList = [
   'ألاك','أمباني','امبود','آمرج','انتيكان','أوجفت','أطار','باسكنو','بابابي','باركيول',
@@ -16,6 +20,15 @@ const bloodTypes = ['A+','A-','B+','B-','AB+','AB-','O+','O-','غير معروف
 const validatePhone = (v) => /^\d{8}$/.test(v || '');
 
 export default function ReadyToDonateBloodPage() {
+  // اختر صورة الغلاف (ثابتة أو عشوائية من مجلد public/images)
+  const bgCandidates = useMemo(() => [
+    '/images/tabar4.jpg',
+    '/images/tabar6.jpg',
+    '/images/tabar5.jpg',
+    '/images/fundo-about.png'
+  ], []);
+  const bgUrl = useMemo(() => bgCandidates[0], [bgCandidates]); // لو حابب عشوائي: bgCandidates[Math.floor(Math.random()*bgCandidates.length)]
+
   const [form, setForm] = useState({
     location: '',
     bloodType: '',
@@ -70,20 +83,22 @@ export default function ReadyToDonateBloodPage() {
 
   return (
     <div className="py-4" dir="rtl">
-      {/* Hero */}
-      <div className="position-relative">
-        <img src="/images/ready-blood.jpg" alt="التبرع بالدم" className="w-100" style={{ maxHeight: 300, objectFit: 'cover' }} />
-        <div className="position-absolute top-50 start-50 translate-middle text-white text-center">
-          <h1 className="fw-bold mb-2"><FiDroplet className="me-2" /> مستعد للتبرع بالدم</h1>
-          <p className="mb-0">تبرّعك قد ينقذ حياة إنسان اليوم.</p>
+      {/* HERO مع خلفية قابلة للتبديل عبر CSS var */}
+      <section className="blood-hero" style={{ '--bg': `url(${bgUrl})` }}>
+        <div className="hero-content">
+          <h1 className="fw-bold mb-2">
+            <FiDroplet className="me-2" /> مستعد للتبرع بالدم
+          </h1>
+          <p>تبرّعك قد ينقذ حياة إنسان اليوم.</p>
+         
         </div>
-      </div>
+      </section>
 
       <Container className="my-4">
         <Row className="justify-content-center">
           <Col lg={8}>
             <Card className="border-0 shadow-sm">
-              <Card.Body>
+              <Card.Body id="ready-form">
                 <h3 className="mb-3">سجّل استعدادك</h3>
                 {msg && <Alert variant={msg.startsWith('✅') ? 'success':'danger'}>{msg}</Alert>}
 

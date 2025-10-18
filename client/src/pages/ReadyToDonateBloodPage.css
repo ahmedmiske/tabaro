@@ -1,0 +1,76 @@
+/* ===== Ready To Donate Blood - HERO ===== */
+.blood-hero {
+  --bg: url('../images/useradd.png');       /* غلاف افتراضي - عدّل المسار كما تريد */
+  --overlay: rgba(0,0,0,0.45);           /* طبقة تعتيم لتحسين التباين */
+  --blur: 2px;                           /* تمويه خفيف للخلفية */
+  --accent: #b11226;                     /* لون قطرة الدم */
+  position: relative;
+  min-height: 320px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: #fff;
+  overflow: clip;
+  isolation: isolate;
+  background:
+    radial-gradient(1200px 400px at 80% -10%, rgba(177,18,38,0.25), transparent 60%),
+    radial-gradient(900px 350px at 20% 110%, rgba(177,18,38,0.2), transparent 60%),
+    linear-gradient(180deg, rgba(0,0,0,0.10), rgba(0,0,0,0.35)),
+    var(--bg) center/cover no-repeat fixed;
+  backdrop-filter: blur(var(--blur));
+}
+
+.blood-hero::before {
+  /* طبقة التعتيم */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 0%, var(--overlay) 60%, var(--overlay) 100%);
+  z-index: -1;
+}
+
+/* زخرفة قطرات دم SVG كخلفية فوقية خفيفة */
+.blood-hero::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 90px;
+  background:
+    radial-gradient(12px 18px at 5% 40%, var(--accent), transparent 40%),
+    radial-gradient(9px 14px at 15% 70%, var(--accent), transparent 42%),
+    radial-gradient(10px 16px at 35% 55%, var(--accent), transparent 40%),
+    radial-gradient(14px 20px at 60% 65%, var(--accent), transparent 38%),
+    radial-gradient(11px 16px at 78% 50%, var(--accent), transparent 42%),
+    linear-gradient(0deg, rgba(0,0,0,0.15), transparent);
+  opacity: .12;
+}
+
+/* الحاوية الداخلية للنص */
+.blood-hero .hero-content {
+  padding: 48px 12px;
+}
+
+.blood-hero h1 {
+  font-weight: 800;
+  letter-spacing: .5px;
+  margin-bottom: .35rem;
+}
+
+.blood-hero p {
+  margin: 0;
+  font-size: 1.05rem;
+  opacity: .95;
+}
+
+/* زر سريع إن رغبت */
+.blood-cta {
+  margin-top: 1rem;
+}
+
+/* تجاوبية */
+@media (min-width: 768px) {
+  .blood-hero { min-height: 380px; }
+  .blood-hero .hero-content { padding: 64px 16px; }
+  .blood-hero h1 { font-size: 2.25rem; }
+  .blood-hero p { font-size: 1.1rem; }
+}
