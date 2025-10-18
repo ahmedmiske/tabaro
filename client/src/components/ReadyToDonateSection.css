@@ -1,0 +1,336 @@
+/* Ready To Donate Section Styles */
+.ready-to-donate-section {
+  background: linear-gradient(135deg, 
+    rgba(248, 250, 252, 0.8) 0%, 
+    rgba(241, 245, 249, 0.9) 50%, 
+    rgba(248, 250, 252, 0.8) 100%);
+  padding: 80px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.ready-to-donate-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(18, 178, 121, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 122, 69, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* Section Header */
+.section-header {
+  position: relative;
+  z-index: 2;
+}
+
+.section-title {
+  font-size: 2.8rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #12B279 0%, #FF7A45 50%, #12B279 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+/* عنوان كبير خاص */
+.section-title.large-title {
+  font-size: 3.5rem !important;
+  font-weight: 900 !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  letter-spacing: -0.5px;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(90deg, #12B279 0%, #FF7A45 100%);
+  border-radius: 2px;
+}
+
+.section-subtitle {
+  font-size: 1.2rem;
+  color: #64748b;
+  font-weight: 500;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Donate Cards */
+.donate-card {
+  border: none;
+  border-radius: 24px;
+  box-shadow: 
+    0 10px 40px rgba(0, 0, 0, 0.08),
+    0 4px 25px rgba(0, 0, 0, 0.05);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  overflow: hidden;
+  background: white;
+}
+
+.donate-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(90deg, #12B279 0%, #45C897 100%);
+  transition: all 0.3s ease;
+}
+
+.general-card::before {
+  background: linear-gradient(90deg, #FF7A45 0%, #FF9A6C 100%);
+}
+
+.donate-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.15),
+    0 8px 40px rgba(0, 0, 0, 0.1);
+}
+
+.donate-card:hover::before {
+  height: 8px;
+}
+
+/* Card Icons */
+.card-icon {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.blood-icon {
+  background: linear-gradient(135deg, #12B279 0%, #45C897 100%);
+  color: white;
+  box-shadow: 0 8px 25px rgba(18, 178, 121, 0.3);
+}
+
+.general-icon {
+  background: linear-gradient(135deg, #FF7A45 0%, #FF9A6C 100%);
+  color: white;
+  box-shadow: 0 8px 25px rgba(255, 122, 69, 0.3);
+}
+
+.card-icon::after {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  border-radius: 50%;
+  background: inherit;
+  opacity: 0.1;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.1; }
+  50% { transform: scale(1.1); opacity: 0.2; }
+}
+
+/* Card Content */
+.card-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 1rem;
+}
+
+.card-description {
+  color: #64748b;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+/* Features */
+.card-features {
+  margin-bottom: 2rem;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.8rem;
+  font-size: 0.95rem;
+  color: #475569;
+}
+
+.feature-item i {
+  color: #22c55e;
+  margin-left: 0.8rem;
+  font-size: 1rem;
+}
+
+/* Ready Buttons */
+.btn-ready {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 16px 24px;
+  border-radius: 16px;
+  font-weight: 600;
+  font-size: 1.1rem;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  overflow: hidden;
+  border: none;
+  cursor: pointer;
+}
+
+.blood-ready {
+  background: linear-gradient(135deg, #12B279 0%, #45C897 100%);
+  color: white;
+  box-shadow: 0 8px 25px rgba(18, 178, 121, 0.3);
+}
+
+.general-ready {
+  background: linear-gradient(135deg, #FF7A45 0%, #FF9A6C 100%);
+  color: white;
+  box-shadow: 0 8px 25px rgba(255, 122, 69, 0.3);
+}
+
+.btn-ready:hover {
+  transform: translateY(-2px) scale(1.05);
+  color: white;
+  text-decoration: none;
+}
+
+.blood-ready:hover {
+  box-shadow: 0 15px 45px rgba(18, 178, 121, 0.4);
+  background: linear-gradient(135deg, #0EA472 0%, #3BB889 100%);
+}
+
+.general-ready:hover {
+  box-shadow: 0 15px 45px rgba(255, 122, 69, 0.4);
+  background: linear-gradient(135deg, #E6693D 0%, #F08A5D 100%);
+}
+
+.btn-ready::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.2), 
+    transparent);
+  transition: left 0.6s;
+}
+
+.btn-ready:hover::before {
+  left: 100%;
+}
+
+/* Stats Section */
+.stats-row {
+  border-top: 2px solid rgba(18, 178, 121, 0.1);
+  position: relative;
+}
+
+.stat-item {
+  padding: 1rem;
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.stat-item:hover {
+  transform: translateY(-3px);
+}
+
+.stat-number {
+  font-size: 2.2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #12B279 0%, #FF7A45 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  color: #64748b;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .ready-to-donate-section {
+    padding: 60px 0;
+  }
+
+  .section-title {
+    font-size: 2.2rem;
+  }
+
+  .section-subtitle {
+    font-size: 1.1rem;
+  }
+
+  .card-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 1.8rem;
+  }
+
+  .card-title {
+    font-size: 1.3rem;
+  }
+
+  .btn-ready {
+    padding: 14px 20px;
+    font-size: 1rem;
+  }
+
+  .stat-number {
+    font-size: 1.8rem;
+  }
+
+  .stats-row {
+    margin-top: 3rem !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .section-title {
+    font-size: 1.9rem;
+  }
+
+  .section-title.large-title {
+    font-size: 2.4rem !important;
+  }
+
+  .section-subtitle {
+    font-size: 1rem;
+  }
+
+  .donate-card {
+    margin-bottom: 1.5rem;
+  }
+}

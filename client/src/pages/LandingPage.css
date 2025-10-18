@@ -1,9 +1,9 @@
 ﻿.landing-page {
   min-height: 100vh;
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, rgba(var(--primary-rgb), 0) 0%,     rgba(var(--primary-light-rgb), 0.1) 100%), url('./tabarou.png');
+  background: linear-gradient(135deg, rgba(18, 178, 121, 0) 0%, rgba(69, 200, 151, 0.1) 100%), url('./tabarou.png');
   background-size: 110%;
   background-position: center;
   background-attachment: fixed;
@@ -11,14 +11,19 @@
   position: relative;
   animation: backgroundMove 20s ease-in-out infinite;
   -webkit-animation: backgroundMove 20s ease-in-out infinite;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .container-landing {
   position: relative;
   text-align: center;
   z-index: 2;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
- .container-landing {
+.container-landing {
   max-width: 900px;
   width: 100%;
 }

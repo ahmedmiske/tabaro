@@ -212,7 +212,7 @@ function AddUserPage() {
         */}
 
         {/* طبقة التأثيرات البصرية */}
-        <div className="image-overlay" aria-hidden="true"></div>
+       {/*  <div className="image-overlay" aria-hidden="true"></div> */}
 
         {/* الصورة الرئيسية تحتل كامل المساحة */}
         <div className="image-container fullscreen-container">
@@ -225,14 +225,14 @@ function AddUserPage() {
           />
 
           {/* مؤشر التحميل الأنيق */}
-          {isLoading && (
+         {/*  {isLoading && (
             <div className="loading-overlay" aria-live="polite">
               <div className="loading-spinner">
                 <div className="spinner-ring"></div>
                 <span className="loading-text">جاري المعالجة...</span>
               </div>
             </div>
-          )}
+          )} */}
         </div>
       </section>
 
