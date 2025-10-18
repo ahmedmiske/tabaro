@@ -7,12 +7,13 @@ const ContactMethodSchema = new mongoose.Schema({
 }, { _id: false });
 
 const ReadyToDonateBloodSchema = new mongoose.Schema({
-  type: { type: String, default: 'blood' },           // constant "blood"
-  location: { type: String, required: true },         // e.g., "نواكشوط"
+  location: { type: String, required: true },
   bloodType: { type: String, required: true, enum: ['A+','A-','B+','B-','AB+','AB-','O+','O-','غير معروف'] },
   note: { type: String, default: '' },
-  contactMethods: { type: [ContactMethodSchema], validate: v => v && v.length > 0 },
+  contactMethods: { type: [ContactMethodSchema], validate: v => Array.isArray(v) && v.length > 0 },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null }
-}, { timestamps: true });
+}, { timestamps: true, collection: 'ready_to_donate_blood' });
+
+ReadyToDonateBloodSchema.index({ location: 'text', bloodType: 'text', note: 'text' });
 
 module.exports = mongoose.model('ReadyToDonateBlood', ReadyToDonateBloodSchema);

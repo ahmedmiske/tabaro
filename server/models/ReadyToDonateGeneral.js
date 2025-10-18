@@ -1,3 +1,4 @@
+// server/models/ReadyToDonateGeneral.js
 const mongoose = require('mongoose');
 
 const ContactMethodSchema = new mongoose.Schema({
@@ -8,13 +9,13 @@ const ContactMethodSchema = new mongoose.Schema({
 const ReadyToDonateGeneralSchema = new mongoose.Schema({
   city: { type: String, required: true },
   extra: {
-    category: { type: String, enum: ['money','goods','time','other'], default: 'money' } // نوع التبرع
+    category: { type: String, enum: ['money','goods','time','other'], default: 'money' }
   },
   note: { type: String, default: '' },
   contactMethods: { type: [ContactMethodSchema], validate: v => Array.isArray(v) && v.length > 0 },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null }
 }, { timestamps: true, collection: 'ready_to_donate_general' });
 
-ReadyToDonateGeneralSchema.index({ city: 'text', note: 'text', 'extra.category': 1 });
+ReadyToDonateGeneralSchema.index({ city: 'text', note: 'text' });
 
 module.exports = mongoose.model('ReadyToDonateGeneral', ReadyToDonateGeneralSchema);

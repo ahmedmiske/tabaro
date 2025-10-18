@@ -1,103 +1,28 @@
 // src/pages/BloodDonors.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Container, Row, Col, Card, Badge, Button, Form, InputGroup, Alert, Spinner } from 'react-bootstrap';
 import { FiSearch, FiMapPin, FiPhone, FiUser, FiDroplet, FiCalendar, FiFilter } from 'react-icons/fi';
 import { useAuth } from '../AuthContext';
-import { Navigate, Link } from 'react-router-dom';
+import { Navigate, Link, useLocation } from 'react-router-dom';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import './BloodDonors.css';
 
 const BloodDonors = () => {
   const { user } = useAuth();
+  const locationHook = useLocation();
+  const urlParams = useMemo(() => new URLSearchParams(locationHook.search), [locationHook.search]);
+
   const [donors, setDonors] = useState([]);
   const [filteredDonors, setFilteredDonors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterBloodType, setFilterBloodType] = useState('');
-  const [filterLocation, setFilterLocation] = useState('');
+
+  // فلاتر واجهة + قراءة من URL
+  const [searchTerm, setSearchTerm] = useState(urlParams.get('q') || '');
+  const [filterBloodType, setFilterBloodType] = useState(urlParams.get('bloodType') || '');
+  const [filterLocation, setFilterLocation] = useState(urlParams.get('location') || '');
 
   const bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
-
-  const fetchDonors = async () => {
-    try {
-      setLoading(true);
-      // بيانات تجريبية حتى يتم ربط الخادم
-      const mockDonors = [
-        {
-          _id: '1',
-          fullName: 'أحمد محمد',
-          bloodType: 'O+',
-          location: 'نواكشوط',
-          phone: '12345678',
-          age: 28,
-          lastDonation: '2024-01-15',
-          isAvailable: true,
-          joinDate: '2023-06-01'
-        },
-        {
-          _id: '2',
-          fullName: 'فاطمة أحمد',
-          bloodType: 'A+',
-          location: 'نواذيبو',
-          age: 32,
-          isAvailable: true,
-          joinDate: '2023-08-12'
-        },
-        {
-          _id: '3',
-          fullName: 'محمد الأمين',
-          bloodType: 'B-',
-          location: 'أطار',
-          phone: '87654321',
-          age: 25,
-          lastDonation: '2024-02-20',
-          isAvailable: false,
-          joinDate: '2023-05-20'
-        }
-      ];
-      
-      setDonors(mockDonors);
-      setError('');
-    } catch (err) {
-      console.error('Error fetching donors:', err);
-      setError('حدث خطأ في تحميل البيانات');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filterDonors = () => {
-    let filtered = donors;
-
-    // تصفية بالبحث
-    if (searchTerm) {
-      filtered = filtered.filter(donor => 
-        donor.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        donor.location?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    // تصفية بفصيلة الدم
-    if (filterBloodType) {
-      filtered = filtered.filter(donor => donor.bloodType === filterBloodType);
-    }
-
-    // تصفية بالموقع
-    if (filterLocation) {
-      filtered = filtered.filter(donor => 
-        donor.location?.toLowerCase().includes(filterLocation.toLowerCase())
-      );
-    }
-
-    setFilteredDonors(filtered);
-  };
-
-  const clearFilters = () => {
-    setSearchTerm('');
-    setFilterBloodType('');
-    setFilterLocation('');
-  };
 
   const getBloodTypeColor = (bloodType) => {
     const colors = {
@@ -109,21 +34,83 @@ const BloodDonors = () => {
     return colors[bloodType] || 'secondary';
   };
 
-  // استخدام useEffect للتحكم في التوجيه وجلب البيانات
-  useEffect(() => {
-    if (user) {
-      fetchDonors();
+  // الجلب من الباك باستخدام res.body
+  const fetchDonors = async () => {
+    try {
+      setLoading(true);
+      setError('');
+
+      const qs = new URLSearchParams();
+      if (filterBloodType) qs.set('bloodType', filterBloodType);
+      if (filterLocation) qs.set('location', filterLocation);
+      if (searchTerm) qs.set('q', searchTerm);
+
+      const res = await fetchWithInterceptors(`/api/ready-to-donate-blood?${qs.toString()}`);
+      const body = res?.body;
+
+      const arr = Array.isArray(body?.data) ? body.data : (Array.isArray(body) ? body : []);
+      const mapped = arr.map(d => {
+        const phone = (d.contactMethods || []).find(m => m.method === 'phone')?.number;
+        const fullName = d?.createdBy?.firstName
+          ? `${d.createdBy.firstName} ${d.createdBy.lastName || ''}`.trim()
+          : 'متبرع';
+        const profilePicture = d?.createdBy?.profileImage
+          ? `/uploads/profileImages/${d.createdBy.profileImage}`
+          : null;
+
+        return {
+          _id: d._id,
+          fullName,
+          bloodType: d.bloodType,
+          location: d.location,
+          phone,
+          age: undefined,
+          lastDonation: undefined,
+          isAvailable: true,
+          joinDate: d.createdAt,
+          profilePicture
+        };
+      });
+
+      setDonors(mapped);
+    } catch (err) {
+      console.error('Error fetching donors:', err);
+      const msg = err?.body?.error || err?.message || 'حدث خطأ في تحميل البيانات';
+      setError(msg);
+      setDonors([]);
+    } finally {
+      setLoading(false);
     }
-  }, [user]);
+  };
 
-  useEffect(() => {
-    filterDonors();
-  }, [donors, searchTerm, filterBloodType, filterLocation]);
+  const filterDonors = () => {
+    let filtered = donors;
 
-  // إذا لم يكن المستخدم مسجلاً، إعادة توجيه لصفحة تسجيل الدخول
-  if (!user) {
-    return <Navigate to="/login?next=/donors/blood" replace />;
-  }
+    if (searchTerm) {
+      const q = searchTerm.toLowerCase();
+      filtered = filtered.filter(donor =>
+        donor.fullName?.toLowerCase().includes(q) ||
+        donor.location?.toLowerCase().includes(q)
+      );
+    }
+    if (filterBloodType) filtered = filtered.filter(donor => donor.bloodType === filterBloodType);
+    if (filterLocation) {
+      const q = filterLocation.toLowerCase();
+      filtered = filtered.filter(donor => donor.location?.toLowerCase().includes(q));
+    }
+    setFilteredDonors(filtered);
+  };
+
+  const clearFilters = () => {
+    setSearchTerm('');
+    setFilterBloodType('');
+    setFilterLocation('');
+  };
+
+  useEffect(() => { if (user) fetchDonors(); /* eslint-disable-next-line */ }, [user, filterBloodType, filterLocation]);
+  useEffect(() => { filterDonors(); /* eslint-disable-next-line */ }, [donors, searchTerm, filterBloodType, filterLocation]);
+
+  if (!user) return <Navigate to="/login?next=/donors/blood" replace />;
 
   if (loading) {
     return (
@@ -138,15 +125,13 @@ const BloodDonors = () => {
 
   return (
     <Container className="donors-page py-5" dir="rtl">
-      {/* العنوان الرئيسي */}
+      {/* العنوان */}
       <div className="page-header text-center mb-5">
         <h1 className="page-title">
           <FiDroplet className="me-2" />
           المتبرعون بالدم
         </h1>
-        <p className="page-subtitle">
-          شبكة المتبرعين المسجلين في المنصة الوطنية للتبرع
-        </p>
+        <p className="page-subtitle">شبكة المتبرعين المسجلين في المنصة الوطنية للتبرع</p>
         <div className="title-divider"></div>
       </div>
 
@@ -172,14 +157,9 @@ const BloodDonors = () => {
               </InputGroup>
             </Col>
             <Col md={3}>
-              <Form.Select
-                value={filterBloodType}
-                onChange={(e) => setFilterBloodType(e.target.value)}
-              >
+              <Form.Select value={filterBloodType} onChange={(e) => setFilterBloodType(e.target.value)}>
                 <option value="">جميع فصائل الدم</option>
-                {bloodTypes.map(type => (
-                  <option key={type} value={type}>{type}</option>
-                ))}
+                {bloodTypes.map(type => <option key={type} value={type}>{type}</option>)}
               </Form.Select>
             </Col>
             <Col md={3}>
@@ -191,49 +171,20 @@ const BloodDonors = () => {
               />
             </Col>
             <Col md={2}>
-              <Button 
-                variant="outline-secondary" 
-                onClick={clearFilters}
-                className="w-100"
-              >
-                <FiFilter className="me-1" />
-                إعادة تعيين
+              <Button variant="outline-secondary" onClick={clearFilters} className="w-100">
+                <FiFilter className="me-1" /> إعادة تعيين
               </Button>
             </Col>
           </Row>
         </Card.Body>
       </Card>
 
-      {/* إحصائيات سريعة */}
+      {/* إحصائيات */}
       <Row className="stats-row mb-4">
-        <Col md={3} sm={6}>
-          <div className="stat-card">
-            <div className="stat-number">{donors.length}</div>
-            <div className="stat-label">إجمالي المتبرعين</div>
-          </div>
-        </Col>
-        <Col md={3} sm={6}>
-          <div className="stat-card">
-            <div className="stat-number">{filteredDonors.length}</div>
-            <div className="stat-label">النتائج المعروضة</div>
-          </div>
-        </Col>
-        <Col md={3} sm={6}>
-          <div className="stat-card">
-            <div className="stat-number">
-              {donors.filter(d => d.isAvailable).length}
-            </div>
-            <div className="stat-label">متاحون للتبرع</div>
-          </div>
-        </Col>
-        <Col md={3} sm={6}>
-          <div className="stat-card">
-            <div className="stat-number">
-              {new Set(donors.map(d => d.location)).size}
-            </div>
-            <div className="stat-label">مدينة</div>
-          </div>
-        </Col>
+        <Col md={3} sm={6}><div className="stat-card"><div className="stat-number">{donors.length}</div><div className="stat-label">إجمالي المتبرعين</div></div></Col>
+        <Col md={3} sm={6}><div className="stat-card"><div className="stat-number">{filteredDonors.length}</div><div className="stat-label">النتائج المعروضة</div></div></Col>
+        <Col md={3} sm={6}><div className="stat-card"><div className="stat-number">{donors.filter(d => d.isAvailable).length}</div><div className="stat-label">متاحون للتبرع</div></div></Col>
+        <Col md={3} sm={6}><div className="stat-card"><div className="stat-number">{new Set(donors.map(d => d.location)).size}</div><div className="stat-label">مدينة</div></div></Col>
       </Row>
 
       {/* قائمة المتبرعين */}
@@ -243,32 +194,26 @@ const BloodDonors = () => {
             <FiUser size={60} className="text-muted mb-3" />
             <h4>لا توجد نتائج</h4>
             <p className="text-muted">
-              {searchTerm || filterBloodType || filterLocation 
-                ? 'لم يتم العثور على متبرعين يطابقون معايير البحث' 
+              {searchTerm || filterBloodType || filterLocation
+                ? 'لم يتم العثور على متبرعين يطابقون معايير البحث'
                 : 'لا توجد متبرعون مسجلون حالياً'}
             </p>
             {(searchTerm || filterBloodType || filterLocation) && (
-              <Button variant="primary" onClick={clearFilters}>
-                عرض جميع المتبرعين
-              </Button>
+              <Button variant="primary" onClick={clearFilters}>عرض جميع المتبرعين</Button>
             )}
           </Card.Body>
         </Card>
       ) : (
-        <Row>
+        <Row className="g-4 align-items-stretch">
           {filteredDonors.map((donor, index) => (
-            <Col lg={6} xl={4} key={donor._id || index} className="mb-4">
-              <Card className="donor-card h-100">
+            <Col lg={6} xl={4} key={donor._id || index}>
+              <Card className="donor-card h-100 w-300" >
                 <Card.Body>
-                  {/* صورة المتبرع واسمه */}
+                  {/* صورة + اسم */}
                   <div className="donor-header d-flex align-items-center mb-3">
                     <div className="donor-avatar">
                       {donor.profilePicture ? (
-                        <img 
-                          src={donor.profilePicture} 
-                          alt={donor.fullName}
-                          className="avatar-img"
-                        />
+                        <img src={donor.profilePicture} alt={donor.fullName} className="avatar-img" />
                       ) : (
                         <div className="avatar-placeholder">
                           {donor.fullName?.charAt(0)?.toUpperCase() || 'م'}
@@ -278,34 +223,23 @@ const BloodDonors = () => {
                     <div className="donor-info">
                       <h5 className="donor-name">{donor.fullName || 'متبرع'}</h5>
                       <div className="donor-badges">
-                        <Badge 
-                          bg={getBloodTypeColor(donor.bloodType)} 
-                          className="blood-type-badge"
-                        >
-                          <FiDroplet className="me-1" />
-                          {donor.bloodType}
-                        </Badge>
-                        {donor.isAvailable && (
-                          <Badge bg="success" className="ms-2">
-                            متاح للتبرع
+                        {donor.bloodType && (
+                          <Badge bg={getBloodTypeColor(donor.bloodType)} className="blood-type-badge">
+                            <FiDroplet className="me-1" />
+                            {donor.bloodType}
                           </Badge>
                         )}
+                        {donor.isAvailable && <Badge bg="success" className="ms-2">متاح للتبرع</Badge>}
                       </div>
                     </div>
                   </div>
 
-                  {/* معلومات المتبرع */}
+                  {/* تفاصيل */}
                   <div className="donor-details">
                     {donor.location && (
                       <div className="detail-item">
                         <FiMapPin className="detail-icon" />
                         <span>{donor.location}</span>
-                      </div>
-                    )}
-                    {donor.age && (
-                      <div className="detail-item">
-                        <FiUser className="detail-icon" />
-                        <span>{donor.age} سنة</span>
                       </div>
                     )}
                     {donor.lastDonation && (
@@ -316,22 +250,14 @@ const BloodDonors = () => {
                     )}
                   </div>
 
-                  {/* أزرار الإجراء */}
+                  {/* إجراءات */}
                   <div className="donor-actions mt-3">
-                    <Link 
-                      to={`/profile/${donor._id}`} 
-                      className="btn btn-outline-primary btn-sm me-2"
-                    >
+                    <Link to={`/users/${donor._id}`} className="btn btn-outline-primary btn-sm me-2">
                       عرض الملف الشخصي
                     </Link>
                     {donor.phone && (
-                      <Button 
-                        variant="success" 
-                        size="sm"
-                        href={`tel:${donor.phone}`}
-                      >
-                        <FiPhone className="me-1" />
-                        اتصال
+                      <Button variant="success" size="sm" href={`tel:${donor.phone}`}>
+                        <FiPhone className="me-1" /> اتصال
                       </Button>
                     )}
                   </div>
@@ -347,12 +273,8 @@ const BloodDonors = () => {
         <Card.Body className="text-center">
           <FiDroplet size={50} className="text-primary mb-3" />
           <h4>هل تريد أن تصبح متبرعاً؟</h4>
-          <p className="text-muted mb-4">
-            انضم إلى شبكة المتبرعين وساهم في إنقاذ الأرواح
-          </p>
-          <Link to="/blood-donation" className="btn btn-primary btn-lg">
-            سجل كمتبرع
-          </Link>
+          <p className="text-muted mb-4">انضم إلى شبكة المتبرعين وساهم في إنقاذ الأرواح</p>
+          <Link to="/blood-donation" className="btn btn-primary btn-lg">سجل كمتبرع</Link>
         </Card.Body>
       </Card>
     </Container>

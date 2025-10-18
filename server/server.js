@@ -84,6 +84,8 @@ app.use("/api/donationRequests", donationRequestRoutes);
 
 app.use("/api/messages", messageRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use('/api/ready-to-donate-blood', readyToDonateBloodRoute);
+app.use('/api/ready-to-donate-general', readyToDonateGeneralRoute);
 
 /* Swagger dev-only */
 if (!process.env.NODE_ENV || process.env.NODE_ENV !== "production") {

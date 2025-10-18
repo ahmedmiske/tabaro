@@ -1,78 +1,101 @@
 // src/pages/GeneralDonors.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Container, Row, Col, Card, Badge, Button, Form, InputGroup, Alert, Spinner } from 'react-bootstrap';
 import { FiSearch, FiMapPin, FiPhone, FiUser, FiHeart, FiCalendar, FiFilter, FiDollarSign } from 'react-icons/fi';
 import { useAuth } from '../AuthContext';
-import { Navigate, Link } from 'react-router-dom';
+import { Navigate, Link, useLocation } from 'react-router-dom';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import './GeneralDonors.css';
 
 const GeneralDonors = () => {
   const { user } = useAuth();
+  const locationHook = useLocation();
+  const urlParams = useMemo(() => new URLSearchParams(locationHook.search), [locationHook.search]);
+
   const [donors, setDonors] = useState([]);
   const [filteredDonors, setFilteredDonors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterCategory, setFilterCategory] = useState('');
-  const [filterLocation, setFilterLocation] = useState('');
 
-  const categories = [
-    'الصحة',
-    'التعليم', 
-    'السكن',
-    'الكوارث الطبيعية',
-    'المساعدات المالية',
-    'أخرى'
-  ];
+  // تسميات عربية <-> أكواد السيرفر
+  const categoryLabel = {
+    money: 'المساعدات المالية',
+    goods: 'مواد/أغراض',
+    time: 'تطوع بالوقت/الجهد',
+    other: 'أخرى'
+  };
+  const labelToCode = {
+    'المساعدات المالية': 'money',
+    'مواد/أغراض': 'goods',
+    'تطوع بالوقت/الجهد': 'time',
+    'أخرى': 'other'
+  };
 
+  const [searchTerm, setSearchTerm] = useState(urlParams.get('q') || '');
+  const [filterCategory, setFilterCategory] = useState(categoryLabel[urlParams.get('category')] || '');
+  const [filterLocation, setFilterLocation] = useState(urlParams.get('city') || '');
+
+  const categoriesUI = ['المساعدات المالية', 'مواد/أغراض', 'تطوع بالوقت/الجهد', 'أخرى'];
+
+  const getCategoryColor = (categoryAr) => {
+    const colors = {
+      'المساعدات المالية': 'success',
+      'مواد/أغراض': 'secondary',
+      'تطوع بالوقت/الجهد': 'info',
+      'أخرى': 'secondary'
+    };
+    return colors[categoryAr] || 'secondary';
+  };
+
+  // 🔗 الجلب من الباك باستخدام res.body
   const fetchDonors = async () => {
     try {
       setLoading(true);
-      // بيانات تجريبية حتى يتم ربط الخادم
-      const mockDonors = [
-        {
-          _id: '1',
-          fullName: 'عائشة محمد',
-          categories: ['الصحة', 'التعليم'],
-          location: 'نواكشوط',
-          phone: '11223344',
-          specialties: ['التمريض', 'التدريس'],
-          totalDonations: 5,
-          isActive: true,
-          description: 'متخصصة في التمريض والتعليم الصحي',
-          joinDate: '2023-03-15'
-        },
-        {
-          _id: '2',
-          fullName: 'محمد الأمين',
-          categories: ['السكن', 'الكوارث الطبيعية'],
-          location: 'نواذيبو',
-          phone: '55667788',
-          specialties: ['البناء', 'الإغاثة'],
-          totalDonations: 8,
-          isActive: true,
-          description: 'خبرة في البناء والإغاثة في الكوارث',
-          joinDate: '2023-01-20'
-        },
-        {
-          _id: '3',
-          fullName: 'خديجة أحمد',
-          categories: ['التعليم', 'المساعدات المالية'],
-          location: 'أطار',
-          specialties: ['الرياضيات', 'المحاسبة'],
-          totalDonations: 3,
-          isActive: false,
-          description: 'مدرسة رياضيات ومحاسبة',
-          joinDate: '2023-07-10'
-        }
-      ];
-      
-      setDonors(mockDonors);
       setError('');
+
+      const qs = new URLSearchParams();
+      const categoryCode = labelToCode[filterCategory] || urlParams.get('category') || '';
+      if (categoryCode) qs.set('category', categoryCode);
+      if (filterLocation) qs.set('city', filterLocation);
+      if (searchTerm) qs.set('q', searchTerm);
+
+      const res = await fetchWithInterceptors(`/api/ready-to-donate-general?${qs.toString()}`);
+      const body = res?.body;
+
+      const arr = Array.isArray(body?.data) ? body.data : (Array.isArray(body) ? body : []);
+      const mapped = arr.map(d => {
+        const phone = (d.contactMethods || []).find(m => m.method === 'phone')?.number;
+        const fullName = d?.createdBy?.firstName
+          ? `${d.createdBy.firstName} ${d.createdBy.lastName || ''}`.trim()
+          : 'متبرع';
+        const profilePicture = d?.createdBy?.profileImage
+          ? `/uploads/profileImages/${d.createdBy.profileImage}`
+          : null;
+
+        const catCode = d?.extra?.category;
+        const catAr = categoryLabel[catCode] || 'أخرى';
+
+        return {
+          _id: d._id,
+          fullName,
+          categories: [catAr],
+          location: d.city,
+          phone,
+          specialties: [],
+          totalDonations: undefined,
+          isActive: true,
+          description: d.note || '',
+          joinDate: d.createdAt,
+          profilePicture
+        };
+      });
+
+      setDonors(mapped);
     } catch (err) {
       console.error('Error fetching donors:', err);
-      setError('حدث خطأ في تحميل البيانات');
+      const msg = err?.body?.error || err?.message || 'حدث خطأ في تحميل البيانات';
+      setError(msg);
+      setDonors([]);
     } finally {
       setLoading(false);
     }
@@ -81,29 +104,21 @@ const GeneralDonors = () => {
   const filterDonors = () => {
     let filtered = donors;
 
-    // تصفية بالبحث
     if (searchTerm) {
-      filtered = filtered.filter(donor => 
-        donor.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        donor.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        donor.specialties?.some(spec => spec.toLowerCase().includes(searchTerm.toLowerCase()))
+      const q = searchTerm.toLowerCase();
+      filtered = filtered.filter(donor =>
+        donor.fullName?.toLowerCase().includes(q) ||
+        donor.location?.toLowerCase().includes(q) ||
+        donor.specialties?.some(spec => spec.toLowerCase().includes(q))
       );
     }
-
-    // تصفية بالفئة
     if (filterCategory) {
-      filtered = filtered.filter(donor => 
-        donor.categories?.includes(filterCategory)
-      );
+      filtered = filtered.filter(donor => donor.categories?.includes(filterCategory));
     }
-
-    // تصفية بالموقع
     if (filterLocation) {
-      filtered = filtered.filter(donor => 
-        donor.location?.toLowerCase().includes(filterLocation.toLowerCase())
-      );
+      const q = filterLocation.toLowerCase();
+      filtered = filtered.filter(donor => donor.location?.toLowerCase().includes(q));
     }
-
     setFilteredDonors(filtered);
   };
 
@@ -113,30 +128,16 @@ const GeneralDonors = () => {
     setFilterLocation('');
   };
 
-  const getCategoryColor = (category) => {
-    const colors = {
-      'الصحة': 'danger',
-      'التعليم': 'primary',
-      'السكن': 'warning',
-      'الكوارث الطبيعية': 'info',
-      'المساعدات المالية': 'success',
-      'أخرى': 'secondary'
-    };
-    return colors[category] || 'secondary';
-  };
-
-  // استخدام useEffect للتحكم في التوجيه وجلب البيانات
   useEffect(() => {
-    if (user) {
-      fetchDonors();
-    }
-  }, [user]);
+    if (user) fetchDonors();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, filterLocation, filterCategory]);
 
   useEffect(() => {
     filterDonors();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [donors, searchTerm, filterCategory, filterLocation]);
 
-  // إذا لم يكن المستخدم مسجلاً، إعادة توجيه لصفحة تسجيل الدخول
   if (!user) {
     return <Navigate to="/login?next=/donors/general" replace />;
   }
@@ -160,9 +161,7 @@ const GeneralDonors = () => {
           <FiHeart className="me-2" />
           المتبرعون العامون
         </h1>
-        <p className="page-subtitle">
-          شبكة المتبرعين في المجالات العامة والخيرية
-        </p>
+        <p className="page-subtitle">شبكة المتبرعين في المجالات العامة والخيرية</p>
         <div className="title-divider"></div>
       </div>
 
@@ -193,7 +192,7 @@ const GeneralDonors = () => {
                 onChange={(e) => setFilterCategory(e.target.value)}
               >
                 <option value="">جميع الفئات</option>
-                {categories.map(category => (
+                {categoriesUI.map(category => (
                   <option key={category} value={category}>{category}</option>
                 ))}
               </Form.Select>
@@ -207,11 +206,7 @@ const GeneralDonors = () => {
               />
             </Col>
             <Col md={2}>
-              <Button 
-                variant="outline-secondary" 
-                onClick={clearFilters}
-                className="w-100"
-              >
+              <Button variant="outline-secondary" onClick={clearFilters} className="w-100">
                 <FiFilter className="me-1" />
                 إعادة تعيين
               </Button>
@@ -236,17 +231,13 @@ const GeneralDonors = () => {
         </Col>
         <Col md={3} sm={6}>
           <div className="stat-card">
-            <div className="stat-number">
-              {donors.filter(d => d.isActive).length}
-            </div>
+            <div className="stat-number">{donors.filter(d => d.isActive).length}</div>
             <div className="stat-label">نشطون</div>
           </div>
         </Col>
         <Col md={3} sm={6}>
           <div className="stat-card">
-            <div className="stat-number">
-              {new Set(donors.map(d => d.location)).size}
-            </div>
+            <div className="stat-number">{new Set(donors.map(d => d.location)).size}</div>
             <div className="stat-label">مدينة</div>
           </div>
         </Col>
@@ -259,14 +250,12 @@ const GeneralDonors = () => {
             <FiUser size={60} className="text-muted mb-3" />
             <h4>لا توجد نتائج</h4>
             <p className="text-muted">
-              {searchTerm || filterCategory || filterLocation 
-                ? 'لم يتم العثور على متبرعين يطابقون معايير البحث' 
+              {searchTerm || filterCategory || filterLocation
+                ? 'لم يتم العثور على متبرعين يطابقون معايير البحث'
                 : 'لا توجد متبرعون مسجلون حالياً'}
             </p>
             {(searchTerm || filterCategory || filterLocation) && (
-              <Button variant="primary" onClick={clearFilters}>
-                عرض جميع المتبرعين
-              </Button>
+              <Button variant="primary" onClick={clearFilters}>عرض جميع المتبرعين</Button>
             )}
           </Card.Body>
         </Card>
@@ -280,11 +269,7 @@ const GeneralDonors = () => {
                   <div className="donor-header d-flex align-items-center mb-3">
                     <div className="donor-avatar">
                       {donor.profilePicture ? (
-                        <img 
-                          src={donor.profilePicture} 
-                          alt={donor.fullName}
-                          className="avatar-img"
-                        />
+                        <img src={donor.profilePicture} alt={donor.fullName} className="avatar-img" />
                       ) : (
                         <div className="avatar-placeholder">
                           {donor.fullName?.charAt(0)?.toUpperCase() || 'م'}
@@ -295,11 +280,7 @@ const GeneralDonors = () => {
                       <h5 className="donor-name">{donor.fullName || 'متبرع'}</h5>
                       <div className="donor-badges">
                         {donor.categories?.slice(0, 2).map((category, idx) => (
-                          <Badge 
-                            key={idx}
-                            bg={getCategoryColor(category)} 
-                            className="category-badge"
-                          >
+                          <Badge key={idx} bg={getCategoryColor(category)} className="category-badge">
                             {category}
                           </Badge>
                         ))}
@@ -320,12 +301,6 @@ const GeneralDonors = () => {
                         <span>{donor.location}</span>
                       </div>
                     )}
-                    {donor.specialties?.length > 0 && (
-                      <div className="detail-item">
-                        <FiUser className="detail-icon" />
-                        <span>{donor.specialties.join(', ')}</span>
-                      </div>
-                    )}
                     {donor.totalDonations && (
                       <div className="detail-item">
                         <FiDollarSign className="detail-icon" />
@@ -343,8 +318,8 @@ const GeneralDonors = () => {
                   {/* وصف قصير */}
                   {donor.description && (
                     <div className="donor-description">
-                      <p>{donor.description.length > 100 
-                        ? `${donor.description.substring(0, 100)}...` 
+                      <p>{donor.description.length > 100
+                        ? `${donor.description.substring(0, 100)}...`
                         : donor.description}
                       </p>
                     </div>
@@ -352,18 +327,11 @@ const GeneralDonors = () => {
 
                   {/* أزرار الإجراء */}
                   <div className="donor-actions mt-3">
-                    <Link 
-                      to={`/profile/${donor._id}`} 
-                      className="btn btn-outline-primary btn-sm me-2"
-                    >
+                    <Link to={`/users/${donor._id}`} className="btn btn-outline-primary btn-sm me-2">
                       عرض الملف الشخصي
                     </Link>
                     {donor.phone && (
-                      <Button 
-                        variant="success" 
-                        size="sm"
-                        href={`tel:${donor.phone}`}
-                      >
+                      <Button variant="success" size="sm" href={`tel:${donor.phone}`}>
                         <FiPhone className="me-1" />
                         اتصال
                       </Button>
@@ -376,17 +344,13 @@ const GeneralDonors = () => {
         </Row>
       )}
 
-      {/* دعوة للتبرع */}
+      {/* دعوة للتطوع/التبرع */}
       <Card className="call-to-action-card mt-5">
         <Card.Body className="text-center">
           <FiHeart size={50} className="text-primary mb-3" />
           <h4>هل تريد أن تصبح متبرعاً؟</h4>
-          <p className="text-muted mb-4">
-            انضم إلى شبكة المتبرعين العامين وساهم في مساعدة المحتاجين
-          </p>
-          <Link to="/donation-requests" className="btn btn-primary btn-lg">
-            سجل كمتبرع عام
-          </Link>
+          <p className="text-muted mb-4">انضم إلى شبكة المتبرعين العامين وساهم في مساعدة المحتاجين</p>
+          <Link to="/donation-requests" className="btn btn-primary btn-lg">سجل كمتبرع عام</Link>
         </Card.Body>
       </Card>
     </Container>

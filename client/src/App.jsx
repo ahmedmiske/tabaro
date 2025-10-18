@@ -23,6 +23,7 @@ import About from './components/About';
 import NotFound from './pages/NotFound';
 import ReadyToDonateBloodPage from './pages/ReadyToDonateBloodPage.jsx';
  import ReadyToDonateGeneralPage from './pages/ReadyToDonateGeneralPage.jsx';
+ import ReadyDonors from './pages/ReadyDonors.jsx';
 // Lists & details
 import BloodDonationList from './components/BloodDonationListe';
 import DonationRequestList from './components/DonationRequestList';
@@ -131,10 +132,11 @@ function App() {
             <Route path="/messages" element={<RequireAuth><ChatList /></RequireAuth>} />
             <Route path="/notifications" element={<RequireAuth><NotificationsPage /></RequireAuth>} />
             <Route path="/users/:id" element={<RequireAuth><PublicProfile /></RequireAuth>} />
-
+ 
             {/* صفحات المتبرعين */}
-            <Route path="/donors/blood" element={<BloodDonors />} />
-            <Route path="/donors/general" element={<GeneralDonors />} />
+            <Route path="/ready-donors" element={<RequireAuth><ReadyDonors /></RequireAuth>}/>
+            <Route path="/blood-donors" element={<RequireAuth><BloodDonors /></RequireAuth>} />
+            <Route path="general-donors" element={<RequireAuth><GeneralDonors /></RequireAuth>} />
 
             {/* تفاصيل التأكيد */}
             <Route path="/donation-confirmations/:id" element={<RequireAuth><DonationConfirmationDetails /></RequireAuth>} />

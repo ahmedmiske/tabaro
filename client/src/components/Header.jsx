@@ -343,7 +343,7 @@ function Header({ notifCount }) {
               <div className="eh-mega-content"><h4>قائمة الطلبات</h4><p>تصفّح وفلترة</p></div>
             </Link>
 
-            <Link to="/donors/blood" className="eh-mega-card" onClick={() => setOpen(null)}>
+            <Link to="/blood-donors" className="eh-mega-card" onClick={() => setOpen(null)}>
               <div className="eh-mega-icon"><FiUsers /></div>
               <div className="eh-mega-content"><h4>المتبرعون</h4><p>المتبرعون المسجّلون</p></div>
             </Link>
@@ -447,7 +447,7 @@ function Header({ notifCount }) {
               <Link to="/ready/blood" onClick={() => setMobileOpen(false)}>اعلان تبرع</Link>
               <Link to="/blood-donation" onClick={() => setMobileOpen(false)}>طلب التبرع</Link>
               <Link to="/blood-donations" onClick={() => setMobileOpen(false)}>قائمة الطلبات</Link>
-              <Link to="/donors/blood" onClick={() => setMobileOpen(false)}>المتبرعون</Link>
+              <Link to="/blood-donors" onClick={() => setMobileOpen(false)}>المتبرعون</Link>
             </div>
 
             <div className="eh-drawer-group">
@@ -455,7 +455,7 @@ function Header({ notifCount }) {
               <Link to="/ready/general" onClick={() => setMobileOpen(false)}>اعلان تبرع عام</Link>
               <Link to="/donation-requests" onClick={() => setMobileOpen(false)}>طلب التبرع</Link>
               <Link to="/donations" onClick={() => setMobileOpen(false)}>قائمة الطلبات</Link>
-              <Link to="/donors/general" onClick={() => setMobileOpen(false)}>المتبرعون</Link>
+              <Link to="/general-donors" onClick={() => setMobileOpen(false)}>المتبرعون</Link>
             </div>
 
             <div className="eh-drawer-group">
