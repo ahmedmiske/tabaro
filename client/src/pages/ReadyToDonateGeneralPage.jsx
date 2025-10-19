@@ -1,92 +1,78 @@
 // src/pages/ReadyToDonateGeneralPage.jsx
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
 import { FiHeart } from 'react-icons/fi';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
-import './ReadyToDonateGeneralPage.css';
+import { GENERAL_CATEGORY_OPTIONS } from '../constants/donationCategories';
 
 const validatePhone = (v) => /^\d{8}$/.test(v || '');
 
 export default function ReadyToDonateGeneralPage() {
-  const [form, setForm] = useState({
-    city: '',
-    category: 'money', // money | goods | time | other
-    note: '',
-    phone: '',
-    whatsapp: ''
-  });
+  const [form, setForm] = useState({ city:'', category:'money', note:'', phone:'', whatsapp:'' });
   const [errors, setErrors] = useState({});
   const [msg, setMsg] = useState('');
 
-  // بدّل الخلفية بسهولة (ثابت/عشوائي/حسب الفئة)
-  const bgCandidates = useMemo(() => [
-    '/images/ready-general.jpg',
-    '/images/tabar5.jpg',
-    '/images/tabar6.jpg'
-  ], []);
-  const bgUrl = useMemo(() => bgCandidates[0], [bgCandidates]);
   const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const validate = () => {
+  const submit = async (ev) => {
+    ev.preventDefault();
     const e = {};
     if (!form.city.trim()) e.city = true;
     if (!form.category) e.category = true;
     if (!validatePhone(form.phone)) e.phone = true;
     if (!validatePhone(form.whatsapp)) e.whatsapp = true;
     setErrors(e);
-    return Object.keys(e).length === 0;
-  };
-
-  const submit = async (ev) => {
-    ev.preventDefault();
-    if (!validate()) return;
-
-    const payload = {
-      type: 'general',
-      city: form.city,
-      note: form.note,
-      extra: { category: form.category }, // مهم للتمييز في السيرفر
-      contactMethods: [
-        { method: 'phone', number: form.phone },
-        { method: 'whatsapp', number: form.whatsapp }
-      ]
-    };
+    if (Object.keys(e).length) return;
 
     try {
-      await fetchWithInterceptors('/api/ready-to-donate-general', {
+      const res = await fetchWithInterceptors('/api/ready-to-donate-general', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: {
+          type: 'general',
+          city: form.city,
+          note: form.note,
+          extra: { category: form.category },
+          contactMethods: [
+            { method: 'phone', number: form.phone },
+            { method: 'whatsapp', number: form.whatsapp }
+          ]
+        }
       });
-      setMsg('✅ تم تسجيل استعدادك للتبرع العام.');
-      setForm({ city:'', category:'money', note:'', phone:'', whatsapp:'' });
-      setErrors({});
-    } catch (err) {
+      if (res?.ok) {
+        setMsg('✅ تم تسجيل استعدادك للتبرع العام.');
+        setForm({ city:'', category:'money', note:'', phone:'', whatsapp:'' });
+        setErrors({});
+      } else setMsg('❌ تعذّر الإرسال. حاول لاحقًا.');
+    } catch {
       setMsg('❌ تعذّر الإرسال. حاول لاحقًا.');
-      console.error(err);
     }
   };
 
+  const heroSrc = `${process.env.PUBLIC_URL}/images/tabar6.jpg`; // ← من مجلد public
+
   return (
     <div className="py-4" dir="rtl">
-      {/* HERO */}
-      <section className="general-hero" style={{ '--bg': `url(${bgUrl})` }}>
-        <div className="hero-content">
-          <h1 className="fw-bold mb-2">
-            <FiHeart className="me-2" /> مستعد للتبرع العام
-          </h1>
-          <p>مساهمتك تُحدث فرقًا حقيقيًا في حياة الناس.</p>
-          
+      {/* Hero */}
+      <div className="position-relative">
+        <img
+          src={heroSrc}
+          alt="التبرع وأهميته"
+          className="w-100"
+          style={{ maxHeight: 300, objectFit: 'cover' }}
+        />
+        <div className="position-absolute top-50 start-50 translate-middle text-white text-center">
+          <h1 className="fw-bold mb-2"><FiHeart className="me-2" /> مستعد للتبرع العام</h1>
+          <p className="mb-0">مساهمتك تحدث فرقًا حقيقيًا في حياة الناس.</p>
         </div>
-      </section>
+      </div>
 
       <Container className="my-4">
         <Row className="justify-content-center">
           <Col lg={8}>
             <Card className="border-0 shadow-sm">
-              <Card.Body id="ready-form">
+              <Card.Body>
                 <h3 className="mb-3">سجّل استعدادك</h3>
-                {msg && <Alert variant={msg.startsWith('✅') ? 'success' : 'danger'}>{msg}</Alert>}
+                {msg && <Alert variant={msg.startsWith('✅') ? 'success':'danger'}>{msg}</Alert>}
 
                 <Form onSubmit={submit}>
                   <Form.Group className="mb-3">
@@ -98,10 +84,9 @@ export default function ReadyToDonateGeneralPage() {
                   <Form.Group className="mb-3">
                     <Form.Label>نوع التبرع</Form.Label>
                     <Form.Select name="category" value={form.category} onChange={onChange} isInvalid={errors.category} required>
-                      <option value="money">مالي</option>
-                      <option value="goods">مواد/أغراض</option>
-                      <option value="time">تطوع بالوقت/الجهد</option>
-                      <option value="other">أخرى</option>
+                      {GENERAL_CATEGORY_OPTIONS.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
                     </Form.Select>
                     <Form.Control.Feedback type="invalid">اختر نوع التبرع</Form.Control.Feedback>
                   </Form.Group>

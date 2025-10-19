@@ -54,7 +54,7 @@
   border: none; border-radius: 16px; overflow: hidden; position: relative;
   box-shadow: 0 4px 20px rgba(0,0,0,.08); transition: .3s; animation: fadeInUp .6s ease-out;
   min-height: 340px; /* 👈 اجعل الكارد كبيرًا بما يكفي */
-  min-width: 400px;
+  
 }
 @media (max-width: 576px) { .donor-card { min-height: 300px; } }
 

@@ -9,10 +9,30 @@ const ContactMethodSchema = new mongoose.Schema({
 const ReadyToDonateGeneralSchema = new mongoose.Schema({
   city: { type: String, required: true },
   extra: {
-    category: { type: String, enum: ['money','goods','time','other'], default: 'money' }
+    category: {
+      type: String,
+      enum: [
+        'sadaqa',          // صدقة
+        'zakat',           // زكاة
+        'kafara',          // كفارة
+        'orphans',         // الأيتام
+        'awqaf',           // الأوقاف
+        'livestock',       // الأنعام/أضاحي
+        'money',           // مساعدات مالية
+        'goods',           // مواد/أغراض
+        'time',            // تطوع بالوقت/الجهد
+        'mosque_services', // خدمات المسجد  ✅
+        'mahadir_services',// خدمات المحاظر ✅
+        'other'            // أخرى
+      ],
+      default: 'money'
+    }
   },
   note: { type: String, default: '' },
-  contactMethods: { type: [ContactMethodSchema], validate: v => Array.isArray(v) && v.length > 0 },
+  contactMethods: {
+    type: [ContactMethodSchema],
+    validate: v => Array.isArray(v) && v.length > 0
+  },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null }
 }, { timestamps: true, collection: 'ready_to_donate_general' });
 

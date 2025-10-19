@@ -376,7 +376,7 @@ function Header({ notifCount }) {
               <div className="eh-mega-content"><h4>قائمة الطلبات</h4><p>تصفية حسب النوع</p></div>
             </Link>
 
-            <Link to="/donors/general" className="eh-mega-card" onClick={() => setOpen(null)}>
+            <Link to="/general-donors" className="eh-mega-card" onClick={() => setOpen(null)}>
               <div className="eh-mega-icon"><FiUsers /></div>
               <div className="eh-mega-content"><h4>المتبرعون</h4><p>المتبرعون العامّون</p></div>
             </Link>

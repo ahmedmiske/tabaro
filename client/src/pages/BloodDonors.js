@@ -206,8 +206,8 @@ const BloodDonors = () => {
       ) : (
         <Row className="g-4 align-items-stretch">
           {filteredDonors.map((donor, index) => (
-            <Col lg={6} xl={4} key={donor._id || index}>
-              <Card className="donor-card h-100 w-300" >
+            <Col  key={donor._id || index}>
+              <Card className="donor-card" >
                 <Card.Body>
                   {/* صورة + اسم */}
                   <div className="donor-header d-flex align-items-center mb-3">

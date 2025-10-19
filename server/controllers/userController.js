@@ -11,7 +11,7 @@ const registerUser = asyncHandler(async (req, res) => {
   const {
     firstName,
     lastName,
-    email, // ممكن يجي أو لا
+    email, 
     password,
     username,
     userType,

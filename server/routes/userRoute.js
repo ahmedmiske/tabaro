@@ -1,7 +1,8 @@
 // server/routes/userRoute.js
 const express = require("express");
 const multer = require("multer");
-const path = require("path"); // ← أضف هذا
+const path = require("path");
+const fs = require("fs");
 
 const {
   registerUser,
@@ -16,10 +17,13 @@ const {
 
 const { protect, authorize, protectRegisterUser } = require("../middlewares/authMiddleware");
 
-// ✅ تخزين الصور داخل server/uploads/profileImages دائماً
+// تأكد أن مجلد الرفع موجود
+const uploadDir = path.join(__dirname, "../uploads/profileImages");
+fs.mkdirSync(uploadDir, { recursive: true });
+
 const storage = multer.diskStorage({
   destination(req, file, cb) {
-    cb(null, path.join(__dirname, "../uploads/profileImages")); // ← أهم تعديل
+    cb(null, uploadDir);
   },
   filename(req, file, cb) {
     cb(null, `${Date.now()}-${file.originalname}`);
@@ -30,7 +34,7 @@ const upload = multer({ storage });
 
 const router = express.Router();
 
-// ✅ تسجيل مستخدم جديد مع رفع صورة
+// إنشاء مستخدم (عامة) + رفع صورة اختيارية
 router
   .route("/")
   .post(upload.single("profileImage"), registerUser)
@@ -40,15 +44,11 @@ router.post("/login", authUser);
 
 router
   .route("/profile")
-  .put(protect, updateUser)
+  .put(protect, upload.single("profileImage"), updateUser)
   .get(protect, getUser)
   .delete(protect, deleteUser);
 
 router.put("/change-password", protect, changePassword);
 router.put("/reset-password", protectRegisterUser, resetPassword);
-
-router.get("/notifications", protect, require("../controllers/notificationController").getUserNotifications);
-router.put("/notifications/:id", protect, require("../controllers/notificationController").markNotificationAsRead);
-router.get("/notifications/unread-count", protect, require("../controllers/notificationController").getUnreadNotificationCount);
 
 module.exports.userRoutes = router;

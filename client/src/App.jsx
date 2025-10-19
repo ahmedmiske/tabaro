@@ -136,7 +136,7 @@ function App() {
             {/* صفحات المتبرعين */}
             <Route path="/ready-donors" element={<RequireAuth><ReadyDonors /></RequireAuth>}/>
             <Route path="/blood-donors" element={<RequireAuth><BloodDonors /></RequireAuth>} />
-            <Route path="general-donors" element={<RequireAuth><GeneralDonors /></RequireAuth>} />
+            <Route path="/general-donors" element={<RequireAuth><GeneralDonors /></RequireAuth>} />
 
             {/* تفاصيل التأكيد */}
             <Route path="/donation-confirmations/:id" element={<RequireAuth><DonationConfirmationDetails /></RequireAuth>} />
