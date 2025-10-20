@@ -1,57 +1,87 @@
-.title-main-container {
-  text-align: center;
-  margin-bottom: 30px;
-  padding: 20px 10px;
-  position: relative;
+:root{
+  --brand-1:#00A443;
+  --brand-2:#00C853;
+  --ink-1:#2D3748;  /* رمادي غامق */
+  --ink-2:#4A5568;  /* رمادي أفتح */
 }
 
-.title-main-container::before {
-  content: '';
+.tm-container{
+  text-align: center;
+  margin-block-end: 28px;
+  padding: 18px 10px;
+  position: relative;
+  direction: inherit;
+}
+
+.tm-start{ text-align: start; }
+.tm-end{ text-align: end; }
+.tm-center{ text-align: center; }
+
+/* أحجام */
+.tm-lg .tm-title{ font-size: 32px; }
+.tm-md .tm-title{ font-size: 26px; }
+.tm-sm .tm-title{ font-size: 22px; }
+
+.tm-title{
+  margin: 0;
+  line-height: 1.25;
+  font-weight: 800;
+  /* تدرّج الهوية على النص */
+  background: linear-gradient(135deg, var(--ink-1) 0%, var(--brand-1) 55%, #00802F 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: .2px;
+  animation: tm-fade-up .45s ease both;
+}
+
+/* عندما لا يوجد عنوان فرعي: خط زخرفي سفلي صغير */
+.tm-single::after{
+  content:'';
   position: absolute;
-  bottom: 0;
-  left: 50%;
+  inset-inline-start: 50%;
   transform: translateX(-50%);
-  width: 80px;
+  inset-block-end: 0;
+  width: 88px;
   height: 3px;
-  background: linear-gradient(90deg, #00A443 0%, #00C853 100%);
+  background: linear-gradient(90deg, var(--brand-1) 0%, var(--brand-2) 100%);
   border-radius: 2px;
 }
 
-.title-main-text {
-  font-size: 32px;
-  font-weight: 800;
-  margin: 0;
-  line-height: 1.3;
-  background: linear-gradient(135deg, #2D3748 0%, #00A443 50%, #00802F 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.title-primary {
-  background: linear-gradient(135deg, #00A443 0%, #00C853 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.title-secondary {
-  background: linear-gradient(135deg, #2D3748 0%, #4A5568 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.separator {
-  color: #00A443;
-  margin: 0 12px;
+/* عنوان فرعي */
+.tm-subtitle{
+  margin: 10px 0 0;
+  font-size: clamp(14px, 2.3vw, 18px);
   font-weight: 600;
-  font-size: 1.2em;
+  line-height: 1.6;
+  background: linear-gradient(135deg, var(--ink-1) 0%, var(--ink-2) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  opacity: .95;
+  animation: tm-fade-up .55s ease both;
 }
 
-/* استجابة للشاشات الصغيرة */
-@media (max-width: 768px) {
-  .title-main-text {
-    font-size: 22px;
-  }
+/* فاصل أنيق بين العنوان والفرعي */
+.tm-divider{
+  width: 120px;
+  height: 4px;
+  margin: 10px auto 8px;
+  background: linear-gradient(90deg, var(--brand-1) 0%, var(--brand-2) 100%);
+  border-radius: 999px;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-1) 10%, transparent);
+}
+
+/* Responsive tweaks */
+@media (max-width:768px){
+  .tm-lg .tm-title{ font-size: 24px; }
+  .tm-md .tm-title{ font-size: 22px; }
+  .tm-sm .tm-title{ font-size: 20px; }
+  .tm-divider{ width: 96px; height: 3px; }
+}
+
+/* حركة خفيفة */
+@keyframes tm-fade-up{
+  from{ opacity:0; transform: translateY(6px); }
+  to{ opacity:1; transform: translateY(0); }
 }

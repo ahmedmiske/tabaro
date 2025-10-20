@@ -199,7 +199,7 @@ function AddUserPage() {
         ) : (
           <div className="form-container">
              <header className="form-header">
-             <TitleMain text1="إنشاء حساب جديد" />
+             <TitleMain title="إنشاء حساب جديد" />
 
              <div className="steps-progress-container" role="progressbar"
                aria-valuenow={currentStep} aria-valuemin="1" aria-valuemax={totalSteps}>

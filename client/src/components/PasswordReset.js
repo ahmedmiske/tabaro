@@ -109,10 +109,7 @@ const verifyOtp = (phoneNumber,otp) => {
 
   return (
     <div className="container">
-      <TitleMain 
-        text1={stepInfo[step].title}
-        text2={stepInfo[step].subtitle}
-      />
+      <TitleMain  title = {stepInfo[step].title  }  />
       
       {/* Progress indicator with dots */}
       <div className="progress-dots">
