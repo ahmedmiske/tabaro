@@ -47,7 +47,7 @@ function TopBar({ isAuthed, displayName, avatarUrl, badgeCount, onLogout }) {
           {!isAuthed ? (
             <>
               <Link to="/login" className="eh-login-btn"><FiUser /><span>تسجيل الدخول</span></Link>
-              <Link to="/add-user" className="eh-login-btn"><FiPlus /><span>انشاء حساب</span></Link>
+              <Link to="/add-user" className="eh-login-btn eh-login-btn-add"><FiPlus /><span>انشاء حساب</span></Link>
             </>
           ) : (
             <>

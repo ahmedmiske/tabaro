@@ -783,14 +783,12 @@ a.hero-btn-primary,
 
 a.hero-btn-secondary,
 .hero-btn-secondary {
-  background: transparent !important;
-  color: #FF7A45 !important;
+  color: #ffffff !important;
   border: 2px solid #FF7A45 !important;
 }
 
 a.hero-btn-secondary:hover,
 .hero-btn-secondary:hover {
-  background: linear-gradient(135deg, #FF7A45 0%, #FF9A6C 50%, #E05A2E 100%) !important;
   color: white !important;
 }
 

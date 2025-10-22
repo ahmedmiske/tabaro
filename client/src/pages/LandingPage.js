@@ -44,7 +44,7 @@ function LandingPage() {
               <Link to="/add-user" className="hero-btn-primary" aria-label="ابدأ التسجيل كمستخدم جديد">
                 ابدأ رحلتك الآن
               </Link>
-              <Link to="/login" className="hero-btn-secondary" aria-label="انتقال إلى صفحة تسجيل الدخول">
+              <Link to="/login" className="hero-btn-secondary " aria-label="انتقال إلى صفحة تسجيل الدخول">
                 تسجيل الدخول
               </Link>
             </div>

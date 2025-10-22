@@ -61,6 +61,9 @@
   opacity: .95;
   animation: tm-fade-up .55s ease both;
 }
+.eh-login-btn-add{
+  background-color: #003300;
+}
 
 /* فاصل أنيق بين العنوان والفرعي */
 .tm-divider{

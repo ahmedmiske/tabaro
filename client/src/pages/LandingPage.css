@@ -29,9 +29,23 @@
 }
   
 .landing-title {
-  font-size: 4rem;
+  font-size: 5rem;
   font-weight: 900;
-  background: linear-gradient(135deg, #FF7A45 0%, #FF9A6C 25%, #FFB347 50%, #FF8C42 75%, #E05A2E 100%);
+  background: linear-gradient(135deg, #d73527 0%, #d73527 25%, #d73527 50%, #d73527 75%, #d73527 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1rem;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  position: relative;
+  text-align: center;
+  padding: 1rem 0;
+  text-shadow: 0 4px 20px rgba(255, 122, 69, 0.3);
+  animation: textGlow 3s ease-in-out infinite alternate;
+  font-size: 5rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #d73527 0%, #d73527 25%, #d73527 50%, #d73527 75%, #d73527 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -53,10 +67,10 @@
   display: inline-block;
    
 }
-
 .lead-text {
   font-size: 1.8rem;
-  background: linear-gradient(135deg, #2D3748 0%, #4A5568 30%, #FF7A45 60%, #E05A2E 100%);
+   background: linear-gradient(135deg, #d73527 0%, #d73527 25%, #d73527 50%, #d73527 75%, #d73527 100%);
+
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -216,18 +230,16 @@
 }
 
 .hero-btn-secondary {
-  background: transparent !important;
-  color: #FF7A45 !important;
   text-decoration: none !important;
   padding: 16px 32px !important;
   font-size: 18px !important;
   font-weight: 600 !important;
   border-radius: 25px !important;
-  border: 2px solid #FF7A45 !important;
+  border: 2px solid #d73527 !important;
   backdrop-filter: blur(10px) !important;
+  background-color: #d73527;
   transition: all 0.3s ease !important;
   display: inline-block !important;
-  text-align: center !important;
   box-shadow: 0 4px 15px rgba(255, 122, 69, 0.2) !important;
 }
 
