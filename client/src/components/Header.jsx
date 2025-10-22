@@ -72,11 +72,6 @@ function Header({ notifCount }) {
   const [badgeCount, setBadgeCount] = useState(Number.isFinite(notifCount) ? notifCount : 0);
   const [searchOpen, setSearchOpen] = useState(false);
 
-  const isActive = useCallback(
-    (path) => location.pathname === path || (path !== '/' && location.pathname.startsWith(path)),
-    [location.pathname]
-  );
-
   const onSubmit = useCallback((e) => {
     e.preventDefault();
     const s = q.trim();
@@ -168,19 +163,16 @@ function Header({ notifCount }) {
       }
     };
 
-    // إذا تم تمرير القيمة كمُدخل نستخدمها مباشرة
     if (Number.isFinite(notifCount)) {
       setBadgeCount(notifCount);
       return () => {};
     }
 
-    // بدون توكن لا نطلب شيئًا
     if (!token) {
       setBadgeCount(0);
       return () => {};
     }
 
-    // مع توكن: اطلب بشكل دوري
     loadCount();
     timer = setInterval(loadCount, 20000);
 
@@ -199,14 +191,31 @@ function Header({ notifCount }) {
     navigate('/login');
   };
 
+  // ===== Active section logic =====
+  const { pathname } = location;
+
+  const isAnyActive = useCallback(
+    (paths) => paths.some(p => pathname === p || (p !== '/' && pathname.startsWith(p))),
+    [pathname]
+  );
+
+  const BLOOD_PATHS = ['/ready/blood', '/blood-donation', '/blood-donations', '/blood-donors'];
+  const GENERAL_PATHS = ['/ready/general', '/donation-requests', '/donations', '/general-donors'];
+  const CAMPAIGN_PATHS = ['/campaigns']; // covers /campaigns/create as well
+
   // ARIA ids for groups
   const bloodId = useId();
   const generalId = useId();
   const campaignsId = useId();
 
   return (
-    <header className="eh-header-modern" dir="rtl" ref={rootRef}>
-      {/* ✅ TopBar مستقل مع صورة المستخدم وعدّاد الإشعارات */}
+    <header
+      className="eh-header-modern"
+      dir="rtl"
+      ref={rootRef}
+      data-authed={isAuthed ? 'true' : 'false'}
+    >
+      {/* ✅ TopBar */}
       <TopBar
         isAuthed={isAuthed}
         displayName={displayName}
@@ -235,27 +244,30 @@ function Header({ notifCount }) {
           <nav className="eh-nav-left">
             <div className={`eh-nav-item ${open==='blood' ? 'open' : ''}`}>
               <button
-                className={`eh-nav-link ${isActive('/blood-donations') ? 'active' : ''}`}
+                className={`eh-nav-link ${isAnyActive(BLOOD_PATHS) ? 'active' : ''}`}
                 onClick={() => setOpen(open === 'blood' ? null : 'blood')}
                 onMouseEnter={() => setOpen('blood')}
+                aria-current={isAnyActive(BLOOD_PATHS) ? 'page' : undefined}
               >
                 <FiDroplet /><span>التبرع بالدم</span><FiChevronDown className="eh-caret" />
               </button>
             </div>
             <div className={`eh-nav-item ${open==='general' ? 'open' : ''}`}>
               <button
-                className={`eh-nav-link ${isActive('/donations') ? 'active' : ''}`}
+                className={`eh-nav-link ${isAnyActive(GENERAL_PATHS) ? 'active' : ''}`}
                 onClick={() => setOpen(open === 'general' ? null : 'general')}
                 onMouseEnter={() => setOpen('general')}
+                aria-current={isAnyActive(GENERAL_PATHS) ? 'page' : undefined}
               >
                 <FiHeart /><span>تبرعات عامة</span><FiChevronDown className="eh-caret" />
               </button>
             </div>
             <div className={`eh-nav-item ${open==='campaigns' ? 'open' : ''}`}>
               <button
-                className={`eh-nav-link ${isActive('/campaigns') ? 'active' : ''}`}
+                className={`eh-nav-link ${isAnyActive(CAMPAIGN_PATHS) ? 'active' : ''}`}
                 onClick={() => setOpen(open === 'campaigns' ? null : 'campaigns')}
                 onMouseEnter={() => setOpen('campaigns')}
+                aria-current={isAnyActive(CAMPAIGN_PATHS) ? 'page' : undefined}
               >
                 <FiUsers /><span>حملات التبرع</span><FiChevronDown className="eh-caret" />
               </button>
@@ -327,7 +339,6 @@ function Header({ notifCount }) {
           aria-labelledby={bloodId}
         >
           <div className="eh-mega-grid">
-            {/* إعلان الاستعداد للتبرّع بالدم */}
             <Link to="/ready/blood" className="eh-mega-card" onClick={() => setOpen(null)}>
               <div className="eh-mega-icon"><FiDroplet /></div>
               <div className="eh-mega-content"><h4>اعلان تبرع</h4><p>سجّل رغبتك بالتبرع الآن</p></div>
@@ -360,7 +371,6 @@ function Header({ notifCount }) {
           aria-labelledby={generalId}
         >
           <div className="eh-mega-grid">
-            {/* إعلان الاستعداد للتبرّع العام */}
             <Link to="/ready/general" className="eh-mega-card" onClick={() => setOpen(null)}>
               <div className="eh-mega-icon"><FiHeart /></div>
               <div className="eh-mega-content"><h4>اعلان تبرع</h4><p>ابدأ التبرع الآن</p></div>

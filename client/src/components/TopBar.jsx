@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import { FiHome, FiUser, FiBell, FiSettings, FiLogOut, FiChevronDown, FiPlus } from 'react-icons/fi';
+import './TopBar.css';
 
 function TopBar({ isAuthed, displayName, avatarUrl, badgeCount, onLogout }) {
   const [accOpen, setAccOpen] = useState(false);
