@@ -23,7 +23,7 @@ const Footer = () => {
             {/* Brand */}
             <Col md={5} sm={12} className="mb-4">
               <div className="f-brand">
-                <div className="f-brand-row">
+                <div className="f-bra nd-row">
                   <div className="f-logo">
                     <img src="/logoTabaro.png" alt="شعار المنصة الوطنية للتبرع والتضامن" />
                   </div>
