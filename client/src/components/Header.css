@@ -204,11 +204,11 @@
 /* الشعار */
 .eh-brand-center{ display:flex; justify-content:center; }
 .eh-brand-modern{ display:flex; align-items:center; gap:12px; text-decoration:none; transition: transform .3s ease; }
-.eh-brand-modern:hover{ transform: scale(1.02); }
-.eh-logo-wrapper{ width:60px; height:60px; border-radius:16px; display:flex; align-items:center; justify-content:center; box-shadow: var(--eh-glow); }
-.eh-logo-wrapper img{ width:40px; height:40px; object-fit:contain; }
-.eh-brand-text{ display:flex; flex-direction:column; text-align:center; }
-.eh-brand-title{ font-size:20px; font-weight:800; color:var(--eh-darker); line-height:1.1; }
+.eh-brand-modern:hover{ transform: scale(1.02); text-decoration: none; }
+.eh-logo-wrapper{ width:80px; height:80px; border-radius:16px; display:flex; align-items:center; justify-content:center; box-shadow: var(--eh-glow); }
+.eh-logo-wrapper img{ width:80px; height:80px; object-fit:contain; }
+.eh-brand-text{ display:flex; flex-direction:column; text-align:center; text-decoration: none; }
+.eh-brand-title{ font-size:20px; font-weight:800; color: var( --main-color-alt); line-height:1.1; }
 .eh-brand-subtitle{ font-size:16px; font-weight:600; color:var(--eh-primary); line-height:1.1; }
 
 /* إجراءات القائمة اليمنى */
@@ -265,12 +265,25 @@
 /* القوائم المنسدلة */
 .eh-mega-modern{ position:relative; z-index:999; }
 .eh-mega-panel{
-  position:absolute; top:100%; left:0; right:0;
+  position:absolute;
+  top:100%;
+  left:0;
+  right:0;
   background: rgba(255,255,255,.98);
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-  border-top:1px solid var(--eh-border); box-shadow: var(--eh-shadow);
-  opacity:0; visibility:hidden; transform: translateY(-10px);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top:1px solid var(--eh-border);
+  box-shadow: var(--eh-shadow);
+  opacity:0;
+  visibility:hidden;
+  transform: translateY(-10px);
   transition: all .3s ease;
+  box-shadow: 10px 10px 30px rgba(0,0,0,.1);
+  max-height: 120px;
+  -webkit-transition: all .3s ease;
+  -moz-transition: all .3s ease;
+  -ms-transition: all .3s ease;
+  -o-transition: all .3s ease;
 }
 .eh-mega-panel.open{ opacity:1; visibility:visible; transform: translateY(0); }
 .eh-mega-grid{
@@ -278,9 +291,10 @@
   display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:20px;
 }
 .eh-mega-card{
-  display:flex; align-items:center; gap:16px; padding:20px; background:#fff;
+  display:flex; align-items:center; gap:10px; padding:10px; background:#fff;
   border:2px solid transparent; border-radius:16px; text-decoration:none; color: var(--eh-dark);
   transition: all .3s ease;
+
 }
 .eh-mega-card:hover{ border-color: var(--eh-primary); transform: translateY(-4px); box-shadow: var(--eh-shadow); }
 .eh-mega-icon{
@@ -328,7 +342,7 @@
 }
 .eh-drawer-link:hover{ background: var(--eh-lighter); border-left-color: var(--eh-primary); }
 .eh-drawer-group{ margin-bottom:8px; }
-.eh-drawer-group-title{ display:flex; align-items:center; gap:12px; padding:16px 24px; font-weight:700; color: var(--eh-darker); background: var(--eh-lighter); }
+.eh-drawer-group-title{ display:flex; align-items:center; gap:10px; padding:16px 24px; font-weight:700; color: var(--eh-darker); background: var(--eh-lighter); max-height:40px ; }
 .eh-drawer-group a{
   display:block; padding:12px 24px 12px 52px; color: var(--eh-dark); text-decoration:none; transition: all .3s ease; border-left:4px solid transparent; cursor: default;
 }

@@ -115,7 +115,7 @@ function About() {
       icon: "🩸",
       title: "تبرع بالدم",
       description: "ساهم في إنقاذ الأرواح عبر تبرع آمن وسريع",
-      path: "/donations",
+      path: "/blood-donations",
       state: { type: "blood" },
     },
     {
