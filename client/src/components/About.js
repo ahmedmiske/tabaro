@@ -183,6 +183,18 @@ function About() {
     {
       question: "كيف أتواصل مع صاحب الطلب؟",
       answer: "من صفحة الطلب، استخدم زر \"تواصل\"—ستجد الهاتف/الواتساب بعد تحقق الصلاحيات."
+    },
+    {
+      question: "هل يمكنني التطوع بدون خبرة سابقة؟",
+      answer: "نعم، نوفر فرص تطوع تناسب جميع المستويات ونقدم التوجيه والدعم اللازم."
+    },
+    {
+      question: "كيف أتابع حالة طلبي أو تبرعي؟",
+      answer: "يمكنك متابعة حالة الطلب أو التبرع من خلال حسابك الشخصي في المنصة وستصلك إشعارات بالتحديثات."
+    },
+    {
+      question: "هل يمكنني اقتراح خدمة أو مبادرة جديدة؟",
+      answer: "بكل سرور! يمكنك إرسال اقتراحك عبر نموذج التواصل وسنقوم بدراسته والرد عليك."  
     }
   ];
 
@@ -252,8 +264,13 @@ function About() {
         </header>
 
         {/* الخدمات */}
+        <section className="separador">
+          <div className="separador-content">
+             <h2 className="section-title">خدماتنا</h2>
+          </div>
+        </section>
         <section aria-label="الخدمات المتاحة" className="services-section">
-          <h2 className="section-title">خدماتنا</h2>
+        
           <div className="services-grid">
             {serviceCards.map((service, index) => (
               <div key={index} className="service-card reveal" data-animate="up">
@@ -287,174 +304,186 @@ function About() {
             ))}
           </div>
         </section>
-
-        {/* نموذج الاتصال المحسن */}
-
-
-        <section className="contact-form-section" aria-labelledby="form-title">
-          <div className="form-header">
+        <section className="separador">
+          <div className="separador-content">
             <h3 id="form-title" className="form-title">تواصل معنا</h3>
             <p className="form-description">
               نحن هنا للإجابة على جميع استفساراتك أو ملاحظاتك. يمكنك التواصل معنا عبر النموذج أو من خلال وسائل التواصل التالية:
             </p>
+          </div>
+        </section>
+        {/* نموذج الاتصال المحسن */}
+
+        <section className="contact-form-section" aria-labelledby="form-title">
+          <div className="form-header">
+
             <div className="divider" aria-hidden="true">
               <img
-                src={require("../images/fundo-about.png")}
+                src={require("../images/contactanos.png")}
                 alt="تواصل معنا"
-                style={{ width: "100%", display: "block" ,height: "350px"}}
+                className="divider-img"
               />
             </div>
 
           </div>
-        <div className="form-container">
-          {!sent ? (
-            <Form noValidate onSubmit={handleSubmit} className="simple-form">
-              <div className="form-grid">
-                <div className="form-field">
-                  <Form.Label htmlFor="name">الاسم الكامل</Form.Label>
-                  <Form.Control
-                    id="name"
-                    name="name"
-                    type="text"
-                    placeholder="أدخل اسمك الكامل"
-                    value={form.name}
+          <div className="form-container">
+            {!sent ? (
+              <Form noValidate onSubmit={handleSubmit} className="simple-form">
+                <div className="form-grid">
+                  <div className="form-field">
+                    <Form.Label htmlFor="name">الاسم الكامل</Form.Label>
+                    <Form.Control
+                      id="name"
+                      name="name"
+                      type="text"
+                      placeholder="أدخل اسمك الكامل"
+                      value={form.name}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      isInvalid={touched.name && !!errors.name}
+                      required
+                      minLength={3}
+                      className="form-input"
+                    />
+                    <Form.Control.Feedback type="invalid" className="error-message">
+                      {errors.name}
+                    </Form.Control.Feedback>
+                  </div>
+
+                  <div className="form-field">
+                    <Form.Label htmlFor="email">البريد الإلكتروني</Form.Label>
+                    <Form.Control
+                      id="email"
+                      name="email"
+                      type="email"
+                      placeholder="example@mail.com"
+                      value={form.email}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      isInvalid={touched.email && !!errors.email}
+                      required
+                      className="form-input"
+                    />
+                    <Form.Control.Feedback type="invalid" className="error-message">
+                      {errors.email}
+                    </Form.Control.Feedback>
+                  </div>
+
+                  <div className="form-field full-width">
+                    <Form.Label htmlFor="message">رسالتك</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      id="message"
+                      name="message"
+                      rows={4}
+                      placeholder="اكتب رسالتك هنا..."
+                      value={form.message}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      isInvalid={touched.message && !!errors.message}
+                      required
+                      minLength={20}
+                      className="form-textarea"
+                    />
+                    <Form.Control.Feedback type="invalid" className="error-message">
+                      {errors.message}
+                    </Form.Control.Feedback>
+                  </div>
+                </div>
+
+                <div className="agreement-section">
+                  <Form.Check
+                    id="agree"
+                    name="agree"
+                    checked={form.agree}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    isInvalid={touched.name && !!errors.name}
+                    isInvalid={touched.agree && !!errors.agree}
                     required
-                    minLength={3}
-                    className="form-input"
+                    className="agreement-checkbox"
                   />
+                  <Form.Label htmlFor="agree" className="agreement-label">
+                    أوافق على <Link to="/terms" className="terms-link">الشروط والأحكام</Link> وسياسة الخصوصية
+                  </Form.Label>
                   <Form.Control.Feedback type="invalid" className="error-message">
-                    {errors.name}
+                    {errors.agree}
                   </Form.Control.Feedback>
                 </div>
 
-                <div className="form-field">
-                  <Form.Label htmlFor="email">البريد الإلكتروني</Form.Label>
-                  <Form.Control
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="example@mail.com"
-                    value={form.email}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    isInvalid={touched.email && !!errors.email}
-                    required
-                    className="form-input"
-                  />
-                  <Form.Control.Feedback type="invalid" className="error-message">
-                    {errors.email}
-                  </Form.Control.Feedback>
+                <div className="form-buttons">
+                  <button type="submit" className="submit-btn" disabled={!isValid}>
+                    إرسال الرسالة
+                  </button>
+                  <Link to="/add-user" className="secondary-btn">
+                    إنشاء حساب جديد
+                  </Link>
                 </div>
-
-                <div className="form-field full-width">
-                  <Form.Label htmlFor="message">رسالتك</Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    id="message"
-                    name="message"
-                    rows={4}
-                    placeholder="اكتب رسالتك هنا..."
-                    value={form.message}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    isInvalid={touched.message && !!errors.message}
-                    required
-                    minLength={20}
-                    className="form-textarea"
-                  />
-                  <Form.Control.Feedback type="invalid" className="error-message">
-                    {errors.message}
-                  </Form.Control.Feedback>
+              </Form>
+            ) : (
+              <div className="success-state">
+                <div className="success-message">
+                  <div className="success-icon">✓</div>
+                  <h4>تم استلام رسالتك بنجاح</h4>
+                  <p>سنقوم بالرد عليك في أقرب وقت ممكن</p>
+                </div>
+                <div className="success-buttons">
+                  <Link to="/add-user" className="submit-btn">
+                    إنشاء حساب جديد
+                  </Link>
+                  <Link to="/donations" className="secondary-btn">
+                    تصفح التبرعات
+                  </Link>
                 </div>
               </div>
-
-              <div className="agreement-section">
-                <Form.Check
-                  id="agree"
-                  name="agree"
-                  checked={form.agree}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  isInvalid={touched.agree && !!errors.agree}
-                  required
-                  className="agreement-checkbox"
-                />
-                <Form.Label htmlFor="agree" className="agreement-label">
-                  أوافق على <Link to="/terms" className="terms-link">الشروط والأحكام</Link> وسياسة الخصوصية
-                </Form.Label>
-                <Form.Control.Feedback type="invalid" className="error-message">
-                  {errors.agree}
-                </Form.Control.Feedback>
-              </div>
-
-              <div className="form-buttons">
-                <button type="submit" className="submit-btn" disabled={!isValid}>
-                  إرسال الرسالة
-                </button>
-                <Link to="/add-user" className="secondary-btn">
-                  إنشاء حساب جديد
-                </Link>
-              </div>
-            </Form>
-          ) : (
-            <div className="success-state">
-              <div className="success-message">
-                <div className="success-icon">✓</div>
-                <h4>تم استلام رسالتك بنجاح</h4>
-                <p>سنقوم بالرد عليك في أقرب وقت ممكن</p>
-              </div>
-              <div className="success-buttons">
-                <Link to="/add-user" className="submit-btn">
-                  إنشاء حساب جديد
-                </Link>
-                <Link to="/donations" className="secondary-btn">
-                  تصفح التبرعات
-                </Link>
-              </div>
-            </div>
-          )}
-        </div>
-      </section>
-
-
-
-      {/* الأسئلة الشائعة */}
-      <section className="faq-section" aria-labelledby="faq-title">
-        <h2 id="faq-title" className="section-title">أسئلة شائعة</h2>
-        <div className="faq-grid">
-          {faqs.map((faq, index) => (
-            <details key={index} className="faq-item reveal" data-animate="up">
-              <summary className="faq-question">{faq.question}</summary>
-              <div className="faq-answer">
-                <p>{faq.answer}</p>
-              </div>
-            </details>
-          ))}
-        </div>
-      </section>
-
-
-      {/* الدعوة للإجراء */}
-      <section className="cta-section">
-        <div className="cta-card">
-          <h3 className="cta-title">ابدأ رحلتك في العطاء</h3>
-          <p className="cta-text">
-            انضم إلى آلاف المتبرعين والمتطوعين الذين يساهمون في صنع فرق حقيقي في المجتمع
-          </p>
-          <div className="cta-buttons">
-            <Link to="/add-user" className="cta-btn primary">
-              سجل الآن مجاناً
-            </Link>
-            <Link to="/donations" className="cta-btn secondary">
-              تصفح التبرعات
-            </Link>
+            )}
           </div>
-        </div>
+        </section>
+
+
+
+        {/* الأسئلة الشائعة */}
+  <section className="separador">
+          <div className="separador-content">
+          <h2 id="faq-title" className="section-title">أسئلة شائعة</h2>
+            <p className="form-description">
+              تجد هنا إجابات لأكثر الأسئلة شيوعًا حول منصتنا وخدماتنا
+            </p>
+          </div>
+        </section>
+        <section className="faq-section" aria-labelledby="faq-title">
+          <div className="faq-grid">
+            {faqs.map((faq, index) => (
+              <details key={index} className="faq-item reveal" data-animate="up">
+                <summary className="faq-question">{faq.question}</summary>
+                <div className="faq-answer">
+                  <p>{faq.answer}</p>
+                </div>
+              </details>
+            ))}
+          </div>
+        </section>
+
+
+        {/* الدعوة للإجراء */}
+        <section className="cta-section">
+          <div className="cta-card">
+            <h3 className="cta-title">ابدأ رحلتك في العطاء</h3>
+            <p className="cta-text">
+
+              انضم إلى آلاف المتبرعين والمتطوعين الذين يساهمون في صنع فرق حقيقي في المجتمع
+            </p>
+
+            <div className="cta-buttons">
+              <Link to="/add-user" className="cta-btn primary">
+                سجل الآن مجاناً
+              </Link>
+              <Link to="/donations" className="cta-btn secondary">
+                تصفح التبرعات
+              </Link>
+            </div>
+          </div>
+        </section>
       </section>
-    </section>
     </section >
   );
 }

@@ -1,3 +1,21 @@
+.stats-section {
+  background: url('../images/fundo-about.png') center/cover no-repeat;
+  position: relative;
+  z-index: 1;
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+.stats-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.85); /* طبقة شفافة لزيادة وضوح النص */
+  z-index: 2;
+}
+.stats-section > * {
+  position: relative;
+  z-index: 3;
+}
 /* ====== Contact Info List Design ====== */
 .contact-info-list {
   background: #f8fafc;
@@ -86,6 +104,7 @@
   position: relative;
   line-height: 1.2;
   margin-bottom: 1rem !important;
+    color: #ffffff !important; /* تغيير لون نص العناوين الرئيسية إلى الأبيض */
 }
 
  
@@ -138,6 +157,7 @@
   position: relative;
   overflow: hidden;
 }
+
 
 
 .about-hero::before {
@@ -555,11 +575,31 @@
   flex: 1 1 50%;
 
 }
+/*======Separador ==== */
+.separador{
+  width: 100%;
+  height: 350px;
+  background-color: #0E8D5F;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+ 
+}
+/* ========= تنسيق صورة تواصل معنا ========== */
+.divider{
+   margin:  0rem 0rem 0rem 2rem;
+  height: 100%;
+
+}
+.divider-img{
+  width: 100%;
+  height: 100%;
+}
 .form-description{
   grid-column: 1 / -1;
   font-size: 1rem;
   margin-bottom: 2rem;
-  color: #444;
+  color: #ffffff;
  padding: 10px;
 }
 .contact-info-list{
@@ -709,7 +749,7 @@
 
 .secondary-btn:hover {
   background: var(--primary-orange);
-  color: #fff;
+  color: #ffffff;
   transform: translateY(-3px);
   box-shadow: 0 4px 12px rgba(255, 122, 69, 0.3);
 }
@@ -749,13 +789,13 @@
 
 /* ===== الأسئلة الشائعة ===== */
 .faq-section {
-  margin-bottom: 4rem;
+  margin: 2rem;
 }
 
 .faq-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
 }
 
 .faq-item {
