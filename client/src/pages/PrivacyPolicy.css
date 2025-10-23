@@ -1,0 +1,98 @@
+.privacy-hero-img {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border-radius: 1.2rem;
+  margin-bottom: 2rem;
+  object-fit: cover;
+  box-shadow: 0 2px 12px rgba(25, 118, 210, 0.08);
+  display: block;
+}
+.privacy-cards {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+}
+.privacy-card {
+  background: linear-gradient(135deg, var(--surface) 80%, var(--primary-light) 100%);
+  border-radius: 1.2rem;
+  box-shadow: 0 2px 12px rgba(25, 118, 210, 0.08);
+  padding: 2rem 1.5rem 1.5rem 1.5rem;
+  min-width: 220px;
+  max-width: 320px;
+  flex: 1 1 220px;
+  text-align: center;
+  border: 1px solid var(--border);
+  transition: var(--transition);
+}
+.privacy-card:hover {
+  box-shadow: 0 6px 24px rgba(25, 118, 210, 0.13);
+  transform: translateY(-6px) scale(1.03);
+}
+.privacy-card-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  display: block;
+  color: var(--primary);
+}
+.privacy-card h3 {
+  color: var(--primary);
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin-bottom: 0.7rem;
+}
+.privacy-card p {
+  color: var(--text-light);
+  font-size: 1rem;
+  margin-bottom: 0;
+}
+.privacy-intro {
+  color: var(--text);
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+.privacy-policy-container {
+  background: #fff;
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 16px rgba(25, 118, 210, 0.07);
+  padding: 2.5rem 1.5rem;
+  margin: 2rem auto 3rem auto;
+  max-width: 800px;
+  direction: rtl;
+}
+
+.privacy-title {
+  color: var(--primary);
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.privacy-policy-container h2 {
+  color: var(--accent);
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 0.7rem;
+}
+
+.privacy-policy-container ul {
+  margin-bottom: 1.2rem;
+  padding-right: 1.5rem;
+}
+
+.privacy-policy-container li {
+  color: var(--text-light);
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.privacy-policy-container p {
+  color: var(--text-lighter);
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}

@@ -1,6 +1,6 @@
 /* ===== Ready To Donate Blood - HERO ===== */
 .blood-hero {
-  --bg: url('../images/useradd.png');       /* غلاف افتراضي - عدّل المسار كما تريد */
+  --bg: url('../images/default-avatar.png');       /* غلاف افتراضي - تم التعديل */
   --overlay: rgba(0,0,0,0.45);           /* طبقة تعتيم لتحسين التباين */
   --blur: 2px;                           /* تمويه خفيف للخلفية */
   --accent: #b11226;                     /* لون قطرة الدم */

@@ -1,6 +1,7 @@
 // React & router
 import React, { useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 // Styles & providers
 import 'react-toastify/dist/ReactToastify.css';
@@ -104,6 +105,7 @@ function App() {
 
         <div className="page-wrapper">
           <Routes>
+            <Route path="/privacy" element={<PrivacyPolicy />} />
             {/* عامة */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/add-user" element={<AddUserserPage />} />

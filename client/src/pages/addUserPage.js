@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import UserForm from '../components/UserForm';
 import TitleMain from '../components/TitleMain';
-import userAddImage from '../images/useradd.png';
+import userAddImage from '../images/default-avatar.png';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import './addUserPage.css';
 

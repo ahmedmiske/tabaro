@@ -47,18 +47,7 @@
   letter-spacing: -0.5px;
 }
 
-.section-title::after {
-  content: '';
-  position: absolute;
-  bottom: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80px;
-  height: 4px;
-  background: linear-gradient(90deg, #12B279 0%, #FF7A45 100%);
-  border-radius: 2px;
-}
-
+ 
 .section-subtitle {
   font-size: 1.2rem;
   color: #64748b;
