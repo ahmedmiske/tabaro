@@ -1,0 +1,40 @@
+/* SectionHeader.css */
+.section-header {
+  text-align: center;
+  margin-bottom: 40px;
+
+}
+
+/* محاذاة حسب prop align */
+.section-header.align-start { text-align: start; }
+.section-header.align-center { text-align: center; }
+.section-header.align-end { text-align: end; }
+
+/* العنوان */
+.section-title-about {
+  color: var(--main-color-alt, var(--text-color, #333) );
+  margin: 0 0 8px 0;
+  line-height: 1.25;
+  font-size: 3.8rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #12B279 0%, #FF7A45 50%, #12B279 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1rem;
+  position: relative;
+  border-bottom: 4px solid #bfeede;
+
+}
+
+/* السطر الفرعي */
+.section-subtitle {
+  /* color: var(--sh-subtitle-color, var(--muted-color, #555)); */
+  margin: 0;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+/* تقليل الهوامش عند dense */
+.section-header.dense .section-title { margin-bottom: 4px; }
+.section-header.dense { margin-bottom: 24px; }

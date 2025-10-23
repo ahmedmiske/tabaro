@@ -1,7 +1,8 @@
-// ===== React Component المحدث =====
+// src/pages/About.jsx
 import React, { useEffect, useRef, useState } from "react";
-import { Container, Form } from "react-bootstrap";
+import { Form } from "react-bootstrap";
 import { useNavigate, Link } from "react-router-dom";
+import SectionHeader from "./SectionHeader.jsx";
 import "./About.css";
 
 function About() {
@@ -30,25 +31,29 @@ function About() {
 
   // ===== Stats numbers =====
   useEffect(() => {
+    const root = sectionRef.current;
+    if (!root) return;
+
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const els = document.querySelectorAll(".stat-value");
+    const els = root.querySelectorAll(".stat-value");
 
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry, index) => {
+        entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const el = entry.target;
             const target = parseInt(el.getAttribute("data-target") || "0", 10);
 
             if (prefersReduced) {
               el.textContent = target.toLocaleString("ar");
+              observer.unobserve(el);
               return;
             }
 
             let current = 0;
-            const increment = target / 50;
+            const steps = 50;
+            const increment = target / steps;
             const duration = 1500;
-
             const timer = setInterval(() => {
               current += increment;
               if (current >= target) {
@@ -56,7 +61,7 @@ function About() {
                 clearInterval(timer);
               }
               el.textContent = Math.floor(current).toLocaleString("ar");
-            }, duration / 50);
+            }, duration / steps);
 
             observer.unobserve(el);
           }
@@ -111,43 +116,43 @@ function About() {
       title: "تبرع بالدم",
       description: "ساهم في إنقاذ الأرواح عبر تبرع آمن وسريع",
       path: "/donations",
-      state: { type: "blood" }
+      state: { type: "blood" },
     },
     {
       icon: "💳",
       title: "تبرع مالي",
       description: "ادعم حالات عاجلة بمساهمة آمنة وشفافة",
       path: "/donations",
-      state: { type: "financial" }
+      state: { type: "financial" },
     },
     {
       icon: "🎁",
       title: "تبرع عيني",
       description: "قدّم ملابس، طعامًا أو أدوات لتلبية احتياجات عاجلة",
       path: "/donations",
-      state: { type: "in-kind" }
+      state: { type: "in-kind" },
     },
     {
       icon: "🙋‍♂️",
       title: "تطوّع",
       description: "انضم لفرق مساعدة ميدانية أو رقمية حسب وقتك",
       path: "/announcements",
-      state: { type: "volunteer" }
+      state: { type: "volunteer" },
     },
     {
       icon: "💡",
       title: "أفكار ومبادرات",
       description: "شارك مبادرتك واجمع متطوعين لتنفيذها",
       path: "/announcements",
-      state: { type: "ideas" }
+      state: { type: "ideas" },
     },
     {
       icon: "🔎",
       title: "مفقودات",
       description: "انشر/ابحث عن مفقودات وساعد أصحابها في استرجاعها",
       path: "/announcements",
-      state: { type: "lost" }
-    }
+      state: { type: "lost" },
+    },
   ];
 
   const stats = [
@@ -155,63 +160,73 @@ function About() {
       icon: "❤️",
       value: "1240",
       label: "تبرع ناجح",
-      description: "ساهمنا في إنقاذ الأرواح"
+      description: "ساهمنا في إنقاذ الأرواح",
     },
     {
       icon: "🚀",
       value: "85",
       label: "حملة فعالة",
-      description: "لجمع التبرعات والمبادرات"
+      description: "لجمع التبرعات والمبادرات",
     },
     {
       icon: "✓",
       value: "530",
       label: "متبرع موثّق",
-      description: "في مجتمعنا المتنامي"
-    }
+      description: "في مجتمعنا المتنامي",
+    },
   ];
 
   const faqs = [
     {
       question: "كيف أضمن موثوقية الطلبات؟",
-      answer: "نطبّق توثيق الهوية ومراجعة الوثائق، مع شارات ثقة وتاريخ آخر تحديث لكل طلب."
+      answer:
+        "نطبّق توثيق الهوية ومراجعة الوثائق، مع شارات ثقة وتاريخ آخر تحديث لكل طلب.",
     },
     {
       question: "هل التبرع المالي آمن؟",
-      answer: "يتم عبر قنوات آمنة ومشفّرة، مع تتبع للدفعات وعرض ملخص الاستخدام."
+      answer:
+        "يتم عبر قنوات آمنة ومشفّرة، مع تتبع للدفعات وعرض ملخص الاستخدام.",
     },
     {
       question: "كيف أتواصل مع صاحب الطلب؟",
-      answer: "من صفحة الطلب، استخدم زر \"تواصل\"—ستجد الهاتف/الواتساب بعد تحقق الصلاحيات."
+      answer:
+        "من صفحة الطلب، استخدم زر \"تواصل\"—ستجد الهاتف/الواتساب بعد تحقق الصلاحيات.",
     },
     {
       question: "هل يمكنني التطوع بدون خبرة سابقة؟",
-      answer: "نعم، نوفر فرص تطوع تناسب جميع المستويات ونقدم التوجيه والدعم اللازم."
+      answer:
+        "نعم، نوفر فرص تطوع تناسب جميع المستويات ونقدم التوجيه والدعم اللازم.",
     },
     {
       question: "كيف أتابع حالة طلبي أو تبرعي؟",
-      answer: "يمكنك متابعة حالة الطلب أو التبرع من خلال حسابك الشخصي في المنصة وستصلك إشعارات بالتحديثات."
+      answer:
+        "يمكنك متابعة حالة الطلب أو التبرع من خلال حسابك الشخصي في المنصة وستصلك إشعارات بالتحديثات.",
     },
     {
       question: "هل يمكنني اقتراح خدمة أو مبادرة جديدة؟",
-      answer: "بكل سرور! يمكنك إرسال اقتراحك عبر نموذج التواصل وسنقوم بدراسته والرد عليك."  
-    }
+      answer:
+        "بكل سرور! يمكنك إرسال اقتراحك عبر نموذج التواصل وسنقوم بدراسته والرد عليك.",
+    },
   ];
 
   return (
     <section className="about-container" aria-labelledby="about-title" ref={sectionRef}>
       <section>
-        {/* تعريف المنصة مع التصميم المبسط */}
+        {/* ===== هيرو: عن منصة تبرع ===== */}
         <header className="about-hero reveal" data-animate="up">
           <div className="hero-content">
-            {<div className="hero-badge">
+            <div className="hero-badge">
               <span className="badge-icon">🌟</span>
               <span className="badge-text">منصة تبرع الرسمية</span>
-            </div>}
+            </div>
 
-            <h1 id="about-title" className="hero-title">
-              عن منصة تبرع
-            </h1>
+            <SectionHeader
+              id="about-title"
+              title="عن منصة تبرع"
+              subtitle="نربط المتبرع بالمحتاج مباشرةً عبر مسارات موثوقة وتجربة بسيطة وآمنة"
+              align="start"
+           
+            />
 
             <div className="hero-description">
               <p className="hero-text">
@@ -263,14 +278,19 @@ function About() {
           </div>
         </header>
 
-        {/* الخدمات */}
+        {/* ===== الخدمات ===== */}
         <section className="separador">
           <div className="separador-content">
-             <h2 className="section-title">خدماتنا</h2>
+            <SectionHeader
+              id="services-title"
+              title="خدماتنا"
+              subtitle="قنوات تبرع واضحة وآمنة تُسهِّل عليك اختيار الطريقة الأنسب للمساعدة"
+              tone="light"
+            />
           </div>
         </section>
+
         <section aria-label="الخدمات المتاحة" className="services-section">
-        
           <div className="services-grid">
             {serviceCards.map((service, index) => (
               <div key={index} className="service-card reveal" data-animate="up">
@@ -290,9 +310,19 @@ function About() {
           </div>
         </section>
 
-        {/* الإحصائيات */}
+        {/* ===== الإحصائيات ===== */}
         <section className="stats-section" aria-label="إحصائيات المنصة">
-          <h2 className="section-title">أثرنا في المجتمع</h2>
+          <section className="separador">
+          
+             <div className="separador-content" >
+               <SectionHeader
+                id="impact-title"
+                title="أثرنا في المجتمع"
+                subtitle="أرقام حقيقية تعكس مساهماتكم وحملاتنا الفعّالة على مدار الفترة الماضية"
+                tone="green"
+               />
+             </div>
+            </section>
           <div className="stats-grid">
             {stats.map((stat, index) => (
               <div key={index} className="stat-card reveal" data-animate="up">
@@ -304,19 +334,21 @@ function About() {
             ))}
           </div>
         </section>
+
+        {/* ===== تواصل معنا ===== */}
         <section className="separador">
           <div className="separador-content">
-            <h3 id="form-title" className="form-title">تواصل معنا</h3>
-            <p className="form-description">
-              نحن هنا للإجابة على جميع استفساراتك أو ملاحظاتك. يمكنك التواصل معنا عبر النموذج أو من خلال وسائل التواصل التالية:
-            </p>
+            <SectionHeader
+              id="form-title"
+              title="تواصل معنا"
+              subtitle="نستقبل استفساراتك ومقترحاتك — فريقنا يرد عادة خلال 24–48 ساعة"
+              tone="light"
+            />
           </div>
         </section>
-        {/* نموذج الاتصال المحسن */}
 
         <section className="contact-form-section" aria-labelledby="form-title">
           <div className="form-header">
-
             <div className="divider" aria-hidden="true">
               <img
                 src={require("../images/contactanos.png")}
@@ -324,8 +356,8 @@ function About() {
                 className="divider-img"
               />
             </div>
-
           </div>
+
           <div className="form-container">
             {!sent ? (
               <Form noValidate onSubmit={handleSubmit} className="simple-form">
@@ -439,17 +471,18 @@ function About() {
           </div>
         </section>
 
-
-
-        {/* الأسئلة الشائعة */}
-  <section className="separador">
+        {/* ===== الأسئلة الشائعة ===== */}
+        <section className="separador">
           <div className="separador-content">
-          <h2 id="faq-title" className="section-title">أسئلة شائعة</h2>
-            <p className="form-description">
-              تجد هنا إجابات لأكثر الأسئلة شيوعًا حول منصتنا وخدماتنا
-            </p>
+            <SectionHeader
+              id="faq-title"
+              title="أسئلة شائعة"
+              subtitle="مجموعة من الإجابات المختصرة لأكثر الاستفسارات تكرارًا حول المنصة"
+              tone="light"
+            />
           </div>
         </section>
+
         <section className="faq-section" aria-labelledby="faq-title">
           <div className="faq-grid">
             {faqs.map((faq, index) => (
@@ -463,13 +496,11 @@ function About() {
           </div>
         </section>
 
-
-        {/* الدعوة للإجراء */}
+        {/* ===== الدعوة للإجراء ===== */}
         <section className="cta-section">
           <div className="cta-card">
             <h3 className="cta-title">ابدأ رحلتك في العطاء</h3>
             <p className="cta-text">
-
               انضم إلى آلاف المتبرعين والمتطوعين الذين يساهمون في صنع فرق حقيقي في المجتمع
             </p>
 
@@ -484,7 +515,7 @@ function About() {
           </div>
         </section>
       </section>
-    </section >
+    </section>
   );
 }
 

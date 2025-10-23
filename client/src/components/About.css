@@ -104,7 +104,7 @@
   position: relative;
   line-height: 1.2;
   margin-bottom: 1rem !important;
-    color: #ffffff !important; /* تغيير لون نص العناوين الرئيسية إلى الأبيض */
+  color: #ffffff !important; /* تغيير لون نص العناوين الرئيسية إلى الأبيض */
 }
 
  
@@ -176,6 +176,7 @@
   min-width: 300px;
   position: relative;
   z-index: 2;
+
 }
 
 .hero-badge {
@@ -575,16 +576,18 @@
   flex: 1 1 50%;
 
 }
-/*======Separador ==== */
-.separador{
+/* ======Separador ==== */
+ .separador{
   width: 100%;
-  height: 350px;
-  background-color: #0E8D5F;
+  height: 200px;
+   background-color: #f3f7f3 ; 
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-bottom: 2rem;
  
-}
+} 
+
 /* ========= تنسيق صورة تواصل معنا ========== */
 .divider{
    margin:  0rem 0rem 0rem 2rem;
