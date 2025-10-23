@@ -1,4 +1,3 @@
-// src/components/Header.jsx
 import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -72,6 +71,27 @@ function Header({ notifCount }) {
   const [badgeCount, setBadgeCount] = useState(Number.isFinite(notifCount) ? notifCount : 0);
   const [searchOpen, setSearchOpen] = useState(false);
 
+  // Hide-on-scroll (mobile/tablet only)
+  const [isHeaderHidden, setIsHeaderHidden] = useState(false);
+
+  // ===== Routing helpers: keep parent active when any sub-page is open =====
+  const pathname = location.pathname;
+
+  const bloodActive = useMemo(() => {
+    return [
+      '/blood', '/blood-', '/blooddon', '/ready/blood'
+    ].some(prefix => pathname.startsWith(prefix))
+    || ['/blood-donations','/blood-donation','/blood-donors'].some(p=> pathname.startsWith(p));
+  }, [pathname]);
+
+  const generalActive = useMemo(() => {
+    return [
+      '/donations', '/donation-requests', '/general-donors', '/ready/general'
+    ].some(prefix => pathname.startsWith(prefix));
+  }, [pathname]);
+
+  const campaignsActive = useMemo(() => pathname.startsWith('/campaigns'), [pathname]);
+
   const onSubmit = useCallback((e) => {
     e.preventDefault();
     const s = q.trim();
@@ -107,7 +127,7 @@ function Header({ notifCount }) {
     };
   }, []);
 
-  // تحديث ارتفاع الهيدر
+  // تحديث ارتفاع الهيدر → variable for pushing content
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
     const el = rootRef.current;
@@ -191,26 +211,42 @@ function Header({ notifCount }) {
     navigate('/login');
   };
 
-  // ===== Active section logic =====
-  const { pathname } = location;
-
-  const isAnyActive = useCallback(
-    (paths) => paths.some(p => pathname === p || (p !== '/' && pathname.startsWith(p))),
-    [pathname]
-  );
-
-  const BLOOD_PATHS = ['/ready/blood', '/blood-donation', '/blood-donations', '/blood-donors'];
-  const GENERAL_PATHS = ['/ready/general', '/donation-requests', '/donations', '/general-donors'];
-  const CAMPAIGN_PATHS = ['/campaigns']; // covers /campaigns/create as well
-
   // ARIA ids for groups
   const bloodId = useId();
   const generalId = useId();
   const campaignsId = useId();
 
+  // ===== Hide on scroll (mobile/tablet) =====
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    let lastY = window.scrollY;
+    let ticking = false;
+
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(() => {
+        const y = window.scrollY;
+        const goingDown = y > lastY;
+        const thresholdPassed = y > 80;
+        const isSmallScreen = window.matchMedia('(max-width: 1024px)').matches;
+
+        const shouldHide =
+          goingDown && thresholdPassed && !mobileOpen && !searchOpen && isSmallScreen;
+
+        setIsHeaderHidden(!!shouldHide);
+        lastY = y;
+        ticking = false;
+      });
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [mobileOpen, searchOpen]);
+
   return (
     <header
-      className="eh-header-modern"
+      className={`eh-header-modern ${isHeaderHidden ? 'is-hidden' : ''}`}
       dir="rtl"
       ref={rootRef}
       data-authed={isAuthed ? 'true' : 'false'}
@@ -230,7 +266,7 @@ function Header({ notifCount }) {
         <div className="eh-main-container">
           {/* الشعار في المنتصف */}
           <div className="eh-brand-center">
-            <Link to="/" className="eh-brand-modern">
+            <Link to="/" className="eh-brand-modern" onClick={() => setOpen(null)}>
               <div className="eh-logo-wrapper">
                 <img src="/logo.png" alt="المنصة الوطنية للتبرع" />
               </div>
@@ -244,30 +280,36 @@ function Header({ notifCount }) {
           <nav className="eh-nav-left">
             <div className={`eh-nav-item ${open==='blood' ? 'open' : ''}`}>
               <button
-                className={`eh-nav-link ${isAnyActive(BLOOD_PATHS) ? 'active' : ''}`}
+                className={`eh-nav-link ${bloodActive ? 'active' : ''}`}
                 onClick={() => setOpen(open === 'blood' ? null : 'blood')}
                 onMouseEnter={() => setOpen('blood')}
-                aria-current={isAnyActive(BLOOD_PATHS) ? 'page' : undefined}
+                aria-expanded={open==='blood'}
+                aria-controls="mega-blood"
+                id={bloodId}
               >
                 <FiDroplet /><span>التبرع بالدم</span><FiChevronDown className="eh-caret" />
               </button>
             </div>
             <div className={`eh-nav-item ${open==='general' ? 'open' : ''}`}>
               <button
-                className={`eh-nav-link ${isAnyActive(GENERAL_PATHS) ? 'active' : ''}`}
+                className={`eh-nav-link ${generalActive ? 'active' : ''}`}
                 onClick={() => setOpen(open === 'general' ? null : 'general')}
                 onMouseEnter={() => setOpen('general')}
-                aria-current={isAnyActive(GENERAL_PATHS) ? 'page' : undefined}
+                aria-expanded={open==='general'}
+                aria-controls="mega-general"
+                id={generalId}
               >
                 <FiHeart /><span>تبرعات عامة</span><FiChevronDown className="eh-caret" />
               </button>
             </div>
             <div className={`eh-nav-item ${open==='campaigns' ? 'open' : ''}`}>
               <button
-                className={`eh-nav-link ${isAnyActive(CAMPAIGN_PATHS) ? 'active' : ''}`}
+                className={`eh-nav-link ${campaignsActive ? 'active' : ''}`}
                 onClick={() => setOpen(open === 'campaigns' ? null : 'campaigns')}
                 onMouseEnter={() => setOpen('campaigns')}
-                aria-current={isAnyActive(CAMPAIGN_PATHS) ? 'page' : undefined}
+                aria-expanded={open==='campaigns'}
+                aria-controls="mega-campaigns"
+                id={campaignsId}
               >
                 <FiUsers /><span>حملات التبرع</span><FiChevronDown className="eh-caret" />
               </button>
@@ -279,20 +321,20 @@ function Header({ notifCount }) {
             <div className="eh-nav-actions">
               <button
                 className={`eh-search-toggle ${searchOpen ? 'active' : ''}`}
-                onClick={() => setSearchOpen(!searchOpen)}
+                onClick={() => { setSearchOpen(!searchOpen); setOpen(null); }}
                 aria-label="بحث"
               >
                 <FiSearch />
               </button>
 
-              <Link to="/cart" className="eh-cart-icon" aria-label="سلة التبرعات">
+              <Link to="/cart" className="eh-cart-icon" aria-label="سلة التبرعات" onClick={() => setOpen(null)}>
                 <FiShoppingCart />
               </Link>
 
               {/* زر الهامبرغر */}
               <button
                 className="eh-menu-toggle"
-                onClick={() => setMobileOpen(!mobileOpen)}
+                onClick={() => { setMobileOpen(!mobileOpen); setOpen(null); }}
                 aria-label="فتح القائمة"
                 aria-expanded={mobileOpen}
                 aria-controls="mobile-drawer"

@@ -14,11 +14,6 @@
   --eh-glow: 0 0 20px rgba(var(--primary-rgb), 0.15);
   --header-height: 140px;
   --eh-topbar-height: 44px; /* ارتفاع ثابت للشريط العلوي */
-
-  /* ألوان وتمييز الـhover (مختلفة عن active) */
-  --eh-hover-bg: rgba(var(--rgb-primary, 18,178,121), .10);
-  --eh-hover-border: var(--eh-primary);
-  --eh-hover-text: var(--eh-darker);
 }
 
 /* (مضاعفة كلوحة ألوان إضافية — إن لم تكن لديك في index.css) */
@@ -189,24 +184,13 @@
   cursor:pointer;
   transition: all .3s ease;
 }
-
-/* ===== Hover (خفيف) vs Active (مصمت) ===== */
-.eh-nav-link:hover,
-.eh-nav-link:focus{
-  background: var(--eh-hover-bg);
-  border-color: var(--eh-hover-border);
-  color: var(--eh-hover-text);
+.eh-nav-link:hover{
+  background: var(--eh-primary);
+  color:#fff;
+  border-color: var(--eh-primary);
   transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(0,142,98,.10);
+  box-shadow: 0 6px 18px rgba(0,142,98,.18);
 }
-
-/* عندما تكون المجموعة مفتوحة دون تفعيل فعلي */
-.eh-nav-item.open > .eh-nav-link:not(.active){
-  background: var(--eh-hover-bg);
-  border-color: var(--eh-hover-border);
-  color: var(--eh-hover-text);
-}
-
 .eh-nav-link.active{
   background: var(--eh-primary);
   color:#fff;
@@ -237,22 +221,14 @@
   background:#fff; color: var(--eh-dark);
   cursor:pointer; transition: all .3s ease; text-decoration:none;
 }
-
-/* Hover للأزرار الجانبية (خفيف) */
 .eh-search-toggle:hover, .eh-cart-icon:hover, .eh-menu-toggle:hover{
-  background: var(--eh-hover-bg);
-  border-color: var(--eh-hover-border);
-  color: var(--eh-primary);
-  transform: translateY(-2px);
-  box-shadow: var(--eh-shadow);
-}
-
-/* حالة نشطة للأزرار (عند فتح البحث مثلاً) */
-.eh-search-toggle.active{
   background: var(--eh-primary);
   border-color: var(--eh-primary);
   color:#fff;
+  transform: translateY(-2px);
+  box-shadow: var(--eh-shadow);
 }
+.eh-search-toggle.active{ background: var(--eh-primary); border-color: var(--eh-primary); color:#fff; }
 
 /* شريط البحث المنزلق */
 .eh-search-slide{
