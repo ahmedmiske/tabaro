@@ -66,62 +66,98 @@ export default function ReadyToDonateGeneralPage() {
         </div>
       </div>
 
-      <Container className="my-4">
-        <Row className="justify-content-center">
-          <Col lg={8}>
-            <Card className="border-0 shadow-sm">
-              <Card.Body>
-                <h3 className="mb-3">سجّل استعدادك</h3>
-                {msg && <Alert variant={msg.startsWith('✅') ? 'success':'danger'}>{msg}</Alert>}
+      <div className="contact-form-section">
+        <div className="form-container">
+          <div className="form-title">سجّل استعدادك</div>
+          <div className="form-header">املأ البيانات التالية لتسجيل استعدادك</div>
+          {msg && <Alert variant={msg.startsWith('✅') ? 'success':'danger'}>{msg}</Alert>}
+          <Form onSubmit={submit}>
+            <div className="form-grid">
+              {/* المدينة */}
+              <div className="form-field">
+                <label className="form-label" htmlFor="city">المدينة</label>
+                <input
+                  id="city"
+                  name="city"
+                  value={form.city}
+                  onChange={onChange}
+                  className="form-input"
+                  required
+                  style={errors.city ? { borderColor: '#e53e3e' } : {}}
+                  placeholder="اكتب اسم المدينة"
+                />
+                {errors.city && <span className="error-message">هذا الحقل مطلوب</span>}
+              </div>
 
-                <Form onSubmit={submit}>
-                  <Form.Group className="mb-3">
-                    <Form.Label>المدينة</Form.Label>
-                    <Form.Control name="city" value={form.city} onChange={onChange} isInvalid={errors.city} required />
-                    <Form.Control.Feedback type="invalid">هذا الحقل مطلوب</Form.Control.Feedback>
-                  </Form.Group>
+              {/* نوع التبرع */}
+              <div className="form-field">
+                <label className="form-label" htmlFor="category">نوع التبرع</label>
+                <select
+                  id="category"
+                  name="category"
+                  value={form.category}
+                  onChange={onChange}
+                  className="form-input"
+                  required
+                  style={errors.category ? { borderColor: '#e53e3e' } : {}}
+                >
+                  {GENERAL_CATEGORY_OPTIONS.map(opt => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+                {errors.category && <span className="error-message">اختر نوع التبرع</span>}
+              </div>
 
-                  <Form.Group className="mb-3">
-                    <Form.Label>نوع التبرع</Form.Label>
-                    <Form.Select name="category" value={form.category} onChange={onChange} isInvalid={errors.category} required>
-                      {GENERAL_CATEGORY_OPTIONS.map(opt => (
-                        <option key={opt.value} value={opt.value}>{opt.label}</option>
-                      ))}
-                    </Form.Select>
-                    <Form.Control.Feedback type="invalid">اختر نوع التبرع</Form.Control.Feedback>
-                  </Form.Group>
+              {/* الهاتف */}
+              <div className="form-field">
+                <label className="form-label" htmlFor="phone">الهاتف</label>
+                <input
+                  id="phone"
+                  name="phone"
+                  value={form.phone}
+                  onChange={onChange}
+                  className="form-input"
+                  placeholder="8 أرقام"
+                  style={errors.phone ? { borderColor: '#e53e3e' } : {}}
+                />
+                {errors.phone && <span className="error-message">رقم غير صالح</span>}
+              </div>
 
-                  <Row>
-                    <Col md={6}>
-                      <Form.Group className="mb-3">
-                        <Form.Label>الهاتف</Form.Label>
-                        <Form.Control name="phone" value={form.phone} onChange={onChange} isInvalid={errors.phone} placeholder="8 أرقام" />
-                        <Form.Control.Feedback type="invalid">رقم غير صالح</Form.Control.Feedback>
-                      </Form.Group>
-                    </Col>
-                    <Col md={6}>
-                      <Form.Group className="mb-3">
-                        <Form.Label>واتساب</Form.Label>
-                        <Form.Control name="whatsapp" value={form.whatsapp} onChange={onChange} isInvalid={errors.whatsapp} placeholder="8 أرقام" />
-                        <Form.Control.Feedback type="invalid">رقم غير صالح</Form.Control.Feedback>
-                      </Form.Group>
-                    </Col>
-                  </Row>
+              {/* واتساب */}
+              <div className="form-field">
+                <label className="form-label" htmlFor="whatsapp">واتساب</label>
+                <input
+                  id="whatsapp"
+                  name="whatsapp"
+                  value={form.whatsapp}
+                  onChange={onChange}
+                  className="form-input"
+                  placeholder="8 أرقام"
+                  style={errors.whatsapp ? { borderColor: '#e53e3e' } : {}}
+                />
+                {errors.whatsapp && <span className="error-message">رقم غير صالح</span>}
+              </div>
 
-                  <Form.Group className="mb-3">
-                    <Form.Label>ملاحظة (اختياري)</Form.Label>
-                    <Form.Control as="textarea" rows={3} name="note" value={form.note} onChange={onChange} />
-                  </Form.Group>
-
-                  <div className="d-flex justify-content-end">
-                    <Button type="submit">تأكيد التسجيل</Button>
-                  </div>
-                </Form>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
+              {/* الملاحظة */}
+              <div className="form-field full-width">
+                <label className="form-label" htmlFor="note">ملاحظة (اختياري)</label>
+                <textarea
+                  id="note"
+                  name="note"
+                  value={form.note}
+                  onChange={onChange}
+                  className="form-textarea"
+                  rows={3}
+                  placeholder="أي معلومات إضافية تريد إضافتها..."
+                />
+              </div>
+            </div>
+            <div className="form-buttons">
+              <button type="submit" className="submit-btn">تأكيد التسجيل</button>
+            </div>
+          </Form>
+        </div>
+      </div>
     </div>
   );
 }
