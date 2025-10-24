@@ -225,7 +225,7 @@ function About() {
               title="عن منصة تبرع"
               subtitle="نربط المتبرع بالمحتاج مباشرةً عبر مسارات موثوقة وتجربة بسيطة وآمنة"
               align="start"
-           
+
             />
 
             <div className="hero-description">
@@ -311,18 +311,18 @@ function About() {
         </section>
 
         {/* ===== الإحصائيات ===== */}
-        <section className="stats-section" aria-label="إحصائيات المنصة">
-          <section className="separador">
-          
-             <div className="separador-content" >
-               <SectionHeader
+        <section className="separador">
+            <div className="separador-content" >
+              <SectionHeader
                 id="impact-title"
                 title="أثرنا في المجتمع"
                 subtitle="أرقام حقيقية تعكس مساهماتكم وحملاتنا الفعّالة على مدار الفترة الماضية"
                 tone="green"
-               />
-             </div>
-            </section>
+              />
+            </div>
+          </section>
+        <section className="stats-section" aria-label="إحصائيات المنصة">
+          
           <div className="stats-grid">
             {stats.map((stat, index) => (
               <div key={index} className="stat-card reveal" data-animate="up">
