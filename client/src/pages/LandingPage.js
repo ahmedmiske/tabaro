@@ -35,7 +35,6 @@ function LandingPage() {
     return (fn || user.username || user.email || 'مرحبًا').toString();
   }, [user]);
 
-  // الهدف الذي يذهب إليه سهم النزول
   const heroScrollTargetId = isAuthed ? 'quick-start' : 'about';
 
   const handleScrollClick = (e) => {
@@ -46,37 +45,38 @@ function LandingPage() {
   };
 
   return (
-    <>
+    // غلاف خاص بالصفحة: يفعّل متغيرات الألوان ويعزل التنسيق
+    <div className="lp" data-page="landing">
       {/* ===== الهيرو ===== */}
-      <header className="landing-page" id="top" role="banner" aria-label="القسم الافتتاحي">
-        <div className="container-landing">
-          <div className="hero-content">
-            <h1 id="hero-title" className="landing-title">
+      <header className="lp-hero" id="top" role="banner" aria-label="القسم الافتتاحي">
+        <div className="lp-container">
+          <div className="lp-hero-content">
+            <h1 id="hero-title" className="lp-title">
               {isAuthed ? `مرحبًا ${displayName}! لنُكمِل الخير معًا` : 'تواصل مباشر بين المتبرع والمتعفف'}
             </h1>
 
-            <p className="lead-text">
+            <p className="lp-lead">
               {isAuthed
                 ? 'إدارة تبرعاتك، متابعة طلبات المحتاجين، والانضمام للحملات بنقرة واحدة.'
                 : 'نربط الأيدي البيضاء بالقلوب المحتاجة'}
             </p>
 
-            <div className="buttons-container" role="group" aria-label="روابط الإجراءات الرئيسية">
+            <div className="lp-actions" role="group" aria-label="روابط الإجراءات الرئيسية">
               {isAuthed ? (
                 <>
-                  <Link to="/dashboard" className="hero-btn-primary" aria-label="الانتقال إلى لوحة التحكم">
+                  <Link to="/dashboard" className="lp-btn lp-btn-primary" aria-label="الانتقال إلى لوحة التحكم">
                     إلى لوحة التحكم
                   </Link>
-                  <Link to="/donations" className="hero-btn-secondary" aria-label="استكشاف الطلبات">
+                  <Link to="/donations" className="lp-btn lp-btn-secondary" aria-label="استكشاف الطلبات">
                     استكشف الطلبات
                   </Link>
                 </>
               ) : (
                 <>
-                  <Link to="/add-user" className="hero-btn-primary" aria-label="ابدأ التسجيل كمستخدم جديد">
+                  <Link to="/add-user" className="lp-btn lp-btn-primary" aria-label="ابدأ التسجيل كمستخدم جديد">
                     ابدأ رحلتك الآن
                   </Link>
-                  <Link to="/login" className="hero-btn-secondary" aria-label="انتقال إلى صفحة تسجيل الدخول">
+                  <Link to="/login" className="lp-btn lp-btn-secondary" aria-label="انتقال إلى صفحة تسجيل الدخول">
                     تسجيل الدخول
                   </Link>
                 </>
@@ -84,10 +84,10 @@ function LandingPage() {
             </div>
 
             {/* سهم النزول يعمل في الحالتين */}
-            <div className="scroll-down" aria-hidden="true">
+            <div className="lp-scroll" aria-hidden="true">
               <a
                 href={`#${heroScrollTargetId}`}
-                className="scroll-link"
+                className="lp-scroll-link"
                 aria-label="الانتقال للأسفل"
                 onClick={handleScrollClick}
               >
@@ -100,44 +100,37 @@ function LandingPage() {
 
       {/* ===== المحتوى الرئيسي ===== */}
       <main id="main" tabIndex={-1}>
-        {/* الزائر: About كما هو — المستخدم: قسم بداية سريعة */}
+        {/* الزائر: About — المستخدم: بداية سريعة */}
         {isAuthed ? (
           <section
-            className="about-section anchor-target quick-start"
+            className="lp-section lp-quick-start lp-anchor-target"
             id="quick-start"
             aria-label="مقترحات للمستخدم"
           >
-            <div className="container-landing" style={{ textAlign: 'center', marginBottom: 32 }}>
-              <h2 style={{ marginBottom: 16 }}>ابدأ بسرعة</h2>
-              <div
-                style={{
-                  display: 'grid',
-                  gap: 16,
-                  gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))',
-                }}
-              >
-                {/* زرّان ثانويان بخلفية فاتحة => on-light لضمان تباين النص */}
-                <Link className="hero-btn-secondary on-light" to="/ready/blood">
+            <div className="lp-container lp-center">
+              <h2 className="lp-qs-title">ابدأ بسرعة</h2>
+              <div className="lp-qs-grid">
+                <Link className="lp-btn lp-btn-secondary on-light" to="/ready/blood">
                   إعلان استعداد للتبرع بالدم
                 </Link>
-                <Link className="hero-btn-secondary on-light" to="/donation-requests">
+                <Link className="lp-btn lp-btn-secondary on-light" to="/donation-requests">
                   إضافة طلب تبرع
                 </Link>
-                <Link className="hero-btn-secondary on-light" to="/campaigns">
+                <Link className="lp-btn lp-btn-secondary on-light" to="/campaigns">
                   الانضمام لحملة
                 </Link>
               </div>
             </div>
           </section>
         ) : (
-          <section className="about-section anchor-target" id="about" aria-label="عن المنصّة">
+          <section className="lp-section lp-about lp-anchor-target" id="about" aria-label="عن المنصّة">
             <About />
           </section>
         )}
 
         <ReadyToDonateSection />
       </main>
-    </>
+    </div>
   );
 }
 
