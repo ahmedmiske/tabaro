@@ -141,15 +141,25 @@ function AddUserPage() {
     <div className={`signup-layout ${animationClass}`} role="main" aria-label="صفحة التسجيل">
       {/* القسم البصري */}
       <section className="signup-image-section fullscreen-image" aria-label="منطقة الترحيب البصرية">
-        <div className="image-container fullscreen-container">
-          <img
-            src={userAddImage}
-            alt="رسم توضيحي لإنشاء حساب جديد"
-            className="user-add-image fullscreen-image-element"
-            loading="eager"
-            decoding="async"
-          />
-        </div>
+        <div
+          className="image-container fullscreen-container"
+          style={{
+            backgroundImage: 'url(/images/useradd.png)',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: 'contain',
+            backgroundPosition: 'center',
+            minHeight: '260px',
+            margin: 0,
+            padding: 0,
+            width: '100%',
+            borderRadius: '1.2rem',
+            backgroundColor: '#fff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          aria-label="رسم توضيحي لإنشاء حساب جديد"
+        />
       </section>
 
       {/* منطقة النموذج */}

@@ -1,3 +1,74 @@
+.blood-info-box {
+  background: rgba(255,255,255,0.5);
+  border-radius: 1.2rem;
+  box-shadow: none;
+  padding: 1.5rem 1.2rem;
+  margin-top: 1.5rem;
+  color: #222;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+  backdrop-filter: blur(2px);
+}
+.blood-info-box .info-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1976d2;
+  margin-bottom: 0.7rem;
+}
+.blood-info-box .info-list {
+  margin: 0 0 0.7rem 0;
+  padding-left: 1.2rem;
+  font-size: 1rem;
+  color: #444;
+}
+.blood-info-box ul.info-list {
+  list-style: disc inside;
+}
+.blood-info-box ol.info-list {
+  list-style: decimal inside;
+}
+.blood-info-box li {
+  margin-bottom: 0.3rem;
+}
+/* ===== صف الهيرو والفورم جنباً إلى جنب ===== */
+.ready-blood-row {
+  display: flex;
+  gap: 2rem;
+  align-items: stretch;
+}
+.blood-hero {
+  flex: 1 1 45%;
+  min-width: 320px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: none;
+}
+/* صورة الهيرو تظهر كاملة */
+.blood-hero-img {
+  width: 100%;
+  height: 360px;
+  object-fit: contain;
+  border-radius: 1.2rem;
+  display: block;
+  background: #fff;
+}
+.form-side {
+  flex: 1 1 55%;
+  min-width: 320px;
+  display: flex;
+  align-items: center;
+}
+@media (max-width: 900px) {
+  .ready-blood-row {
+    flex-direction: column;
+  }
+  .form-side, .blood-hero {
+    min-width: 0;
+  }
+}
 /* ===== Ready To Donate Blood - HERO ===== */
 .blood-hero {
   --bg: url('../images/default-avatar.png');       /* غلاف افتراضي - تم التعديل */
@@ -54,12 +125,14 @@
   font-weight: 800;
   letter-spacing: .5px;
   margin-bottom: .35rem;
+  color: #E05A2E;
 }
 
 .blood-hero p {
   margin: 0;
   font-size: 1.05rem;
   opacity: .95;
+  color: #E05A2E;
 }
 
 /* زر سريع إن رغبت */

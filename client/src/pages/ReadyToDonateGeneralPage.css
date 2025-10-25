@@ -1,9 +1,72 @@
 /* ===== Ready To Donate - GENERAL HERO ===== */
+
+/* ===== Ready To Donate - GENERAL HERO & INFO BOX ===== */
+.general-info-box {
+  background: rgba(255,255,255,0.5);
+  border-radius: 1.2rem;
+  box-shadow: none;
+  padding: 1.5rem 1.2rem;
+  margin-top: 1.5rem;
+  color: #222;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+  backdrop-filter: blur(2px);
+}
+.general-info-box .info-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #e63946;
+  margin-bottom: 0.7rem;
+}
+.general-info-box .info-list {
+  margin: 0 0 0.7rem 0;
+  padding-left: 1.2rem;
+  font-size: 1rem;
+  color: #444;
+}
+.general-info-box ul.info-list {
+  list-style: disc inside;
+}
+.general-info-box ol.info-list {
+  list-style: decimal inside;
+}
+.general-info-box li {
+  margin-bottom: 0.3rem;
+}
+/* ===== صف الهيرو والفورم جنباً إلى جنب ===== */
+.ready-general-row {
+  display: flex;
+  gap: 2rem;
+  align-items: stretch;
+}
 .general-hero {
-  --bg: url('../images/fundo-about.png'); /* بدّل المسار إذا لزم */
+  flex: 1 1 45%;
+  min-width: 320px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.form-side {
+  flex: 1 1 55%;
+  min-width: 320px;
+  display: flex;
+  align-items: center;
+}
+@media (max-width: 900px) {
+  .ready-general-row {
+    flex-direction: column;
+  }
+  .form-side, .general-hero {
+    min-width: 0;
+  }
+}
+/* ===== Ready To Donate General - HERO ===== */
+.general-hero {
+  --bg: url('../images/fundo-about.png');
   --overlay: rgba(0,0,0,0.45);
   --blur: 2px;
-  --accent: #e63946; /* لون القلب */
+  --accent: #e63946;
   position: relative;
   min-height: 320px;
   display: grid;
@@ -25,7 +88,6 @@
   background: linear-gradient(180deg, transparent 0%, var(--overlay) 60%, var(--overlay) 100%);
   z-index:-1;
 }
-/* زخرفة قلوب */
 .general-hero::after{
   content:"";
   position:absolute; inset:auto 0 0 0; height:90px;
@@ -39,8 +101,19 @@
   opacity:.12;
 }
 .general-hero .hero-content{ padding:48px 12px; }
-.general-hero h1{ font-weight:800; letter-spacing:.5px; margin-bottom:.35rem; }
-.general-hero p{ margin:0; font-size:1.05rem; opacity:.95; }
+/* لون العنوان والنص الرئيسي بالبرتقالي */
+.general-hero h1 {
+  font-weight:800;
+  letter-spacing:.5px;
+  margin-bottom:.35rem;
+  color:#E05A2E;
+}
+.general-hero p {
+  margin:0;
+  font-size:1.05rem;
+  opacity:.95;
+  color: #E05A2E;
+}
 @media (min-width:768px){
   .general-hero{ min-height:380px; }
   .general-hero .hero-content{ padding:64px 16px; }

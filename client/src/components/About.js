@@ -309,17 +309,24 @@ function About() {
             ))}
           </div>
         </section>
-
         {/* ===== الإحصائيات ===== */}
         <section className="separador">
-            <div className="separador-content" >
-              <SectionHeader
-                id="impact-title"
-                title="أثرنا في المجتمع"
-                subtitle="أرقام حقيقية تعكس مساهماتكم وحملاتنا الفعّالة على مدار الفترة الماضية"
-                tone="green"
-              />
-            </div>
+            <section
+              className="separador"
+              style={{
+                background: "url('/images/gualla.png') center/cover no-repeat",
+                position: "relative"
+              }}
+            >
+              <div className="separador-content" >
+                <SectionHeader
+                  id="impact-title"
+                  title="أثرنا في المجتمع"
+                  subtitle="أرقام حقيقية تعكس مساهماتكم وحملاتنا الفعّالة على مدار الفترة الماضية"
+                  tone="green"
+                />
+              </div>
+            </section>
           </section>
         <section className="stats-section" aria-label="إحصائيات المنصة">
           

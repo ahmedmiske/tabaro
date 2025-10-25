@@ -1,9 +1,10 @@
 // src/pages/ReadyToDonateGeneralPage.jsx
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
-import { FiHeart } from 'react-icons/fi';
+import { FiHeart, FiCheck } from 'react-icons/fi';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import { GENERAL_CATEGORY_OPTIONS } from '../constants/donationCategories';
+import './ReadyToDonateGeneralPage.css';
 
 const validatePhone = (v) => /^\d{8}$/.test(v || '');
 
@@ -48,30 +49,58 @@ export default function ReadyToDonateGeneralPage() {
     }
   };
 
-  const heroSrc = `${process.env.PUBLIC_URL}/images/tabar6.jpg`; // ← من مجلد public
+  const bgCandidates = useMemo(() => [
+    '/images/tabar6.jpg',
+    '/images/tabar5.jpg',
+    '/images/fundo-about.png'
+  ], []);
+  const bgUrl = useMemo(() => bgCandidates[0], [bgCandidates]);
 
   return (
-    <div className="py-4" dir="rtl">
-      {/* Hero */}
-      <div className="position-relative">
-        <img
-          src={heroSrc}
-          alt="التبرع وأهميته"
-          className="w-100"
-          style={{ maxHeight: 300, objectFit: 'cover' }}
-        />
-        <div className="position-absolute top-50 start-50 translate-middle text-white text-center">
-          <h1 className="fw-bold mb-2"><FiHeart className="me-2" /> مستعد للتبرع العام</h1>
-          <p className="mb-0">مساهمتك تحدث فرقًا حقيقيًا في حياة الناس.</p>
+    <div className="py-4 ready-general-row" dir="rtl">
+      <section
+        className="general-hero"
+        style={{
+          backgroundImage: `url(${bgUrl})`,
+          backgroundRepeat: 'no-repeat',
+          backgroundSize: 'contain',
+          backgroundPosition: 'center',
+          backgroundColor: '#fff',
+          borderRadius: '1.2rem',
+          minHeight: 360,
+          position: 'relative',
+        }}
+      >
+        <div className="hero-overlay"></div>
+        <div className="hero-content">
+          <h1 className="fw-bold mb-2">
+            <FiHeart className="me-2" /> مستعد للتبرع العام
+          </h1>
+          <p className="mb-3">مساهمتك تحدث فرقًا حقيقيًا في حياة الناس.</p>
+          <div className="general-info-box">
+            <h3 className="info-title">لماذا التبرع العام مهم؟</h3>
+            <ul className="info-list">
+              <li>يساعد في دعم الأسر المحتاجة والمرضى والفقراء.</li>
+              <li>يمكن أن يكون تبرعك مالياً أو عينياً أو خدمياً.</li>
+              <li>كل مساهمة تساهم في تحسين حياة المجتمع.</li>
+              <li>التبرع يتم بسرية واحترام كامل للمتبرعين والمستفيدين.</li>
+            </ul>
+            <h4 className="info-title mt-3">كيف تتم عملية التبرع؟</h4>
+            <ol className="info-list">
+              <li>سجّل بياناتك في النموذج بجانب الصورة.</li>
+              <li>سيتم التواصل معك من قبل الفريق المختص.</li>
+              <li>يتم التنسيق معك حسب نوع التبرع والمستفيدين.</li>
+              <li>تساهم في إسعاد الآخرين وتغيير حياتهم للأفضل.</li>
+            </ol>
+          </div>
         </div>
-      </div>
-
-      <div className="contact-form-section">
+      </section>
+      <div className="form-side">
         <div className="form-container">
-          <div className="form-title">سجّل استعدادك</div>
+          <div className="form-title">سجّل استعدادك للتبرع</div>
           <div className="form-header">املأ البيانات التالية لتسجيل استعدادك</div>
-          {msg && <Alert variant={msg.startsWith('✅') ? 'success':'danger'}>{msg}</Alert>}
-          <Form onSubmit={submit}>
+          {msg && <Alert variant={msg.startsWith('✅') ? 'success':'danger'} className="mb-4">{msg}</Alert>}
+          <Form onSubmit={submit} className="donation-form">
             <div className="form-grid">
               {/* المدينة */}
               <div className="form-field">
@@ -88,7 +117,6 @@ export default function ReadyToDonateGeneralPage() {
                 />
                 {errors.city && <span className="error-message">هذا الحقل مطلوب</span>}
               </div>
-
               {/* نوع التبرع */}
               <div className="form-field">
                 <label className="form-label" htmlFor="category">نوع التبرع</label>
@@ -102,12 +130,11 @@ export default function ReadyToDonateGeneralPage() {
                   style={errors.category ? { borderColor: '#e53e3e' } : {}}
                 >
                   {GENERAL_CATEGORY_OPTIONS.map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>)
+                  )}
                 </select>
                 {errors.category && <span className="error-message">اختر نوع التبرع</span>}
               </div>
-
               {/* الهاتف */}
               <div className="form-field">
                 <label className="form-label" htmlFor="phone">الهاتف</label>
@@ -122,7 +149,6 @@ export default function ReadyToDonateGeneralPage() {
                 />
                 {errors.phone && <span className="error-message">رقم غير صالح</span>}
               </div>
-
               {/* واتساب */}
               <div className="form-field">
                 <label className="form-label" htmlFor="whatsapp">واتساب</label>
@@ -137,7 +163,6 @@ export default function ReadyToDonateGeneralPage() {
                 />
                 {errors.whatsapp && <span className="error-message">رقم غير صالح</span>}
               </div>
-
               {/* الملاحظة */}
               <div className="form-field full-width">
                 <label className="form-label" htmlFor="note">ملاحظة (اختياري)</label>
@@ -153,7 +178,9 @@ export default function ReadyToDonateGeneralPage() {
               </div>
             </div>
             <div className="form-buttons">
-              <button type="submit" className="submit-btn">تأكيد التسجيل</button>
+              <button type="submit" className="submit-btn">
+                <FiCheck className="me-2" /> تأكيد التسجيل
+              </button>
             </div>
           </Form>
         </div>

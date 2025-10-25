@@ -75,7 +75,6 @@ const Footer = () => {
                 <address className="f-contact">
                   <div className="f-contact-row">📍 نواكشوط، تفرغ زينة</div>
                   <div className="f-contact-row">📞 <a href="tel:+22245250000">+222 45 25 00 00</a></div>
-                  <div className="f-contact-row">✉️ <a href="mailto:info@donation.gov.mr">info@donation.gov.mr</a></div>
                 </address>
                 <div className="f-social">
                   <a href="#" aria-label="فيسبوك" title="فيسبوك">

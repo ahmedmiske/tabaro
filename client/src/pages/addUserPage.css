@@ -21,7 +21,7 @@
 
 /* ✅ القسم الأيسر (الصورة) */
 .signup-image-section {
-  flex: 0 0 35%;
+  flex: 0 0 48%;
   position: relative;
   background: white;
   display: flex;
