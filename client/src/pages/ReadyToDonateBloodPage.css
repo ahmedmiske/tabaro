@@ -71,21 +71,15 @@
 }
 /* ===== Ready To Donate Blood - HERO ===== */
 .blood-hero {
-  --bg: url('../images/default-avatar.png');       /* غلاف افتراضي - تم التعديل */
-  --overlay: rgba(0,0,0,0.45);           /* طبقة تعتيم لتحسين التباين */
-  --blur: 2px;                           /* تمويه خفيف للخلفية */
-  --accent: #b11226;                     /* لون قطرة الدم */
-  position: relative;
-  min-height: 320px;
-  display: grid;
+  --overlay: rgba(0,0,0,0.45);
   place-items: center;
   text-align: center;
   color: #fff;
   overflow: clip;
   isolation: isolate;
   background:
-    radial-gradient(1200px 400px at 80% -10%, rgba(177,18,38,0.25), transparent 60%),
-    radial-gradient(900px 350px at 20% 110%, rgba(177,18,38,0.2), transparent 60%),
+    radial-gradient(1000px 420px at 85% -5%, rgba(230,57,70,0.22), transparent 60%),
+    radial-gradient(900px 380px at 15% 110%, rgba(230,57,70,0.18), transparent 60%),
     linear-gradient(180deg, rgba(0,0,0,0.10), rgba(0,0,0,0.35)),
     var(--bg) center/cover no-repeat fixed;
   backdrop-filter: blur(var(--blur));
