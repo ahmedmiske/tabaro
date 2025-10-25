@@ -1,0 +1,19 @@
+.social-card {
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  padding: 14px;
+  background: #fff;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+  display: flex; flex-direction: column; gap: 8px;
+}
+.social-card__head { display: flex; justify-content: space-between; align-items: center; }
+.social-card__chip, .social-card__status {
+  font-size: 12px; padding: 4px 8px; border-radius: 999px; background: #f3f4f6;
+}
+.social-card__title { font-size: 1.05rem; margin: 0; }
+.social-card__desc { margin: 0; color: #444; min-height: 48px; }
+.social-card__meta { display: flex; gap: 8px; color: #666; font-size: 0.9rem; }
+.social-card__actions { margin-top: 8px; }
+.btn { padding: 8px 12px; border-radius: 10px; background: #008E62; color: #fff; border: none; cursor: pointer; }
+.btn:hover { filter: brightness(0.95); }
+.btn.btn-outline { background: transparent; color: #008E62; border: 1px solid #008E62; }

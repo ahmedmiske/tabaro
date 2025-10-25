@@ -20,6 +20,7 @@ const messageRoutes = require("./routes/messageRoute");
 const notificationRoutes = require("./routes/notificationRoutes");
 const readyToDonateBloodRoute = require('./routes/readyToDonateBloodRoute');
 const readyToDonateGeneralRoute = require('./routes/readyToDonateGeneralRoute');
+const socialAdRoutes = require('./routes/socialAdroutes');
 const setupSocket = require("./socket");
 
 
@@ -87,6 +88,7 @@ app.use("/api/notifications", notificationRoutes);
 app.use('/api/ready-to-donate-blood', readyToDonateBloodRoute);
 app.use('/api/ready-to-donate-general', readyToDonateGeneralRoute);
 
+app.use('/api/social-ads', socialAdRoutes);
 /* Swagger dev-only */
 if (!process.env.NODE_ENV || process.env.NODE_ENV !== "production") {
   require("./swagger")(app);
@@ -94,9 +96,7 @@ if (!process.env.NODE_ENV || process.env.NODE_ENV !== "production") {
 app.use('/api/ready-to-donate', readyToDonateBloodRoute);
 app.use('/api/ready-to-donate-general', readyToDonateGeneralRoute);
 app.use('/api/public', publicProfileRoutes);
-/* Errors */
-app.use(notFound);
-app.use(errorHandler);
+
 
 /* Socket.IO */
 setupSocket(io);
@@ -115,3 +115,7 @@ mongoose
     console.error("❌ Failed to connect to MongoDB", err);
     process.exit(1);
   });
+
+  /* Errors */
+app.use(notFound);
+app.use(errorHandler);

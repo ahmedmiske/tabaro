@@ -1,0 +1,18 @@
+.social-details { padding: 24px; }
+.sd-head { display: grid; gap: 10px; }
+.sd-chip, .sd-status { font-size: 12px; padding: 4px 10px; border-radius: 999px; background: #eef2f7; width: max-content; }
+.sd-title { margin: 0; }
+.sd-meta { margin: 0; color: #666; }
+.sd-media img { width: 100%; max-height: 420px; object-fit: cover; border-radius: 12px; margin: 12px 0; }
+.sd-desc { white-space: pre-wrap; line-height: 1.8; }
+.sd-extra pre { background: #0b10211a; padding: 12px; border-radius: 12px; overflow: auto; }
+.sd-actions { display: flex; gap: 10px; margin: 16px 0; flex-wrap: wrap; }
+.btn { padding: 10px 14px; border-radius: 10px; background: #008E62; color: #fff; border: none; cursor: pointer; }
+.btn:hover { filter: brightness(0.95); }
+.btn.btn-outline { background: transparent; color: #008E62; border: 2px solid #008E62; }
+.btn.btn-ghost { background: #f7f7f7; color: #111; }
+.btn.btn-danger { background: #c1121f; }
+.sd-report textarea { width: 100%; min-height: 100px; border: 1px solid #ddd; border-radius: 10px; padding: 10px; }
+.sd-note { margin-top: 10px; color: #555; }
+
+

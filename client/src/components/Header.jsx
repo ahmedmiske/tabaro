@@ -311,7 +311,7 @@ function Header({ notifCount }) {
                 aria-controls="mega-campaigns"
                 id={campaignsId}
               >
-                <FiUsers /><span>حملات التبرع</span><FiChevronDown className="eh-caret" />
+                <FiUsers /><span> مجتمعنا</span><FiChevronDown className="eh-caret" />
               </button>
             </div>
           </nav>
@@ -435,9 +435,9 @@ function Header({ notifCount }) {
           </div>
         </div>
 
-        {/* حملات التبرع */}
+         {/* الاعلانات الاجتماعية */}
         <div
-          id="mega-campaigns"
+          id="social-campaigns"
           className={`eh-mega-panel ${open==='campaigns' ? 'open' : ''}`}
           onMouseEnter={() => setOpen('campaigns')}
           onMouseLeave={() => setOpen(null)}
@@ -445,13 +445,13 @@ function Header({ notifCount }) {
           aria-labelledby={campaignsId}
         >
           <div className="eh-mega-grid">
-            <Link to="/campaigns" className="eh-mega-card" onClick={() => setOpen(null)}>
+            <Link to="/social" className="eh-mega-card" onClick={() => setOpen(null)}>
               <div className="eh-mega-icon"><FiGrid /></div>
-              <div className="eh-mega-content"><h4>قائمة الحملات</h4><p>استكشف الحملات</p></div>
+              <div className="eh-mega-content"><h4>قائمة الاعلانات</h4><p>  استكشف المجتمع من حولك</p></div>
             </Link>
-            <Link to="/campaigns/create" className="eh-mega-card" onClick={() => setOpen(null)}>
+            <Link to="/social/new" className="eh-mega-card" onClick={() => setOpen(null)}>
               <div className="eh-mega-icon"><FiHeart /></div>
-              <div className="eh-mega-content"><h4>إنشاء حملة</h4><p>أطلق حملتك الآن</p></div>
+              <div className="eh-mega-content"><h4>إنشاء اعلان</h4><p>أطلق اعلانك الآن</p></div>
             </Link>
           </div>
         </div>

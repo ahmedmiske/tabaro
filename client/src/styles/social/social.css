@@ -1,0 +1,11 @@
+.social-wrap { padding: 24px; }
+.social-header { margin-bottom: 16px; }
+.social-header h1 { margin: 0 0 8px 0; }
+.lead { color: #555; }
+.social-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+.state { padding: 12px; background: #f7f7f7; border-radius: 8px; }
+.state--error { background: #fde8e8; color: #a11212; }

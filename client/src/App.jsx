@@ -52,8 +52,10 @@ import NotificationsPage from './pages/NotificationsPage';
 // Demos
 import OrangeButtonsShowcase from './components/OrangeButtonsShowcase';
 import ButtonsDemo from './components/ButtonsDemo';
-
-
+// Socail ads
+import SocialList from './pages/social/SocialList.jsx';
+import SocialDetails from './pages/social/SocialDetails.jsx';
+import SocialForm from './pages/social/SocialForm.jsx';
 
 // Guards & socket
 import RequireAuth from './components/RequireAuth';
@@ -121,6 +123,7 @@ function App() {
 
             {/* محمية */}
             {/* صفحات الاستعداد للتبرع (محميّة) */}
+
              <Route path="/ready/blood" element={<RequireAuth><ReadyToDonateBloodPage /></RequireAuth>}/>
              <Route path="/ready/general" element={<RequireAuth><ReadyToDonateGeneralPage /></RequireAuth>} />
             <Route path="/donation-details/:id" element={<RequireAuth><DonationDetails /></RequireAuth>} />
@@ -134,7 +137,11 @@ function App() {
             <Route path="/messages" element={<RequireAuth><ChatList /></RequireAuth>} />
             <Route path="/notifications" element={<RequireAuth><NotificationsPage /></RequireAuth>} />
             <Route path="/users/:id" element={<RequireAuth><PublicProfile /></RequireAuth>} />
- 
+            {/* صفحات الإعلانات الاجتماعية */}
+            <Route path="/social" element={<SocialList  />} />
+            <Route path="/social/new" element={<RequireAuth><SocialForm /></RequireAuth>} />
+            <Route path="/social/:id" element={<SocialDetails />} />
+             
             {/* صفحات المتبرعين */}
             <Route path="/ready-donors" element={<RequireAuth><ReadyDonors /></RequireAuth>}/>
             <Route path="/blood-donors" element={<RequireAuth><BloodDonors /></RequireAuth>} />
