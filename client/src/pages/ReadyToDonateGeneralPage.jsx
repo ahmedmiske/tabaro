@@ -9,7 +9,7 @@ import './ReadyToDonateGeneralPage.css';
 const validatePhone = (v) => /^\d{8}$/.test(v || '');
 
 export default function ReadyToDonateGeneralPage() {
-  const [form, setForm] = useState({ city:'', category:'money', note:'', phone:'', whatsapp:'' });
+  const [form, setForm] = useState({ city: '', category: 'money', note: '', phone: '', whatsapp: '' });
   const [errors, setErrors] = useState({});
   const [msg, setMsg] = useState('');
 
@@ -41,7 +41,7 @@ export default function ReadyToDonateGeneralPage() {
       });
       if (res?.ok) {
         setMsg('✅ تم تسجيل استعدادك للتبرع العام.');
-        setForm({ city:'', category:'money', note:'', phone:'', whatsapp:'' });
+        setForm({ city: '', category: 'money', note: '', phone: '', whatsapp: '' });
         setErrors({});
       } else setMsg('❌ تعذّر الإرسال. حاول لاحقًا.');
     } catch {
@@ -61,45 +61,23 @@ export default function ReadyToDonateGeneralPage() {
       <section
         className="general-hero"
         style={{
-          backgroundImage: `url(${bgUrl})`,
-          backgroundRepeat: 'no-repeat',
-          backgroundSize: 'contain',
-          backgroundPosition: 'center',
-          backgroundColor: '#fff',
-          borderRadius: '1.2rem',
-          minHeight: 360,
-          position: 'relative',
+          backgroundImage: `url(${bgUrl})`
+          
         }}
       >
-        <div className="hero-overlay"></div>
         <div className="hero-content">
           <h1 className="fw-bold mb-2">
             <FiHeart className="me-2" /> مستعد للتبرع العام
           </h1>
           <p className="mb-3">مساهمتك تحدث فرقًا حقيقيًا في حياة الناس.</p>
-          <div className="general-info-box">
-            <h3 className="info-title">لماذا التبرع العام مهم؟</h3>
-            <ul className="info-list">
-              <li>يساعد في دعم الأسر المحتاجة والمرضى والفقراء.</li>
-              <li>يمكن أن يكون تبرعك مالياً أو عينياً أو خدمياً.</li>
-              <li>كل مساهمة تساهم في تحسين حياة المجتمع.</li>
-              <li>التبرع يتم بسرية واحترام كامل للمتبرعين والمستفيدين.</li>
-            </ul>
-            <h4 className="info-title mt-3">كيف تتم عملية التبرع؟</h4>
-            <ol className="info-list">
-              <li>سجّل بياناتك في النموذج بجانب الصورة.</li>
-              <li>سيتم التواصل معك من قبل الفريق المختص.</li>
-              <li>يتم التنسيق معك حسب نوع التبرع والمستفيدين.</li>
-              <li>تساهم في إسعاد الآخرين وتغيير حياتهم للأفضل.</li>
-            </ol>
-          </div>
         </div>
       </section>
+
       <div className="form-side">
         <div className="form-container">
           <div className="form-title">سجّل استعدادك للتبرع</div>
           <div className="form-header">املأ البيانات التالية لتسجيل استعدادك</div>
-          {msg && <Alert variant={msg.startsWith('✅') ? 'success':'danger'} className="mb-4">{msg}</Alert>}
+          {msg && <Alert variant={msg.startsWith('✅') ? 'success' : 'danger'} className="mb-4">{msg}</Alert>}
           <Form onSubmit={submit} className="donation-form">
             <div className="form-grid">
               {/* المدينة */}

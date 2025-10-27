@@ -76,42 +76,18 @@ export default function ReadyToDonateBloodPage() {
   };
 
   return (
-    <div className="py-4 ready-blood-row" dir="rtl">
+    <div className="ready-blood-row" dir="rtl">
       <section
         className="blood-hero"
         style={{
           backgroundImage: `url(${bgUrl})`,
-          backgroundRepeat: 'no-repeat',
-          backgroundSize: 'contain',
-          backgroundPosition: 'center',
-          backgroundColor: '#fff',
-          borderRadius: '1.2rem',
-          minHeight: 360,
-          position: 'relative',
         }}
       >
-        <div className="hero-overlay"></div>
         <div className="hero-content">
           <h1 className="fw-bold mb-2">
             <FiDroplet className="me-2" /> مستعد للتبرع بالدم
           </h1>
           <p className="mb-3">تبرّعك قد ينقذ حياة إنسان اليوم.</p>
-          <div className="blood-info-box">
-            <h3 className="info-title">لماذا التبرع بالدم مهم؟</h3>
-            <ul className="info-list">
-              <li>كل تبرع يمكن أن ينقذ حياة شخص في حاجة ماسة.</li>
-              <li>التبرع آمن وسريع ويخضع لإشراف طبي.</li>
-              <li>يتم فحص المتبرعين لضمان سلامتهم وسلامة المستفيدين.</li>
-              <li>يمكنك اختيار الموقع وفصيلة الدم المناسبة.</li>
-            </ul>
-            <h4 className="info-title mt-3">كيف تتم عملية التبرع؟</h4>
-            <ol className="info-list">
-              <li>سجّل بياناتك في النموذج بجانب الصورة.</li>
-              <li>سيتم التواصل معك من قبل الفريق المختص.</li>
-              <li>تتوجه إلى مركز التبرع أو يتم التنسيق معك حسب الحالة.</li>
-              <li>تساهم في إنقاذ حياة وتمنح الأمل للآخرين.</li>
-            </ol>
-          </div>
         </div>
       </section>
       <div className="form-side">
