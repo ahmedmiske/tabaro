@@ -1,125 +1,333 @@
- /* ReadyToDonateBloodPage.css */
+/* ReadyToDonateBloodPage.css */
 
-/* ===== Ready To Donate - BLOOD HERO ===== */
-
-/* ===== Ready To Donate - BLOOD HERO & INFO BOX ===== *
-/* ===== صف الهيرو والفورم جنباً إلى جنب ===== */
 .ready-blood-row {
   display: flex;
-  gap: 1rem;
+  gap: 2rem;
   align-items: stretch;
-  padding: 2rem;
+  padding: 3rem;
+  border-radius: 20px;
+  margin: 2rem auto;
+  max-width: 1400px;
+  box-shadow: 0 12px 40px rgba(224, 90, 46, 0.12);
+  position: relative;
+  min-height: 600px;
 }
-.blood-hero {
-  flex: 1 0 45% ;
-  min-width: 320px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: cover;
+
+ 
+
+ 
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  padding: 3rem;
+  margin: 2rem;
+  border-radius: 12px;
 }
+
+ 
+ 
+
 .form-side {
   min-width: 320px;
-  max-width: 600px;
+  max-width: 500px;
   display: flex;
   align-items: center;
+  justify-content: center;
 }
-@media (max-width: 900px) {
-  .ready-blood-row {
-    flex-direction: column;
-    padding: 0;
-  }
-  .form-side, .blood-hero {
-    min-width: 0;
-  }
+
+.section-form {
+  display: none;
 }
-/* ===== Ready To Donate Blood - HERO ===== */
- .blood-hero {
-  place-items: center;
-  text-align: center;
-  overflow: clip;
-  isolation: isolate;
-  
-  backdrop-filter: blur(var(--blur));
-} 
- 
- 
-.blood-hero .hero-content{ padding:48px 12px; }
-/* لون العنوان والنص الرئيسي بالبرتقالي */
-.blood-hero h1 {
-  font-weight:800;
-  letter-spacing:.5px;
-  margin-bottom:.35rem;
-  color:#E05A2E;
+
+/* تنسيقات النموذج */
+.form-container {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(224, 90, 46, 0.1);
+  width: 100%;
+  border: 1px solid rgba(224, 90, 46, 0.1);
 }
-.blood-hero p {
-  margin:0;
-  font-size:1.05rem;
-  opacity:.95;
+
+.form-title {
+  font-size: 1.5rem;
+  font-weight: 800;
   color: #E05A2E;
+  margin-bottom: 0.5rem;
+  text-align: center;
 }
-@media (min-width:768px){
-  .blood-hero{ min-height:380px; }
-  .blood-hero .hero-content{ padding:64px 16px; }
-  .blood-hero h1{ font-size:2.25rem; }
-  .blood-hero p{ font-size:1.1rem; }
+
+.form-header {
+  font-size: 0.95rem;
+  color: #666;
+  text-align: center;
+  margin-bottom: 2rem;
+  line-height: 1.5;
 }
+
+.donation-form {
+  margin-top: 1.5rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-field.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-label {
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.form-label svg {
+  color: #E05A2E;
+  font-size: 1.1rem;
+}
+
+.form-input,
+.form-textarea {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: white;
+  color: #333;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: #E05A2E;
+  box-shadow: 0 0 0 3px rgba(224, 90, 46, 0.1);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+  line-height: 1.5;
+}
+
+.form-buttons {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+}
+
+.submit-btn {
+  background: linear-gradient(135deg, #E05A2E 0%, #d0451b 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2.5rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(224, 90, 46, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 200px;
+}
+
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(224, 90, 46, 0.4);
+}
+
+.error-message {
+  color: #e53e3e;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  font-weight: 500;
+}
+
+ 
+
+/* تجاوبية للهواتف - الفورم فوق الصورة */
 @media (max-width: 900px) {
   .ready-blood-row {
     flex-direction: column;
-    padding: 0.25rem;
-    gap: 0.25rem;
-  }
-  .form-side, .blood-hero {
-    min-width: 0;
-    width: 100%;
-    max-width: 100%;
     padding: 0;
-    box-sizing: border-box;
-  }
-  .blood-hero .hero-content {
-    padding: 8px 1px;
-  }
-  .blood-hero img {
-    max-width: 100%;
-    height: auto;
-    display: block;
+    gap: 0;
     margin: 0;
-  padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: none;
+    min-height: auto;
+    position: relative;
   }
-  .blood-hero h1 {
-    font-size: 1.3rem;
+
+ 
+   
+  .hero-content {
+    margin: 1rem;
+    padding: 1.5rem;
+    text-align: center;
   }
-  .blood-hero p {
+
+  
+
+  /* إخفاء الفورم الجانبي وإظهار الفورم فوق الصورة */
+  .form-side {
+    display: none;
+  }
+
+  .section-form {
+    display: block;
+    position: absolute;
+    top: 35%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 400px;
+    z-index: 10;
+  }
+
+  .form-container {
+    padding: 1.5rem;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+  }
+
+  /* تقليل حجم حقول الإدخال في الهاتف */
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 0.875rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .form-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .form-header {
+    font-size: 0.85rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .form-label {
+    font-size: 0.9rem;
+    margin-bottom: 0.375rem;
+  }
+
+  .form-input,
+  .form-textarea {
+    padding: 0.675rem 0.875rem;
+    font-size: 0.9rem;
+    border-radius: 8px;
+  }
+
+  .form-textarea {
+    min-height: 80px;
+    font-size: 0.9rem;
+  }
+
+  .submit-btn {
+    padding: 0.75rem 1.5rem;
     font-size: 0.95rem;
+    min-width: 100px;
+    border-radius: 10px;
   }
 }
 
 @media (max-width: 600px) {
-  .ready-blood-row {
-    padding: 0.1rem;
-    gap: 0.1rem;
+ 
+  .hero-content {
+    padding: 1rem;
+    margin: 0.5rem;
   }
-  .form-side, .blood-hero {
-    padding: 0;
-    min-width: 0;
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
+
+ 
+
+  .section-form {
+    top: 30%;
+    width: 95%;
+    max-width: 350px;
   }
-  
-  .blood-hero img {
-    max-width: 100%;
-    height: auto;
-    display: block;
-    margin: 0;
+
+  .form-container {
+    padding: 1.25rem;
   }
-  .blood-hero h1 {
-    font-size: 1.05rem;
+
+  /* جعل حقول الإدخال أصغر في الشاشات الصغيرة جداً */
+  .form-grid {
+    gap: 0.75rem;
   }
-  .blood-hero p {
+
+  .form-input,
+  .form-textarea {
+    padding: 0.575rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .form-textarea {
+    min-height: 70px;
+  }
+
+  .submit-btn {
+    padding: 0.675rem 1.25rem;
+    font-size: 0.9rem;
+    min-width: 140px;
+  }
+
+  .form-title {
+    font-size: 1.1rem;
+  }
+
+  .form-header {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .section-form {
+    top: 28%;
+    width: 98%;
+    max-width: 320px;
+  }
+
+  .form-container {
+    padding: 1rem;
+  }
+
+  .form-input,
+  .form-textarea {
+    padding: 0.5rem 0.675rem;
+    font-size: 0.8rem;
+  }
+
+  .form-label {
     font-size: 0.85rem;
   }
 }
+
+/* تأثيرات خاصة للتنبيهات */
+.alert {
+  border-radius: 10px;
+  border: none;
+  padding: 0.875rem 1rem;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+ 

@@ -57,7 +57,7 @@ export default function ReadyToDonateGeneralPage() {
   const bgUrl = useMemo(() => bgCandidates[0], [bgCandidates]);
 
   return (
-    <div className="py-4 ready-general-row" dir="rtl">
+    <div className="ready-general-row" dir="rtl">
       <section
         className="general-hero"
         style={{

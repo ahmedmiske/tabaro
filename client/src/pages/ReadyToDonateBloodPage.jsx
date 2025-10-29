@@ -76,9 +76,10 @@ export default function ReadyToDonateBloodPage() {
   };
 
   return (
-    <div className="ready-blood-row" dir="rtl">
+     <div className="ready-general-row" dir="rtl">
+
       <section
-        className="blood-hero"
+        className="general-hero"
         style={{
           backgroundImage: `url(${bgUrl})`,
         }}
@@ -194,7 +195,7 @@ export default function ReadyToDonateBloodPage() {
             </div>
           </Form>
         </div>
-      </div>
+    </div>
     </div>
   );
 }
