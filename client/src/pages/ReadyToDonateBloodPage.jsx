@@ -91,7 +91,7 @@ export default function ReadyToDonateBloodPage() {
           <p className="mb-3">تبرّعك قد ينقذ حياة إنسان اليوم.</p>
         </div>
       </section>
-      <div className="form-side">
+      <div className="form-side blood-form-f">
         <div className="form-container">
           <div className="form-title">سجّل استعدادك للتبرع</div>
           <div className="form-header">املأ البيانات التالية لتسجيل استعدادك</div>

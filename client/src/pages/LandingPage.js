@@ -4,6 +4,8 @@ import './LandingPage.css';
 import About from '../components/About';
 import ReadyToDonateSection from '../components/ReadyToDonateSection.jsx';
 import useSEO from '../hooks/useSEO';
+import IconsSection from '../components/IconsSection.jsx';
+import CarouselHero from '../components/CarouselHero.jsx';
 
 function LandingPage() {
   useSEO({
@@ -48,8 +50,9 @@ function LandingPage() {
     // غلاف خاص بالصفحة: يفعّل متغيرات الألوان ويعزل التنسيق
     <div className="lp" data-page="landing">
       {/* ===== الهيرو ===== */}
-      <header className="lp-hero" id="top" role="banner" aria-label="القسم الافتتاحي">
-        <div className="lp-container">
+      <header className="lp-hero" id="top" role="banner" aria-label="القسم الافتتاحي" style={{position: 'relative', overflow: 'hidden'}}>
+        <CarouselHero />
+        <div className="lp-container" style={{position: 'relative', zIndex: 2}}>
           <div className="lp-hero-content">
             <h1 id="hero-title" className="lp-title">
               {isAuthed ? `مرحبًا ${displayName}! لنُكمِل الخير معًا` : 'تواصل مباشر بين المتبرع والمتعفف'}
@@ -128,8 +131,9 @@ function LandingPage() {
           </section>
         )}
 
-        <ReadyToDonateSection />
-      </main>
+          <IconsSection />
+          <ReadyToDonateSection />
+        </main>
     </div>
   );
 }
