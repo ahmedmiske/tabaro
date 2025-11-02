@@ -25,15 +25,17 @@ import NotFound from './pages/NotFound';
 import ReadyToDonateBloodPage from './pages/ReadyToDonateBloodPage.jsx';
  import ReadyToDonateGeneralPage from './pages/ReadyToDonateGeneralPage.jsx';
  import ReadyDonors from './pages/ReadyDonors.jsx';
+ import DashboardWrapper from './pages/DashboardWrapper.jsx';
 // Lists & details
-import BloodDonationList from './components/BloodDonationListe';
-import DonationRequestList from './components/DonationRequestList';
+// import BloodDonationList from './components/BloodDonationListe';
+import DonationRequestPage from './pages/DonationRequestsPage.jsx';
 import DonationDetails from './components/DonationDetails';
 import DonationRequestDetails from './components/DonationRequestDetails';
 import BloodDonationDetails from './components/BloodDonationDetails';
 import CampaignDetails from './components/CampaignDetails';
 import MyRequestDetails from './pages/MyRequestDetails';
 import PublicProfile from './pages/PublicProfile';
+import BloodDonationPage from './pages/BloodDonationPage.jsx';
 
 // Forms
 import PasswordReset from './components/PasswordReset';
@@ -113,8 +115,8 @@ function App() {
             <Route path="/add-user" element={<AddUserserPage />} />
             <Route path="/login" element={<Login />} />
             <Route path="/reset-password" element={<PasswordReset />} />
-            <Route path="/blood-donations" element={<BloodDonationList />} />
-            <Route path="/donations" element={<DonationRequestList />} />
+            <Route path="/blood-donations" element={<BloodDonationPage />} />
+            <Route path="/donations" element={<DonationRequestPage />} />
             <Route path="/about" element={<About />} />
             <Route path="/users" element={<UserPage />} />
             <Route path="/buttons-showcase" element={<OrangeButtonsShowcase />} />
@@ -137,6 +139,9 @@ function App() {
             <Route path="/messages" element={<RequireAuth><ChatList /></RequireAuth>} />
             <Route path="/notifications" element={<RequireAuth><NotificationsPage /></RequireAuth>} />
             <Route path="/users/:id" element={<RequireAuth><PublicProfile /></RequireAuth>} />
+
+           {/* صفحة لوحة التحكم */}
+            <Route path="/dashboard" element={<RequireAuth><DashboardWrapper /></RequireAuth>} />
             {/* صفحات الإعلانات الاجتماعية */}
             <Route path="/social" element={<SocialList  />} />
             <Route path="/social/new" element={<RequireAuth><SocialForm /></RequireAuth>} />

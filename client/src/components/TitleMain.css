@@ -1,90 +1,115 @@
-:root{
-  --brand-1:#00A443;
+:root {
+  --brand-1:#0d6f3c;
   --brand-2:#00C853;
-  --ink-1:#2D3748;  /* رمادي غامق */
-  --ink-2:#4A5568;  /* رمادي أفتح */
+  --ink-1:#2D3748;
+  --ink-2:#4A5568;
 }
 
-.tm-container{
-  text-align: center;
+/* الحاوية العامة للعنوان */
+.tm-wrapper {
+  text-align: center;       /* دايماً وسط بصري */
   margin-block-end: 28px;
   padding: 18px 10px;
   position: relative;
   direction: inherit;
+  max-width: 900px;         /* نخلي العنوان والوصف ما يصيروا طويلين كثير */
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.tm-start{ text-align: start; }
-.tm-end{ text-align: end; }
+.tm-start { text-align: start; }
+.tm-end   { text-align: end; }
 .tm-center{ text-align: center; }
 
 /* أحجام */
-.tm-lg .tm-title{ font-size: 32px; }
-.tm-md .tm-title{ font-size: 26px; }
-.tm-sm .tm-title{ font-size: 22px; }
+.tm-lg .tm-title { font-size: 32px; }
+.tm-md .tm-title { font-size: 26px; }
+.tm-sm .tm-title { font-size: 22px; }
 
-.tm-title{
+@media (max-width:768px){
+  .tm-lg .tm-title { font-size: 24px; }
+  .tm-md .tm-title { font-size: 22px; }
+  .tm-sm .tm-title { font-size: 20px; }
+}
+
+/* العنوان */
+.tm-title {
   margin: 0;
   line-height: 1.25;
   font-weight: 800;
-  /* تدرّج الهوية على النص */
-  background: linear-gradient(135deg, var(--ink-1) 0%, var(--brand-1) 55%, #00802F 100%);
+  text-align: center; /* تأكيد الوسط */
+  background: linear-gradient(
+    135deg,
+    var(--ink-1) 0%,
+    var(--brand-1) 55%,
+    #00802F 100%
+  );
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: .2px;
   animation: tm-fade-up .45s ease both;
+  display: inline-block;
 }
 
-/* عندما لا يوجد عنوان فرعي: خط زخرفي سفلي صغير */
-.tm-single::after{
-  content:'';
-  position: absolute;
-  inset-inline-start: 50%;
-  transform: translateX(-50%);
-  inset-block-end: 0;
-  width: 88px;
-  height: 3px;
-  background: linear-gradient(90deg, var(--brand-1) 0%, var(--brand-2) 100%);
-  border-radius: 2px;
+/* خط سفلي عندما لا يوجد subtitle */
+.tm-underline-center {
+  width: 140px;
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    var(--brand-1) 0%,
+    var(--brand-2) 100%
+  );
+  margin: 12px auto 0;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-1) 10%, transparent);
 }
 
-/* عنوان فرعي */
-.tm-subtitle{
-  margin: 10px 0 0;
+/* الفاصل بين العنوان و subtitle */
+.tm-divider {
+  width: 140px;
+  height: 4px;
+  margin: 12px auto 10px;
+  background: linear-gradient(
+    90deg,
+    var(--brand-1) 0%,
+    var(--brand-2) 100%
+  );
+  border-radius: 999px;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-1) 10%, transparent);
+}
+
+/* Subtitle */
+.tm-subtitle {
+  margin: 0;
   font-size: clamp(14px, 2.3vw, 18px);
   font-weight: 600;
   line-height: 1.6;
-  background: linear-gradient(135deg, var(--ink-1) 0%, var(--ink-2) 100%);
+  text-align: center;
+  background: linear-gradient(
+    135deg,
+    var(--ink-1) 0%,
+    var(--ink-2) 100%
+  );
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
   opacity: .95;
   animation: tm-fade-up .55s ease both;
-}
-.eh-login-btn-add{
-  background-color: #003300;
-}
-
-/* فاصل أنيق بين العنوان والفرعي */
-.tm-divider{
-  width: 120px;
-  height: 4px;
-  margin: 10px auto 8px;
-  background: linear-gradient(90deg, var(--brand-1) 0%, var(--brand-2) 100%);
-  border-radius: 999px;
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-1) 10%, transparent);
-}
-
-/* Responsive tweaks */
-@media (max-width:768px){
-  .tm-lg .tm-title{ font-size: 24px; }
-  .tm-md .tm-title{ font-size: 22px; }
-  .tm-sm .tm-title{ font-size: 20px; }
-  .tm-divider{ width: 96px; height: 3px; }
+  max-width: 95%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* حركة خفيفة */
-@keyframes tm-fade-up{
-  from{ opacity:0; transform: translateY(6px); }
-  to{ opacity:1; transform: translateY(0); }
+@keyframes tm-fade-up {
+  from {
+    opacity:0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity:1;
+    transform: translateY(0);
+  }
 }

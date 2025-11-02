@@ -50,6 +50,32 @@ html:focus-within{ scroll-behavior: smooth; }
   --shadow-2: 0 12px 40px rgba(0,0,0,.14);
 
   --main-transition: 0.3s;
+  --text-main-dark: #1a1a1a;
+  --text-muted: #6b6b6b;
+
+  --border-soft: rgba(0,0,0,0.06);
+  --card-bg: #ffffff;
+  --section-bg: var(--main-color-fundo); /* أنت أصلاً تستخدمها كخلفية للصناديق الكبيرة */
+
+  /* حالات */
+  --urgent-bg: #d32f2f;
+  --urgent-text: #fff;
+  --pill-bg-soft: rgba(255,255,255,0.6); /* وسمة فصيلة الدم بخلفية شفافة فوق خلفية فاتحة */
+
+  /* radius / shadow موحدين للمشروع */
+  --radius-lg: 16px;
+  --radius-md: 10px;
+  --shadow-card: 0 18px 30px rgba(0,0,0,0.05);
+
+  /* أزرار CTA */
+  --btn-solid-bg: var(--main-color);
+  --btn-solid-bg-hover: var(--main-color-alt);
+  --btn-solid-text: #fff;
+
+  --btn-outline-border: var(--main-color);
+  --btn-outline-text: var(--main-color);
+  --btn-outline-bg-hover: var(--main-color);
+  --btn-outline-text-hover: #fff;
 }
 
 body{

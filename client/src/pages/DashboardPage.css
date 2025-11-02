@@ -1,0 +1,401 @@
+/* src/pages/DashboardPage.css */
+
+.dash-shell {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 1rem 4rem;
+  font-family: "Cairo", system-ui, sans-serif;
+  color: var(--text-main-dark, #1a1a1a);
+  background-color: var(--page-bg, #f9faf9);
+}
+
+/* ====== الرأس العلوي */
+.dash-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem 2rem;
+  justify-content: space-between;
+  align-items: flex-start;
+  background-color: #ffffff;
+  border: 1px solid var(--border-soft, #d9e2db);
+  border-radius: 1rem;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.04);
+  padding: 1.5rem 1.5rem 2rem;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.dash-header-left {
+  flex: 1 1 260px;
+  min-width: 220px;
+}
+
+.dash-hello {
+  margin: 0 0 .5rem;
+  font-size: clamp(1.1rem, 1vw, 1.25rem);
+  font-weight: 700;
+  color: #145c2f;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .4rem;
+}
+
+.dash-hello-name {
+  color: #0a8a40;
+  font-weight: 800;
+}
+
+.dash-sub {
+  margin: 0 0 .75rem;
+  color: #4a4a4a;
+  font-size: .9rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.dash-profile-link {
+  display: inline-block;
+  font-size: .8rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: #0a8a40;
+  background-color: #f0fff4;
+  border: 1px solid rgba(10,138,64,.25);
+  border-radius: .5rem;
+  padding: .45rem .75rem;
+  line-height: 1.2;
+  transition: all .15s ease;
+}
+.dash-profile-link:hover {
+  background-color: #d9ffe3;
+  border-color: rgba(10,138,64,.4);
+  box-shadow: 0 10px 20px rgba(0,0,0,.06);
+}
+
+/* ====== كروت الإحصائيات */
+.dash-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(140px,1fr));
+  gap: .75rem;
+  flex: 2 1 360px;
+  min-width: 260px;
+}
+
+.dash-stat-card {
+  background-color: #f7fdf9;
+  border: 1px solid rgba(0,128,64,0.12);
+  border-radius: .75rem;
+  padding: .75rem .9rem;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.dash-stat-label {
+  font-size: .8rem;
+  font-weight: 600;
+  color: #145c2f;
+  margin-bottom: .25rem;
+}
+
+.dash-stat-value {
+  font-size: 1.4rem;
+  line-height: 1.2;
+  font-weight: 800;
+  color: #0a8a40;
+  margin-bottom: .25rem;
+}
+
+.dash-stat-hint {
+  font-size: .75rem;
+  color: #444;
+  font-weight: 500;
+  display: flex;
+  gap: .4rem;
+  align-items: center;
+}
+
+.dash-stat-urgent {
+  color: #d62828;
+  font-weight: 700;
+}
+
+/* ====== الإجراءات السريعة */
+.dash-quick {
+  background-color: #ffffff;
+  border: 1px solid var(--border-soft, #d9e2db);
+  border-radius: 1rem;
+  box-shadow: 0 12px 32px rgba(0,0,0,.04);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.dash-block-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #145c2f;
+  margin: 0 0 1rem;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.dash-quick-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(230px,1fr));
+  gap: 1rem;
+}
+
+.quick-action-btn {
+  display: flex;
+  align-items: flex-start;
+  gap: .75rem;
+  text-decoration: none;
+  background-color: #f8fff9;
+  border: 2px solid rgba(10,138,64,0.14);
+  border-radius: .9rem;
+  padding: 1rem 1rem;
+  box-shadow: 0 10px 24px rgba(0,0,0,.03);
+  transition: all .17s ease;
+  color: inherit;
+}
+
+.quick-action-btn:hover {
+  box-shadow: 0 18px 32px rgba(0,0,0,.07);
+  transform: translateY(-2px);
+  border-color: rgba(10,138,64,0.3);
+}
+
+.qa-emoji {
+  font-size: 1.4rem;
+  line-height: 1;
+  min-width: 1.4rem;
+}
+
+.qa-texts {
+  flex: 1;
+}
+
+.qa-title {
+  font-size: .95rem;
+  font-weight: 700;
+  color: #0a8a40;
+  margin-bottom: .25rem;
+  line-height: 1.4;
+}
+
+.qa-desc {
+  font-size: .8rem;
+  font-weight: 500;
+  color: #444;
+  line-height: 1.5;
+}
+
+/* ====== أحدث الطلبات العامة (دم + مساعدات) */
+.dash-lists {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(min(420px,100%),1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.dash-list-col {
+  background-color: #ffffff;
+  border: 1px solid var(--border-soft, #d9e2db);
+  border-radius: 1rem;
+  box-shadow: 0 12px 32px rgba(0,0,0,.04);
+  padding: 1rem 1rem 1.25rem;
+  min-width: 0;
+}
+
+.dash-list-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 1rem;
+  gap: .75rem;
+}
+
+.dash-see-all {
+  font-size: .8rem;
+  font-weight: 600;
+  color: #0a8a40;
+  text-decoration: none;
+  background-color: #f0fff4;
+  border: 1px solid rgba(10,138,64,.2);
+  border-radius: .5rem;
+  padding: .4rem .6rem;
+  line-height: 1.2;
+}
+.dash-see-all:hover {
+  background-color: #d9ffe3;
+  border-color: rgba(10,138,64,.4);
+  box-shadow: 0 10px 20px rgba(0,0,0,.05);
+}
+
+.dash-card-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dash-empty {
+  font-size: .85rem;
+  color: #666;
+  background-color: #fafafa;
+  border: 1px dashed #ccc;
+  border-radius: .75rem;
+  padding: 1rem;
+  text-align: center;
+}
+
+/* بطاقة عرض صغيرة */
+.mini-card {
+  border: 1px solid var(--border-soft, #d9e2db);
+  background-color: #ffffff;
+  border-radius: .75rem;
+  box-shadow: 0 10px 24px rgba(0,0,0,.03);
+  padding: .9rem 1rem 1rem;
+  margin-bottom: .9rem;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.mini-card-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  align-items: center;
+  margin-bottom: .5rem;
+}
+
+.mini-badge {
+  font-size: .7rem;
+  line-height: 1;
+  font-weight: 700;
+  border-radius: .6rem;
+  padding: .4rem .6rem;
+  display: inline-flex;
+  align-items: center;
+  box-shadow: 0 6px 14px rgba(0,0,0,.07);
+}
+
+.mini-badge.urgent {
+  color: #fff;
+  background: linear-gradient(135deg,#d62828,#9c1c1c);
+  border: 1px solid rgba(214,40,40,.4);
+}
+
+.mini-badge.blood {
+  background: linear-gradient(135deg,#0a8a40,#145c2f);
+  color: #fff;
+  border: 1px solid rgba(20,92,47,.4);
+}
+
+.mini-badge.category {
+  background-color: #eef9f1;
+  color: #145c2f;
+  border: 1px solid rgba(10,138,64,.2);
+}
+
+.mini-badge.offer {
+  background-color: #fff8e6;
+  color: #8a5a00;
+  border: 1px solid rgba(138,90,0,.2);
+}
+
+.mini-badge.success {
+  background-color: #e6fff1;
+  color: #0a8a40;
+  border: 1px solid rgba(10,138,64,.2);
+}
+
+.mini-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.mini-title {
+  font-size: .9rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: .4rem;
+  line-height: 1.4;
+}
+
+.mini-row {
+  font-size: .8rem;
+  color: #444;
+  font-weight: 500;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+  margin-bottom: .3rem;
+  line-height: 1.4;
+}
+
+.mini-label {
+  color: #145c2f;
+  font-weight: 600;
+}
+
+.mini-amount {
+  font-weight: 700;
+  color: #0a8a40;
+}
+
+.mini-footer {
+  margin-top: .75rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.mini-link {
+  font-size: .8rem;
+  font-weight: 600;
+  color: #0a8a40;
+  text-decoration: none;
+  background-color: #f0fff4;
+  border: 1px solid rgba(10,138,64,.2);
+  border-radius: .5rem;
+  padding: .4rem .6rem;
+  line-height: 1.2;
+}
+.mini-link:hover {
+  background-color: #d9ffe3;
+  border-color: rgba(10,138,64,.4);
+  box-shadow: 0 10px 20px rgba(0,0,0,.05);
+}
+
+/* ====== قسم طلباتي / تبرعاتي الشخصية */
+.dash-my {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(min(420px,100%),1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.dash-my-col {
+  background-color: #ffffff;
+  border: 1px solid var(--border-soft, #d9e2db);
+  border-radius: 1rem;
+  box-shadow: 0 12px 32px rgba(0,0,0,.04);
+  padding: 1rem 1rem 1.25rem;
+  min-width: 0;
+}
+
+/* ريسبونسيف */
+@media (max-width: 600px) {
+  .dash-header {
+    padding: 1rem 1rem 1.5rem;
+  }
+  .dash-stats-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .quick-action-btn {
+    flex-direction: row;
+  }
+}

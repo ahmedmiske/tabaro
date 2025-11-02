@@ -327,7 +327,6 @@ ul.uploaded-files li {
   align-items: center;
   border: 1px solid #e9ecef;
 }
-
 /* الأزرار */
 .action-buttons {
   display: flex;
@@ -386,4 +385,205 @@ ul.uploaded-files li {
   textarea {
     font-size: 16px; /* منع تكبير الصفحة على iOS */
   }
+}
+
+/* ===== كروت وسائل التواصل ===== */
+.contact-method-card {
+  border: 2px solid #e9ecef;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  transition: all .25s ease;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.03);
+  position: relative;
+  direction: rtl;
+}
+
+.contact-method-card.active {
+  border-color: #1d643b;
+  box-shadow: 0 8px 20px rgba(29,100,59,.15);
+  background: linear-gradient(
+    135deg,
+    rgba(29,100,59,0.05) 0%,
+    rgba(40,167,69,0.05) 100%
+  );
+}
+
+.contact-method-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: #1d643b;
+  line-height: 1.3;
+}
+
+.contact-method-icon-wrap {
+  background: #1d643b;
+  color: #fff;
+  min-width: 28px;
+  min-height: 28px;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(29,100,59,0.4);
+  font-size: 14px;
+}
+
+.contact-icon {
+  font-size: 15px;
+  line-height: 1;
+}
+
+/* ===== بطاقة الملخص (الخطوة 4) ===== */
+.summary-card {
+  background: #ffffff;
+  border: 2px solid rgba(29, 100, 59, 0.12);
+  border-radius: 14px;
+  padding: 20px 20px 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.05);
+  direction: rtl;
+}
+
+.summary-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.summary-icon {
+  background: #1d643b;
+  color: #fff;
+  font-size: 18px;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(29, 100, 59, 0.4);
+}
+
+.summary-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1d643b;
+  line-height: 1.3;
+}
+
+.summary-hint {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.3;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+  gap: 16px 20px;
+}
+
+.summary-item {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.summary-item-wide {
+  grid-column: span 2;
+}
+
+@media (max-width: 600px) {
+  .summary-item-wide {
+    grid-column: span 1;
+  }
+}
+
+.summary-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.summary-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: #222;
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+.summary-badge {
+  display: inline-block;
+  min-width: 48px;
+  padding: 3px 8px;
+  font-size: 13px;
+  line-height: 1.2;
+  font-weight: 600;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.summary-badge.urgent {
+  background: #dc3545;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(220,53,69,0.4);
+}
+
+.summary-badge.normal {
+  background: #28a745;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(40,167,69,0.4);
+}
+
+/* تحذير الوقت */
+.text-warning {
+  color: #d39e00;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ===== شاشة النجاح بعد الإرسال ===== */
+.success-card {
+  text-align: center;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 2px solid rgba(40,167,69,0.15);
+  padding: 24px 20px 28px;
+  box-shadow: 0 12px 28px rgba(40,167,69,0.12);
+  direction: rtl;
+}
+
+.success-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.success-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1d643b;
+  margin-bottom: 8px;
+}
+
+.success-desc {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #444;
+  margin-bottom: 20px;
+}
+
+.success-actions .btn {
+  font-weight: 600;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.07);
 }

@@ -1,80 +1,519 @@
-.donation-container {
-  width: 100% !important;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 30px 20px;
-
-  /* خلفية لطيفة كما في الدم */
-  background: linear-gradient(to bottom, #f0f4f3, #ffffff);
-  background-color: var(--main-color-fundo);
-
-  box-shadow: 0 0 15px rgba(128, 128, 128, 0.3);
-  margin-bottom: 80px;
-  border-radius: 10px;
+:root {
+  --main-color: #0d6f3c;
+  --main-color-light: #1d643b;
+  --border-soft: #dfe4e4;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --shadow-card: 0 16px 40px rgba(0, 0, 0, 0.05);
+  --text-main-dark: #1d1f1e;
+  --text-muted: #6b6b6b;
+  --bg-section: #fafafa;
+  --bg-card: #ffffff;
+  --bg-soft: #f9f9f9;
+  --danger: #c1121f;
+  --grey-badge-bg: #f5f5f5;
+  --grey-badge-border: #8a8f96;
+  --head-bg: linear-gradient(135deg, #5fc5a1 0%, #cc876b 50%, #58b997 100%); /* خلفية خفيفة للهيدر داخل الكارد */
 }
 
-/* شريط الفلاتر */
-.donation-container .filter {
-  background-color: var(--main-color-fundo);
-  margin: 0 auto 30px;
+/* ===== CONTAINER ===== */
+.donation-requests-wrapper {
+  max-width: 1280px;
+  margin: 0 auto 3rem auto;
+  padding: 1.5rem 1rem 3rem;
+  background: var(--bg-section);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  position: relative;
+  direction: rtl;
+}
+
+/* ===== TITLE BLOCK ===== */
+.donation-header-block {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+.donation-header-block .heart-emoji {
+  font-size: 1.1em;
+  margin-inline-start: .3rem;
+}
+
+/* ===== FILTER BAR ===== */
+.filter-bar-box {
+  background: #fff;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: 1rem 1rem 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(260px,100%),1fr));
+  gap: 1rem 1.5rem;
+  align-items: start;
+  margin-bottom: 1rem;
+}
+
+/* كل بلوك فلتر */
+.filter-block {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  position: relative;
+}
+
+.filter-block-label {
+  font-size: .9rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* بلوك الأولوية أصغر */
+.priority-block {
+  align-items: center;
+  text-align: center;
+}
+
+/* mini toggle (أصغر من السابق) */
+.mini-toggle {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 24px;
+  cursor: pointer;
+}
+.mini-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.mini-toggle-ui {
+  position: absolute;
+  inset: 0;
+  background-color: #ccc;
+  border-radius: 999px;
+  transition: .2s;
+  box-shadow: inset 0 0 4px rgba(0,0,0,0.2);
+}
+.mini-toggle-ui::before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #fff;
+  border-radius: 50%;
+  transition: .2s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+.mini-toggle input:checked + .mini-toggle-ui {
+  background-color: var(--danger);
+}
+.mini-toggle input:checked + .mini-toggle-ui::before {
+  transform: translateX(22px);
+}
+
+/* نص "مستعجل فقط" */
+.urgent-caption {
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--danger);
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: .4rem;
+  margin-top: .25rem;
+}
+.sirene {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* زر مسح الفلاتر */
+.reset-btn {
+  background: #fff;
+  color: var(--text-main-dark);
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  padding: .6rem .9rem;
+  font-size: .85rem;
+  border: 2px solid var(--border-soft);
+  min-width: 130px;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.04);
+  transition: all .18s ease;
+}
+.reset-btn:hover {
+  background: linear-gradient(135deg,#ff9a5a 0%,#ff643a 100%);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 16px 24px rgba(0,0,0,0.08);
+  transform: translateY(-1px);
+}
+
+/* ===== DROPDOWN-LIKE FILTERS ===== */
+.filter-chip {
+  font-size: .95rem;
+  font-weight: 600;
+  border: 2px solid var(--border-soft);
+  background: var(--bg-soft);
+  border-radius: var(--radius-md);
+  padding: .7rem .9rem;
+  line-height: 1.2;
+  width: 100%;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.04);
+  transition: all .18s ease;
+  color: var(--text-main-dark);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: .5rem;
+  position: relative;
+}
+.filter-chip.open,
+.filter-chip:hover {
+  background: #fff;
+  box-shadow: 0 16px 24px rgba(0,0,0,0.08);
+  transform: translateY(-1px);
+}
+.filter-chip-text {
+  white-space: nowrap;
+  max-width: 80%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+.caret {
+  font-size: .8rem;
+  line-height: 1;
+  color: var(--text-muted);
+}
+
+/* القائمة المنسدلة */
+.dropdown-list {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 2px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  box-shadow: 0 18px 28px rgba(0,0,0,0.08);
+  padding: .5rem;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.dropdown-item {
+  background: #fff;
+  border: 2px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--text-main-dark);
+  padding: .5rem .75rem;
+  margin-bottom: .5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all .18s ease;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+.dropdown-item:last-child {
+  margin-bottom: 0;
+}
+.dropdown-item.active {
+  background-color: var(--main-color);
+  border-color: var(--main-color);
+  color: #fff;
+  box-shadow: 0 16px 24px rgba(0,0,0,0.12);
+}
+.dropdown-item:hover {
+  box-shadow: 0 18px 28px rgba(0,0,0,0.08);
+  transform: translateY(-1px);
+}
+.dropdown-item.clear {
+  background: var(--bg-soft);
+  border-style: dashed;
+  color: var(--text-muted);
+}
+
+/* ===== DIVIDER ===== */
+/* ===== DIVIDER ===== */
+.single-divider {
+  border-top: none;
+  height: 3px;
+  width: 100%;
+  /* background-color: var(--main-color); */
+  border-radius: 2px;
+  margin: 0.5rem 0 1.5rem;
+}
+
+
+/* ===== STATES (loading / error / empty) ===== */
+.state-box {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--text-main-dark);
+  font-weight: 500;
+  font-size: 1rem;
+}
+.state-box.error {
+  color: var(--danger);
+  font-weight: 600;
+}
+.spinner-ring {
+  width: 28px;
+  height: 28px;
+  border: 4px solid #ccc;
+  border-top: 4px solid var(--main-color);
+  border-radius: 50%;
+  margin: 0 auto .75rem;
+  animation: spin 0.6s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.state-text {
+  font-size: .85rem;
+  color: var(--text-muted);
+}
+
+/* ===== GRID OF CARDS ===== */
+.donation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill,minmax(min(320px,100%),1fr));
+  gap: 1.25rem;
+  width: 100%;
+  background: transparent;
+  padding-top: 0;
+  margin-bottom: 2rem;
+}
+
+/* ===== CARD ===== */
+.donation-card {
+  width: 100%;
+  transition: all .18s ease;
+}
+.donation-card-inner {
+  background: var(--bg-card);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: 0; /* الرأس صار له خلفية خاصة، فنقلل padding هنا */
+  display: flex;
+  flex-direction: column;
+  min-height: 220px;
+  overflow: hidden; /* حتى الهيدر يكون radius أنيق */
+}
+
+/* رأس البطاقة بخلفية فاتحة */
+.donation-card-head-colored {
+  background: var(--head-bg);
+  border-bottom: 1px solid var(--border-soft);
+  padding: 1rem 1rem .75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: .75rem;
+  flex-wrap: wrap;
+}
+
+.donation-head-right {
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+  text-align: start;
+}
+
+.donation-cat {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text-main-dark);
+}
+.donation-type {
+  color: var(--main-color);
+  font-weight: 600;
+  font-size: .9rem;
+  line-height: 1.4;
+}
+.donation-place {
+  font-size: .8rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+/* بادج المستعجل / العادي */
+.urgency-badge {
+  border-radius: 999px;
+  font-size: .8rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: .5rem .9rem;
+  border: 2px solid transparent;
+  white-space: nowrap;
+}
+.urgency-badge.urgent {
+  background: #fff5f5;
+  border-color: #d72638;
+  color: #d72638;
+}
+.urgency-badge.normal {
+  background: var(--grey-badge-bg);
+  border: 2px solid var(--grey-badge-border);
+  color: var(--grey-badge-border);
+}
+
+/* بقية محتوى البطاقة */
+.donation-amount-row {
+  padding: .75rem 1rem 0;
+  font-size: .9rem;
+  font-weight: 500;
+  color: var(--text-main-dark);
+  line-height: 1.5;
+}
+.donation-amount-row .label {
+  font-weight: 600;
+  color: var(--text-main-dark);
+  margin-inline-end: .25rem;
+}
+.donation-amount-row .value {
+  color: var(--main-color);
+  font-weight: 700;
+}
+
+.donation-desc {
+  padding: .5rem 1rem 1rem;
+  font-size: .85rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+  flex-grow: 1;
+  white-space: pre-line;
+}
+
+/* فوتر البطاقة */
+.donation-card-footer {
+  border-top: 1px solid var(--border-soft);
+  margin-top: auto;
+  padding: .75rem 1rem .9rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: .5rem;
+  flex-wrap: wrap;
+}
+
+.donation-date {
+  font-size: .8rem;
+  color: var(--text-muted);
+  line-height: 1.2;
+}
+
+.details-btn {
+  background: #fff;
+  color: var(--main-color);
+  font-weight: 600;
+  font-size: .9rem;
+  border-radius: var(--radius-md);
+  padding: .6rem 1rem;
+  border: 2px solid var(--main-color);
+  line-height: 1;
+  min-width: 100px;
+  text-align: center;
+  text-decoration: none;
+  box-shadow: 0 10px 20px rgba(0,0,0,.05);
+  transition: all .18s ease;
+}
+.details-btn:hover {
+  background: var(--main-color);
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 0 18px 28px rgba(0,0,0,.1);
+  transform: translateY(-1px);
+}
+
+/* ===== PAGINATION ===== */
+.pagination-bar {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 20px;
-  padding: 20px;
-  border: 2px solid var(--main-color-alt);
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-  border-radius: 8px;
+  gap: .75rem 2rem;
+  margin-top: 0;         /* تقليل فراغ */
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-soft);
 }
 
-/* شبكة البطاقات */
-.donation-grid {
-  background: linear-gradient(to bottom, #f9fbfb, #ffffff) !important;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 20px;
-  border-top: 4px solid var(--main-color-alt);
-  padding: 20px 10px;
-  background-color: var(--main-color-fundo);
-  border-radius: 8px;
-  width: 100%;
+.pg-btn {
+  appearance: none;
+  border: 2px solid var(--border-soft);
+  background: #fff;
+  color: var(--text-main-dark);
+  border-radius: var(--radius-md);
+  padding: .7rem 1rem;
+  min-width: 120px;
+  font-weight: 600;
+  font-size: .9rem;
+  line-height: 1;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+  transition: all .18s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+}
+.pg-btn:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+.pg-btn:not(:disabled):hover {
+  background: #fff;
+  border-color: var(--main-color);
+  color: var(--main-color);
+  box-shadow: 0 18px 28px rgba(0,0,0,0.08);
+  transform: translateY(-1px);
 }
 
-/* كل بطاقة تمسك عمودًا مثل الدم */
-.donation-card {
-  flex: 1 1 calc(25% - 20px); /* 4 في السطر */
-  max-width: calc(25% - 20px);
-  min-width: 250px;
+.pg-info {
+  align-self: center;
+  font-weight: 500;
+  font-size: .9rem;
+  color: var(--text-main-dark);
 }
 
-@media (max-width: 1200px) {
-  .donation-card {
-    flex: 1 1 calc(33.33% - 20px); /* 3 في السطر */
-    max-width: calc(33.33% - 20px);
+.arrow {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width:768px){
+  .donation-requests-wrapper {
+    padding: 1rem 1rem 2.5rem;
+    border-radius: var(--radius-md);
   }
-}
 
-@media (max-width: 768px) {
-  .donation-card {
-    flex: 1 1 calc(50% - 20px); /* 2 في السطر */
-    max-width: calc(50% - 20px);
+  .filter-bar-box {
+    grid-template-columns: 1fr 1fr;
   }
-}
 
-@media (max-width: 576px) {
-  .donation-card {
-    flex: 1 1 100%; /* بطاقة واحدة */
-    max-width: 100%;
+  .priority-block {
+    grid-column: 1 / -1;
+    border-bottom: 1px solid var(--border-soft);
+    padding-bottom: .75rem;
+    margin-bottom: .5rem;
   }
-}
 
-.container-card {
-  width: 100%;
-  padding: 0;
-  margin: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  border-radius: 8px;
+  .single-divider {
+    margin-top: .75rem;
+  }
+
+  .donation-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
 }
