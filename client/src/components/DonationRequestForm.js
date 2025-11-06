@@ -5,7 +5,7 @@ import { FaCheck } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
 import './DonationRequestForm.css';
-import TitleMain from './TitleMain';
+import TitleMain from './TitleMain.jsx';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 
 /**

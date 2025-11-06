@@ -260,8 +260,8 @@ function Header({ notifCount }) {
         badgeCount={badgeCount}
         onLogout={logout}
       />
-
-      {/* الشريط الرئيسي */}
+      <di className="header-precinpal">
+        {/* الشريط الرئيسي */}
       <div className="eh-main-bar">
         <div className="eh-main-container">
           {/* الشعار في المنتصف */}
@@ -457,8 +457,8 @@ function Header({ notifCount }) {
         </div>
       </div>
 
-      {/* القائمة الجانبية للجوّال */}
-      <div
+       {/* القائمة الجانبية للجوّال */}
+       <div
         id="mobile-drawer"
         className={`eh-mobile-drawer ${mobileOpen ? 'open' : ''}`}
         onClick={() => setMobileOpen(false)}
@@ -521,7 +521,9 @@ function Header({ notifCount }) {
             </Link>
           </nav>
         </div>
-      </div>
+       </div>
+    </di>
+      
     </header>
   );
 }

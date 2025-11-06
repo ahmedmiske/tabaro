@@ -35,7 +35,7 @@ function Login() {
         const token = response.body?.token;
         if (user && token) {
           login({ ...user, token });
-          navigate(next || '/profile', { replace: true }); // ✅ رجوع للصفحة المطلوبة
+          navigate(next || '/dashboard', { replace: true }); // ✅ رجوع للصفحة المطلوبة
         } else {
           setError('البيانات غير مكتملة. الرجاء المحاولة لاحقًا.');
         }
