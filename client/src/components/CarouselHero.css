@@ -45,3 +45,25 @@
 .carousel-hero-indicators span.active {
   background: #F46A25;
 }
+
+@media (max-width: 600px) {
+  .carousel-hero-bg {
+    position: absolute;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    min-height: 320px;
+    max-height: 100vh;
+    overflow: hidden;
+  }
+  .carousel-hero-img {
+    position: absolute;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    min-height: 320px;
+    max-height: 100vh;
+    object-fit: contain;
+    background: #222;
+  }
+}

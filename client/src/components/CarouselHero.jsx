@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import './CarouselHero.css';
 
 const images = [
-  '/images/carrusel-4.jpg',
-  '/images/carrusel-1.png',
   '/images/carrusel-2.jpg',
   '/images/carrusel-3.jpg', 
-  '/images/carrusel-5.png', 
   '/images/carrusel-6.png', 
+  '/images/carruse-7.png', 
+  '/images/carruse-10.png', 
+  '/images/carruse-11.png', 
+  '/images/carruse-14.jpg', 
 ];
 
 const CarouselHero = () => {
