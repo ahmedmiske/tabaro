@@ -9,6 +9,7 @@ const images = [
   '/images/carruse-10.png', 
   '/images/carruse-11.png', 
   '/images/carruse-14.jpg', 
+  '/images/carrusel-6.png', 
 ];
 
 const CarouselHero = () => {
