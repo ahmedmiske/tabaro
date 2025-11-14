@@ -125,10 +125,10 @@ function LandingPage() {
                 </Link>
               </div>
             </div>
+            <About />
           </section>
         ) : (
           <section className="lp-section lp-about lp-anchor-target" id="about" aria-label="عن المنصّة">
-          
             <About />
           </section>
         )}
