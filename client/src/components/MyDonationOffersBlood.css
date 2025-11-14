@@ -1,128 +1,37 @@
-.my-donation-offers .clickable-row:hover {
-  background: #f7f9fc;
-}
+.my-donation-offers .clickable-row:hover { background: #f7f9fc; }
 
 .header-bar {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 12px;
-  border: 1px solid #e9ecef;
-  border-radius: 12px;
-  background: #fff;
+  display:flex; gap:12px; align-items:center; justify-content:space-between;
+  padding:10px 12px; border:1px solid #e9ecef; border-radius:12px; background:#fff;
 }
+.header-bar.sticky { position:sticky; top:68px; z-index:10; box-shadow:0 4px 18px rgba(0,0,0,0.04); }
+.header-bar .title-wrap { display:flex; align-items:center; gap:10px; }
+.header-bar .title-icon { width:36px;height:36px;border-radius:10px;background:#f1f5ff;display:inline-flex;align-items:center;justify-content:center;font-size:16px;color:#1f57ff; }
+.header-bar .status-filter { min-width:220px; text-align:center; }
+.form-select { font-size:14px; padding:6px 12px; border:1px solid #d1d5db; border-radius:8px; background:#fff; text-align:center; }
 
-.header-bar.sticky {
-  position: sticky;
-  top: 68px; /* عدّلها بحسب ارتفاع Navbar لديك */
-  z-index: 10;
-  box-shadow: 0 4px 18px rgba(0,0,0,0.04);
-}
+@media (max-width:576px){ .header-bar{flex-direction:column; align-items:stretch; gap:8px;} .header-bar .status-filter{min-width:auto;} }
 
-.header-bar .title-wrap {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.header-bar .title-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: #f1f5ff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  color: #1f57ff;
-}
-
-.header-bar .status-filter {
-  min-width: 220px;
-  text-align: center;
-}
-
-.form-select {
-  font-size: 14px;
-  padding: 6px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  background: #fff;
-  transition: border-color .2s ease-in-out;
-  text-align: center;
-}
-
-@media (max-width: 576px) {
-  .header-bar {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-  }
-  .header-bar .status-filter { min-width: auto; }
-}
-
-/* أقسام الجدول */
-.section-card {
-  border: 1px solid #e9ecef;
-  border-radius: 12px;
-  background: #fff;
-  overflow: hidden;
-}
-.section-head {
-  padding: 10px 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #fafbff;
-  border-bottom: 1px solid #eef1f6;
-}
+.section-card { border:1px solid #e9ecef; border-radius:12px; background:#fff; overflow:hidden; }
+.section-head { padding:10px 12px; display:flex; align-items:center; justify-content:space-between; background:#fafbff; border-bottom:1px solid #eef1f6; }
 
 /* كبسولة الوقت */
-.time-chip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  width: 52px;
-  height: 36px;
-  border-radius: 999px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  border: 1px solid #e6e9f0;
-  background: #ffffff;
-}
-.time-chip .t { font-size: 12px; }
-.time-chip .b { font-size: 10px; opacity: .8; }
+.time-chip{ display:inline-flex; align-items:center; justify-content:center; gap:2px; width:52px; height:36px; border-radius:999px; font-weight:700; letter-spacing:.5px; border:1px solid #e6e9f0; background:#ffffff; }
+.time-chip .t{ font-size:12px; } .time-chip .b{ font-size:10px; opacity:.8; }
+.time-chip.chip--na{ opacity:.6; } .time-chip.chip--ok{ background:#f5fbff; border-color:#d7ecff; }
+.time-chip.chip--soon{ background:#fff9e9; border-color:#ffe6a8; }
+.time-chip.chip--urgent{ background:#fff1f1; border-color:#ffd5d5; }
+.time-chip.chip--expired{ background:#f2f2f2; border-color:#e1e1e1; color:#8f8f8f; }
 
-.time-chip.chip--na { opacity: .6; }
-.time-chip.chip--ok { background: #f5fbff; border-color: #d7ecff; }
-.time-chip.chip--soon { background: #fff9e9; border-color: #ffe6a8; }
-.time-chip.chip--urgent { background: #fff1f1; border-color: #ffd5d5; }
-.time-chip.chip--expired { background: #f2f2f2; border-color: #e1e1e1; color: #8f8f8f; }
-
-/* أزرار الطفو للصعود/الهبوط */
-.page-fabs {
-  position: fixed;
-  right: 14px;
-  bottom: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  z-index: 20;
+/* ==== بطاقات الموبايل ==== */
+.card-list{ list-style:none; margin:.5rem 0 0; padding:0; display:grid; gap:.75rem; }
+.card-item{
+  border:1px solid #e9ecef; border-radius:12px; background:#fff; padding:.8rem .9rem;
+  box-shadow:0 8px 18px rgba(0,0,0,.04); cursor:pointer;
 }
-
-.fab-btn {
-  width: 44px;
-  height: 44px;
-  border-radius: 999px;
-  border: 1px solid #e6e9f0;
-  background: #ffffff;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-  cursor: pointer;
-  font-weight: 700;
-}
-.fab-btn:hover {
-  transform: translateY(-1px);
-}
-
+.card-item:hover{ background:#f8fbff; }
+.card-item .ci-head{ display:flex; align-items:center; justify-content:space-between; gap:.75rem; margin-bottom:.5rem; }
+.card-item .ci-title{ font-weight:800; color:#0f172a; font-size:.98rem; }
+.card-item .ci-meta{ display:flex; flex-wrap:wrap; gap:.4rem; margin:.25rem 0 .6rem; }
+.card-item .ci-actions{ display:flex; gap:.4rem; flex-wrap:wrap; }
+.card-item .ci-rating{ display:flex; align-items:center; gap:.5rem; }

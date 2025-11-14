@@ -3,6 +3,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { Form } from "react-bootstrap";
 import { useNavigate, Link } from "react-router-dom";
 import SectionHeader from "./SectionHeader.jsx";
+import IconsSection from "./IconsSection.jsx";
+import ReadyToDonateSection from "./ReadyToDonateSection.jsx";
 import "./About.css";
 
 function About() {
@@ -277,7 +279,8 @@ function About() {
             </div>
           </div>
         </header>
-
+        <IconsSection />
+        <ReadyToDonateSection />
         {/* ===== الخدمات ===== */}
         <section className="separador">
           <div className="separador-content">
@@ -477,6 +480,25 @@ function About() {
             )}
           </div>
         </section>
+        
+        {/* ===== الدعوة للإجراء ===== */}
+        <section className="cta-section">
+          <div className="cta-card">
+            <h3 className="cta-title">ابدأ رحلتك في العطاء</h3>
+            <p className="cta-text">
+              انضم إلى آلاف المتبرعين والمتطوعين الذين يساهمون في صنع فرق حقيقي في المجتمع
+            </p>
+
+            <div className="cta-buttons">
+              <Link to="/add-user" className="cta-btn primary">
+                سجل الآن مجاناً
+              </Link>
+              <Link to="/donations" className="cta-btn secondary">
+                تصفح التبرعات
+              </Link>
+            </div>
+          </div>
+        </section>
 
         {/* ===== الأسئلة الشائعة ===== */}
         <section className="separador">
@@ -503,24 +525,7 @@ function About() {
           </div>
         </section>
 
-        {/* ===== الدعوة للإجراء ===== */}
-        <section className="cta-section">
-          <div className="cta-card">
-            <h3 className="cta-title">ابدأ رحلتك في العطاء</h3>
-            <p className="cta-text">
-              انضم إلى آلاف المتبرعين والمتطوعين الذين يساهمون في صنع فرق حقيقي في المجتمع
-            </p>
-
-            <div className="cta-buttons">
-              <Link to="/add-user" className="cta-btn primary">
-                سجل الآن مجاناً
-              </Link>
-              <Link to="/donations" className="cta-btn secondary">
-                تصفح التبرعات
-              </Link>
-            </div>
-          </div>
-        </section>
+        
       </section>
     </section>
   );

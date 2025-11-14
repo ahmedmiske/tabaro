@@ -1,9 +1,9 @@
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import './LandingPage.css';
-import About from '../components/About';
+import About from '../components/About.js';
 import ReadyToDonateSection from '../components/ReadyToDonateSection.jsx';
-import useSEO from '../hooks/useSEO';
+import useSEO from '../hooks/useSEO.js';
 import IconsSection from '../components/IconsSection.jsx';
 import CarouselHero from '../components/CarouselHero.jsx';
 
@@ -110,6 +110,7 @@ function LandingPage() {
             id="quick-start"
             aria-label="مقترحات للمستخدم"
           >
+         
             <div className="lp-container lp-center">
               <h2 className="lp-qs-title">ابدأ بسرعة</h2>
               <div className="lp-qs-grid">
@@ -127,13 +128,15 @@ function LandingPage() {
           </section>
         ) : (
           <section className="lp-section lp-about lp-anchor-target" id="about" aria-label="عن المنصّة">
+          
             <About />
           </section>
         )}
 
-          <IconsSection />
-          <ReadyToDonateSection />
-        </main>
+          
+
+      
+      </main>
     </div>
   );
 }

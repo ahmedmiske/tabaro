@@ -22,7 +22,7 @@
 
 /* ===== الهيرو ===== */
 .lp-hero {
-  min-height: 100vh;
+  min-height: 80vh;
   display: grid;
   place-items: center;
   background:
@@ -61,6 +61,7 @@
   padding: 1rem 0;
   color: #fff;
   text-shadow: 0 6px 30px rgba(0,0,0,.45);
+  margin-top: 20px;
   animation: lp-text-glow 3s ease-in-out infinite alternate;
 }
 

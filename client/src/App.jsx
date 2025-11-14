@@ -14,7 +14,7 @@ import Footer from './components/Footer';
 import SocialMedia from './components/SocialMedia';
 
 // Common / pages
-import LandingPage from './pages/LandingPage';
+import LandingPage from './pages/LandingPage.jsx';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import UserPage from './pages/UserPage';
@@ -26,6 +26,8 @@ import ReadyToDonateBloodPage from './pages/ReadyToDonateBloodPage.jsx';
  import ReadyToDonateGeneralPage from './pages/ReadyToDonateGeneralPage.jsx';
  import ReadyDonors from './pages/ReadyDonors.jsx';
  import DashboardWrapper from './pages/DashboardWrapper.jsx';
+// Manage center
+import ManageCenter from './pages/ManageCenter.jsx';
 // Lists & details
 // import BloodDonationList from './components/BloodDonationListe';
 import DonationRequestPage from './pages/DonationRequestsPage.jsx';
@@ -142,6 +144,7 @@ function App() {
 
            {/* صفحة لوحة التحكم */}
             <Route path="/dashboard" element={<RequireAuth><DashboardWrapper /></RequireAuth>} />
+            <Route path="/manage" element={<RequireAuth><ManageCenter /></RequireAuth>} />
             {/* صفحات الإعلانات الاجتماعية */}
             <Route path="/social" element={<SocialList  />} />
             <Route path="/social/new" element={<RequireAuth><SocialForm /></RequireAuth>} />

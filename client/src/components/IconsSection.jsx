@@ -1,6 +1,7 @@
 // src/components/IconsSection.jsx
 import React from 'react';
 import './IconsSection.css';
+import SectionHeader from './SectionHeader.jsx';
 
 const IconsSection = () => {
   const iconsData = [
@@ -33,7 +34,7 @@ const IconsSection = () => {
   return (
     <section className="icons-section" aria-label="مجالات التبرع">
       <div className="icons-container">
-        <h2 className="icons-title">مجالات الخير</h2>
+        <SectionHeader title="مجالات الخير" />
         <div className="icons-grid">
           {iconsData.map((item) => (
             <div key={item.id} className="icon-card">

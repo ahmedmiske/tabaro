@@ -1,0 +1,127 @@
+:root{
+  --mqs-radius: 22px;
+  --mqs-shadow: 0 18px 40px rgba(2,6,23,.08);
+  --mqs-border: rgba(255,255,255,.22);
+  --mqs-text: #0f172a;
+
+  /* الألوان الرئيسية للشعار */
+  --color-green: #0a8a40;
+  --color-green-dark: #076b32;
+  --color-blue: #0077b6;
+  --color-orange: #f97316;
+  --color-bg-light: #f8faf9;
+}
+
+/* الشبكة العامة */
+.mqs-shell{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(260px,1fr));
+  gap: 18px;
+  margin: 16px 0 22px;
+}
+
+/* الكارت الأساسي */
+.mqs-card{
+  position:relative;
+  overflow:hidden;
+  border-radius: var(--mqs-radius);
+  color:#fff;
+  padding: 22px 20px 18px;
+  box-shadow: var(--mqs-shadow);
+  isolation: isolate;
+  min-height: 182px;
+  display:flex; flex-direction:column; justify-content:space-between;
+  border:1px solid var(--mqs-border);
+  backdrop-filter: blur(1px);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.mqs-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 22px 48px rgba(0,0,0,.12);
+}
+
+/* الجزء العلوي */
+.mqs-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.mqs-icon{
+  width:48px; height:48px; border-radius:16px;
+  display:inline-flex; align-items:center; justify-content:center;
+  font-size:22px; background: rgba(255,255,255,.15);
+  border:1px solid var(--mqs-border);
+}
+.mqs-badge{
+  font-weight:800; font-size:.85rem;
+  padding:.35rem .65rem; border-radius:999px;
+  background: rgba(255,255,255,.18);
+  border:1px solid var(--mqs-border);
+}
+
+/* النصوص */
+.mqs-title{
+  margin:10px 0 6px;
+  font-weight:900;
+  font-size: clamp(1.1rem, 1.4vw, 1.4rem);
+  line-height:1.35;
+}
+.mqs-desc{
+  margin:0 0 8px;
+  font-weight:600;
+  line-height:1.75;
+  color: rgba(255,255,255,.94);
+}
+
+/* التذييل */
+.mqs-footer{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.mqs-hint{ font-weight:800; opacity:.9; }
+.mqs-cta{
+  text-decoration:none;
+  color:#fff;
+  font-weight:800;
+  background:rgba(255,255,255,.15);
+  border-radius:12px;
+  padding:.55rem .9rem;
+  border:1px solid rgba(255,255,255,.4);
+  box-shadow: 0 10px 22px rgba(2,6,23,.12);
+  transition: all .15s ease;
+}
+.mqs-cta:hover{
+  background:#fff;
+  color:var(--color-green-dark);
+  transform:translateY(-2px);
+}
+
+/* وهج خفيف */
+.mqs-glow{
+  position:absolute; inset:-30%;
+  background: radial-gradient(60% 60% at 70% 30%, rgba(255,255,255,.35) 0%, rgba(255,255,255,.1) 35%, transparent 60%);
+  filter: blur(12px); opacity:.6; z-index:-1;
+  transform: rotate(8deg) scale(1.05);
+}
+
+/* 🎨 ألوان الكروت (قريبة من شعار المنصة) */
+.mqs-card.is-blood{
+  background: linear-gradient(135deg, #e53935 0%, #b71c1c 50%, #7f1d1d 100%);
+}
+.mqs-card.is-general{
+  background: linear-gradient(135deg, var(--color-green) 0%, var(--color-green-dark) 40%, #064e24 100%);
+}
+.mqs-card.is-community{
+  background: linear-gradient(135deg, var(--color-blue) 0%, #00b4d8 40%, #0077b6 100%);
+}
+
+/* تأثير لمعان عند التحويم */
+.mqs-card::after{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,.28) 50%, transparent 100%);
+  transform: translateX(-100%);
+  transition: transform .45s ease;
+  mix-blend-mode: soft-light;
+}
+.mqs-card:hover::after{ transform: translateX(100%); }
+
+/* Responsive */
+@media (max-width: 1024px){
+  .mqs-shell{ grid-template-columns: repeat(2,1fr); }
+}
+@media (max-width: 640px){
+  .mqs-shell{ grid-template-columns: 1fr; }
+}
