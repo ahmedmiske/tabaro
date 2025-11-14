@@ -22,6 +22,7 @@ const readyToDonateBloodRoute = require('./routes/readyToDonateBloodRoute');
 const readyToDonateGeneralRoute = require('./routes/readyToDonateGeneralRoute');
 const socialAdRoutes = require('./routes/socialAdroutes');
 const setupSocket = require("./socket");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 
 
 dotenv.config();
@@ -96,7 +97,8 @@ if (!process.env.NODE_ENV || process.env.NODE_ENV !== "production") {
 app.use('/api/ready-to-donate', readyToDonateBloodRoute);
 app.use('/api/ready-to-donate-general', readyToDonateGeneralRoute);
 app.use('/api/public', publicProfileRoutes);
-
+// مسار لوحة التحكم
+app.use("/api/dashboard", dashboardRoutes);
 
 /* Socket.IO */
 setupSocket(io);

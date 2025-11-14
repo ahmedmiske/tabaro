@@ -111,7 +111,7 @@ function LandingPage() {
             aria-label="مقترحات للمستخدم"
           >
          
-            <div className="lp-container lp-center">
+            {/* <div className="lp-container lp-center">
               <h2 className="lp-qs-title">ابدأ بسرعة</h2>
               <div className="lp-qs-grid">
                 <Link className="lp-btn lp-btn-secondary on-light" to="/ready/blood">
@@ -124,7 +124,7 @@ function LandingPage() {
                   الانضمام لحملة
                 </Link>
               </div>
-            </div>
+            </div> */}
             <About />
           </section>
         ) : (

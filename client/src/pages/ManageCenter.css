@@ -6,13 +6,31 @@
   --c-text: #0f172a;           /* نص */
   --c-muted: #64748b;          /* نص ثانوي */
   --c-border: #e5e7eb;         /* حدود خفيفة */
-  --c-bg: #ffffff;             /* خلفية */
-  --c-bg-soft: #f8fafc;        /* خلفية ناعمة */
+  --c-bg: #c4c7c4bd;           /* خلفية اللوحة */
+  --c-bg-soft: #18b239;        /* خلفية ناعمة للتبويب */
 
   /* درجات لكل تبويب */
   --blood-1: #ef4444;  --blood-2: #f97316;
   --general-1: #2563eb;--general-2: #22c55e;
   --community-1: #7c3aed; --community-2: #06b6d4;
+
+  /* ألوان تزيين ديناميكية للزر واللوحة */
+  --accent: #198754;        /* افتراضي */
+  --accent-weak: rgba(25,135,84,.12);
+}
+
+/* عند تغيير التبويب نبدّل المتغيرات (بدون JS إضافي) */
+.mc-wrap[data-variant="blood"]{
+  --accent: var(--blood-1);
+  --accent-weak: rgba(239,68,68,.12);
+}
+.mc-wrap[data-variant="general"]{
+  --accent: var(--general-1);
+  --accent-weak: rgba(37,99,235,.12);
+}
+.mc-wrap[data-variant="community"]{
+  --accent: var(--community-1);
+  --accent-weak: rgba(124,58,237,.12);
 }
 
 /* خلفية عامة لطيفة */
@@ -45,6 +63,43 @@ body{
   font-weight: 600;
 }
 
+/* شريط علوي صغير يحتوي زر الرجوع */
+.mc-topbar{
+  margin: 12px auto 0;
+  max-width: 1100px;
+  display: flex;
+  justify-content: flex-start; /* في RTL يكون في اليمين بصريًا */
+}
+
+/* زر الرجوع: نفس خلفية اللوحة ويأخذ لمسة من التبويب النشط */
+.mc-back{
+  appearance: none;
+  border: 1px solid var(--c-border);
+  background: var(--c-bg);
+  color: var(--c-text);
+  border-radius: 12px;
+  padding: .55rem .9rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(2,6,23,.06);
+  transition: transform .15s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease;
+}
+.mc-back__icon{ font-size: 1rem; line-height: 1; }
+.mc-back:hover{
+  transform: translateY(-2px);
+  border-color: var(--accent);
+  box-shadow: 0 16px 32px var(--accent-weak);
+}
+.mc-back:focus-visible{
+  outline: none;
+  box-shadow:
+    0 0 0 3px var(--accent-weak),
+    0 16px 32px rgba(2,6,23,.12);
+}
+
 /* ================ شريط التبويبات ================ */
 .mc-tabs{
   display: grid;
@@ -52,9 +107,9 @@ body{
   gap: .75rem;
   margin: 14px 0 16px;
   position: relative;
+  z-index: 1;
 }
 
-/* زر التبويب */
 .mc-tab{
   position: relative;
   height: var(--tab-h);
@@ -73,17 +128,12 @@ body{
   box-shadow: 0 8px 22px rgba(2, 6, 23, .04);
   outline: none;
 }
-
-/* أيقونة داخل التبويب */
 .mc-tab__icon{
   width: 28px; height: 28px; flex: 0 0 28px;
   border-radius: 10px;
   display: inline-flex; align-items: center; justify-content: center;
-  background: #eef2ff; color: #1d4ed8;
-  font-size: 16px;
+  background: #eef2ff; color: #1d4ed8; font-size: 16px;
 }
-
-/* خط سفلي متحرك لكل تبويب (يظهر عند النشط/الهوفر) */
 .mc-tab::after{
   content: "";
   position: absolute; inset-inline: 10px 10px; bottom: 6px;
@@ -91,45 +141,34 @@ body{
   transform: scaleX(0);
   transform-origin: center;
   transition: transform .25s ease;
-  background: currentColor;
-  opacity: .55;
+  background: currentColor; opacity: .55;
 }
-
-/* تأثير الhover */
 .mc-tab:hover{
   transform: translateY(-2px);
   box-shadow: 0 14px 28px rgba(2, 6, 23, .08);
 }
-
-/* تمييز لوني عند الهوفر */
 .mc-tab[data-variant="blood"]:hover{ color: var(--blood-1); }
 .mc-tab[data-variant="general"]:hover{ color: var(--general-1); }
 .mc-tab[data-variant="community"]:hover{ color: var(--community-1); }
 .mc-tab:hover::after{ transform: scaleX(1); }
 
 /* ================ التبويب النشط ================ */
-/* ندعم الكلاس is-active أو aria-selected="true" */
 .mc-tab.is-active,
 .mc-tab[aria-selected="true"]{
   color: #0b0f19;
   border-color: transparent;
-  background: #fff;
-  box-shadow:
-    0 18px 38px rgba(2, 6, 23, .10),
-    inset 0 0 0 1px rgba(255,255,255,.6);
+  background: #c67b4a;
+  box-shadow: 0 18px 38px rgba(2, 6, 23, .10), inset 0 0 0 1px rgba(255,255,255,.6);
   transform: translateY(-1px);
 }
 
-/* هالة لونية ناعمة حسب النوع */
 .mc-tab.is-active[data-variant="blood"],
 .mc-tab[aria-selected="true"][data-variant="blood"]{
   background:
     linear-gradient(180deg, rgba(239,68,68,.10), rgba(249,115,22,.08)),
     #fff;
-  color: #991b1b;
-  box-shadow:
-    0 18px 38px rgba(239,68,68,.20),
-    0 0 0 2px rgba(239,68,68,.10) inset;
+  color: #440404;
+  box-shadow: 0 18px 38px rgba(239,68,68,.20), 0 0 0 2px rgba(239,68,68,.10) inset;
 }
 .mc-tab.is-active[data-variant="general"],
 .mc-tab[aria-selected="true"][data-variant="general"]{
@@ -137,22 +176,17 @@ body{
     linear-gradient(180deg, rgba(37,99,235,.10), rgba(34,197,94,.08)),
     #fff;
   color: #0b4dd8;
-  box-shadow:
-    0 18px 38px rgba(37,99,235,.18),
-    0 0 0 2px rgba(37,99,235,.12) inset;
+  box-shadow: 0 18px 38px rgba(37,99,235,.18), 0 0 0 2px rgba(37,99,235,.12) inset;
 }
 .mc-tab.is-active[data-variant="community"],
 .mc-tab[aria-selected="true"][data-variant="community"]{
   background:
     linear-gradient(180deg, rgba(124,58,237,.10), rgba(6,182,212,.08)),
     #fff;
-  color: #6d28d9;
-  box-shadow:
-    0 18px 38px rgba(124,58,237,.18),
-    0 0 0 2px rgba(124,58,237,.12) inset;
+  color: #220354;
+  box-shadow: 0 18px 38px rgba(124,58,237,.18), 0 0 0 2px rgba(124,58,237,.12) inset;
 }
 
-/* شريط سفلي واضح للتبويب النشط */
 .mc-tab.is-active::after,
 .mc-tab[aria-selected="true"]::after{
   transform: scaleX(1);
@@ -163,15 +197,13 @@ body{
 
 /* وصولية */
 .mc-tab:focus-visible{
-  box-shadow:
-    0 0 0 3px rgba(37,99,235,.20),
-    0 18px 38px rgba(2, 6, 23, .10);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.20), 0 18px 38px rgba(2, 6, 23, .10);
 }
 
 /* ================ اللوحة (المحتوى) ================ */
 .mc-panel{
   border: 1px solid var(--c-border);
-  background: var(--c-bg);
+  background: var(--c-bg);           /* نفس الخلفية يستعملها زر الرجوع */
   border-radius: 16px;
   padding: 18px;
   box-shadow: 0 12px 30px rgba(2, 6, 23, .05);
@@ -182,20 +214,15 @@ body{
   font-size: clamp(1.05rem, 2.2vw, 1.35rem);
   font-weight: 900; color: #0b0f19;
 }
-.mc-panel-desc{
-  margin: 0 0 1rem; color: var(--c-muted); font-weight: 600;
-}
+.mc-panel-desc{ margin: 0 0 1rem; color: var(--c-muted); font-weight: 600; }
 
-/* عناصر وهمية مكان المكوّنات الفعلية */
 .mc-placeholder{
   border: 1px dashed var(--c-border);
   border-radius: 12px;
   padding: 14px 16px;
   background: #fbfdff;
 }
-.mc-placeholder-title{
-  font-weight: 800; color: #0b4dd8; margin-bottom: .4rem;
-}
+.mc-placeholder-title{ font-weight: 800; color: #0b4dd8; margin-bottom: .4rem; }
 
 /* تذييل */
 .mc-footnote{
@@ -211,4 +238,6 @@ body{
   .mc-tabs{ grid-template-columns: 1fr; }
   .mc-tab{ justify-content: flex-start; padding-inline: 12px 14px; }
   .mc-tab__label{ font-weight: 900; }
+  .mc-topbar{ justify-content: stretch; }
+  .mc-back{ width: 100%; }
 }
