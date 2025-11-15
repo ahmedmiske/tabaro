@@ -1,27 +1,27 @@
 // React & router
 import React, { useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
-import PrivacyPolicy from './pages/PrivacyPolicy';
+import PrivacyPolicy from './pages/PrivacyPolicy.jsx';
 
 // Styles & providers
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
-import { AuthProvider } from './AuthContext';
+import { AuthProvider } from './AuthContext.jsx';
 
 // Layout
 import Header from './components/Header.jsx';
-import Footer from './components/Footer';
-import SocialMedia from './components/SocialMedia';
+import Footer from './components/Footer.jsx';
+import SocialMedia from './components/SocialMedia.jsx';
 
 // Common / pages
 import LandingPage from './pages/LandingPage.jsx';
-import Register from './pages/Register';
-import Login from './pages/Login';
-import UserPage from './pages/UserPage';
-import UserProfile from './pages/UserProfile';
-import AddUserserPage from './pages/addUserPage';
-import About from './components/About';
-import NotFound from './pages/NotFound';
+import Register from './pages/Register.jsx';
+import Login from './pages/Login.jsx';
+import UserPage from './pages/UserPage.jsx';
+import UserProfile from './pages/UserProfile.jsx';
+import AddUserserPage from './pages/addUserPage.jsx';
+import About from './components/About.jsx';
+import NotFound from './pages/NotFound.jsx';
 import ReadyToDonateBloodPage from './pages/ReadyToDonateBloodPage.jsx';
  import ReadyToDonateGeneralPage from './pages/ReadyToDonateGeneralPage.jsx';
  import ReadyDonors from './pages/ReadyDonors.jsx';
@@ -31,43 +31,43 @@ import ManageCenter from './pages/ManageCenter.jsx';
 // Lists & details
 // import BloodDonationList from './components/BloodDonationListe';
 import DonationRequestPage from './pages/DonationRequestsPage.jsx';
-import DonationDetails from './components/DonationDetails';
-import DonationRequestDetails from './components/DonationRequestDetails';
-import BloodDonationDetails from './components/BloodDonationDetails';
-import CampaignDetails from './components/CampaignDetails';
-import MyRequestDetails from './pages/MyRequestDetails';
-import PublicProfile from './pages/PublicProfile';
+import DonationDetails from './components/DonationDetails.jsx';
+import DonationRequestDetails from './components/DonationRequestDetails.jsx';
+import BloodDonationDetails from './components/BloodDonationDetails.jsx';
+import CampaignDetails from './components/CampaignDetails.jsx';
+import MyRequestDetails from './pages/MyRequestDetails.jsx';
+import PublicProfile from './pages/PublicProfile.jsx';
 import BloodDonationPage from './pages/BloodDonationPage.jsx';
 
 // Forms
-import PasswordReset from './components/PasswordReset';
-import DonationRequestForm from './components/DonationRequestForm';
-import BloodDonationForm from './components/BloodDonationForm';
+import PasswordReset from './components/PasswordReset.jsx';
+import DonationRequestForm from './components/DonationRequestForm.jsx';
+import BloodDonationForm from './components/BloodDonationForm.jsx';
 
 // Donors pages
-import BloodDonors from './pages/BloodDonors';
-import GeneralDonors from './pages/GeneralDonors';
+import BloodDonors from './pages/BloodDonors.jsx';
+import GeneralDonors from './pages/GeneralDonors.jsx';
 
 // Chat / notifications
-import ChatPage from './pages/ChatPage';
-import ChatList from './pages/ChatList';
-import NotificationsPage from './pages/NotificationsPage';
+import ChatPage from './pages/ChatPage.jsx';
+import ChatList from './pages/ChatList.jsx';
+import NotificationsPage from './pages/NotificationsPage.jsx';
 
 // Demos
-import OrangeButtonsShowcase from './components/OrangeButtonsShowcase';
-import ButtonsDemo from './components/ButtonsDemo';
+import OrangeButtonsShowcase from './components/OrangeButtonsShowcase.jsx';
+import ButtonsDemo from './components/ButtonsDemo.jsx';
 // Socail ads
 import SocialList from './pages/social/SocialList.jsx';
 import SocialDetails from './pages/social/SocialDetails.jsx';
 import SocialForm from './pages/social/SocialForm.jsx';
 
 // Guards & socket
-import RequireAuth from './components/RequireAuth';
+import RequireAuth from './components/RequireAuth.jsx';
 import { connectSocket } from './socket';
 
 // Confirmation details
-import DonationConfirmationDetails from './pages/DonationConfirmationDetails';
-import DonationRequestConfirmationDetails from './pages/DonationRequestConfirmationDetails';
+import DonationConfirmationDetails from './pages/DonationConfirmationDetails.jsx';
+import DonationRequestConfirmationDetails from './pages/DonationRequestConfirmationDetails.jsx';
 
 function App() {
   const location = useLocation();

@@ -1,7 +1,7 @@
 // src/pages/AddUserPage.jsx
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import UserForm from '../components/UserForm';
-import TitleMain from '../components/TitleMain';
+import UserForm from '../components/UserForm.jsx';
+import TitleMain from '../components/TitleMain.jsx';
 import userAddImage from '../images/default-avatar.png';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import './addUserPage.css';

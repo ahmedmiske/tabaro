@@ -8,7 +8,7 @@ import {
   FiSearch, FiMapPin, FiPhone, FiUser, FiHeart,
   FiCalendar, FiFilter, FiDollarSign
 } from 'react-icons/fi';
-import { useAuth } from '../AuthContext';
+import { useAuth } from '../AuthContext.jsx';
 import { Navigate, Link } from 'react-router-dom';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import './GeneralDonors.css';

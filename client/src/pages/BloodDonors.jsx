@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Container, Row, Col, Card, Badge, Button, Form, InputGroup, Alert, Spinner } from 'react-bootstrap';
 import { FiSearch, FiMapPin, FiPhone, FiUser, FiDroplet, FiCalendar, FiFilter } from 'react-icons/fi';
-import { useAuth } from '../AuthContext';
+import { useAuth } from '../AuthContext.jsx';
 import { Navigate, Link, useLocation } from 'react-router-dom';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import './BloodDonors.css';

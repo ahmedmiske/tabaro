@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import './LandingPage.css';
-import About from '../components/About.js';
+import About from '../components/About.jsx';
 import ReadyToDonateSection from '../components/ReadyToDonateSection.jsx';
 import useSEO from '../hooks/useSEO.js';
 import IconsSection from '../components/IconsSection.jsx';
