@@ -5,7 +5,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import './Login.css';
 import loginImg from './login.jpeg';
 import fetchWithInterceptors from '../services/fetchWithInterceptors.js';
-import { useAuth } from '../AuthContext';
+import { useAuth } from '../AuthContext.jsx';
 
 function Login() {
   const [loginInput, setLoginInput] = useState('');

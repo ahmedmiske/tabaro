@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import UserForm from '../components/UserForm';
+import UserForm from '../components/UserForm.jsx';
 import './Register.css';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 

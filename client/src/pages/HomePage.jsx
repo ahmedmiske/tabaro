@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import UserForm from '../components/UserForm';
-import UserList from '../components/UserList';
+import UserForm from '../components/UserForm.jsx';
+import UserList from '../components/UserList.jsx';
 import './HomePage.css';
 
 function HomePage() {

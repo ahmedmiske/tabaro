@@ -7,7 +7,7 @@ import {
 import { FaShareAlt, FaFlag, FaComments, FaArrowRight, FaPaperclip, FaInfoCircle } from 'react-icons/fa';
 import PropTypes from 'prop-types';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
-import ChatBox from '../components/ChatBox';
+import ChatBox from './ChatBox.jsx';
 import useTicker from '../hooks/useTicker';
 import './DonationRequestDetails.css';
 

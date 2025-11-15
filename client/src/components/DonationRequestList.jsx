@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import { Link } from 'react-router-dom';
 import TitleMain from './TitleMain.jsx';
-import FindeNot from './FindeNot';
+import FindeNot from './FindeNot.jsx';
 import './DonationRequestList.css';
 
 const DEFAULT_Q = {

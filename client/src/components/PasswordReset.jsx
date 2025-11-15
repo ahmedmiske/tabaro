@@ -3,7 +3,7 @@ import { Form, Button, Alert } from 'react-bootstrap';
 
 import fetchWithInterceptors from '../services/fetchWithInterceptors'; // Make sure to import your fetch service
 
-import TitleMain from './TitleMain';
+import TitleMain from './TitleMain.jsx';
 import './PasswordReset.css';
 
 function PasswordReset() {

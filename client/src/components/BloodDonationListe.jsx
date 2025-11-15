@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Row, Spinner, Button } from 'react-bootstrap';
 import './BloodDonationListe.css';
 import TitleMain from './TitleMain.jsx';
-import FindeNot from './FindeNot.js';
+import FindeNot from './FindeNot.jsx';
 import DonationCard from './DonationCard.jsx';
 import DonationFilterBar from './DonationFilterBar.jsx';
 import fetchWithInterceptors from '../services/fetchWithInterceptors.js';

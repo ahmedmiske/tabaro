@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import { Card, ListGroup, Badge, Spinner, Button } from 'react-bootstrap';
-import DonationOffersForRequest from '../components/DonationOffersForRequest';
+import DonationOffersForRequest from '../components/DonationOffersForRequest.jsx';
 import './MyRequestDetails.css';
 
 const MyRequestDetails = () => {

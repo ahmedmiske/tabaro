@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './ManageCenter.css';
-import MyDonationOffersBlood from '../components/MyDonationOffersBlood';
-import MyRequestsWithOffersBlood from '../components/MyRequestsWithOffersBlood';
-import MyDonationOffersGeneral from '../components/MyDonationOffersGeneral';
-import MyRequestsWithOffersGeneral from '../components/MyRequestsWithOffersGeneral';
+import MyDonationOffersBlood from '../components/MyDonationOffersBlood.jsx';
+import MyRequestsWithOffersBlood from '../components/MyRequestsWithOffersBlood.jsx';
+import MyDonationOffersGeneral from '../components/MyDonationOffersGeneral.jsx';
+import MyRequestsWithOffersGeneral from '../components/MyRequestsWithOffersGeneral.jsx';
 import TitleMain from '../components/TitleMain.jsx';
 
 const TABS = [

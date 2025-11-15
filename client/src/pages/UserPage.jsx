@@ -2,15 +2,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import UserDetails from '../components/UserDetails';
-import AccountDetails from '../components/AccountDetails';
-import NotificationsPage from './NotificationsPage';
+import UserDetails from '../components/UserDetails.jsx';
+import AccountDetails from '../components/AccountDetails.jsx';
+import NotificationsPage from './NotificationsPage.jsx';
 
-import MyDonationOffersBlood from '../components/MyDonationOffersBlood';
-import MyDonationOffersGeneral from '../components/MyDonationOffersGeneral';
+import MyDonationOffersBlood from '../components/MyDonationOffersBlood.jsx';
+import MyDonationOffersGeneral from '../components/MyDonationOffersGeneral.jsx';
 
-import MyRequestsWithOffersBlood from '../components/MyRequestsWithOffersBlood';
-import MyRequestsWithOffersGeneral from '../components/MyRequestsWithOffersGeneral';
+import MyRequestsWithOffersBlood from '../components/MyRequestsWithOffersBlood.jsx';
+import MyRequestsWithOffersGeneral from '../components/MyRequestsWithOffersGeneral.jsx';
 
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import './UserProfile.css';

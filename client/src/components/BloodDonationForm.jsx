@@ -6,7 +6,7 @@ import { FiPhone } from 'react-icons/fi';
 import { FaWhatsapp } from 'react-icons/fa';
 
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
-import TitleMain from './TitleMain';
+import TitleMain from './TitleMain.jsx';
 
 import './BloodDonationForm.css';
 

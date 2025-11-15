@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import ChatBox from '../components/ChatBox';
+import ChatBox from '../components/ChatBox.jsx';
 
 const getMyId = () => {
   try { return JSON.parse(localStorage.getItem('user') || '{}')._id || null; }
