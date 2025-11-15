@@ -313,8 +313,11 @@ function ChatBox({ conversationId, recipientId, recipient }) {
         {!mine && (
           <img className="avatar" src={avatarSrc} alt="" onError={(e)=> (e.currentTarget.src='/default-avatar.png')} />
         )}
-
+      {mine && (
+          <img className="avatar" src={avatarSrc} alt="" onError={(e)=> (e.currentTarget.src='/default-avatar.png')} />
+        )}
         <div className="bubble">
+      
           {m.content && <div className="text">{m.content}</div>}
           {m.attachment && (
             <div className="att">
@@ -331,9 +334,7 @@ function ChatBox({ conversationId, recipientId, recipient }) {
           </div>
         </div>
 
-        {mine && (
-          <img className="avatar" src={avatarSrc} alt="" onError={(e)=> (e.currentTarget.src='/default-avatar.png')} />
-        )}
+      
       </div>
     );
   };

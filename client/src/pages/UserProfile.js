@@ -1,6 +1,5 @@
 // src/pages/UserProfile.jsx
 import React, { useState, useEffect, useMemo } from 'react';
-import { Button, Row, Col, Container, Badge } from 'react-bootstrap';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import UserDetails from '../components/UserDetails';
@@ -99,102 +98,98 @@ function UserProfile() {
   };
 
   return (
-    <Container className="user-profile-container mt-4">
-      <Row className="user-profile-layout">
-        <Col md={3} className="sidebar order-md-1">
-          <div className="mb-4">
+    <div className="user-profile-container">
+      <div className="user-profile-layout">
+        <div className="sidebar">
+          <div className="sidebar-header">
             <h4>الملف الشخصي</h4>
             {userDetails && (
               <div className="user-profile-imag">
                 <img
                   src={userDetails.profileImage ? `/uploads/profileImages/${userDetails.profileImage}` : '/default-avatar.png'}
                   alt="الصورة الشخصية"
-                  className="user-avatar rounded-circle"
+                  className="user-avatar"
                 />
-                <div className="mt-2 fw-bold">
+                <div className="user-name">
                   {userDetails.firstName} {userDetails.lastName}
                 </div>
               </div>
             )}
           </div>
 
-          <div className="menu d-grid gap-2">
-            <Button
+          <div className="menu">
+            <button
               className={`menu-button ${view === 'personal' ? 'active' : ''}`}
               onClick={() => handleViewChange('personal')}
             >
               معلومات شخصية
-            </Button>
+            </button>
 
-            <Button
+            <button
               className={`menu-button ${view === 'account' ? 'active' : ''}`}
               onClick={() => handleViewChange('account')}
             >
               معلومات الحساب
-            </Button>
+            </button>
 
             {/* عروضي للتبرع */}
-            <Button
+            <button
               className={`menu-button ${isOffersActive ? 'active' : ''}`}
               onClick={() => setExpandOffers(v => !v)}
             >
               عروضي للتبرع {expandOffers ? '▴' : '▾'}
-            </Button>
+            </button>
             {expandOffers && (
               <div className="submenu">
-                <Button
-                  variant="light"
+                <button
                   className={`submenu-button ${view === 'offers-blood' ? 'active' : ''}`}
                   onClick={() => handleViewChange('offers-blood')}
                 >
                   تبرع بالدم
-                </Button>
-                <Button
-                  variant="light"
+                </button>
+                <button
                   className={`submenu-button ${view === 'offers-general' ? 'active' : ''}`}
                   onClick={() => handleViewChange('offers-general')}
                 >
                   تبرع عام
-                </Button>
+                </button>
               </div>
             )}
 
             {/* طلباتي مع العروض */}
-            <Button
+            <button
               className={`menu-button ${isRequestsActive ? 'active' : ''}`}
               onClick={() => setExpandRequests(v => !v)}
             >
               طلباتي مع العروض {expandRequests ? '▴' : '▾'}
-            </Button>
+            </button>
             {expandRequests && (
               <div className="submenu">
-                <Button
-                  variant="light"
+                <button
                   className={`submenu-button ${view === 'req-blood' ? 'active' : ''}`}
                   onClick={() => handleViewChange('req-blood')}
                 >
                   تبرع بالدم
-                </Button>
-                <Button
-                  variant="light"
+                </button>
+                <button
                   className={`submenu-button ${view === 'req-general' ? 'active' : ''}`}
                   onClick={() => handleViewChange('req-general')}
                 >
                   تبرع عام
-                </Button>
+                </button>
               </div>
             )}
 
-            <Button
+            <button
               className={`menu-button ${view === 'notifications' ? 'active' : ''}`}
               onClick={() => handleViewChange('notifications')}
             >
-              الإشعارات {unreadCount > 0 && <Badge bg="danger">{unreadCount}</Badge>}
-            </Button>
+              الإشعارات {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
+            </button>
           </div>
-        </Col>
+        </div>
 
-        <Col md={9} className="main-content order-md-2">
+        <div className="main-content">
           {view === 'personal' && (
             <UserDetails userDetails={userDetails} setUserDetails={setUserDetails} />
           )}
@@ -209,9 +204,9 @@ function UserProfile() {
           {view === 'req-general' && <MyRequestsWithOffersGeneral onOpenDetails={openDetails} />}
 
           {view === 'notifications' && <NotificationsPage onOpenDetails={openDetails} />}
-        </Col>
-      </Row>
-    </Container>
+        </div>
+      </div>
+    </div>
   );
 }
 
