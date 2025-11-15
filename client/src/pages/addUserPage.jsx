@@ -143,21 +143,6 @@ function AddUserPage() {
       <section className="signup-image-section fullscreen-image" aria-label="منطقة الترحيب البصرية">
         <div
           className="image-container fullscreen-container"
-          style={{
-            backgroundImage: 'url(/images/useradd.png)',
-            backgroundRepeat: 'no-repeat',
-            backgroundSize: 'contain',
-            backgroundPosition: 'center',
-            minHeight: '260px',
-            margin: 0,
-            padding: 0,
-            width: '100%',
-            borderRadius: '1.2rem',
-            backgroundColor: '#fff',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
           aria-label="رسم توضيحي لإنشاء حساب جديد"
         />
       </section>

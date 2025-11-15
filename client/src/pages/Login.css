@@ -247,8 +247,7 @@
   }
   
   .login-img {
-    flex: 0 0 250px;
-    max-width: 400px;
+    display: none; /* إخفاء الصورة في الشاشات الصغيرة */
   }
   
   .login-container {
