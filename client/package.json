@@ -21,6 +21,7 @@
     "react-marquee-slider": "^1.1.5",
     "react-router-dom": "^6.24.1",
     "react-scripts": "^5.0.1",
+    "react-toastify": "^11.0.5",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
     "web-vitals": "^2.1.4"
