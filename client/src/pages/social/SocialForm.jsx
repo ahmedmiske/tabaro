@@ -5,7 +5,7 @@ import { FaCheck } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
 import fetchWithInterceptors from '../../services/fetchWithInterceptors';
-import TitleMain from '../../components/TitleMain';
+import TitleMain from '../../components/TitleMain.jsx';
 import { SOCIAL_AD_CATEGORY, CATEGORY_LABELS_AR } from '../../constants/social.enums';
 
 import '../../styles/social/social-form.css';
