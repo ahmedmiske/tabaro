@@ -25,10 +25,38 @@ const ChatPage = () => {
 
   return (
     <div className="container mt-4" dir="rtl">
-      <h4 className="text-center mb-3">
-        <i className="fas fa-comments me-2 text-primary"></i>
+      <h2 
+        className="text-center mb-4" 
+        style={{
+          fontSize: '2.5rem',
+          fontWeight: '700',
+          background: 'linear-gradient(135deg, #4CAF50 0%, #66BB6A 50%, #388E3C 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text',
+          textShadow: '0 2px 4px rgba(0,0,0,0.1)',
+          marginBottom: '1.5rem',
+          position: 'relative',
+          paddingBottom: '1rem'
+        }}
+      >
+        <i className="fas fa-comments" style={{ 
+          marginLeft: '0.75rem',
+          color: '#4CAF50',
+          WebkitTextFillColor: '#4CAF50'
+        }}></i>
         الدردشة مع صاحب الطلب
-      </h4>
+        <div style={{
+          position: 'absolute',
+          bottom: '0',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '120px',
+          height: '4px',
+          background: 'linear-gradient(90deg, #4CAF50, #66BB6A, #388E3C)',
+          borderRadius: '2px'
+        }}></div>
+      </h2>
 
       {conversationId ? (
        <ChatBox
