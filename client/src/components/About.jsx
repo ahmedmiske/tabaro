@@ -5,6 +5,8 @@ import { useNavigate, Link } from "react-router-dom";
 import SectionHeader from "./SectionHeader.jsx";
 import IconsSection from "./IconsSection.jsx";
 import ReadyToDonateSection from "./ReadyToDonateSection.jsx";
+import AboutFaq from "../pages/AboutFaq.jsx";
+
 import "./About.css";
 
 function About() {
@@ -175,39 +177,6 @@ function About() {
       value: "530",
       label: "متبرع موثّق",
       description: "في مجتمعنا المتنامي",
-    },
-  ];
-
-  const faqs = [
-    {
-      question: "كيف أضمن موثوقية الطلبات؟",
-      answer:
-        "نطبّق توثيق الهوية ومراجعة الوثائق، مع شارات ثقة وتاريخ آخر تحديث لكل طلب.",
-    },
-    {
-      question: "هل التبرع المالي آمن؟",
-      answer:
-        "يتم عبر قنوات آمنة ومشفّرة، مع تتبع للدفعات وعرض ملخص الاستخدام.",
-    },
-    {
-      question: "كيف أتواصل مع صاحب الطلب؟",
-      answer:
-        "من صفحة الطلب، استخدم زر \"تواصل\"—ستجد الهاتف/الواتساب بعد تحقق الصلاحيات.",
-    },
-    {
-      question: "هل يمكنني التطوع بدون خبرة سابقة؟",
-      answer:
-        "نعم، نوفر فرص تطوع تناسب جميع المستويات ونقدم التوجيه والدعم اللازم.",
-    },
-    {
-      question: "كيف أتابع حالة طلبي أو تبرعي؟",
-      answer:
-        "يمكنك متابعة حالة الطلب أو التبرع من خلال حسابك الشخصي في المنصة وستصلك إشعارات بالتحديثات.",
-    },
-    {
-      question: "هل يمكنني اقتراح خدمة أو مبادرة جديدة؟",
-      answer:
-        "بكل سرور! يمكنك إرسال اقتراحك عبر نموذج التواصل وسنقوم بدراسته والرد عليك.",
     },
   ];
 
@@ -513,17 +482,9 @@ function About() {
         </section>
 
         <section className="faq-section" aria-labelledby="faq-title">
-          <div className="faq-grid">
-            {faqs.map((faq, index) => (
-              <details key={index} className="faq-item reveal" data-animate="up">
-                <summary className="faq-question">{faq.question}</summary>
-                <div className="faq-answer">
-                  <p>{faq.answer}</p>
-                </div>
-              </details>
-            ))}
-          </div>
+          <AboutFaq />
         </section>
+
 
         
       </section>
