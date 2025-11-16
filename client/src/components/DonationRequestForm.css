@@ -42,6 +42,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  -webkit-border-radius: 50%;
+  -moz-border-radius: 50%;
+  -ms-border-radius: 50%;
+  -o-border-radius: 50%;
 }
 
 .step-details h3 {
@@ -78,6 +82,14 @@
   color: #666;
   border: 2px solid #e9ecef;
   transition: all 0.3s ease;
+  -webkit-border-radius: 50%;
+  -moz-border-radius: 50%;
+  -ms-border-radius: 50%;
+  -o-border-radius: 50%;
+  -webkit-transition: all 0.3s ease;
+  -moz-transition: all 0.3s ease;
+  -ms-transition: all 0.3s ease;
+  -o-transition: all 0.3s ease;
 }
 
 .step-dot-header.active {
@@ -98,6 +110,10 @@
   background: #e9ecef;
   border-radius: 2px;
   overflow: hidden;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  -ms-border-radius: 2px;
+  -o-border-radius: 2px;
 }
 
 .progress-bar {
@@ -105,6 +121,10 @@
   background: linear-gradient(90deg, #1d643b 0%, #28a745 100%);
   border-radius: 2px;
   transition: width 0.4s ease;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  -ms-border-radius: 2px;
+  -o-border-radius: 2px;
 }
 
 /* محتوى الخطوات */
@@ -114,6 +134,10 @@
   border-radius: 12px;
   margin-bottom: 25px;
   border: 1px solid #e9ecef;
+  -webkit-border-radius: 12px;
+  -moz-border-radius: 12px;
+  -ms-border-radius: 12px;
+  -o-border-radius: 12px;
 }
 
 .step-content .form-label {
@@ -161,6 +185,10 @@ input, select, textarea {
   border-radius: 5px;
   text-align: right;
   transition: all 0.3s ease;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
 }
 
 /* تحسين مظهر القائمة المنسدلة */
@@ -192,6 +220,10 @@ datalist {
   max-height: 200px;
   overflow-y: auto;
   z-index: 1000;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  -ms-border-radius: 8px;
+  -o-border-radius: 8px;
 }
 
 datalist option {
@@ -562,4 +594,312 @@ select[name="bloodType"] option {
   font-size: .9rem;
   color: #6c757d;
   margin-bottom: .5rem;
+}
+
+
+
+/* أيقونة وسيلة الدفع دائرية وصغيرة */
+.payment-icon {
+  margin-top: -5px;
+  margin-right: 20px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #eee;
+  background: #fff;
+  padding: 2px;
+  box-shadow: 0 0 3px rgba(0,0,0,0.15);
+  -webkit-border-radius: 50%;
+  -moz-border-radius: 50%;
+  -ms-border-radius: 50%;
+  -o-border-radius: 50%;
+}
+
+/* صف وسيلة الدفع: checkbox + الأيقونة + الاسم */
+.payment-method-row .form-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* جعل الـ checkbox قريب وواضح بلون مميز */
+.payment-method-check .form-check-input {
+  margin-inline-start: 0;
+  margin-inline-end: 4px;
+  accent-color: #1d643b;      /* لون مميز */
+  transform: scale(1.2);      /* تكبير بسيط */
+}
+
+.payment-method-check .form-check-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+
+
+/* أيقونة وسيلة الدفع دائرية وصغيرة */
+.payment-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #eee;
+  background: #fff;
+  padding: 2px;
+  box-shadow: 0 0 3px rgba(0,0,0,0.15);
+}
+
+/* صف وسيلة الدفع: checkbox + الأيقونة + الاسم */
+.payment-method-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;               /* 👈 مسافة أوضح بين checkbox وبقية المحتوى */
+  padding: 6px 4px;
+}
+
+/* عنصر الـ Form.Check نفسه */
+.payment-method-check {
+  display: flex;
+  align-items: center;
+  margin: 0;
+}
+
+/* تنسيق الـ checkbox نفسه */
+.payment-method-check .form-check-input {
+  display: inline-block;
+  margin-inline-end: 40px;
+  /*👈مسافةبينالـcheckboxوالأيقونة/النص*/margin-inline-start: 0;
+  accent-color: #1d643b;
+  /*لونمميز*/transform: scale(1.25);
+  /*تكبيربسيطليكونواضحلكلالأعمار*/
+
+  -webkit-transform: scale(1.25);
+  -moz-transform: scale(1.25);
+  -ms-transform: scale(1.25);
+  -o-transform: scale(1.25);
+}
+
+/* شكل الـ checkbox عند التفعيل */
+.payment-method-check .form-check-input:checked {
+  border-color: #1d643b;
+  box-shadow: 0 0 0 2px rgba(29, 100, 59, 0.25);
+}
+
+/* الأيقونة + النص داخل الليبل */
+.payment-method-check .form-check-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;                 /* مسافة بين الأيقونة واسم الوسيلة */
+  font-weight: 500;
+}
+
+/* --- أيقونات ووسائل الدفع (Bankily / Masrifi / Sadad / bim-bank) --- */
+
+/* أيقونة وسيلة الدفع دائرية وصغيرة */
+.payment-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #eee;
+  background: #fff;
+  padding: 2px;
+  box-shadow: 0 0 3px rgba(0,0,0,0.15);
+}
+
+/* صف وسيلة الدفع: checkbox + الأيقونة + الاسم + حقل الرقم */
+.payment-method-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;            /* مسافة واضحة بين checkbox وباقي العناصر */
+  padding: 6px 0;
+}
+
+/* عنصر الـ Form.Check نفسه */
+.payment-method-check {
+  display: flex;
+  align-items: center;
+  margin: 0;
+}
+
+/* تنسيق الـ checkbox نفسه */
+.payment-method-check .form-check-input {
+  margin-inline-start: 0;
+  margin-inline-end: 12px;      /* مسافة بين الـ checkbox والأيقونة/النص */
+  accent-color: #1d643b;        /* لون أخضر واضح */
+  transform: scale(1.2);        /* تكبير بسيط ليكون واضح لكل الأعمار */
+}
+
+/* شكل الـ checkbox عند التفعيل */
+.payment-method-check .form-check-input:checked {
+  border-color: #1d643b;
+  box-shadow: 0 0 0 2px rgba(29, 100, 59, 0.25);
+}
+
+/* الأيقونة + النص داخل الليبل */
+.payment-method-check .form-check-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;                    /* مسافة بين الأيقونة واسم الوسيلة */
+  font-weight: 500;
+}
+
+.checkbox-urgent {
+  font-size: 16px;
+  font-weight: 600;
+  color: #d9534f;
+}
+/* كارت نجاح إرسال الطلب */
+.success-card {
+  max-width: 520px;
+  margin: 80px auto;
+  padding: 24px 22px;
+  text-align: center;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+.success-icon {
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+
+.success-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1d643b;
+  margin-bottom: 8px;
+}
+
+.success-desc {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 18px;
+}
+
+.success-actions .btn {
+  font-weight: 600;
+  border-radius: 10px;
+}
+
+/* ملخص الطلب قبل الإرسال */
+.summary-card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+  padding: 16px 18px;
+}
+
+.summary-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.summary-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #e8f5e9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.summary-title {
+  font-weight: 700;
+  font-size: 15px;
+  color: #1d643b;
+}
+
+.summary-hint {
+  font-size: 13px;
+  color: #777;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px 16px;
+}
+
+.summary-item {
+  font-size: 14px;
+}
+
+.summary-item-wide {
+  grid-column: 1 / -1;
+}
+
+.summary-label {
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 2px;
+}
+
+.summary-value {
+  color: #222;
+}
+
+.summary-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.summary-badge.urgent {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.summary-badge.normal {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+/* تأكيد شكل أيقونات الدفع والـ checkbox (كما كنت تعمل) */
+.payment-method-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 6px 4px;
+}
+
+.payment-method-check {
+  display: flex;
+  align-items: center;
+  margin: 0;
+}
+
+.payment-method-check .form-check-input {
+  display: inline-block;
+  margin-inline-end: 8px;
+  margin-inline-start: 0;
+  accent-color: #1d643b;
+  transform: scale(1.25);
+}
+
+.payment-method-check .form-check-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+}
+
+.payment-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #eee;
+  background: #fff;
+  padding: 2px;
+  box-shadow: 0 0 3px rgba(0,0,0,0.15);
 }

@@ -93,7 +93,7 @@
   width: 100%;
   margin: 0;
   /* بدون margin تلقائي */
-  padding: 0 24px;
+  padding: 10 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -212,7 +212,7 @@
 .eh-main-bar {
   position: relative;
   margin-right: 0;
-  padding: 0;
+  padding:5px 0;
 }
 
 
@@ -247,7 +247,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 20px;
+  padding: 12px;
   background: transparent;
   border: 2px solid transparent;
   color: var(--eh-dark);
@@ -268,12 +268,12 @@
   border: none;
   border-color: var(--eh-primary);
   background-color: #f5b19c;
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   box-shadow: 0 6px 18px rgba(0, 142, 98, .18);
-  -webkit-transform: translateY(-2px);
-  -moz-transform: translateY(-2px);
-  -ms-transform: translateY(-2px);
-  -o-transform: translateY(-2px);
+  -webkit-transform: translateY(-1px);
+  -moz-transform: translateY(-1px);
+  -ms-transform: translateY(-1px);
+  -o-transform: translateY(-1px);
 }
 
 .eh-nav-link.active {
@@ -503,7 +503,6 @@
   transform: translateY(-10px);
   transition: all .3s ease;
   box-shadow: 10px 10px 30px rgba(0, 0, 0, .1);
-  max-height: 120px;
   -webkit-transition: all .3s ease;
   -moz-transition: all .3s ease;
   -ms-transition: all .3s ease;

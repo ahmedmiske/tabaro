@@ -1,12 +1,19 @@
 // src/components/DonationRequestForm.jsx
 import React, { useEffect, useMemo, useState } from 'react';
 import { Form, Button, ListGroup, ListGroupItem, Alert } from 'react-bootstrap';
-import { FaCheck } from 'react-icons/fa';
+import { FaCheck, FaWhatsapp } from 'react-icons/fa';
+import { FiPhone } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 
 import './DonationRequestForm.css';
 import TitleMain from './TitleMain.jsx';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
+
+// 🖼️ أيقونات وسائل الدفع
+import iconBankily from '../images/icon_bankily.png';
+import iconBimBank from '../images/icon_bimBank.jpg';
+import iconMasrivi from '../images/icon_masrivi.avif';
+import iconSadad from '../images/icon_sedad.png';
 
 /**
  * ✅ التحقق من رقم موريتاني محلي:
@@ -38,6 +45,17 @@ const isAllowed = (f) =>
 const DonationRequestForm = () => {
   const navigate = useNavigate();
 
+  // ✅ دالة تمرير لأعلى النموذج / الصفحة
+  const scrollToTop = () => {
+    const wrapper = document.querySelector('.page-wrapper');
+    if (wrapper) {
+      wrapper.scrollTop = 0;
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  };
+
   // تحديث الـ <title>
   useEffect(() => {
     document.title = 'طلب تبرع عام - تبارو';
@@ -54,11 +72,14 @@ const DonationRequestForm = () => {
     place: '',
     amount: '',
     paymentMethods: [], // [{ method, phone }]
-    contactMethods: [], // [{ method, number }]
+    contactMethods: {
+      phone: '',
+      whatsapp: '',
+    },
     deadline: '',
     isUrgent: false,
     bloodType: '',
-    proofDocuments: [], // ملفات مرفقة (واجهة فقط - مش محفوظة في localStorage)
+    proofDocuments: [],
     date: new Date().toISOString(),
   });
 
@@ -66,10 +87,15 @@ const DonationRequestForm = () => {
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
 
+  // حالة النجاح بعد الإرسال
+  const [successMessage, setSuccessMessage] = useState('');
+  const [formSubmitted, setFormSubmitted] = useState(false);
+  const [newRequestId, setNewRequestId] = useState(null);
+
   // أخطاء التحقق لأرقام الدفع/التواصل
   const [errors, setErrors] = useState({
     paymentPhones: {},
-    contactNumbers: {},
+    contactNumbers: {}, // { phone, whatsapp }
   });
 
   // رسالة خطأ رفع الملفات (غير حاسمة)
@@ -88,11 +114,13 @@ const DonationRequestForm = () => {
     ],
   };
 
-  // خيارات وسائل الدفع (للنوع المالي)
-  const paymentOptions = ['Bankily', 'Masrifi', 'Sadad', 'bim-bank'];
-
-  // خيارات وسائل التواصل
-  const contactOptions = ['phone', 'whatsapp'];
+  // ✅ خيارات وسائل الدفع (مع الأيقونات)
+  const paymentOptions = [
+    { method: 'Bankily', label: 'Bankily', icon: iconBankily },
+    { method: 'Masrifi', label: 'Masrifi', icon: iconMasrivi },
+    { method: 'Sadad', label: 'Sadad', icon: iconSadad },
+    { method: 'bim-bank', label: 'bim-bank', icon: iconBimBank },
+  ];
 
   // قائمة الأماكن/المدن
   const placesList = [
@@ -159,11 +187,10 @@ const DonationRequestForm = () => {
     'أكجوجت',
   ];
 
-  // هل نوع الطلب مالي؟ (غير إعلاني اجتماعي)
-  const socialAds = categories['الإعلانات الاجتماعية'];
-  const isFinancial = useMemo(
-    () => donation.type && !socialAds.includes(donation.type),
-    [donation.type, socialAds]
+  // 🔹 مقدار المبلغ كعدد
+  const hasAmount = useMemo(
+    () => Number(donation.amount) > 0,
+    [donation.amount]
   );
 
   // التحقق: الخطوة 1 تحتاج category و type
@@ -172,30 +199,26 @@ const DonationRequestForm = () => {
     [donation.category, donation.type]
   );
 
-  // التحقق: لازم على الأقل وسيلة تواصل واحدة تحتوي على رقم موريتاني صحيح
-  const contactsValid = useMemo(
-    () =>
-      donation.contactMethods.some((c) =>
-        validatePhoneNumberMR(c.number)
-      ),
-    [donation.contactMethods]
-  );
+  // ✅ التحقق: لازم على الأقل هاتف أو واتساب صحيح
+  const contactsValid = useMemo(() => {
+    const phoneOk = validatePhoneNumberMR(donation.contactMethods?.phone);
+    const whatsappOk = validatePhoneNumberMR(
+      donation.contactMethods?.whatsapp
+    );
+    return phoneOk || whatsappOk;
+  }, [donation.contactMethods]);
 
-  // التحقق: لو الطلب مالي
-  // - لازم مبلغ
-  // - لازم وسيلة دفع واحدة عالأقل
-  // - كل وسيلة دفع لازم رقم موريتاني صحيح
+  // ✅ التحقق: وسائل الدفع فقط إذا كان المبلغ > 0
   const paymentsValid = useMemo(() => {
-    if (!isFinancial) return true;
+    if (!hasAmount) return true; // لا مبلغ → لا تحقق
     if (!donation.paymentMethods.length) return false;
 
     const phonesOk = donation.paymentMethods.every((p) =>
       validatePhoneNumberMR(p.phone)
     );
-    const amountOk = Number(donation.amount) > 0;
 
-    return phonesOk && amountOk;
-  }, [donation.paymentMethods, donation.amount, isFinancial]);
+    return phonesOk;
+  }, [donation.paymentMethods, hasAmount]);
 
   // معلومات الـ UI لكل خطوة
   const stepInfo = {
@@ -211,19 +234,19 @@ const DonationRequestForm = () => {
     },
     3: {
       title: 'التفاصيل المالية',
-      description: 'المبلغ وطرق الدفع (للطلبات المالية)',
+      description: 'يمكنك إدخال مبلغ ووسائل الدفع (اختياري)',
       icon: '💰',
     },
     4: {
       title: 'الموعد والمراجعة',
-      description: 'حدد الموعد النهائي وراجع الطلب',
+      description: 'حدد الموعد النهائي وراجع الطلب قبل الإرسال',
       icon: '⏰',
     },
   };
 
-  // عدد الخطوات الحقيقي حسب نوع الطلب
-  const totalSteps = isFinancial ? 4 : 3;
-  const displayedStep = Math.min(step, totalSteps);
+  // عدد الخطوات ثابت ٤
+  const totalSteps = 4;
+  const displayedStep = step;
 
   // تاريخ أقل للـ deadline
   const minDeadline = useMemo(() => {
@@ -237,10 +260,24 @@ const DonationRequestForm = () => {
     const saved = localStorage.getItem('donationRequestDraft');
     if (saved) {
       try {
+        const parsed = JSON.parse(saved);
+
+        // ⚙️ توحيد الشكل القديم (مصفوفة) إلى كائن {phone, whatsapp}
+        let contactMethods = parsed.contactMethods;
+        if (Array.isArray(contactMethods)) {
+          const obj = { phone: '', whatsapp: '' };
+          contactMethods.forEach((c) => {
+            if (c.method === 'phone') obj.phone = c.number || '';
+            if (c.method === 'whatsapp') obj.whatsapp = c.number || '';
+          });
+          contactMethods = obj;
+        }
+
         setDonation((prev) => ({
           ...prev,
-          ...JSON.parse(saved),
-          proofDocuments: [], // ما نسترجع الملفات
+          ...parsed,
+          contactMethods: contactMethods || { phone: '', whatsapp: '' },
+          proofDocuments: [],
         }));
       } catch {
         // تجاهل JSON معطوب
@@ -263,7 +300,7 @@ const DonationRequestForm = () => {
     }));
   };
 
-  // عند اختيار تصنيف جديد: نفرغ type لإجبار المستخدم يختار نوع جديد
+  // عند اختيار تصنيف جديد
   const handleCategoryChange = (e) =>
     setDonation((prev) => ({
       ...prev,
@@ -291,7 +328,6 @@ const DonationRequestForm = () => {
       setTimeout(() => setFileError(''), 4000);
     }
 
-    // إعادة تصفير قيمة input file عشان نفس الملف يقدر يتكرر
     e.target.value = '';
   };
 
@@ -321,90 +357,101 @@ const DonationRequestForm = () => {
     });
   };
 
-  // اختيار/إلغاء وسيلة تواصل
-  const toggleContactMethod = (method, checked) => {
-    setDonation((prev) => {
-      const current = [...prev.contactMethods];
-      if (checked) {
-        if (!current.find((m) => m.method === method)) {
-          current.push({ method, number: '' });
-        }
-      } else {
-        return {
-          ...prev,
-          contactMethods: current.filter((m) => m.method !== method),
-        };
-      }
-      return { ...prev, contactMethods: current };
-    });
-  };
-
   // التالي
   const goNext = () => {
-    if (step === 1 && !isStep1Valid) return;
-    if (step === 2 && (!donation.place || !contactsValid)) return;
-    if (step === 3 && isFinancial && !paymentsValid) return;
+    if (step === 1 && !isStep1Valid) {
+      scrollToTop();
+      return;
+    }
+    if (step === 2 && (!donation.place || !contactsValid)) {
+      scrollToTop();
+      return;
+    }
+    if (step === 3 && hasAmount && !paymentsValid) {
+      scrollToTop();
+      return;
+    }
 
-    let s = step + 1;
-    // لو مو مالي، ما نعرض خطوة المال، فنقفز
-    if (!isFinancial && s === 3) s = 4;
-    setStep(Math.min(s, totalSteps));
+    const s = Math.min(step + 1, totalSteps);
+    setStep(s);
+    scrollToTop();
   };
 
   // السابق
   const goPrev = () => {
-    let s = step - 1;
-    if (!isFinancial && s === 3) s = 2;
-    setStep(Math.max(s, 1));
+    const s = Math.max(step - 1, 1);
+    setStep(s);
+    scrollToTop();
   };
 
-  // ⬅⬅ الإرسال النهائي باستخدام fetchWithInterceptors
+  // إعادة تعيين النموذج بعد نجاح الإرسال
+  const resetForm = () => {
+    setDonation({
+      category: '',
+      type: '',
+      description: '',
+      place: '',
+      amount: '',
+      paymentMethods: [],
+      contactMethods: { phone: '', whatsapp: '' },
+      deadline: '',
+      isUrgent: false,
+      bloodType: '',
+      proofDocuments: [],
+      date: new Date().toISOString(),
+    });
+    setStep(1);
+    setSubmitting(false);
+    setErrors({ paymentPhones: {}, contactNumbers: {} });
+    setFileError('');
+    setSuccessMessage('');
+    setFormSubmitted(false);
+    setNewRequestId(null);
+    scrollToTop();
+  };
+
+  // ⬅⬅ الإرسال النهائي
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    let hasError = false;
+    let hasErrorFlag = false;
     const newPaymentErrors = {};
     const newContactErrors = {};
 
-    // تحقق من وسائل الدفع (لو مالي)
-    donation.paymentMethods.forEach(({ method, phone }) => {
-      if (isFinancial && !validatePhoneNumberMR(phone)) {
-        newPaymentErrors[method] = true;
-        hasError = true;
-      }
-    });
-
-    // تحقق من وسائل التواصل
-    donation.contactMethods.forEach(({ method, number }) => {
-      if (!validatePhoneNumberMR(number)) {
+    // ✅ تحقق من وسائل التواصل (هاتف + واتساب)
+    ['phone', 'whatsapp'].forEach((method) => {
+      const number = donation.contactMethods?.[method] || '';
+      if (number && !validatePhoneNumberMR(number)) {
         newContactErrors[method] = true;
-        hasError = true;
+        hasErrorFlag = true;
       }
     });
 
-    // لازم يكون فيه على الأقل رقم تواصل واحد صالح
     if (!contactsValid) {
       alert(
         'أضف رقم تواصل واحد على الأقل (هاتف أو واتساب) برقم صحيح (8 أرقام ويبدأ بـ2 أو 3 أو 4).'
       );
-      hasError = true;
+      hasErrorFlag = true;
     }
 
-    // تحقق إضافي من المكان
     if (!donation.place) {
-      hasError = true;
+      hasErrorFlag = true;
       alert('الرجاء كتابة المكان.');
     }
 
-    // تحقق من البيانات المالية لو الطلب مالي
-    if (isFinancial && !(Number(donation.amount) > 0)) {
-      hasError = true;
-      alert('الرجاء إدخال المبلغ المطلوب.');
-    }
+    // ✅ تحقق من البيانات المالية فقط إذا كان هناك مبلغ
+    if (hasAmount) {
+      if (!donation.paymentMethods.length) {
+        hasErrorFlag = true;
+        alert('اختر وسيلة دفع واحدة على الأقل.');
+      }
 
-    if (isFinancial && !donation.paymentMethods.length) {
-      hasError = true;
-      alert('اختر وسيلة دفع واحدة على الأقل.');
+      donation.paymentMethods.forEach(({ method, phone }) => {
+        if (!validatePhoneNumberMR(phone)) {
+          newPaymentErrors[method] = true;
+          hasErrorFlag = true;
+        }
+      });
     }
 
     setErrors({
@@ -412,9 +459,11 @@ const DonationRequestForm = () => {
       contactNumbers: newContactErrors,
     });
 
-    if (hasError) return;
+    if (hasErrorFlag) {
+      scrollToTop();
+      return;
+    }
 
-    // تجهيز الـ FormData
     const fd = new FormData();
     fd.append('category', donation.category);
     fd.append('type', donation.type);
@@ -425,14 +474,26 @@ const DonationRequestForm = () => {
     fd.append('amount', donation.amount || '');
     fd.append('bloodType', donation.bloodType || '');
 
-    const cleanContacts = donation.contactMethods.filter(
-      (x) => x && (x.method || x.number)
-    );
+    // ✅ تحويل الهاتف/الواتساب إلى مصفوفة كما يتوقع الـ backend
+    const contactsArr = [];
+    if (donation.contactMethods.phone) {
+      contactsArr.push({
+        method: 'phone',
+        number: donation.contactMethods.phone.trim(),
+      });
+    }
+    if (donation.contactMethods.whatsapp) {
+      contactsArr.push({
+        method: 'whatsapp',
+        number: donation.contactMethods.whatsapp.trim(),
+      });
+    }
+
     const cleanPayments = donation.paymentMethods.filter(
       (x) => x && (x.method || x.phone)
     );
 
-    fd.append('contactMethods', JSON.stringify(cleanContacts));
+    fd.append('contactMethods', JSON.stringify(contactsArr));
     fd.append('paymentMethods', JSON.stringify(cleanPayments));
 
     donation.proofDocuments.forEach((file) => fd.append('files', file));
@@ -440,42 +501,84 @@ const DonationRequestForm = () => {
     try {
       setSubmitting(true);
 
-      // أهم نقطة: نستخدم fetchWithInterceptors بدل fetch
-      // علشان:
-      // - يضيف Authorization Bearer تلقائي
-      // - يضيف X-UserId لو موجود
-      // - يحدد الـ API_BASE
-      // - يعالج timeout والأخطاء
       const resp = await fetchWithInterceptors('/api/donationRequests', {
         method: 'POST',
         body: fd,
-        // مهم: لا نحط Content-Type يدوياً مع FormData
       });
 
-      // resp.body هو اللي ترجعه دالتك (json/text/blob...)
       const created = resp?.body?.data;
 
-      // تنظيف المسودة بعد النجاح
       localStorage.removeItem('donationRequestDraft');
+      scrollToTop();
 
       if (created?._id) {
-        navigate(`/donations/${created._id}`);
-      } else {
-        alert(resp?.body?.message || 'تم إنشاء الطلب بنجاح');
+        setNewRequestId(created._id);
       }
+
+      setSuccessMessage(
+        resp?.body?.message || 'تم إنشاء طلب التبرع بنجاح!'
+      );
+      setFormSubmitted(true);
     } catch (err) {
       console.error('خطأ أثناء الإرسال:', err);
       alert(err.message || 'حدث خطأ أثناء الإرسال');
+      scrollToTop();
     } finally {
       setSubmitting(false);
     }
   };
 
+  // ✅ واجهة النجاح بعد إرسال الطلب
+  if (formSubmitted && successMessage) {
+    return (
+      <div className="donation-form-container" dir="rtl">
+        <div className="success-card">
+          <div className="success-icon">🎉</div>
+          <h2 className="success-title">تم استلام طلبك بنجاح</h2>
+          <p className="success-desc">
+            شكراً لك. سيتم عرض هذا الطلب للمتطوعين والمتبرعين المهتمين بهذا النوع من المساعدة.
+          </p>
+
+          <div className="success-actions">
+            {newRequestId && (
+              <Button
+                variant="success"
+                className="w-100 mb-2"
+                onClick={() => navigate(`/donations/${newRequestId}`)}
+              >
+                عرض طلبي الآن
+              </Button>
+            )}
+
+            <Button
+              variant="outline-success"
+              className="w-100 mb-2"
+              onClick={() => navigate('/donations')}
+            >
+              مشاهدة جميع طلبات التبرع
+            </Button>
+
+            <Button
+              variant="primary"
+              className="w-100"
+              onClick={resetForm}
+            >
+              إنشاء طلب جديد
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="donation-form-container" dir="rtl">
       {/* رأس النموذج */}
       <header className="form-header">
-        <TitleMain title="طلب تبرع عام 🤝" />
+        <TitleMain
+          title="طلب تبرع عام 🤝"
+          subtitle="يمكن لكل مستخدم إنشاء طلب نيابةً عن أي شخص آخر، لذلك فإن وسائل التواصل ووسائل الدفع مرتبطة بالطلب نفسه وليست بحساب المستخدم."
+        />
 
         {/* شريط التقدم البصري */}
         <div
@@ -605,166 +708,186 @@ const DonationRequestForm = () => {
               </datalist>
             </Form.Group>
 
+            {/* ✅ وسائل التواصل ثابتة */}
             <Form.Group className="mt-3">
               <Form.Label>وسائل التواصل</Form.Label>
 
-              {contactOptions.map((method) => {
-                const selected = donation.contactMethods.find(
-                  (m) => m.method === method
-                );
-
-                const niceLabel =
-                  method === 'phone'
-                    ? 'هاتف مباشر'
-                    : 'واتساب (مكالمات / رسائل)';
-
-                return (
-                  <div key={method} className="mb-3">
-                    <Form.Check
-                      type="checkbox"
-                      label={niceLabel}
-                      checked={!!selected}
-                      onChange={(e) =>
-                        toggleContactMethod(method, e.target.checked)
-                      }
-                    />
-
-                    {selected && (
-                      <>
-                        <Form.Control
-                          type="text"
-                          placeholder={
-                            method === 'phone'
-                              ? 'رقم الهاتف للتواصل (8 أرقام ويبدأ بـ2 أو 3 أو 4)'
-                              : 'رقم واتساب داخل موريتانيا (8 أرقام ويبدأ بـ2 أو 3 أو 4)'
-                          }
-                          value={selected.number}
-                          isInvalid={!!errors.contactNumbers[method]}
-                          onChange={(e) => {
-                            const number = e.target.value;
-                            setDonation((prev) => ({
-                              ...prev,
-                              contactMethods: prev.contactMethods.map((m) =>
-                                m.method === method
-                                  ? { ...m, number }
-                                  : m
-                              ),
-                            }));
-                            setErrors((prev) => ({
-                              ...prev,
-                              contactNumbers: {
-                                ...prev.contactNumbers,
-                                [method]: !validatePhoneNumberMR(number),
-                              },
-                            }));
-                          }}
-                          required
-                        />
-
-                        {errors.contactNumbers[method] && (
-                          <div className="invalid-feedback d-block">
-                            الرقم يجب أن يكون 8 أرقام ويبدأ بـ 2 أو 3 أو 4.
-                          </div>
-                        )}
-                      </>
-                    )}
+              {/* الهاتف */}
+              <div className="mb-3">
+                <label className="form-label d-flex align-items-center gap-2">
+                  <FiPhone size={18} style={{ color: '#2e7d32' }} />
+                  الهاتف
+                </label>
+                <Form.Control
+                  type="text"
+                  value={donation.contactMethods.phone}
+                  onChange={(e) => {
+                    const number = e.target.value;
+                    setDonation((prev) => ({
+                      ...prev,
+                      contactMethods: {
+                        ...prev.contactMethods,
+                        phone: number,
+                      },
+                    }));
+                    setErrors((prev) => ({
+                      ...prev,
+                      contactNumbers: {
+                        ...prev.contactNumbers,
+                        phone: number && !validatePhoneNumberMR(number),
+                      },
+                    }));
+                  }}
+                  isInvalid={!!errors.contactNumbers?.phone}
+                />
+                {errors.contactNumbers?.phone && (
+                  <div className="invalid-feedback d-block">
+                    رقم غير صالح — يجب أن يكون 8 أرقام ويبدأ بـ 2 أو 3 أو 4.
                   </div>
-                );
-              })}
+                )}
+              </div>
+
+              {/* واتساب */}
+              <div className="mb-3">
+                <label className="form-label d-flex align-items-center gap-2">
+                  <FaWhatsapp size={18} style={{ color: '#1c9c55' }} />
+                  واتساب
+                </label>
+                <Form.Control
+                  type="text"
+                  value={donation.contactMethods.whatsapp}
+                  onChange={(e) => {
+                    const number = e.target.value;
+                    setDonation((prev) => ({
+                      ...prev,
+                      contactMethods: {
+                        ...prev.contactMethods,
+                        whatsapp: number,
+                      },
+                    }));
+                    setErrors((prev) => ({
+                      ...prev,
+                      contactNumbers: {
+                        ...prev.contactNumbers,
+                        whatsapp: number && !validatePhoneNumberMR(number),
+                      },
+                    }));
+                  }}
+                  isInvalid={!!errors.contactNumbers?.whatsapp}
+                />
+                {errors.contactNumbers?.whatsapp && (
+                  <div className="invalid-feedback d-block">
+                    رقم غير صالح — يجب أن يكون 8 أرقام ويبدأ بـ 2 أو 3 أو 4.
+                  </div>
+                )}
+              </div>
 
               {!contactsValid && (
                 <div className="text-danger small">
-                  يجب إضافة رقم تواصل صالح واحد على الأقل.
+                  يجب إضافة رقم تواصل صالح واحد على الأقل (هاتف أو واتساب).
                 </div>
               )}
             </Form.Group>
           </div>
         )}
 
-        {/* الخطوة ٣: التفاصيل المالية (فقط لو الطلب مالي) */}
-        {displayedStep === 3 && isFinancial && (
+        {/* الخطوة ٣: المبلغ + وسائل الدفع (اختياري) */}
+        {displayedStep === 3 && (
           <div className="step-content">
             <Form.Group>
-              <Form.Label>المبلغ المطلوب</Form.Label>
+              <Form.Label>المبلغ المطلوب (بالأوقية الجديدة)</Form.Label>
               <Form.Control
                 type="number"
                 name="amount"
                 value={donation.amount}
                 onChange={handleChange}
-                min="1"
-                required
+                min="0"
               />
+              <Form.Text className="text-muted">
+                المبلغ يُحتسب بالأوقية الجديدة (MRU). يمكنك ترك الحقل فارغًا إذا لم يكن هناك مبلغ محدد.
+              </Form.Text>
             </Form.Group>
 
-            <Form.Group>
-              <Form.Label>وسائل الدفع</Form.Label>
+            {/* تظهر وسائل الدفع فقط إذا يوجد مبلغ */}
+            {hasAmount && (
+              <Form.Group className="mt-3">
+                <Form.Label>وسائل الدفع (تظهر فقط عند إدخال مبلغ)</Form.Label>
 
-              {paymentOptions.map((method) => {
-                const selected = donation.paymentMethods.find(
-                  (m) => m.method === method
-                );
+                {paymentOptions.map(({ method, label, icon }) => {
+                  const selected = donation.paymentMethods.find(
+                    (m) => m.method === method
+                  );
 
-                return (
-                  <div key={method} className="mb-3">
-                    <Form.Check
-                      type="checkbox"
-                      label={method}
-                      checked={!!selected}
-                      onChange={(e) =>
-                        togglePaymentMethod(method, e.target.checked)
-                      }
-                    />
+                  return (
+                    <div key={method} className="mb-3 payment-method-row">
+                      <Form.Check
+                        type="checkbox"
+                        className="payment-method-check"
+                        label={
+                          <span className="d-inline-flex align-items-center gap-2">
+                            <img
+                              src={icon}
+                              alt={label}
+                              className="payment-icon"
+                            />
+                            <span>{label}</span>
+                          </span>
+                        }
+                        checked={!!selected}
+                        onChange={(e) =>
+                          togglePaymentMethod(method, e.target.checked)
+                        }
+                      />
 
-                    {selected && (
-                      <>
-                        <Form.Control
-                          type="text"
-                          placeholder={`رقم ${method} (8 أرقام ويبدأ بـ2 أو 3 أو 4)`}
-                          value={selected.phone}
-                          isInvalid={!!errors.paymentPhones[method]}
-                          onChange={(e) => {
-                            const phone = e.target.value;
-                            setDonation((prev) => ({
-                              ...prev,
-                              paymentMethods: prev.paymentMethods.map((m) =>
-                                m.method === method
-                                  ? { ...m, phone }
-                                  : m
-                              ),
-                            }));
-                            setErrors((prev) => ({
-                              ...prev,
-                              paymentPhones: {
-                                ...prev.paymentPhones,
-                                [method]: !validatePhoneNumberMR(phone),
-                              },
-                            }));
-                          }}
-                          required
-                        />
+                      {selected && (
+                        <>
+                          <Form.Control
+                            type="text"
+                            placeholder={`رقم ${label}`}
+                            value={selected.phone}
+                            isInvalid={!!errors.paymentPhones?.[method]}
+                            onChange={(e) => {
+                              const phone = e.target.value;
+                              setDonation((prev) => ({
+                                ...prev,
+                                paymentMethods: prev.paymentMethods.map((m) =>
+                                  m.method === method ? { ...m, phone } : m
+                                ),
+                              }));
+                              setErrors((prev) => ({
+                                ...prev,
+                                paymentPhones: {
+                                  ...(prev.paymentPhones || {}),
+                                  [method]: !validatePhoneNumberMR(phone),
+                                },
+                              }));
+                            }}
+                            required
+                          />
 
-                        {errors.paymentPhones[method] && (
-                          <div className="invalid-feedback d-block">
-                            أدخل رقم صالح (8 أرقام ويبدأ بـ 2 أو 3 أو 4).
-                          </div>
-                        )}
-                      </>
-                    )}
+                          {errors.paymentPhones?.[method] && (
+                            <div className="invalid-feedback d-block">
+                              أدخل رقم صالح (8 أرقام ويبدأ بـ 2 أو 3 أو 4).
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {!paymentsValid && hasAmount && (
+                  <div className="text-danger mt-1">
+                    يجب اختيار وسيلة دفع واحدة على الأقل مع رقم صالح عندما يكون المبلغ مُدخلًا.
                   </div>
-                );
-              })}
-
-              {!paymentsValid && (
-                <div className="text-danger mt-1">
-                  يجب إدخال المبلغ واختيار وسيلة دفع واحدة على الأقل مع رقم صالح.
-                </div>
-              )}
-            </Form.Group>
+                )}
+              </Form.Group>
+            )}
           </div>
         )}
 
-        {/* الخطوة ٤ (أو ٣ لغير المالي): الموعد والاستعجال */}
-        {displayedStep === (isFinancial ? 4 : 3) && (
+        {/* الخطوة ٤: الموعد + المرفقات + الملخص قبل الإرسال */}
+        {displayedStep === 4 && (
           <div className="step-content">
             <div className="row">
               <div className="col-md-6">
@@ -779,7 +902,7 @@ const DonationRequestForm = () => {
                   />
                 </Form.Group>
               </div>
-              <div className="col-md-6 d-flex align-items-end">
+              <div className="col-md-6 d-flex align-items-end checkbox-urgent">
                 <Form.Group>
                   <Form.Check
                     type="checkbox"
@@ -791,16 +914,12 @@ const DonationRequestForm = () => {
                 </Form.Group>
               </div>
             </div>
-          </div>
-        )}
 
-        {/* الخطوة الأخيرة: المرفقات / المراجعة */}
-        {displayedStep === totalSteps && (
-          <div className="step-content">
-            <Form.Group>
+            {/* المرفقات */}
+            <Form.Group className="mt-3">
               <div className="d-flex justify-content-between">
                 <Form.Label>وثائق داعمة</Form.Label>
-                <small className="text-muted">PDF أو صور</small>
+                <small className="text-muted">PDF أو صور (اختياري)</small>
               </div>
               <Form.Control
                 type="file"
@@ -826,6 +945,97 @@ const DonationRequestForm = () => {
                 ))}
               </ListGroup>
             </Form.Group>
+
+            {/* ✅ ملخص الطلب قبل الإرسال */}
+            <div className="summary-card mt-4">
+              <div className="summary-card-header">
+                <span className="summary-icon">📄</span>
+                <div>
+                  <div className="summary-title">ملخص الطلب قبل الإرسال</div>
+                  <div className="summary-hint">
+                    يرجى مراجعة هذه البيانات جيداً قبل الضغط على &quot;إرسال الطلب&quot;.
+                  </div>
+                </div>
+              </div>
+
+              <div className="summary-grid">
+                <div className="summary-item">
+                  <div className="summary-label">المجال</div>
+                  <div className="summary-value">
+                    {donation.category || '—'}
+                  </div>
+                </div>
+
+                <div className="summary-item">
+                  <div className="summary-label">نوع التبرع</div>
+                  <div className="summary-value">
+                    {donation.type || '—'}
+                  </div>
+                </div>
+
+                <div className="summary-item">
+                  <div className="summary-label">الموقع</div>
+                  <div className="summary-value">
+                    {donation.place || '—'}
+                  </div>
+                </div>
+
+                <div className="summary-item">
+                  <div className="summary-label">المبلغ (MRU)</div>
+                  <div className="summary-value">
+                    {donation.amount ? donation.amount : 'بدون مبلغ محدد'}
+                  </div>
+                </div>
+
+                <div className="summary-item">
+                  <div className="summary-label">الاستعجال</div>
+                  <div
+                    className={`summary-badge ${
+                      donation.isUrgent ? 'urgent' : 'normal'
+                    }`}
+                  >
+                    {donation.isUrgent ? 'مستعجل' : 'عادي'}
+                  </div>
+                </div>
+
+                <div className="summary-item summary-item-wide">
+                  <div className="summary-label">وسائل التواصل</div>
+                  <div className="summary-value">
+                    {donation.contactMethods.phone && (
+                      <div>📞 هاتف: {donation.contactMethods.phone}</div>
+                    )}
+                    {donation.contactMethods.whatsapp && (
+                      <div>💬 واتساب: {donation.contactMethods.whatsapp}</div>
+                    )}
+                    {!donation.contactMethods.phone &&
+                      !donation.contactMethods.whatsapp &&
+                      '—'}
+                  </div>
+                </div>
+
+                {hasAmount && donation.paymentMethods.length > 0 && (
+                  <div className="summary-item summary-item-wide">
+                    <div className="summary-label">وسائل الدفع</div>
+                    <div className="summary-value">
+                      {donation.paymentMethods
+                        .map(
+                          (m) => `${m.method} (${m.phone || 'بدون رقم'})`
+                        )
+                        .join(' ، ')}
+                    </div>
+                  </div>
+                )}
+
+                <div className="summary-item summary-item-wide">
+                  <div className="summary-label">عدد المرفقات</div>
+                  <div className="summary-value">
+                    {donation.proofDocuments.length
+                      ? `${donation.proofDocuments.length} ملف`
+                      : 'لا توجد مرفقات'}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
@@ -855,9 +1065,7 @@ const DonationRequestForm = () => {
                 (displayedStep === 1 && !isStep1Valid) ||
                 (displayedStep === 2 &&
                   (!donation.place || !contactsValid)) ||
-                (displayedStep === 3 &&
-                  isFinancial &&
-                  !paymentsValid)
+                (displayedStep === 3 && hasAmount && !paymentsValid)
               }
               type="button"
             >

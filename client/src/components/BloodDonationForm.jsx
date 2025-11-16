@@ -1,10 +1,8 @@
 // src/components/BloodDonationForm.jsx
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
-import { FaCheck } from 'react-icons/fa';
+import { FaCheck, FaWhatsapp } from 'react-icons/fa';
 import { FiPhone } from 'react-icons/fi';
-import { FaWhatsapp } from 'react-icons/fa';
-
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import TitleMain from './TitleMain.jsx';
 
@@ -61,21 +59,30 @@ const BloodDonationForm = () => {
     description: '',
     deadline: '',
     isUrgent: false,
-    // contactMethods: [{ method: 'phone'|'whatsapp', number: '2xxxxxxx' }]
-    contactMethods: []
+    phone: '',
+    whatsapp: ''
   });
 
   const [step, setStep] = useState(1);
   const [supportDocs, setSupportDocs] = useState([]);
-  const [errors, setErrors] = useState({
-    contactNumbers: {},
-  });
+  const [errors, setErrors] = useState({});
   const [showValidationAlert, setShowValidationAlert] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [fileError, setFileError] = useState('');
   const [deadlineWarning, setDeadlineWarning] = useState('');
   const [newRequestId, setNewRequestId] = useState(null);
+
+  // ✅ دالة تمرير لأعلى النموذج / الصفحة
+  const scrollToTop = () => {
+    const wrapper = document.querySelector('.page-wrapper');
+    if (wrapper) {
+      wrapper.scrollTop = 0;
+    }
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  };
 
   // ====== إعدادات عامة ======
   useEffect(() => {
@@ -85,14 +92,15 @@ const BloodDonationForm = () => {
     };
   }, []);
 
-  // أنواع الدم
-  const bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "غير معروف"];
+  // عند نجاح الإرسال، مرِّر للأعلى لعرض شاشة النجاح من البداية
+  useEffect(() => {
+    if (formSubmitted) {
+      scrollToTop();
+    }
+  }, [formSubmitted]);
 
-  // وسائل التواصل الممكنة
-  const contactOptions = [
-    { key: 'phone', label: 'هاتف مباشر', icon: <FiPhone className="contact-icon" /> },
-    { key: 'whatsapp', label: 'واتساب (مكالمات / رسائل)', icon: <FaWhatsapp className="contact-icon" /> }
-  ];
+  // أنواع الدم
+  const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'غير معروف'];
 
   // قائمة الأماكن
   const placesList = [
@@ -106,19 +114,10 @@ const BloodDonationForm = () => {
   ];
 
   /**
-   * ✅ هل عندنا على الأقل رقم واحد صحيح؟
-   */
-  const contactsValid = useMemo(() => {
-    return bloodDonation.contactMethods.some(entry =>
-      validatePhoneNumberMR(entry?.number)
-    );
-  }, [bloodDonation.contactMethods]);
-
-  /**
    * ✅ التحقق لكل خطوة
    */
   const validateStep = (stepNumber) => {
-    const newErrors = { contactNumbers: {} };
+    const newErrors = {};
 
     if (stepNumber === 1) {
       if (!bloodDonation.bloodType) newErrors.bloodType = 'نوع الدم مطلوب';
@@ -127,59 +126,48 @@ const BloodDonationForm = () => {
 
     if (stepNumber === 2) {
       if (!bloodDonation.description) newErrors.description = 'الوصف مطلوب';
-      // المرفقات اختيارية
     }
 
     if (stepNumber === 3) {
       if (!bloodDonation.deadline) newErrors.deadline = 'الموعد النهائي مطلوب';
-      // isUrgent اختياري
     }
 
     if (stepNumber === 4) {
-      // لازم يختار على الأقل وسيلة واحدة
-      if (!bloodDonation.contactMethods.length) {
-        newErrors.contactMethods = 'يجب اختيار طريقة تواصل واحدة على الأقل';
+      const phoneValid = validatePhoneNumberMR(bloodDonation.phone);
+      const whatsappValid = validatePhoneNumberMR(bloodDonation.whatsapp);
+
+      if (bloodDonation.phone && !phoneValid) {
+        newErrors.phone = 'الرقم يجب أن يكون 8 أرقام ويبدأ بـ 2 أو 3 أو 4.';
+      }
+      if (bloodDonation.whatsapp && !whatsappValid) {
+        newErrors.whatsapp = 'الرقم يجب أن يكون 8 أرقام ويبدأ بـ 2 أو 3 أو 4.';
       }
 
-      // تحقق من صحة كل الأرقام المُدخلة
-      bloodDonation.contactMethods.forEach(({ method, number }) => {
-        if (!validatePhoneNumberMR(number)) {
-          newErrors.contactNumbers[method] = true;
-        }
-      });
-
-      // تحقق عام: هل يوجد رقم واحد صالح؟
-      if (!contactsValid) {
-        newErrors.contactMethods =
-          'أدخل رقم تواصل صحيح (8 أرقام ويبدأ بـ2 أو 3 أو 4)';
+      if (!phoneValid && !whatsappValid) {
+        newErrors.contact = 'يجب إدخال رقم هاتف أو واتساب واحد على الأقل بشكل صحيح.';
       }
     }
 
     setErrors(newErrors);
-
-    const hasMainErrors = Object.entries(newErrors)
-      .filter(([key]) => key !== 'contactNumbers')
-      .some(([, val]) => !!val);
-
-    const hasContactNumberErrors = Object.values(newErrors.contactNumbers)
-      .some(v => v === true);
-
-    return !hasMainErrors && !hasContactNumberErrors;
+    return Object.keys(newErrors).length === 0;
   };
 
   /**
-   * تحديث حقل بسيط في bloodDonation
-   * ملاحظة: لو الحقل deadline نعمل تحقق إضافي
+   * ✅ تحديث حقل بسيط في bloodDonation
    */
   const handleInputChange = (field, value) => {
+    // معالجة خاصة للموعد النهائي
     if (field === 'deadline') {
       const chosen = new Date(value);
       const now = new Date();
 
       if (chosen.getTime() < now.getTime()) {
         setDeadlineWarning('لا يمكنك اختيار وقت في الماضي.');
-        setBloodDonation(prev => ({ ...prev, deadline: '' }));
-        setErrors(prev => ({ ...prev, deadline: 'الرجاء اختيار وقت صالح في المستقبل' }));
+        setBloodDonation((prev) => ({ ...prev, deadline: '' }));
+        setErrors((prev) => ({
+          ...prev,
+          deadline: 'الرجاء اختيار وقت صالح في المستقبل'
+        }));
         return;
       }
 
@@ -192,63 +180,47 @@ const BloodDonationForm = () => {
         setDeadlineWarning('');
       }
 
-      setBloodDonation(prev => ({ ...prev, deadline: value }));
-      setErrors(prev => ({ ...prev, deadline: '' }));
+      setBloodDonation((prev) => ({ ...prev, deadline: value }));
+      setErrors((prev) => ({ ...prev, deadline: '' }));
       return;
     }
 
-    setBloodDonation(prev => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
-    }
-  };
+    // تحديث الحالة
+    const next = { ...bloodDonation, [field]: value };
+    setBloodDonation(next);
 
-  /**
-   * ✅ تشغيل/إيقاف وسيلة تواصل (phone / whatsapp)
-   * إذا فعّل المستخدم الوسيلة، نضيف كائن {method, number:''}
-   * إذا لغى التفعيل، نحذف هذا الكائن.
-   */
-  const toggleContactMethod = (method, checked) => {
-    setBloodDonation(prev => {
-      const current = [...prev.contactMethods];
+    // إزالة رسالة الخطأ للحقل الحالي إن وُجدت
+    setErrors((prev) => {
+      const copy = { ...prev };
+      delete copy[field];
 
-      if (checked) {
-        if (!current.find(m => m.method === method)) {
-          current.push({ method, number: '' });
+      // معالجة خاصة للهاتف والواتساب (تحقق فوري)
+      if (field === 'phone' || field === 'whatsapp') {
+        delete copy.phone;
+        delete copy.whatsapp;
+        delete copy.contact;
+
+        const phoneValid = validatePhoneNumberMR(
+          field === 'phone' ? value : next.phone
+        );
+        const whatsappValid = validatePhoneNumberMR(
+          field === 'whatsapp' ? value : next.whatsapp
+        );
+
+        if (next.phone && !validatePhoneNumberMR(next.phone)) {
+          copy.phone = 'رقم غير صالح (8 أرقام ويبدأ بـ 2 أو 3 أو 4)';
         }
-      } else {
-        return {
-          ...prev,
-          contactMethods: current.filter(m => m.method !== method),
-        };
+        if (next.whatsapp && !validatePhoneNumberMR(next.whatsapp)) {
+          copy.whatsapp = 'رقم غير صالح (8 أرقام ويبدأ بـ 2 أو 3 أو 4)';
+        }
+
+        if (!phoneValid && !whatsappValid) {
+          copy.contact = 'يجب إدخال رقم واحد صالح على الأقل.';
+        }
       }
 
-      return { ...prev, contactMethods: current };
+      return copy;
     });
-
-    if (errors.contactMethods) {
-      setErrors(prev => ({ ...prev, contactMethods: '' }));
-    }
-  };
-
-  /**
-   * ✅ تغيير رقم وسيلة تواصل معينة
-   */
-  const handleContactNumberChange = (method, number) => {
-    setBloodDonation(prev => ({
-      ...prev,
-      contactMethods: prev.contactMethods.map(m =>
-        m.method === method ? { ...m, number } : m
-      ),
-    }));
-
-    setErrors(prev => ({
-      ...prev,
-      contactNumbers: {
-        ...prev.contactNumbers,
-        [method]: !validatePhoneNumberMR(number),
-      },
-    }));
   };
 
   /**
@@ -256,16 +228,19 @@ const BloodDonationForm = () => {
    */
   const nextStep = () => {
     if (validateStep(step)) {
-      setStep(step + 1);
+      setStep((prev) => prev + 1);
       setShowValidationAlert(false);
+      scrollToTop();
     } else {
       setShowValidationAlert(true);
+      scrollToTop();
     }
   };
 
   const prevStep = () => {
-    setStep(step - 1);
+    setStep((prev) => prev - 1);
     setShowValidationAlert(false);
+    scrollToTop();
   };
 
   /**
@@ -278,7 +253,7 @@ const BloodDonationForm = () => {
       return;
     }
 
-    const validFiles = files.filter(file => {
+    const validFiles = files.filter((file) => {
       const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
       const maxSize = 5 * 1024 * 1024; // 5MB
       return validTypes.includes(file.type) && file.size <= maxSize;
@@ -298,62 +273,63 @@ const BloodDonationForm = () => {
   /**
    * الإرسال إلى السيرفر
    */
- const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  // تأكد أن الخطوة الأخيرة صالحة
-  if (!validateStep(4)) {
-    setShowValidationAlert(true);
-    return;
-  }
-
-  try {
-    const formData = new FormData();
-    formData.append('bloodType', bloodDonation.bloodType);
-    formData.append('location', bloodDonation.location);
-    formData.append('description', bloodDonation.description);
-    formData.append('deadline', bloodDonation.deadline);
-    formData.append('isUrgent', bloodDonation.isUrgent ? 'true' : 'false');
-
-    // مهم: contactMethods بصيغة JSON نصية
-    formData.append(
-      'contactMethods',
-      JSON.stringify(bloodDonation.contactMethods)
-    );
-
-    // ⬅⬅⬅ هنا التغيير المهم
-    // backend يتوقع حقول docs / files
-    // خلّينا نرسل كل الملفات على الحقل "docs"
-    supportDocs.forEach((file) => {
-      formData.append('docs', file); // بدل supportDocs
-    });
-
-    const response = await fetchWithInterceptors('/api/blood-requests', {
-      method: 'POST',
-      body: formData,
-    });
-
-    if (response.ok) {
-      // بافتراض أن الـ body فيه الطلب الجديد
-      const created = response.body;
-      const newId = created?._id || created?.id || null;
-
-      setNewRequestId(newId);
-      setSuccessMessage('تم إرسال طلب التبرع بالدم بنجاح!');
-      setFormSubmitted(true);
-
-      // مانعمل reset الآن، نخليه بعد ما يختار من شاشة النجاح
-    } else {
-      setErrors({
-        general: response?.body?.message || 'حدث خطأ أثناء إرسال الطلب',
-      });
+    if (!validateStep(4)) {
+      setShowValidationAlert(true);
+      scrollToTop();
+      return;
     }
-  } catch (error) {
-    console.error('Error submitting blood donation request:', error);
-    setErrors({ general: 'حدث خطأ أثناء إرسال الطلب' });
-  }
-};
 
+    try {
+      const formData = new FormData();
+      formData.append('bloodType', bloodDonation.bloodType);
+      formData.append('location', bloodDonation.location);
+      formData.append('description', bloodDonation.description);
+      formData.append('deadline', bloodDonation.deadline);
+      formData.append('isUrgent', bloodDonation.isUrgent ? 'true' : 'false');
+
+      const contactMethods = [];
+      if (bloodDonation.phone) {
+        contactMethods.push({ method: 'phone', number: bloodDonation.phone.trim() });
+      }
+      if (bloodDonation.whatsapp) {
+        contactMethods.push({
+          method: 'whatsapp',
+          number: bloodDonation.whatsapp.trim()
+        });
+      }
+      formData.append('contactMethods', JSON.stringify(contactMethods));
+
+      supportDocs.forEach((file) => {
+        formData.append('docs', file);
+      });
+
+      const response = await fetchWithInterceptors('/api/blood-requests', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (response.ok) {
+        const created = response.body;
+        const newId = created?._id || created?.id || null;
+
+        setNewRequestId(newId);
+        setSuccessMessage('تم إرسال طلب التبرع بالدم بنجاح!');
+        setFormSubmitted(true);
+      } else {
+        setErrors({
+          general: response?.body?.message || 'حدث خطأ أثناء إرسال الطلب'
+        });
+        scrollToTop();
+      }
+    } catch (error) {
+      console.error('Error submitting blood donation request:', error);
+      setErrors({ general: 'حدث خطأ أثناء إرسال الطلب' });
+      scrollToTop();
+    }
+  };
 
   /**
    * إعادة فورم جديد يدويًا
@@ -365,16 +341,18 @@ const BloodDonationForm = () => {
       description: '',
       deadline: '',
       isUrgent: false,
-      contactMethods: []
+      phone: '',
+      whatsapp: ''
     });
     setSupportDocs([]);
     setStep(1);
-    setErrors({ contactNumbers: {} });
+    setErrors({});
     setShowValidationAlert(false);
     setSuccessMessage('');
     setFormSubmitted(false);
     setDeadlineWarning('');
     setNewRequestId(null);
+    scrollToTop();
   };
 
   /**
@@ -384,23 +362,23 @@ const BloodDonationForm = () => {
     1: {
       title: 'نوع الدم والمكان',
       description: 'اختر نوع الدم المطلوب وحدد المكان',
-      icon: '🩸',
+      icon: '🩸'
     },
     2: {
       title: 'وصف الحالة',
       description: 'اكتب وصفاً واضحاً وأرفق وثائق داعمة',
-      icon: '📝',
+      icon: '📝'
     },
     3: {
       title: 'الموعد والإعدادات',
       description: 'حدد آخر موعد للتبرع وهل الحالة طارئة',
-      icon: '⏰',
+      icon: '⏰'
     },
     4: {
       title: 'معلومات التواصل',
       description: 'أدخل أرقام الهاتف أو الواتساب للتواصل السريع',
-      icon: '📞',
-    },
+      icon: '📞'
+    }
   };
 
   const totalSteps = 4;
@@ -424,7 +402,7 @@ const BloodDonationForm = () => {
                 variant="success"
                 className="w-100 mb-2"
                 onClick={() => {
-                  window.location.href = `/blood-requests/${newRequestId}`;
+                  window.location.href = `/blood-donation-details/${newRequestId}`;
                 }}
               >
                 عرض طلبي الآن
@@ -435,17 +413,13 @@ const BloodDonationForm = () => {
               variant="outline-success"
               className="w-100 mb-2"
               onClick={() => {
-                window.location.href = '/blood-requests';
+                window.location.href = '/blood-donations';
               }}
             >
               مشاهدة طلبات التبرع بالدم
             </Button>
 
-            <Button
-              variant="primary"
-              className="w-100"
-              onClick={resetForm}
-            >
+            <Button variant="primary" className="w-100" onClick={resetForm}>
               إنشاء طلب جديد
             </Button>
           </div>
@@ -476,9 +450,7 @@ const BloodDonationForm = () => {
               <span className="step-icon">{stepInfo[step]?.icon}</span>
               <div className="step-details">
                 <h3 className="step-title">{stepInfo[step]?.title}</h3>
-                <p className="step-description">
-                  {stepInfo[step]?.description}
-                </p>
+                <p className="step-description">{stepInfo[step]?.description}</p>
               </div>
             </div>
 
@@ -543,9 +515,7 @@ const BloodDonationForm = () => {
               <Form.Label>المكان *</Form.Label>
               <Form.Select
                 value={bloodDonation.location}
-                onChange={(e) =>
-                  handleInputChange('location', e.target.value)
-                }
+                onChange={(e) => handleInputChange('location', e.target.value)}
                 isInvalid={!!errors.location}
               >
                 <option value="">اختر المكان</option>
@@ -574,9 +544,7 @@ const BloodDonationForm = () => {
                 as="textarea"
                 rows={4}
                 value={bloodDonation.description}
-                onChange={(e) =>
-                  handleInputChange('description', e.target.value)
-                }
+                onChange={(e) => handleInputChange('description', e.target.value)}
                 placeholder="اكتب وصفاً مفصلاً عن الحالة والحاجة للتبرع..."
                 isInvalid={!!errors.description}
               />
@@ -598,9 +566,7 @@ const BloodDonationForm = () => {
               <Form.Text className="text-muted">
                 يمكنك رفع حتى 5 ملفات (صور أو PDF، حجم أقصى 5MB لكل ملف)
               </Form.Text>
-              {fileError && (
-                <div className="text-danger mt-2">{fileError}</div>
-              )}
+              {fileError && <div className="text-danger mt-2">{fileError}</div>}
               {supportDocs.length > 0 && (
                 <div className="mt-2">
                   <small className="text-success">
@@ -622,9 +588,7 @@ const BloodDonationForm = () => {
               <Form.Control
                 type="datetime-local"
                 value={bloodDonation.deadline}
-                onChange={(e) =>
-                  handleInputChange('deadline', e.target.value)
-                }
+                onChange={(e) => handleInputChange('deadline', e.target.value)}
                 isInvalid={!!errors.deadline}
               />
               {errors.deadline && (
@@ -638,20 +602,22 @@ const BloodDonationForm = () => {
               </Form.Text>
 
               {deadlineWarning && (
-                <div className="text-warning small mt-2">
-                  {deadlineWarning}
-                </div>
+                <div className="text-warning small mt-2">{deadlineWarning}</div>
               )}
             </Form.Group>
 
             <Form.Group className="mb-3">
               <Form.Check
                 type="checkbox"
-                label="حالة طارئة"
+                id="urgent-check"
                 checked={bloodDonation.isUrgent}
-                onChange={(e) =>
-                  handleInputChange('isUrgent', e.target.checked)
+                onChange={(e) => handleInputChange('isUrgent', e.target.checked)}
+                label={
+                  <span style={{ color: '#e05a2e', fontWeight: 600, margin: '20px' }}>
+                    حالة طارئة
+                  </span>
                 }
+                className="d-flex align-items-center gap-2"
               />
             </Form.Group>
           </div>
@@ -663,78 +629,46 @@ const BloodDonationForm = () => {
             <h4 className="step-title">طرق التواصل</h4>
 
             <Form.Group className="mb-3">
-              <Form.Label>اختر طرق التواصل وأدخل الرقم *</Form.Label>
-
-              {contactOptions.map((opt) => {
-                const { key: method, label, icon } = opt;
-
-                // هل هذه الوسيلة مفعَّلة؟
-                const selectedEntry = bloodDonation.contactMethods.find(
-                  (m) => m.method === method
-                );
-
-                return (
-                  <div
-                    key={method}
-                    className={`contact-method-card ${selectedEntry ? 'active' : ''}`}
-                  >
-                    {/* checkbox لتشغيل/إلغاء الوسيلة */}
-                    <Form.Check
-                      type="checkbox"
-                      label={
-                        <span className="contact-method-label">
-                          <span className="contact-method-icon-wrap">
-                            {icon}
-                          </span>
-                          <span>{label}</span>
-                        </span>
-                      }
-                      checked={!!selectedEntry}
-                      onChange={(e) =>
-                        toggleContactMethod(method, e.target.checked)
-                      }
-                    />
-
-                    {/* إذا مفعّلة، نظهر حقل الرقم */}
-                    {selectedEntry && (
-                      <>
-                        <Form.Control
-                          type="text"
-                          className="mt-2"
-                          placeholder="رقم (8 أرقام ويبدأ بـ2 أو 3 أو 4)"
-                          value={selectedEntry.number}
-                          isInvalid={!!errors.contactNumbers?.[method]}
-                          onChange={(e) =>
-                            handleContactNumberChange(
-                              method,
-                              e.target.value
-                            )
-                          }
-                          required
-                        />
-                        {errors.contactNumbers?.[method] && (
-                          <div className="invalid-feedback d-block">
-                            الرقم يجب أن يكون 8 أرقام ويبدأ بـ 2 أو 3 أو 4.
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                );
-              })}
-
-              {errors.contactMethods && (
-                <div className="text-danger mt-2">
-                  {errors.contactMethods}
-                </div>
-              )}
-
-              {!contactsValid && (
-                <div className="text-danger small">
-                  يجب إدخال رقم واحد صالح على الأقل.
-                </div>
+              <Form.Label>
+                <span className="d-inline-flex align-items-center gap-2">
+                  <FiPhone /> الهاتف
+                </span>
+              </Form.Label>
+              <Form.Control
+                type="text"
+                value={bloodDonation.phone}
+                onChange={(e) => handleInputChange('phone', e.target.value)}
+                isInvalid={!!errors.phone}
+              />
+              {errors.phone && (
+                <Form.Control.Feedback type="invalid">
+                  {errors.phone}
+                </Form.Control.Feedback>
               )}
             </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>
+                <span className="d-inline-flex align-items-center gap-2">
+                  <FaWhatsapp /> واتساب
+                </span>
+              </Form.Label>
+              <Form.Control
+                type="text"
+                value={bloodDonation.whatsapp}
+                onChange={(e) => handleInputChange('whatsapp', e.target.value)}
+                isInvalid={!!errors.whatsapp}
+              />
+              {errors.whatsapp && (
+                <Form.Control.Feedback type="invalid">
+                  {errors.whatsapp}
+                </Form.Control.Feedback>
+              )}
+            </Form.Group>
+
+            {errors.contact && (
+              <div className="text-danger small mb-2">{errors.contact}</div>
+            )}
 
             {/* ملخص الطلب قبل الإرسال */}
             <div className="summary-card mt-4">
@@ -749,12 +683,16 @@ const BloodDonationForm = () => {
               <div className="summary-grid">
                 <div className="summary-item">
                   <div className="summary-label">نوع الدم</div>
-                  <div className="summary-value">{bloodDonation.bloodType || '—'}</div>
+                  <div className="summary-value">
+                    {bloodDonation.bloodType || '—'}
+                  </div>
                 </div>
 
                 <div className="summary-item">
                   <div className="summary-label">المكان</div>
-                  <div className="summary-value">{bloodDonation.location || '—'}</div>
+                  <div className="summary-value">
+                    {bloodDonation.location || '—'}
+                  </div>
                 </div>
 
                 <div className="summary-item">
@@ -766,7 +704,11 @@ const BloodDonationForm = () => {
 
                 <div className="summary-item">
                   <div className="summary-label">حالة طارئة</div>
-                  <div className={`summary-badge ${bloodDonation.isUrgent ? 'urgent' : 'normal'}`}>
+                  <div
+                    className={`summary-badge ${
+                      bloodDonation.isUrgent ? 'urgent' : 'normal'
+                    }`}
+                  >
                     {bloodDonation.isUrgent ? 'نعم' : 'لا'}
                   </div>
                 </div>
@@ -774,12 +716,16 @@ const BloodDonationForm = () => {
                 <div className="summary-item summary-item-wide">
                   <div className="summary-label">التواصل</div>
                   <div className="summary-value">
-                    {(bloodDonation.contactMethods || []).length
-                      ? bloodDonation.contactMethods
-                          .map((m) => {
-                            const niceLabel = m.method === 'phone' ? 'هاتف' : 'واتساب';
-                            return `${niceLabel} (${m.number || 'بدون رقم'})`;
-                          })
+                    {bloodDonation.phone || bloodDonation.whatsapp
+                      ? [
+                          bloodDonation.phone
+                            ? `هاتف (${bloodDonation.phone})`
+                            : null,
+                          bloodDonation.whatsapp
+                            ? `واتساب (${bloodDonation.whatsapp})`
+                            : null
+                        ]
+                          .filter(Boolean)
                           .join(' ، ')
                       : '—'}
                   </div>

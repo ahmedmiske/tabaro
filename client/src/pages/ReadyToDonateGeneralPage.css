@@ -4,7 +4,7 @@
 /* ===== صف الهيرو والفورم جنباً إلى جنب ===== */
 .ready-general-row {
   display: flex;
-  gap: 1rem;
+  gap: 10px;
   align-items: stretch;
   padding: 2rem;
 }
@@ -21,11 +21,38 @@
 }
 
 .form-side {
-  min-width: 320px;
+  min-width: 400px;
   max-width: 600px;
   display: flex;
   align-items: center;
+  justify-content: center;
+  padding: 0px;
+ 
 }
+
+.form-container {
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  width: 80%;
+  min-width: 100%;
+  -webkit-border-radius:16px;
+  -moz-border-radius:16px;
+  -ms-border-radius:  16px;
+  -o-border-radius: 16px;
+}
+
+
+.donation-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+  
+}
+
+
 
 @media (max-width: 900px) {
   .ready-general-row {
@@ -64,15 +91,43 @@
   font-weight: 800;
   letter-spacing: .5px;
   margin-bottom: .35rem;
-  color: #66BB6A;
+  color: #e05a2e;
 }
 
 .general-hero p {
   margin: 0;
   font-size: 1.05rem;
-  opacity: .95;
-  color: #66BB6A;
+  color: white;
+  font-weight: 500;
 }
+.success-next {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.next-btn {
+  display: block;
+  margin-top: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.95rem;
+  transition: 0.25s ease;
+  background: #e05a2e;
+  color: white;
+}
+
+.next-btn.secondary {
+  background: #4a5568;
+}
+
+.next-btn:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+
+
 
 @media (min-width:768px) {
   .general-hero {

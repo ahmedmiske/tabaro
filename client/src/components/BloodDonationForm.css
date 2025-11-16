@@ -587,3 +587,56 @@ ul.uploaded-files li {
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.07);
 }
+
+/* حالة طارئة بجانب الخيار بلون أوضح */
+.urgent-group .form-check-input {
+  cursor: pointer;
+}
+
+.urgent-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 700;
+  color: #e53e3e; /* أحمر واضح */
+}
+
+.urgent-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #e53e3e;
+}
+
+/* عناوين حقول الأرقام (هاتف / واتساب) مع أيقونات */
+.contact-label {
+  font-weight: 700;
+  color: #2d3748;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.contact-icon {
+  font-size: 1.1rem;
+}
+.contact-icon.phone {
+  color: #3182ce; /* أزرق للهاتف */
+}
+
+.urgent-group {
+  margin-top: 1rem;
+}
+
+.urgent-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.urgent-label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #e3342f;
+  cursor: pointer;
+}
