@@ -382,8 +382,8 @@ function Header({ notifCount }) {
         >
           <div className="eh-mega-grid">
             <Link to="/ready/blood" className="eh-mega-card" onClick={() => setOpen(null)}>
-              <div className="eh-mega-icon"><FiDroplet /></div>
-              <div className="eh-mega-content"><h4>اعلان تبرع</h4><p>سجّل رغبتك بالتبرع الآن</p></div>
+              <div className="eh-mega-icon eh-icon-red"><FiDroplet /></div>
+              <div className="eh-mega-content"><h4>اعلان تبرع بالدم</h4><p>سجّل رغبتك بالتبرع الآن</p></div>
             </Link>
 
             <Link to="/blood-donation" className="eh-mega-card" onClick={() => setOpen(null)}>

@@ -566,8 +566,19 @@
   transition: all .3s ease;
 }
 
+/* أيقونة حمراء */
+.eh-mega-icon.eh-icon-red {
+  background: #fee;
+  color: #dc2626;
+}
+
 .eh-mega-card:hover .eh-mega-icon {
   background: var(--eh-primary);
+  color: #fff;
+}
+
+.eh-mega-card:hover .eh-mega-icon.eh-icon-red {
+  background: #dc2626;
   color: #fff;
 }
 

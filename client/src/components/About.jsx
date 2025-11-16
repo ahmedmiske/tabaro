@@ -1,10 +1,11 @@
 // src/pages/About.jsx
-import React, { useEffect, useRef, useState } from "react";
-import { Form } from "react-bootstrap";
+import React, { useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import SectionHeader from "./SectionHeader.jsx";
 import IconsSection from "./IconsSection.jsx";
 import ReadyToDonateSection from "./ReadyToDonateSection.jsx";
+import AboutHero from "./AboutHero.jsx";
+import ContactForm from "./ContactForm.jsx";
 import "./About.css";
 
 function About() {
@@ -76,48 +77,26 @@ function About() {
     return () => observer.disconnect();
   }, []);
 
-  // ===== Form state & validation =====
-  const [form, setForm] = useState({ name: "", email: "", message: "", agree: false });
-  const [touched, setTouched] = useState({});
-  const [sent, setSent] = useState(false);
-
-  const rules = {
-    name: (v) => v.trim().length >= 3,
-    email: (v) => /^\S+@\S+\.\S+$/.test(v),
-    message: (v) => v.trim().length >= 20,
-    agree: (v) => v === true,
-  };
-
-  const errors = {
-    name: !rules.name(form.name) ? "الاسم يجب أن لا يقل عن 3 أحرف." : "",
-    email: !rules.email(form.email) ? "رجاءً أدخل بريدًا إلكترونيًا صالحًا." : "",
-    message: !rules.message(form.message) ? "الرسالة يجب أن لا تقل عن 20 حرفًا." : "",
-    agree: !rules.agree(form.agree) ? "يجب الموافقة على الشروط قبل الإرسال." : "",
-  };
-
-  const isValid = Object.values(errors).every((e) => e === "");
-
-  const handleChange = (e) => {
-    const { name, type, value, checked } = e.target;
-    setForm((f) => ({ ...f, [name]: type === "checkbox" ? checked : value }));
-  };
-
-  const handleBlur = (e) => setTouched((t) => ({ ...t, [e.target.name]: true }));
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setTouched({ name: true, email: true, message: true, agree: true });
-    if (!isValid) return;
-    // TODO: إرسال إلى API
-    setSent(true);
-  };
-
   const serviceCards = [
     {
       icon: "🩸",
       title: "تبرع بالدم",
       description: "ساهم في إنقاذ الأرواح عبر تبرع آمن وسريع",
       path: "/blood-donations",
+      state: { type: "blood" },
+    },
+    {
+      icon: "🔴",
+      title: "طلب تبرع بالدم",
+      description: "ابحث عن متبرعين بفصيلة دم معينة لحالة عاجلة",
+      path: "/donation-requests",
+      state: { type: "blood" },
+    },
+    {
+      icon: "❤️",
+      title: "الإعلان عن تبرع بالدم",
+      description: "أعلن عن استعدادك للتبرع بالدم وساعد المحتاجين",
+      path: "/ready/blood",
       state: { type: "blood" },
     },
     {
@@ -138,23 +117,24 @@ function About() {
       icon: "🙋‍♂️",
       title: "تطوّع",
       description: "انضم لفرق مساعدة ميدانية أو رقمية حسب وقتك",
-      path: "/announcements",
+      path: "/social",
       state: { type: "volunteer" },
     },
     {
       icon: "💡",
       title: "أفكار ومبادرات",
       description: "شارك مبادرتك واجمع متطوعين لتنفيذها",
-      path: "/announcements",
+      path: "/social",
       state: { type: "ideas" },
     },
     {
       icon: "🔎",
       title: "مفقودات",
       description: "انشر/ابحث عن مفقودات وساعد أصحابها في استرجاعها",
-      path: "/announcements",
+      path: "/social",
       state: { type: "lost" },
     },
+  
   ];
 
   const stats = [
@@ -215,79 +195,17 @@ function About() {
     <section className="about-container" aria-labelledby="about-title" ref={sectionRef}>
       <section>
         {/* ===== هيرو: عن منصة تبرع ===== */}
-        <header className="about-hero reveal" data-animate="up">
-          <div className="hero-content">
-            <div className="hero-badge">
-              <span className="badge-icon">🌟</span>
-              <span className="badge-text">منصة تبرع الرسمية</span>
-            </div>
-
-            <SectionHeader
-              id="about-title"
-              title="عن منصة تبرع"
-              subtitle="نربط المتبرع بالمحتاج مباشرةً عبر مسارات موثوقة وتجربة بسيطة وآمنة"
-              align="start"
-
-            />
-
-            <div className="hero-description">
-              <p className="hero-text">
-                منصة تبرع تجمع بين من يرغب في العطاء ومن يسعى للدعم، عبر تواصل مباشر وآمن.
-                <span className="highlight"> نسهل خطوات التبرع ونضاعف أثره في المجتمع.</span>
-              </p>
-
-              <div className="features-grid">
-                <div className="feature">
-                  <span className="feature-icon">🩸</span>
-                  <span className="feature-text">التبرع بالدم</span>
-                </div>
-                <div className="feature">
-                  <span className="feature-icon">💳</span>
-                  <span className="feature-text">التبرع المالي</span>
-                </div>
-                <div className="feature">
-                  <span className="feature-icon">🎁</span>
-                  <span className="feature-text">التبرع العيني</span>
-                </div>
-                <div className="feature">
-                  <span className="feature-icon">📢</span>
-                  <span className="feature-text">الإعلانات الاجتماعية</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="hero-image">
-            <div className="image-wrapper">
-              <img
-                src="/images/tabar7.jpg"
-                alt="منصة تبرع - تواصل مباشر بين المتبرع والمحتاج"
-                className="hero-img"
-              />
-              <div className="image-overlay">
-                <div className="stats-overlay">
-                  <div className="stat">
-                    <span className="stat-number">1000+</span>
-                    <span className="stat-label">متبرع</span>
-                  </div>
-                  <div className="stat">
-                    <span className="stat-number">500+</span>
-                    <span className="stat-label">حالة</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </header>
+        <AboutHero />
         <IconsSection />
         <ReadyToDonateSection />
+        
         {/* ===== الخدمات ===== */}
         <section className="separador">
           <div className="separador-content">
             <SectionHeader
               id="services-title"
               title="خدماتنا"
-              subtitle="قنوات تبرع واضحة وآمنة تُسهِّل عليك اختيار الطريقة الأنسب للمساعدة"
+              subtitle="مجالات الخير المتنوعة - اختر الطريقة الأنسب لك للمساهمة في مساعدة الآخرين"
               tone="light"
             />
           </div>
@@ -313,24 +231,20 @@ function About() {
           </div>
         </section>
         {/* ===== الإحصائيات ===== */}
-        <section className="separador">
-            <section
-              className="separador"
-              style={{
-                background: "url('/images/gualla.png') center/cover no-repeat",
-                position: "relative"
-              }}
-            >
-              <div className="separador-content" >
-                <SectionHeader
-                  id="impact-title"
-                  title="أثرنا في المجتمع"
-                  subtitle="أرقام حقيقية تعكس مساهماتكم وحملاتنا الفعّالة على مدار الفترة الماضية"
-                  tone="green"
-                />
-              </div>
-            </section>
-          </section>
+        <section className="separador" style={{
+          background: "url('/images/gualla.png') center/cover no-repeat",
+          position: "relative"
+        }}>
+          <div className="separador-content">
+            <SectionHeader
+              id="impact-title"
+              title="أثرنا في المجتمع"
+              subtitle="أرقام حقيقية تعكس مساهماتكم وحملاتنا الفعّالة على مدار الفترة الماضية"
+              tone="green"
+            />
+          </div>
+        </section>
+
         <section className="stats-section" aria-label="إحصائيات المنصة">
           
           <div className="stats-grid">
@@ -356,131 +270,9 @@ function About() {
             />
           </div>
         </section>
-
-        <section className="contact-form-section" aria-labelledby="form-title">
-          <div className="form-header">
-            <div className="divider" aria-hidden="true">
-              <img
-                src={require("../images/contactanos.png")}
-                alt="تواصل معنا"
-                className="divider-img"
-              />
-            </div>
-          </div>
-
-          <div className="form-container">
-            {!sent ? (
-              <Form noValidate onSubmit={handleSubmit} className="simple-form">
-                <div className="form-grid">
-                  <div className="form-field">
-                    <Form.Label htmlFor="name">الاسم الكامل</Form.Label>
-                    <Form.Control
-                      id="name"
-                      name="name"
-                      type="text"
-                      placeholder="أدخل اسمك الكامل"
-                      value={form.name}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      isInvalid={touched.name && !!errors.name}
-                      required
-                      minLength={3}
-                      className="form-input"
-                    />
-                    <Form.Control.Feedback type="invalid" className="error-message">
-                      {errors.name}
-                    </Form.Control.Feedback>
-                  </div>
-
-                  <div className="form-field">
-                    <Form.Label htmlFor="email">البريد الإلكتروني</Form.Label>
-                    <Form.Control
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="example@mail.com"
-                      value={form.email}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      isInvalid={touched.email && !!errors.email}
-                      required
-                      className="form-input"
-                    />
-                    <Form.Control.Feedback type="invalid" className="error-message">
-                      {errors.email}
-                    </Form.Control.Feedback>
-                  </div>
-
-                  <div className="form-field full-width">
-                    <Form.Label htmlFor="message">رسالتك</Form.Label>
-                    <Form.Control
-                      as="textarea"
-                      id="message"
-                      name="message"
-                      rows={4}
-                      placeholder="اكتب رسالتك هنا..."
-                      value={form.message}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      isInvalid={touched.message && !!errors.message}
-                      required
-                      minLength={20}
-                      className="form-textarea"
-                    />
-                    <Form.Control.Feedback type="invalid" className="error-message">
-                      {errors.message}
-                    </Form.Control.Feedback>
-                  </div>
-                </div>
-
-                <div className="agreement-section">
-                  <Form.Check
-                    id="agree"
-                    name="agree"
-                    checked={form.agree}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    isInvalid={touched.agree && !!errors.agree}
-                    required
-                    className="agreement-checkbox"
-                  />
-                  <Form.Label htmlFor="agree" className="agreement-label">
-                    أوافق على <Link to="/terms" className="terms-link">الشروط والأحكام</Link> وسياسة الخصوصية
-                  </Form.Label>
-                  <Form.Control.Feedback type="invalid" className="error-message">
-                    {errors.agree}
-                  </Form.Control.Feedback>
-                </div>
-
-                <div className="form-buttons">
-                  <button type="submit" className="submit-btn" disabled={!isValid}>
-                    إرسال الرسالة
-                  </button>
-                  <Link to="/add-user" className="secondary-btn">
-                    إنشاء حساب جديد
-                  </Link>
-                </div>
-              </Form>
-            ) : (
-              <div className="success-state">
-                <div className="success-message">
-                  <div className="success-icon">✓</div>
-                  <h4>تم استلام رسالتك بنجاح</h4>
-                  <p>سنقوم بالرد عليك في أقرب وقت ممكن</p>
-                </div>
-                <div className="success-buttons">
-                  <Link to="/add-user" className="submit-btn">
-                    إنشاء حساب جديد
-                  </Link>
-                  <Link to="/donations" className="secondary-btn">
-                    تصفح التبرعات
-                  </Link>
-                </div>
-              </div>
-            )}
-          </div>
-        </section>
         
+        <ContactForm />
+
         {/* ===== الدعوة للإجراء ===== */}
         <section className="cta-section">
           <div className="cta-card">

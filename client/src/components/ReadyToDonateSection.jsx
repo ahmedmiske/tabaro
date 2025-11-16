@@ -14,11 +14,6 @@ const ReadyToDonateSection = () => {
       <Container>
         {/* الهيدر */}
         <div className="section-header text-center mb-5 reveal" data-animate="up">
-          <div className="ready-badge">
-            <span className="badge-dot" />
-            <span className="badge-text">جاهز لتكون جزءاً من الحل؟</span>
-          </div>
-
           <h2 className="section-title large-title" id="ready-title">
             <i className="fas fa-hands-helping me-3"></i>
             كن جزءاً من رحلة الخير
@@ -30,7 +25,7 @@ const ReadyToDonateSection = () => {
         </div>
 
         {/* ===== نوعا التبرع ===== */}
-        <Row className="g-4">
+        <Row className="g-4 mb-5">
           {/* بطاقة التبرع بالدم */}
           <Col lg={6} md={12}>
             <Card
@@ -115,6 +110,97 @@ const ReadyToDonateSection = () => {
                   </Link>
                   <span className="btn-note">
                     اختر نوع التبرع المناسب في الخطوة القادمة
+                  </span>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+
+        {/* ===== طلبات التبرع ===== */}
+        <Row className="g-4">
+          {/* بطاقة طلب تبرع بالدم */}
+          <Col lg={6} md={12}>
+            <Card
+              className="donate-card request-blood-card h-100 reveal"
+              data-animate="up"
+            >
+              <Card.Body className="p-4">
+                <div className="card-icon request-blood-icon">
+                  <i className="fas fa-hand-holding-medical"></i>
+                </div>
+
+                <h4 className="card-title">طلب تبرع بالدم</h4>
+                <p className="card-description">
+                  هل أنت بحاجة إلى متبرع بالدم؟ أنشئ طلباً وصِل مع المتبرعين المستعدين في منطقتك لمساعدتك.
+                </p>
+
+                <div className="card-features">
+                  <div className="feature-item">
+                    <i className="fas fa-check-circle"></i>
+                    <span>حدد فصيلة الدم المطلوبة والكمية</span>
+                  </div>
+                  <div className="feature-item">
+                    <i className="fas fa-check-circle"></i>
+                    <span>وصول سريع للمتبرعين في منطقتك</span>
+                  </div>
+                  <div className="feature-item">
+                    <i className="fas fa-check-circle"></i>
+                    <span>إشعارات فورية عند توفر متبرعين</span>
+                  </div>
+                </div>
+
+                <div className="card-actions">
+                  <Link to="/ready/blood" className="btn-ready request-blood-ready">
+                    <i className="fas fa-hand-holding-medical me-2"></i>
+                    إنشاء طلب تبرع بالدم
+                  </Link>
+                  <span className="btn-note">
+                    سيتم نشر طلبك ليراه المتبرعون المستعدون
+                  </span>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+
+          {/* بطاقة طلب تبرع عام */}
+          <Col lg={6} md={12}>
+            <Card
+              className="donate-card request-general-card h-100 reveal"
+              data-animate="up"
+            >
+              <Card.Body className="p-4">
+                <div className="card-icon request-general-icon">
+                  <i className="fas fa-hand-holding-heart"></i>
+                </div>
+
+                <h4 className="card-title">طلب تبرع عام</h4>
+                <p className="card-description">
+                  هل تحتاج لمساعدة مالية أو عينية أو تطوعية؟ اعرض حالتك وتواصل مع المتبرعين الراغبين بالدعم.
+                </p>
+
+                <div className="card-features">
+                  <div className="feature-item">
+                    <i className="fas fa-check-circle"></i>
+                    <span>طلبات مالية أو عينية أو جهد تطوعي</span>
+                  </div>
+                  <div className="feature-item">
+                    <i className="fas fa-check-circle"></i>
+                    <span>شرح تفصيلي لحالتك واحتياجاتك</span>
+                  </div>
+                  <div className="feature-item">
+                    <i className="fas fa-check-circle"></i>
+                    <span>مجتمع متعاون جاهز للمساعدة</span>
+                  </div>
+                </div>
+
+                <div className="card-actions">
+                  <Link to="/ready/general" className="btn-ready request-general-ready">
+                    <i className="fas fa-hand-holding-heart me-2"></i>
+                    إنشاء طلب تبرع عام
+                  </Link>
+                  <span className="btn-note">
+                    حدد نوع المساعدة التي تحتاجها في الخطوة التالية
                   </span>
                 </div>
               </Card.Body>
