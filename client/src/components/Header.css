@@ -149,6 +149,15 @@
   transform: translateY(-1px);
 }
 
+/* زر إنشاء حساب بلون أزرق داكن مائل للأسود */
+.eh-login-btn-add {
+  background: #0f172a;
+}
+
+.eh-login-btn-add:hover {
+  background: #1e293b;
+}
+
 /* عناصر مصغرة */
 .eh-user-mini {
   display: flex;
@@ -783,8 +792,19 @@
 }
 
 @media (max-width:768px) {
-  .eh-top-bar {
+  /* تصغير أزرار تسجيل الدخول وإنشاء حساب */
+  .eh-login-btn {
+    padding: 4px 10px;
+    font-size: 12px;
+    gap: 4px;
+  }
+
+  .eh-login-btn span {
     display: none;
+  }
+
+  .eh-login-btn svg {
+    font-size: 16px;
   }
 
   .eh-main-container {
