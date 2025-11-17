@@ -162,7 +162,6 @@ function About() {
   return (
     <section className="about-container" aria-labelledby="about-title" ref={sectionRef}>
       <section>
-        {/* ===== هيرو: عن منصة تبرع ===== */}
         <AboutHero />
         <IconsSection />
         <ReadyToDonateSection />
@@ -238,9 +237,9 @@ function About() {
             />
           </div>
         </section>
-        
+        <section >
         <ContactForm />
-
+        </section>
         {/* ===== الدعوة للإجراء ===== */}
         <section className="cta-section">
           <div className="cta-card">
