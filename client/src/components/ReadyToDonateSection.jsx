@@ -208,57 +208,7 @@ const ReadyToDonateSection = () => {
           </Col>
         </Row>
 
-        {/* ===== إحصائيات سريعة ===== */}
-        <Row className="stats-row mt-5 pt-4">
-          <Col
-            md={3}
-            sm={6}
-            className="text-center mb-3 reveal"
-            data-animate="up"
-          >
-            <div className="stat-item">
-              <div className="stat-number">1000+</div>
-              <div className="stat-label">متبرع مسجل</div>
-              <p className="stat-helper">أشخاص مستعدون للعطاء في أي وقت</p>
-            </div>
-          </Col>
-          <Col
-            md={3}
-            sm={6}
-            className="text-center mb-3 reveal"
-            data-animate="up"
-          >
-            <div className="stat-item">
-              <div className="stat-number">500+</div>
-              <div className="stat-label">حياة تم إنقاذها</div>
-              <p className="stat-helper">بفضل تبرعاتكم واستجابتكم السريعة</p>
-            </div>
-          </Col>
-          <Col
-            md={3}
-            sm={6}
-            className="text-center mb-3 reveal"
-            data-animate="up"
-          >
-            <div className="stat-item">
-              <div className="stat-number">50+</div>
-              <div className="stat-label">مدينة مشاركة</div>
-              <p className="stat-helper">شبكة تبرع تتوسع يومًا بعد يوم</p>
-            </div>
-          </Col>
-          <Col
-            md={3}
-            sm={6}
-            className="text-center mb-3 reveal"
-            data-animate="up"
-          >
-            <div className="stat-item">
-              <div className="stat-number">24/7</div>
-              <div className="stat-label">خدمة متواصلة</div>
-              <p className="stat-helper">يمكنك التبرع أو الطلب في أي وقت</p>
-            </div>
-          </Col>
-        </Row>
+        
       </Container>
     </section>
   );

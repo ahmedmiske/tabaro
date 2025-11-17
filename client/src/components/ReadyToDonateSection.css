@@ -316,43 +316,6 @@
 }
 
 /* Stats Section */
-.stats-row {
-  border-top: 2px solid rgba(18, 178, 121, 0.1);
-  position: relative;
-}
-
-.stat-item {
-  padding: 1rem;
-  text-align: center;
-  transition: transform 0.3s ease;
-}
-
-.stat-item:hover {
-  transform: translateY(-3px);
-}
-
-.stat-number {
-  font-size: 2.2rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, #12B279 0%, #FF7A45 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 0.5rem;
-}
-
-.stat-label {
-  color: #64748b;
-  font-weight: 500;
-  font-size: 0.95rem;
-}
-
-/* وصف إضافي تحت الرقم */
-.stat-helper {
-  font-size: 0.8rem;
-  color: #6b7280;
-}
-
 /* Responsive Design */
 @media (max-width: 768px) {
   .ready-to-donate-section {
@@ -380,14 +343,6 @@
   .btn-ready {
     padding: 14px 20px;
     font-size: 1rem;
-  }
-
-  .stat-number {
-    font-size: 1.8rem;
-  }
-
-  .stats-row {
-    margin-top: 3rem !important;
   }
 }
 
