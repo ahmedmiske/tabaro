@@ -993,3 +993,47 @@
     font-size: 0.9rem;
   }
 }
+
+.goals-list {
+  margin: 0.75rem 0 0;
+  padding-right: 1.5rem;   /* لأن الاتجاه RTL */
+  padding-left: 0;
+  direction: rtl;
+  text-align: right;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  list-style-type: decimal;  /* أرقام مرتّبة 1,2,3... */
+  column-count: 1;           /* مهم: منع تقسيم القائمة لعمودين */
+  column-gap: 0;
+}
+
+.goals-list li {
+  margin-bottom: 0.4rem;
+  break-inside: avoid;       /* يمنع تكسير السطر بين الأعمدة لو حصل */
+}
+
+.goals-list {
+  margin: 0.75rem 0 0;
+  padding-right: 1.5rem;
+  padding-left: 0;
+  direction: rtl;
+  text-align: right;
+  font-size: 0.95rem;
+  line-height: 1.8;
+
+  /* أهم شيء: إلغاء أي أعمدة */
+  columns: 1 !important;
+  -webkit-columns: 1 !important;
+  -moz-columns: 1 !important;
+
+  column-count: 1 !important;
+  column-gap: 0 !important;
+
+  list-style-type: decimal; /* 1,2,3,... */
+}
+
+.goals-list li {
+  margin-bottom: 0.45rem;
+  break-inside: avoid-column;
+  -webkit-column-break-inside: avoid;
+}

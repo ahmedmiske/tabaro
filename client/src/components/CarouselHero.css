@@ -1,75 +1,160 @@
+/* الغلاف العام للكاروسيل: خلفية وراء نص الهيرو */
 .carousel-hero-bg {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  z-index: 0;
   overflow: hidden;
+  z-index: 0;
 }
 
-
+/* الصور: تمتد على كامل مساحة الهيرو مع تأثير خفيف (zoom out) */
 .carousel-hero-img {
   position: absolute;
   inset: 0;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   min-height: 320px;
-  max-height: 100vh;
   object-fit: cover;
-  object-position: right center;
+  object-position: center center;
   opacity: 0;
-  transition: opacity 1s cubic-bezier(0.4,0,0.2,1);
+  transform: scale(1.05);
+  transition:
+    opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 8s linear;
+  background: #111;
   z-index: 0;
-  background: #222;
 }
 
 .carousel-hero-img.active {
   opacity: 1;
+  transform: scale(1);
   z-index: 1;
 }
 
+/* طبقة تعتيم فوق الصور لتحسين قراءة النص */
+.carousel-hero-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.55) 0%,
+    rgba(0, 0, 0, 0.4) 40%,
+    rgba(0, 0, 0, 0.25) 100%
+  );
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* أزرار السابق / التالي */
+.carousel-hero-control {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.85);
+  color: #f46a25; /* لون الهوية (برتقالي) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.carousel-hero-control.prev {
+  left: 1.5rem;
+}
+
+.carousel-hero-control.next {
+  right: 1.5rem;
+}
+
+.carousel-hero-control:hover,
+.carousel-hero-control:focus-visible {
+  background: #f46a25;
+  color: #ffffff;
+  border-color: #f46a25;
+  transform: translateY(-50%) scale(1.05);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+  outline: none;
+}
+
+/* مؤشرات الكاروسيل (النقاط) */
 .carousel-hero-indicators {
   position: absolute;
-  bottom: 24px;
+  bottom: 1.5rem;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   gap: 8px;
-  z-index: 2;
+  z-index: 3;
 }
 
-.carousel-hero-indicators span {
-  display: block;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.5);
-  transition: background 0.3s;
+/* كل نقطة عبارة عن زر */
+.carousel-hero-indicators button {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    width 0.2s ease;
 }
 
-.carousel-hero-indicators span.active {
-  background: #F46A25;
+.carousel-hero-indicators button.active {
+  width: 24px;
+  background: #f46a25;
+  transform: translateY(-1px);
 }
 
-@media (max-width: 600px) {
-  .carousel-hero-bg {
-    position: absolute;
-    inset: 0;
-    width: 100vw;
-    height: 100vh;
-    min-height: 320px;
-    max-height: 100vh;
-    overflow: hidden;
+.carousel-hero-indicators button:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+/* ===== موبايل ===== */
+@media (max-width: 768px) {
+  .carousel-hero-control {
+    width: 34px;
+    height: 34px;
+    font-size: 1.4rem;
   }
+
+  .carousel-hero-control.prev {
+    left: 0.75rem;
+  }
+
+  .carousel-hero-control.next {
+    right: 0.75rem;
+  }
+
+  .carousel-hero-indicators {
+    bottom: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
   .carousel-hero-img {
-    position: absolute;
-    inset: 0;
-    width: 100vw;
-    height: 100vh;
-    min-height: 320px;
-    max-height: 100vh;
-    object-fit: cover;
-    object-position: right center;
-    background: #222;
+    min-height: 280px;
   }
+
+  .carousel-hero-control {
+    display: none;
+  }
+  
 }
