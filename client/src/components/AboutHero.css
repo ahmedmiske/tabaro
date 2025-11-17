@@ -59,34 +59,95 @@
   margin-right: auto;
 }
 
+/* Logo Container */
 .hero-logo-container {
+  position: relative;
   display: flex;
   justify-content: center;
+  align-items: center;
   margin-bottom: 2rem;
-  animation: fadeInDown 1s ease-out;
+  animation: fadeInScale 1s ease-out backwards;
 }
 
-@keyframes fadeInDown {
+.logo-glow {
+  position: absolute;
+  width: 160px;
+  height: 160px;
+  background: radial-gradient(circle, rgba(255, 122, 69, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: rotate-glow 20s linear infinite;
+  filter: blur(20px);
+}
+
+@keyframes rotate-glow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeInScale {
   from {
     opacity: 0;
-    transform: translateY(-30px);
+    transform: scale(0.9) translateY(20px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: scale(1) translateY(0);
   }
 }
 
 .hero-logo {
   width: 120px;
   height: auto;
-  filter: drop-shadow(0 10px 25px rgba(255, 122, 69, 0.2));
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 2;
+  filter: drop-shadow(0 10px 30px rgba(255, 122, 69, 0.2));
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .hero-logo:hover {
-  transform: scale(1.08) rotate(2deg);
-  filter: drop-shadow(0 15px 35px rgba(255, 122, 69, 0.3));
+  transform: scale(1.05) translateY(-5px);
+  filter: drop-shadow(0 15px 40px rgba(255, 122, 69, 0.3));
+}
+
+/* Platform Title */
+.platform-title {
+  margin-bottom: 2.5rem;
+  animation: fadeInUp 1s ease-out 0.3s backwards;
+}
+
+.platform-name {
+  font-size: 1.8rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #ff7a45 0%, #12b279 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.8rem;
+}
+
+.platform-underline {
+  width: 80px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #ff7a45, #12b279, transparent);
+  margin: 0 auto;
+  border-radius: 999px;
+  animation: expandWidth 1.5s ease-out 0.5s backwards;
+}
+
+@keyframes expandWidth {
+  from {
+    width: 0;
+    opacity: 0;
+  }
+  to {
+    width: 80px;
+    opacity: 1;
+  }
 }
 
 .hero-tag {
@@ -137,6 +198,18 @@
   margin-bottom: 1.5rem;
   color: #1a1a1a;
   letter-spacing: -0.03em;
+  animation: fadeInUp 1s ease-out 0.4s backwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .gradient-text {
@@ -145,6 +218,7 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
   position: relative;
+  display: inline-block;
 }
 
 .hero-description {
@@ -152,7 +226,88 @@
   line-height: 1.7;
   color: #666;
   max-width: 700px;
-  margin: 0 auto;
+  margin: 0 auto 3rem;
+  animation: fadeInUp 1s ease-out 0.6s backwards;
+}
+
+/* Hero Stats */
+.hero-stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 3rem;
+  padding: 2rem;
+  background: linear-gradient(135deg, rgba(255, 122, 69, 0.03) 0%, rgba(18, 178, 121, 0.03) 100%);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 122, 69, 0.1);
+  animation: fadeInUp 1s ease-out 0.8s backwards;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.stat-item:hover {
+  transform: translateY(-5px);
+}
+
+.stat-icon {
+  font-size: 2.5rem;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.1));
+  animation: float-icon 3s ease-in-out infinite;
+}
+
+@keyframes float-icon {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.stat-item:nth-child(1) .stat-icon {
+  animation-delay: 0s;
+}
+
+.stat-item:nth-child(3) .stat-icon {
+  animation-delay: 1s;
+}
+
+.stat-item:nth-child(5) .stat-icon {
+  animation-delay: 2s;
+}
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ff7a45 0%, #12b279 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.stat-divider {
+  width: 1px;
+  height: 50px;
+  background: linear-gradient(180deg, transparent, rgba(255, 122, 69, 0.3), transparent);
 }
 
 /* ===== Bento Grid ===== */
@@ -214,32 +369,34 @@
 .circles-grid {
   display: flex;
   justify-content: center;
-  align-items: center;
-  gap: 4rem;
-  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 2rem;
+  flex-wrap: wrap;
 }
 
-/* ===== Circle Cards ===== */
+/* ===== Circle Cards - Box Style ===== */
 .circle-card {
   position: relative;
-  width: 300px;
-  height: 300px;
-  border-radius: 50%;
+  flex: 1;
+  min-width: 280px;
+  max-width: 350px;
+  border-radius: 20px;
+  padding: 2.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
-  overflow: visible;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
 }
 
 /* Animated Border Effect */
 .circle-card::before {
   content: '';
   position: absolute;
-  inset: -4px;
-  border-radius: 50%;
-  padding: 4px;
+  inset: -3px;
+  border-radius: 20px;
+  padding: 3px;
   background: linear-gradient(135deg, #ff7a45, #12b279, #ff7a45);
   background-size: 200% 200%;
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -262,51 +419,50 @@
 }
 
 .circle-card:hover {
-  transform: scale(1.08) translateY(-10px);
-  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.15);
+  transform: translateY(-10px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
 }
 
-/* Vision Circle - Orange Theme */
+/* Vision Card - Orange Theme */
 .vision-circle {
-  background: linear-gradient(135deg, rgba(255, 122, 69, 0.12) 0%, rgba(255, 122, 69, 0.06) 100%);
-  border: 3px solid rgba(255, 122, 69, 0.25);
+  background: linear-gradient(135deg, rgba(255, 122, 69, 0.08) 0%, rgba(255, 122, 69, 0.03) 100%);
+  border: 2px solid rgba(255, 122, 69, 0.2);
 }
 
 .vision-circle:hover {
-  background: linear-gradient(135deg, rgba(255, 122, 69, 0.18) 0%, rgba(255, 122, 69, 0.10) 100%);
-  border-color: rgba(255, 122, 69, 0.4);
+  background: linear-gradient(135deg, rgba(255, 122, 69, 0.12) 0%, rgba(255, 122, 69, 0.06) 100%);
+  border-color: rgba(255, 122, 69, 0.35);
 }
 
-/* Mission Circle - Green Theme */
+/* Mission Card - Green Theme */
 .mission-circle {
-  background: linear-gradient(135deg, rgba(18, 178, 121, 0.12) 0%, rgba(18, 178, 121, 0.06) 100%);
-  border: 3px solid rgba(18, 178, 121, 0.25);
+  background: linear-gradient(135deg, rgba(18, 178, 121, 0.08) 0%, rgba(18, 178, 121, 0.03) 100%);
+  border: 2px solid rgba(18, 178, 121, 0.2);
 }
 
 .mission-circle:hover {
-  background: linear-gradient(135deg, rgba(18, 178, 121, 0.18) 0%, rgba(18, 178, 121, 0.10) 100%);
-  border-color: rgba(18, 178, 121, 0.4);
+  background: linear-gradient(135deg, rgba(18, 178, 121, 0.12) 0%, rgba(18, 178, 121, 0.06) 100%);
+  border-color: rgba(18, 178, 121, 0.35);
 }
 
-/* Goals Circle - Mixed Theme */
+/* Goals Card - Mixed Theme */
 .goals-circle {
-  background: linear-gradient(135deg, rgba(255, 122, 69, 0.08) 0%, rgba(18, 178, 121, 0.08) 100%);
-  border: 3px solid rgba(255, 122, 69, 0.2);
+  background: linear-gradient(135deg, rgba(255, 122, 69, 0.06) 0%, rgba(18, 178, 121, 0.06) 100%);
+  border: 2px solid rgba(255, 122, 69, 0.18);
 }
 
 .goals-circle:hover {
-  background: linear-gradient(135deg, rgba(255, 122, 69, 0.14) 0%, rgba(18, 178, 121, 0.14) 100%);
-  border-color: rgba(255, 122, 69, 0.35);
+  background: linear-gradient(135deg, rgba(255, 122, 69, 0.10) 0%, rgba(18, 178, 121, 0.10) 100%);
+  border-color: rgba(255, 122, 69, 0.3);
 }
 
 /* ===== Circle Inner Content ===== */
 .circle-inner {
   text-align: center;
-  padding: 2.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   height: 100%;
   width: 100%;
   position: relative;
@@ -316,19 +472,19 @@
 .circle-icon-wrapper {
   width: 70px;
   height: 70px;
-  border-radius: 50%;
+  border-radius: 16px;
   background: rgba(255, 255, 255, 0.95);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 1.5rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .circle-card:hover .circle-icon-wrapper {
-  transform: scale(1.15) rotate(-8deg);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  transform: scale(1.1) translateY(-5px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
 }
 
 .circle-icon {
@@ -350,24 +506,23 @@
 }
 
 .circle-title {
-  font-size: 1.8rem;
-  font-weight: 800;
+  font-size: 1.6rem;
+  font-weight: 700;
   color: #1a1a1a;
-  margin-bottom: 1.2rem;
-  letter-spacing: -0.02em;
+  margin-bottom: 1rem;
+  letter-spacing: -0.01em;
   transition: transform 0.3s ease;
 }
 
 .circle-card:hover .circle-title {
-  transform: scale(1.05);
+  transform: scale(1.03);
 }
 
 .circle-text {
-  font-size: 1.05rem;
+  font-size: 1rem;
   line-height: 1.7;
-  color: #555;
-  max-width: 220px;
-  font-weight: 500;
+  color: #666;
+  font-weight: 400;
 }
 
 .stats-card {
@@ -700,6 +855,14 @@
     font-size: 1.1rem;
   }
 
+  .platform-name {
+    font-size: 1.4rem;
+  }
+
+  .platform-underline {
+    width: 60px;
+  }
+
 
   
   .goals-list {
@@ -725,16 +888,11 @@
   }
 
   .circles-grid {
-    gap: 2.5rem;
+    gap: 2rem;
   }
 
   .circle-card {
-    width: 240px;
-    height: 240px;
-  }
-
-  .circle-inner {
-    padding: 2rem;
+    min-width: 250px;
   }
 
   .circle-icon-wrapper {
@@ -748,7 +906,7 @@
   }
 
   .circle-title {
-    font-size: 1.6rem;
+    font-size: 1.4rem;
   }
 
   .circle-text {
@@ -767,6 +925,24 @@
 
   .hero-description {
     font-size: 1rem;
+  }
+
+  .platform-name {
+    font-size: 1.2rem;
+  }
+
+  .platform-underline {
+    width: 50px;
+    height: 2px;
+  }
+
+  .hero-logo {
+    width: 90px;
+  }
+
+  .logo-glow {
+    width: 120px;
+    height: 120px;
   }
 
 
@@ -801,24 +977,19 @@
 
   .circles-grid {
     flex-direction: column;
-    gap: 2rem;
+    gap: 1.5rem;
   }
 
   .circle-card {
-    width: 280px;
-    height: 280px;
-  }
-
-  .circle-inner {
-    padding: 2rem;
+    min-width: 100%;
+    max-width: 100%;
   }
 
   .circle-title {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
   }
 
   .circle-text {
-    font-size: 0.95rem;
-    max-width: 200px;
+    font-size: 0.9rem;
   }
 }

@@ -10,16 +10,21 @@ const AboutHero = () => {
         {/* Hero Header */}
         <div className="about-hero-header">
           <div className="hero-logo-container">
+            <div className="logo-glow"></div>
             <img src="/logoTabaro.png" alt="تبَرُّع" className="hero-logo" />
           </div>
           
+          <div className="platform-title">
+            <h2 className="platform-name">المنصة الوطنية للتبرع</h2>
+            <div className="platform-underline"></div>
+          </div>
+          
           <h1 className="hero-main-title">
-            نربط القلوب الكريمة
-            <span className="gradient-text"> بالأيادي المحتاجة في موريتانيا</span>
+            <span className="gradient-text">نربط القلوب الكريمة بالأيادي المحتاجة</span>
           </h1>
           <p className="hero-description">
-            أول تجربة موريتانية من نوعها - منصة رقمية متكاملة تُمكّن المواطنين الموريتانيين من التبرع 
-            وطلب التبرعات بالدم والمال والعينيات في بيئة آمنة وشفافة تخدم المجتمع الموريتاني.
+            أول تجربة موريتانية من نوعها - منصة رقمية متكاملة تُمكّن المواطنين من التبرع 
+            وطلب التبرعات بالدم والمال والعينيات في بيئة آمنة وشفافة.
           </p>
         </div>
 

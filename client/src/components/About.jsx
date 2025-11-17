@@ -135,7 +135,7 @@ function About() {
       path: "/social",
       state: { type: "lost" },
     },
-  
+
   ];
 
   const stats = [
@@ -161,11 +161,10 @@ function About() {
 
   return (
     <section className="about-container" aria-labelledby="about-title" ref={sectionRef}>
-      <section>
         <AboutHero />
         <IconsSection />
         <ReadyToDonateSection />
-        
+
         {/* ===== الخدمات ===== */}
         <section className="separador">
           <div className="separador-content">
@@ -213,7 +212,7 @@ function About() {
         </section>
 
         <section className="stats-section" aria-label="إحصائيات المنصة">
-          
+
           <div className="stats-grid">
             {stats.map((stat, index) => (
               <div key={index} className="stat-card reveal" data-animate="up">
@@ -238,7 +237,7 @@ function About() {
           </div>
         </section>
         <section >
-        <ContactForm />
+          <ContactForm />
         </section>
         {/* ===== الدعوة للإجراء ===== */}
         <section className="cta-section">
@@ -276,8 +275,7 @@ function About() {
         </section>
 
 
-        
-      </section>
+
     </section>
   );
 }
