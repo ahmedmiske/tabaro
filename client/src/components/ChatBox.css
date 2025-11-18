@@ -186,6 +186,7 @@
 /* محاذاة - رسائلي على اليسار بالعربية */
 .msg.mine {
   align-self: flex-start;
+  align-items: start;
   flex-direction: row;
 }
 
