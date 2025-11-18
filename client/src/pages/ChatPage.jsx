@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import ChatBox from '../components/ChatBox.jsx';
+import './ChatPage.css';
 
 const getMyId = () => {
   try { return JSON.parse(localStorage.getItem('user') || '{}')._id || null; }
@@ -24,48 +25,26 @@ const ChatPage = () => {
   }, [myId, recipientId, reqId, offId]);
 
   return (
-    <div className="container mt-4" dir="rtl">
-      <h2 
-        className="text-center mb-4" 
-        style={{
-          fontSize: '2.5rem',
-          fontWeight: '700',
-          background: 'linear-gradient(135deg, #4CAF50 0%, #66BB6A 50%, #388E3C 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text',
-          textShadow: '0 2px 4px rgba(0,0,0,0.1)',
-          marginBottom: '1.5rem',
-          position: 'relative',
-          paddingBottom: '1rem'
-        }}
-      >
-        <i className="fas fa-comments" style={{ 
-          marginLeft: '0.75rem',
-          color: '#4CAF50',
-          WebkitTextFillColor: '#4CAF50'
-        }}></i>
-        الدردشة مع صاحب الطلب
-        <div style={{
-          position: 'absolute',
-          bottom: '0',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '120px',
-          height: '4px',
-          background: 'linear-gradient(90deg, #4CAF50, #66BB6A, #388E3C)',
-          borderRadius: '2px'
-        }}></div>
-      </h2>
+    <div className="chat-page-container">
+      <div className="chat-page-title">
+        <h2>
+          <i className="fas fa-comments chat-page-title-icon"></i>
+          الدردشة مع صاحب الطلب
+        </h2>
+        <div className="chat-page-title-underline"></div>
+      </div>
 
       {conversationId ? (
-       <ChatBox
-  conversationId={conversationId}
-  recipientId={recipientId}
-  recipient={{ firstName: '...', profileImage: '...' }} // إذا توفر لديك
-/>
+        <ChatBox
+          conversationId={conversationId}
+          recipientId={recipientId}
+          recipient={{ firstName: '...', profileImage: '...' }}
+        />
       ) : (
-        <div className="alert alert-warning text-center">لا يمكن فتح المحادثة: معرفات ناقصة.</div>
+        <div className="chat-unavailable-alert">
+          <i className="fas fa-exclamation-triangle" style={{ marginLeft: '0.5rem' }}></i>
+          لا يمكن فتح المحادثة: معرفات ناقصة
+        </div>
       )}
     </div>
   );
