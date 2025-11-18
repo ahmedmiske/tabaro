@@ -129,20 +129,16 @@ function About() {
             subtitle="مجالات الخير المتنوعة - اختر الطريقة الأنسب لك للمساهمة في مساعدة الآخرين"
             tone="light"
           />
-
-
         </div>
       </section>
-
-
+      {/* ===== الكومبونت الخاص ب خدماتنا ===== */}
       <ServicesSection />
+
+
       {/* ===== الإحصائيات ===== */}
-      <section className="separador" style={{
-        background: "url('/images/gualla.png') center/cover no-repeat",
-        position: "relative"
-      }}>
+       <section className="separador">
         <div className="separador-content">
-          <SectionHeader
+         <SectionHeader
             id="impact-title"
             title="أثرنا في المجتمع"
             subtitle="أرقام حقيقية تعكس مساهماتكم وحملاتنا الفعّالة على مدار الفترة الماضية"
@@ -150,7 +146,7 @@ function About() {
           />
         </div>
       </section>
-
+       
       <section className="stats-section" aria-label="إحصائيات المنصة">
 
         <div className="stats-grid">
@@ -166,6 +162,7 @@ function About() {
       </section>
 
       {/* ===== تواصل معنا ===== */}
+     
       <section className="separador">
         <div className="separador-content">
           <SectionHeader

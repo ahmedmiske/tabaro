@@ -48,7 +48,7 @@
   content: '';
   position: absolute;
   top: 0;
-  right: 0;
+  inset-inline-end: 0;  /* يتكيف مع RTL/LTR تلقائياً */
   width: 4px;
   height: 100%;
   background: linear-gradient(180deg, #4CAF50, #FF7A45);
