@@ -106,7 +106,7 @@
 }
 
 /* العناوين داخل صفحة الدم فقط */
-.blood-details-container .section-title {
+.blood-details-container .dtbl-section-title {
   font-weight: 800;
   margin-bottom: 8px;
   color: #0f766e !important;
@@ -185,12 +185,16 @@
 }
 
 .blood-details-container .chip {
-  background: #f3f4f6;
-  border: 1px solid #e5e7eb;
-  color: #374151;
+  background: #59d15f;
+  border: 1px solid #c1a23b;
+  color: white;
   padding: 4px 10px;
   border-radius: 999px;
   font-size: 0.9rem;
+  -webkit-border-radius: 999px;
+  -moz-border-radius: 999px;
+  -ms-border-radius: 999px;
+  -o-border-radius: 999px;
 }
 
 .blood-details-container .chip .icon {

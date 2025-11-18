@@ -623,7 +623,7 @@ export default function BloodDonationDetails() {
 
           {/* ---------- تفاصيل الطلب ---------- */}
           <div className="section-card mt-3">
-            <div className="section-title">
+            <div className="dtbl-section-title">
               تفاصيل الطلب
             </div>
 
@@ -712,7 +712,7 @@ export default function BloodDonationDetails() {
             reqContacts.length > 0 ||
             requesterContacts.length > 0) && (
             <div className="section-card mt-3">
-              <div className="section-title">
+              <div className="dtbl-section-title">
                 وسائل التواصل
               </div>
 
@@ -779,7 +779,7 @@ export default function BloodDonationDetails() {
           {/* ---------- الوثائق ---------- */}
           {documents.length > 0 && (
             <div className="section-card mt-3">
-              <div className="section-title">
+              <div className="dtbl-section-title">
                 الوثائق الداعمة
               </div>
 
