@@ -111,6 +111,17 @@
   font-weight: 500;
 }
 
+.quranic-text {
+  font-family: 'Scheherazade New', 'Noto Naskh Arabic', 'Amiri', 'Traditional Arabic', 'Arabic Typesetting', serif;
+  font-size: 1.15rem;
+  color: #12B279;
+  font-weight: 600;
+  direction: rtl;
+  display: inline;
+  letter-spacing: 0.03em;
+  text-shadow: 0 1px 2px rgba(18, 178, 121, 0.1);
+}
+
 @keyframes pulse {
   0%, 100% {
     transform: scale(1);

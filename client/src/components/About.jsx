@@ -8,6 +8,7 @@ import AboutHero from "./AboutHero.jsx";
 import ServicesSection from "./ServicesSection.jsx";
 import ContactForm from "./ContactForm.jsx";
 import AboutFaq from "../pages/AboutFaq.jsx";
+import QuranVerse from "./QuranVerse.jsx";
 import "./About.css";
 
 function About() {
@@ -102,100 +103,116 @@ function About() {
 
   return (
     <section className="about-container" aria-labelledby="about-title" ref={sectionRef}>
-        <AboutHero />
-        <IconsSection />
-        <ReadyToDonateSection />
+      <AboutHero />
+      <section className="separador">
+        <div className="separador-content">
+          <SectionHeader
+            id="services-title"
+            title="أبواب الخير "
+            tone="light"
+          />
+          <QuranVerse verse="﴿وَمَا تُقَدِّمُوا لِأَنفُسِكُم مِّنْ خَيْرٍ تَجِدُوهُ عِندَ اللَّهِ هُوَ خَيْرًا وَأَعْظَمَ أَجْرًا﴾" />
 
-        {/* ===== الخدمات ===== */}
-        <section className="separador">
-          <div className="separador-content">
-            <SectionHeader
-              id="services-title"
-              title="خدماتنا"
-              subtitle="مجالات الخير المتنوعة - اختر الطريقة الأنسب لك للمساهمة في مساعدة الآخرين"
-              tone="light"
-            />
-          </div>
-        </section>
+        </div>
+      </section>
 
-        <ServicesSection />
-        {/* ===== الإحصائيات ===== */}
-        <section className="separador" style={{
-          background: "url('/images/gualla.png') center/cover no-repeat",
-          position: "relative"
-        }}>
-          <div className="separador-content">
-            <SectionHeader
-              id="impact-title"
-              title="أثرنا في المجتمع"
-              subtitle="أرقام حقيقية تعكس مساهماتكم وحملاتنا الفعّالة على مدار الفترة الماضية"
-              tone="green"
-            />
-          </div>
-        </section>
+      <IconsSection />
 
-        <section className="stats-section" aria-label="إحصائيات المنصة">
+      <ReadyToDonateSection />
 
-          <div className="stats-grid">
-            {stats.map((stat, index) => (
-              <div key={index} className="stat-card reveal" data-animate="up">
-                <div className="stat-icon">{stat.icon}</div>
-                <div className="stat-value" data-target={stat.value}>0</div>
-                <div className="stat-label">{stat.label}</div>
-                <div className="stat-description">{stat.description}</div>
-              </div>
-            ))}
-          </div>
-        </section>
+      {/* ===== الخدمات ===== */}
+      <section className="separador">
+        <div className="separador-content">
+          <SectionHeader
+            id="services-title"
+            title="خدماتنا"
+            subtitle="مجالات الخير المتنوعة - اختر الطريقة الأنسب لك للمساهمة في مساعدة الآخرين"
+            tone="light"
+          />
 
-        {/* ===== تواصل معنا ===== */}
-        <section className="separador">
-          <div className="separador-content">
-            <SectionHeader
-              id="form-title"
-              title="تواصل معنا"
-              subtitle="نستقبل استفساراتك ومقترحاتك — فريقنا يرد عادة خلال 24–48 ساعة"
-              tone="light"
-            />
-          </div>
-        </section>
-        <section >
-          <ContactForm />
-        </section>
-        {/* ===== الدعوة للإجراء ===== */}
-        <section className="cta-section">
-          <div className="cta-card">
-            <h3 className="cta-title">ابدأ رحلتك في العطاء</h3>
-            <p className="cta-text">
-              انضم إلى آلاف المتبرعين والمتطوعين الذين يساهمون في صنع فرق حقيقي في المجتمع
-            </p>
 
-            <div className="cta-buttons">
-              <Link to="/add-user" className="cta-btn primary">
-                سجل الآن مجاناً
-              </Link>
-              <Link to="/donations" className="cta-btn secondary">
-                تصفح التبرعات
-              </Link>
+        </div>
+      </section>
+
+
+      <ServicesSection />
+      {/* ===== الإحصائيات ===== */}
+      <section className="separador" style={{
+        background: "url('/images/gualla.png') center/cover no-repeat",
+        position: "relative"
+      }}>
+        <div className="separador-content">
+          <SectionHeader
+            id="impact-title"
+            title="أثرنا في المجتمع"
+            subtitle="أرقام حقيقية تعكس مساهماتكم وحملاتنا الفعّالة على مدار الفترة الماضية"
+            tone="green"
+          />
+        </div>
+      </section>
+
+      <section className="stats-section" aria-label="إحصائيات المنصة">
+
+        <div className="stats-grid">
+          {stats.map((stat, index) => (
+            <div key={index} className="stat-card reveal" data-animate="up">
+              <div className="stat-icon">{stat.icon}</div>
+              <div className="stat-value" data-target={stat.value}>0</div>
+              <div className="stat-label">{stat.label}</div>
+              <div className="stat-description">{stat.description}</div>
             </div>
-          </div>
-        </section>
+          ))}
+        </div>
+      </section>
 
-        {/* ===== الأسئلة الشائعة ===== */}
-        <section className="separador">
-          <div className="separador-content">
-            <SectionHeader
-              id="faq-title"
-              title="أسئلة شائعة"
-              subtitle="مجموعة من الإجابات المختصرة لأكثر الاستفسارات تكرارًا حول المنصة"
-              tone="light"
-            />
-          </div>
-        </section>
+      {/* ===== تواصل معنا ===== */}
+      <section className="separador">
+        <div className="separador-content">
+          <SectionHeader
+            id="form-title"
+            title="تواصل معنا"
+            subtitle="نستقبل استفساراتك ومقترحاتك — فريقنا يرد عادة خلال 24–48 ساعة"
+            tone="light"
+          />
+        </div>
+      </section>
+      <section >
+        <ContactForm />
+      </section>
+      {/* ===== الدعوة للإجراء ===== */}
+      <section className="cta-section">
+        <div className="cta-card">
+          <h3 className="cta-title">ابدأ رحلتك في العطاء</h3>
+          <p className="cta-text">
+            انضم إلى آلاف المتبرعين والمتطوعين الذين يساهمون في صنع فرق حقيقي في المجتمع
+          </p>
 
-        <section className="faq-section" aria-labelledby="faq-title">
-          <AboutFaq />
-        </section>
+          <div className="cta-buttons">
+            <Link to="/add-user" className="cta-btn primary">
+              سجل الآن مجاناً
+            </Link>
+            <Link to="/donations" className="cta-btn secondary">
+              تصفح التبرعات
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== الأسئلة الشائعة ===== */}
+      <section className="separador">
+        <div className="separador-content">
+          <SectionHeader
+            id="faq-title"
+            title="أسئلة شائعة"
+            subtitle="مجموعة من الإجابات المختصرة لأكثر الاستفسارات تكرارًا حول المنصة"
+            tone="light"
+          />
+        </div>
+      </section>
+
+      <section className="faq-section" aria-labelledby="faq-title">
+        <AboutFaq />
+      </section>
 
 
 
