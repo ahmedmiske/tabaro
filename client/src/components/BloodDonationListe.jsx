@@ -19,8 +19,9 @@ function BloodDonationListe() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const [selectedBloodType, setSelectedBloodType] = useState('');
-  const [deadlineRange, setDeadlineRange] = useState('all');
+  // فلاتر
+  const [selectedBloodType, setSelectedBloodType] = useState('ALL');
+  const [selectedLocation, setSelectedLocation] = useState('ALL');
   const [urgentOnly, setUrgentOnly] = useState(false);
 
   const extractListAndPages = (body) => {
@@ -67,6 +68,7 @@ function BloodDonationListe() {
     return { list, pages: Number(pages) || 1 };
   };
 
+  // جلب الطلبات من السيرفر
   useEffect(() => {
     const fetchDonations = async () => {
       setLoading(true);
@@ -74,7 +76,7 @@ function BloodDonationListe() {
       try {
         const res = await fetchWithInterceptors(
           `/api/blood-requests?status=active&page=${page}&limit=${PAGE_SIZE}`,
-          { method: 'GET' }
+          { method: 'GET' },
         );
 
         const { list, pages } = extractListAndPages(res.body);
@@ -96,39 +98,38 @@ function BloodDonationListe() {
     fetchDonations();
   }, [page]);
 
+  // تطبيق الفلاتر على القائمة
   useEffect(() => {
     let filtered = Array.isArray(donations) ? [...donations] : [];
 
+    // فصيلة الدم
     if (selectedBloodType && selectedBloodType !== 'ALL') {
-      filtered = filtered.filter(d => d?.bloodType === selectedBloodType);
+      filtered = filtered.filter((d) => d?.bloodType === selectedBloodType);
     }
 
-    if (urgentOnly) {
-      filtered = filtered.filter(d => d?.isUrgent === true);
-    }
-
-    if (deadlineRange !== 'all') {
-      const now = Date.now();
-      const rangesMs = {
-        '24h': 24 * 60 * 60 * 1000,
-        '3d':  3  * 24 * 60 * 60 * 1000,
-        '7d':  7  * 24 * 60 * 60 * 1000,
-      };
-
-      const limitMs = rangesMs[deadlineRange];
-
-      filtered = filtered.filter(d => {
-        if (!d?.deadline) return false;
-        const deadlineTs = new Date(d.deadline).getTime();
-        if (Number.isNaN(deadlineTs)) return false;
-
-        const diff = deadlineTs - now;
-        return diff <= limitMs && diff >= 0;
+    // الموقع
+    if (selectedLocation && selectedLocation !== 'ALL') {
+      filtered = filtered.filter((d) => {
+        const loc = d?.location || d?.place || '';
+        return loc === selectedLocation;
       });
     }
 
+    // الحالات المستعجلة فقط
+    if (urgentOnly) {
+      filtered = filtered.filter((d) => d?.isUrgent === true);
+    }
+
     setFilteredDonations(filtered);
-  }, [selectedBloodType, urgentOnly, deadlineRange, donations]);
+  }, [selectedBloodType, selectedLocation, urgentOnly, donations]);
+
+  // مسح الفلاتر
+  const handleClearFilters = () => {
+    setSelectedBloodType('ALL');
+    setSelectedLocation('ALL');
+    setUrgentOnly(false);
+    setFilteredDonations(donations);
+  };
 
   if (loading) {
     return (
@@ -143,11 +144,25 @@ function BloodDonationListe() {
     return <p className="text-center text-danger my-4">{error}</p>;
   }
 
-  const donationTypes = ['ALL', ...new Set(
-    (donations || [])
-      .map(d => d?.bloodType)
-      .filter(Boolean)
-  )];
+  // جميع الفصائل المتاحة
+  const donationTypes = [
+    'ALL',
+    ...new Set(
+      (donations || [])
+        .map((d) => d?.bloodType)
+        .filter(Boolean),
+    ),
+  ];
+
+  // جميع المواقع المتاحة
+  const locations = [
+    'ALL',
+    ...new Set(
+      (donations || [])
+        .map((d) => d?.place || d?.location)
+        .filter(Boolean),
+    ),
+  ];
 
   return (
     <section className="blood-donation-section" dir="rtl">
@@ -165,16 +180,18 @@ function BloodDonationListe() {
       <div className="blood-filter-block">
         <DonationFilterBar
           bloodTypes={donationTypes}
+          locations={locations}
           selectedBloodType={selectedBloodType}
           setSelectedBloodType={setSelectedBloodType}
-          deadlineRange={deadlineRange}
-          setDeadlineRange={setDeadlineRange}
+          selectedLocation={selectedLocation}
+          setSelectedLocation={setSelectedLocation}
           urgentOnly={urgentOnly}
           setUrgentOnly={setUrgentOnly}
+          onClearFilters={handleClearFilters}
         />
       </div>
 
-      {/* 3. الفاصل */}
+      {/* 3. فاصل بسيط */}
       <div className="blood-divider" />
 
       {/* 4. النتائج */}
@@ -184,7 +201,7 @@ function BloodDonationListe() {
         ) : (
           <>
             <Row className="blood-grid">
-              {(filteredDonations || []).map(d => (
+              {(filteredDonations || []).map((d) => (
                 <div
                   key={d?._id || Math.random()}
                   className="blood-grid-item"
@@ -205,7 +222,7 @@ function BloodDonationListe() {
                   borderRadius: 'var(--radius-md)',
                   minWidth: '110px',
                 }}
-                onClick={() => setPage(prev => Math.max(prev - 1, 1))}
+                onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
                 disabled={page <= 1}
               >
                 ⬅ السابقة
@@ -228,7 +245,7 @@ function BloodDonationListe() {
                   borderRadius: 'var(--radius-md)',
                   minWidth: '110px',
                 }}
-                onClick={() => setPage(prev => Math.min(prev + 1, totalPages))}
+                onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
                 disabled={page >= totalPages}
               >
                 التالية ➡

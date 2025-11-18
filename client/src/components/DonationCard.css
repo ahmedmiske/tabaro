@@ -1,10 +1,11 @@
+/* الكارد الأساسي */
 .donation-card-box {
-  border-radius: var(--radius-md) !important;
-  border: 1px solid var(--border-soft) !important;
-  box-shadow: var(--shadow-card) !important;
+  border-radius: var(--radius-md, 14px) !important;
+  border: 1px solid var(--border-soft, #e2e8f0) !important;
+  box-shadow: var(--shadow-card, 0 12px 30px rgba(15, 23, 42, 0.06)) !important;
   overflow: hidden;
-  background: var(--card-bg);
-  transition: transform .2s ease, box-shadow .2s ease;
+  background: #ffffff;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   min-height: 360px;
   display: flex;
   flex-direction: column;
@@ -13,146 +14,243 @@
 
 .donation-card-box:hover {
   transform: translateY(-3px);
-  box-shadow: 0 24px 40px rgba(0,0,0,.07);
+  box-shadow: 0 22px 40px rgba(15, 23, 42, 0.12);
 }
 
-/* رأس البطاقة */
+/* ================= HEADER ================= */
+
 .donation-card-header {
   position: relative;
-  min-height: 120px;
-  padding: 1rem 1rem 1.25rem;
+  padding: 0.9rem 1.2rem 1.05rem;
+  background: linear-gradient(
+    135deg,
+    #e6f5ee 0%,
+    #cbe9d8 40%,
+    #b6dec8 100%
+  ); /* أخضر ناعم غير فاتح جدًا */
+  border-bottom: 1px solid #d5e7dc;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  background: linear-gradient(135deg, #5fc5a1 0%, #cc876b 50%, #58b997 100%);
-  border-bottom: 1px solid var(--border-soft);
+  justify-content: space-between;
+  min-height: 92px;
+  overflow: hidden;
 }
 
-/* الشارة اللي فيها فصيلة الدم */
-.blood-pill {
-  align-self: flex-start;
-  background: var(--pill-bg-soft);
-  color: var(--main-color);
-  border: 2px solid var(--main-color);
-  border-radius: 999px;
-  padding: .4rem .75rem;
-  font-size: .9rem;
-  font-weight: 700;
-  line-height: 1;
-  display: inline-flex;
+.donation-card-header::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+      circle at 10% -10%,
+      rgba(255, 255, 255, 0.9) 0,
+      transparent 55%
+    ),
+    radial-gradient(
+      circle at 120% 140%,
+      rgba(10, 138, 64, 0.08) 0,
+      transparent 60%
+    );
+  opacity: 0.75;
+}
+
+/* الصف العلوي: مستعجل + التاريخ */
+.header-top {
+  position: relative;
+  display: flex;
   align-items: center;
-  gap: .4rem;
+  justify-content: space-between;
+  z-index: 2;
 }
 
 /* شارة مستعجل */
 .urgent-badge {
-  position: absolute;
-  top: .75rem;
-  left: .75rem;
-  background: var(--urgent-bg);
-  color: var(--urgent-text);
-  font-size: .7rem;
-  font-weight: 600;
-  border-radius: .5rem;
-  padding: .35rem .5rem;
   display: inline-flex;
   align-items: center;
-  gap: .4rem;
-  box-shadow: 0 12px 20px rgba(255,0,0,.2);
+  gap: 0.35rem;
+  background: #e11d48;
+  color: #ffffff;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  box-shadow: 0 10px 22px rgba(225, 29, 72, 0.35);
 }
 
-/* الجسم */
+.urgent-badge i {
+  font-size: 0.8rem;
+}
+
+/* تاريخ الإضافة داخل الهيدر */
+.date-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.28rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.date-chip i {
+  font-size: 0.8rem;
+}
+
+/* الصف السفلي: فصيلة الدم */
+.header-bottom {
+  margin-top: 0.75rem;
+  display: flex;
+  justify-content: flex-start;
+  z-index: 2;
+}
+
+.blood-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.98);
+  border: 2px solid #0a8a40;
+  color: #0a8a40;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.blood-pill i {
+  font-size: 0.9rem;
+}
+
+/* ================= BODY ================= */
+
 .donation-body {
   direction: rtl;
   text-align: right;
-  padding: 1rem 1.25rem .5rem;
-  color: var(--text-main-dark);
+  padding: 1rem 1.25rem 0.5rem;
+  color: var(--text-main-dark, #111827);
   flex: 1;
 }
 
 .case-desc {
-  font-size: .95rem;
+  font-size: 0.96rem;
   font-weight: 600;
-  color: var(--text-main-dark);
-  margin-bottom: .75rem;
-  line-height: 1.5;
+  margin-bottom: 0.8rem;
+  line-height: 1.6;
+  color: #111827;
 }
 
-.info-row {
-  display: flex;
-  align-items: flex-start;
-  gap: .5rem;
-  font-size: .8rem;
-  color: var(--text-muted);
-  margin-bottom: .4rem;
+/* شبكة المعلومات (آخر أجل + الموقع) */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.info-item {
+  background: #f9fafb;
+  border-radius: 10px;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid #e5e7eb;
 }
 
 .info-label {
-  font-weight: 600;
-  color: var(--text-main-dark);
-  min-width: 60px;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #4b5563;
+  margin-bottom: 0.15rem;
 }
 
+.info-label i {
+  font-size: 0.8rem;
+}
+
+.info-value {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* ================= META ================= */
+
 .donation-meta {
-  background: #fff;
-  border-top: 1px solid var(--border-soft);
-  font-size: .8rem;
-  color: var(--text-muted);
-  padding: .75rem 1.25rem;
+  background: #ffffff;
+  border-top: 1px solid var(--border-soft, #e5e7eb);
+  font-size: 0.8rem;
+  color: #6b7280;
+  padding: 0.75rem 1.25rem;
   direction: rtl;
   text-align: right;
 }
 
-/* الأزرار */
-.donation-actions {
-  border-top: 1px solid var(--border-soft);
-  background: #fff;
-  display: flex;
-  flex-wrap: wrap;
-  gap: .75rem;
-  justify-content: space-between;
-  padding: 1rem 1.25rem 1.25rem;
+.donation-meta strong {
+  font-weight: 700;
+  color: #111827;
 }
 
-/* زر تفاصيل */
+/* ================= ACTIONS ================= */
+
+.donation-actions {
+  border-top: 1px solid var(--border-soft, #e5e7eb);
+  background: #ffffff;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: space-between;
+  padding: 0.9rem 1.25rem 1.1rem;
+}
+
+/* زر تفاصيل الحالة */
 .btn-details {
   flex: 1;
   min-width: 120px;
-  background-color: transparent;
-  border: 2px solid var(--border-soft);
-  color: var(--text-main-dark);
-  border-radius: var(--radius-md);
-  font-size: .8rem;
-  font-weight: 600;
-  padding: .6rem .75rem;
-  transition: all .2s ease;
+  background-color: #ffffff;
+  border: 2px solid #d0d5d9;
+  color: #0f172a;
+  border-radius: 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.6rem 0.75rem;
+  transition: all 0.18s ease;
   text-align: center;
 }
 
 .btn-details:hover {
-  background-color: var(--text-main-dark);
-  border-color: var(--text-main-dark);
-  color: #fff;
+  background-color: #f9fafb;
+  border-color: #0a8a40;
+  color: #0a8a40;
 }
 
-/* زر "أنقذ حياة" */
+/* زر أنقذ حياة الآن – بألوان الشعار */
 .btn-donate {
   flex: 1;
   min-width: 140px;
-  background-color: var(--btn-solid-bg);
-  border: 2px solid var(--btn-solid-bg);
-  color: var(--btn-solid-text);
-  border-radius: var(--radius-md);
-  font-size: .8rem;
-  font-weight: 700;
-  padding: .6rem .75rem;
-  transition: all .2s ease;
+  background-color: #0a8a40 !important;
+  border: 2px solid #0a8a40 !important;
+  color: #ffffff !important;
+  border-radius: 12px;
+  font-size: 0.86rem;
+  font-weight: 800;
+  padding: 0.6rem 0.75rem;
+  transition: all 0.18s ease;
   text-align: center;
   white-space: nowrap;
 }
 
 .btn-donate:hover {
-  background-color: var(--btn-solid-bg-hover);
-  border-color: var(--btn-solid-bg-hover);
-  color: var(--btn-solid-text);
+  background-color: #076b32 !important;
+  border-color: #076b32 !important;
+}
+
+/* ================= Responsive ================= */
+
+@media (max-width: 640px) {
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
 }

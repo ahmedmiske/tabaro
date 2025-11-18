@@ -1,12 +1,13 @@
-/* ========== الحاوية الأساسية ========== */
+/* ========== الحاوية الأساسية للصفحة ========== */
 .blood-details-container {
+  direction: rtl;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: clamp(12px, 3vw, 24px);
   background: #f6f7f9;
   min-height: 100vh;
-  font-family: 'Cairo', sans-serif;
+  font-family: "Cairo", sans-serif;
   color: #333;
   line-height: 1.6;
   width: 60%;
@@ -14,11 +15,11 @@
   margin-inline: auto;
   margin-block-end: clamp(24px, 8vh, 96px);
   margin-bottom: 200px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, .05);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
-/* البطاقات */
-.details-card {
+/* ========== الكروت العامة في هذه الصفحة فقط ========== */
+.blood-details-container .details-card {
   border-radius: 12px;
   overflow: hidden;
   position: relative;
@@ -26,60 +27,110 @@
   background: #fff;
 }
 
-.card-header,
-.details-header-compact {
-  background: linear-gradient(90deg, #2e7d32, #43a047);
+/* لا نستخدم .card-header عامة حتى لا تؤثر على كل المشروع */
+.blood-details-container .details-card > .card-header,
+.blood-details-container .details-header-compact {
+  background: linear-gradient(115deg, #0b7a45 0%, #0f9f5c 50%, #0b7a45 100%);
   color: #fff;
-}
-
-.card-header h5,
-.details-header-compact h5 {
-  margin-right: 200px;
-  font-weight: 700;
-  font-size: 1.25rem;
-}
-
-.details-header-compact {
   padding: 10px 14px !important;
   min-height: auto !important;
   line-height: 1.2;
 }
 
-.details-header-compact .btn {
-  font-size: .9rem;
-  padding: 4px 10px;
-  margin-right: 200px;
+/* ========== هيدر التفاصيل ========== */
+.blood-details-container .details-header-layout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
-/* أقسام */
-.section-card {
-  background: #fff;
+.blood-details-container .back-btn-strong {
+  border-radius: 999px;
+  padding: 4px 14px;
+  font-weight: 600;
+  border: none;
+  background: #ffffff;
+  color: #0b7a45;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.1);
+}
+
+.blood-details-container .back-btn-strong:hover {
+  background: #f1f5f9;
+}
+
+.blood-details-container .details-header-title {
+  text-align: center;
+  flex: 1;
+}
+
+.blood-details-container .details-header-title .title-line {
+  font-weight: 800;
+  font-size: 1.2rem;
+}
+
+.blood-details-container .details-header-title .subtitle-line {
+  font-size: 0.8rem;
+  opacity: 0.9;
+}
+
+.blood-details-container .bloodtype-pill-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.blood-details-container .bloodtype-pill-head .drop-emoji {
+  filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.25));
+}
+
+/* أزرار صغيرة في الهيدر */
+.blood-details-container .header-mini-btn {
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 0.8rem;
+}
+
+/* ========== الكروت الداخلية (تفاصيل، تواصل، وثائق) ========== */
+.blood-details-container .section-card {
+  background: #ffffff;
   border: 1px dashed #e5e7eb;
   border-radius: 12px;
   padding: 12px;
 }
 
-.section-title {
-  font-weight: 700;
+/* العناوين داخل صفحة الدم فقط */
+.blood-details-container .section-title {
+  font-weight: 800;
   margin-bottom: 8px;
-  color: #115e59;
-  
+  color: #0f766e !important;
+  font-size: 1.05rem;
 }
 
-.subsection-title {
+.blood-details-container .subsection-title {
   font-weight: 700;
   margin: 10px 0 6px;
   color: #374151;
 }
 
-/* شريط الناشر */
-.publisher-strip {
+.blood-details-container .publisher-section {
+  margin-bottom: 4px;
+}
+
+/* ========== شريط الناشر ========== */
+.blood-details-container .publisher-strip {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.pub-avatar {
+.blood-details-container .pub-avatar {
   width: 56px;
   height: 56px;
   border-radius: 50%;
@@ -88,79 +139,109 @@
   background: #fff;
 }
 
-.pub-text {
+.blood-details-container .pub-text {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-.pub-name {
+.blood-details-container .pub-name {
   font-weight: 700;
 }
 
-.role-chip {
+.blood-details-container .role-chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   font-weight: 700;
   padding: 2px 10px;
   border-radius: 999px;
-  font-size: .8rem;
+  font-size: 0.8rem;
   border: 1px solid transparent;
 }
 
-.role-chip.publisher {
+.blood-details-container .role-chip.publisher {
   background: #eef2ff;
   color: #3730a3;
   border-color: #dfe3ff;
 }
 
 /* شارة "أنت صاحب هذا الطلب" */
-.self-chip {
+.blood-details-container .self-chip {
   background: #ecfdf5;
   color: #065f46;
   border: 1px solid #a7f3d0;
   padding: 2px 10px;
   border-radius: 999px;
   font-weight: 700;
-  font-size: .75rem;
+  font-size: 0.75rem;
 }
 
-/* تفاصيل */
-.meta-row {
+/* ========== تفاصيل الطلب (chips & deadline bar) ========== */
+.blood-details-container .meta-row {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.chip {
+.blood-details-container .chip {
   background: #f3f4f6;
   border: 1px solid #e5e7eb;
   color: #374151;
   padding: 4px 10px;
   border-radius: 999px;
-  font-size: .92rem;
+  font-size: 0.9rem;
 }
 
-.chip .icon {
+.blood-details-container .chip .icon {
   margin-inline-end: 6px;
   display: inline-block;
 }
 
-.chip.danger {
+.blood-details-container .chip.danger {
   background: #fee2e2;
   border-color: #fecaca;
   color: #991b1b;
 }
 
-/* وسائل التواصل */
-.contact-row {
+.blood-details-container .deadline-strip {
+  margin-top: 10px;
+}
+
+.blood-details-container .deadline-text {
+  font-size: 0.85rem;
+  color: #4b5563;
+  margin-bottom: 4px;
+}
+
+.blood-details-container .deadline-progress-bar {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  overflow: hidden;
+}
+
+.blood-details-container .deadline-progress-inner {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #22c55e, #16a34a, #15803d);
+}
+
+.blood-details-container .urgent-note {
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: #b91c1c;
+}
+
+/* ========== وسائل التواصل ========== */
+.blood-details-container .contact-row {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
 }
 
-.contact-chip {
+.blood-details-container .contact-chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -169,17 +250,17 @@
   color: #374151;
   padding: 4px 10px;
   border-radius: 999px;
-  font-size: .9rem;
+  font-size: 0.9rem;
 }
 
-/* الوثائق */
-.docs-grid {
+/* ========== الوثائق ========== */
+.blood-details-container .docs-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 12px;
 }
 
-.doc-tile {
+.blood-details-container .doc-tile {
   background: #fff;
   border: 1px solid #eaeaea;
   border-radius: 10px;
@@ -192,12 +273,12 @@
   cursor: pointer;
 }
 
-.doc-tile:hover {
-  box-shadow: 0 8px 18px rgba(0, 0, 0, .06);
+.blood-details-container .doc-tile:hover {
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
   transform: translateY(-1px);
 }
 
-.doc-thumb {
+.blood-details-container .doc-thumb {
   height: 140px;
   background: #f6f7f9;
   display: flex;
@@ -206,14 +287,13 @@
   border-bottom: 1px solid #eee;
 }
 
-.doc-thumb img {
+.blood-details-container .doc-thumb img {
   max-height: 115px;
   max-width: 100%;
   object-fit: contain;
 }
 
-/* معاينة PDF كشارة/أيقونة ثابتة */
-.pdf-thumb {
+.blood-details-container .pdf-thumb {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -224,46 +304,140 @@
   padding: 10px 14px;
 }
 
-.pdf-emoji {
+.blood-details-container .pdf-emoji {
   font-size: 28px;
   line-height: 1;
 }
 
-.pdf-text {
+.blood-details-container .pdf-text {
   font-weight: 800;
   font-size: 20px;
   color: #d93025;
-  letter-spacing: .5px;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
 }
 
-.doc-name {
+.blood-details-container .doc-name {
   padding: 8px;
-  font-size: .9rem;
+  font-size: 0.9rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.doc-actions {
+.blood-details-container .doc-actions {
   display: flex;
   gap: 6px;
   justify-content: center;
   padding: 8px;
 }
 
-/* Responsive */
+/* ========== بطاقة "أريد التبرع" ========== */
+.blood-details-container .donate-card {
+  margin-top: 1rem;
+}
+
+.blood-details-container .donate-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: linear-gradient(115deg, #f97316 0%, #fb923c 40%, #f97316 100%);
+  color: #fff;
+}
+
+.blood-details-container .donate-header-main {
+  display: flex;
+  flex-direction: column;
+}
+
+.blood-details-container .donate-title {
+  font-weight: 800;
+  font-size: 1.05rem;
+}
+
+.blood-details-container .donate-subtitle {
+  font-size: 0.8rem;
+  opacity: 0.9;
+}
+
+.blood-details-container .donate-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  justify-content: flex-end;
+}
+
+.blood-details-container .icon-pill {
+  border-radius: 999px;
+  border: none;
+  padding: 4px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+.blood-details-container .icon-pill.outline {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.blood-details-container .icon-pill.danger {
+  background: rgba(239, 68, 68, 0.95);
+}
+
+.blood-details-container .icon-pill:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* منطقة أزرار التبرع */
+.blood-details-container .donate-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.blood-details-container .main-donate-btn {
+  border-radius: 999px;
+  padding-inline: 24px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.blood-details-container .secondary-donate-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* ========== جدول العروض ========== */
+.blood-details-container .offers-table table {
+  font-size: 0.9rem;
+}
+
+.blood-details-container .offers-table .actions-col {
+  min-width: 220px;
+}
+
+/* ========== Responsive ========== */
 @media (max-width: 991.98px) {
   .blood-details-container {
-    box-shadow: 0 1px 6px rgba(0, 0, 0, .04);
+    width: 100%;
+    margin-bottom: 120px;
   }
 
-  .pub-avatar {
+  .blood-details-container .pub-avatar {
     width: 48px;
     height: 48px;
   }
 
-  .docs-grid {
+  .blood-details-container .docs-grid {
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   }
 }
@@ -273,27 +447,35 @@
     padding: 12px;
   }
 
-  .pub-avatar {
+  .blood-details-container .details-header-layout {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .blood-details-container .back-btn-strong {
+    align-self: flex-start;
+  }
+
+  .blood-details-container .pub-avatar {
     width: 44px;
     height: 44px;
   }
 
-  .docs-grid {
+  .blood-details-container .docs-grid {
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     gap: 10px;
   }
 
-  .doc-thumb {
+  .blood-details-container .doc-thumb {
     height: 120px;
   }
 
-  .pdf-emoji {
+  .blood-details-container .pdf-emoji {
     font-size: 24px;
   }
 
-  .pdf-text {
+  .blood-details-container .pdf-text {
     font-size: 18px;
   }
 }
-
-/* ========== End of BloodDonationDetails.css ========== */

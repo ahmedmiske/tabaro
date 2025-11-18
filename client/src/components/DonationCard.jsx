@@ -26,64 +26,73 @@ const DonationCard = ({ donation }) => {
   return (
     <div className="donation-card">
       <Card className="donation-card-box border-0">
-        {/* HEADER */}
-        <div className="donation-card-header">
-          {/* urgent badge */}
-          {isUrgent && (
-            <span className="urgent-badge">
-              <i className="fas fa-bolt"></i>
-              مستعجل
+        {/* ===== HEADER ===== */}
+        <header className="donation-card-header">
+          <div className="header-top">
+            {isUrgent && (
+              <span className="urgent-badge">
+                <i className="fas fa-bolt" aria-hidden="true" />
+                <span>مستعجل</span>
+              </span>
+            )}
+
+            <span className="date-chip" aria-label="تاريخ إضافة الحالة">
+              <i className="far fa-clock" aria-hidden="true" />
+              {addedAt}
             </span>
-          )}
-
-          {/* blood pill */}
-          <div className="blood-pill">
-            <i className="fas fa-tint"></i>
-            <span>{bloodType || "غير معروف"}</span>
           </div>
-        </div>
 
-        {/* BODY */}
+          <div className="header-bottom">
+            <div className="blood-pill" aria-label="فصيلة الدم">
+              <i className="fas fa-tint" aria-hidden="true" />
+              <span>{bloodType || "غير معروف"}</span>
+            </div>
+          </div>
+        </header>
+
+        {/* ===== BODY ===== */}
         <div className="donation-body">
           <div className="case-desc">
             {description || "لا يوجد وصف للحالة."}
           </div>
 
-          <div className="info-row">
-            <div className="info-label">آخر أجل:</div>
-            <div className="info-value">
-              <i className="fas fa-calendar-day"></i> {formattedDeadline}
+          <div className="info-grid">
+            <div className="info-item">
+              <span className="info-label">
+                <i className="far fa-calendar-day" aria-hidden="true" /> آخر أجل
+              </span>
+              <span className="info-value">{formattedDeadline}</span>
             </div>
-          </div>
 
-          <div className="info-row">
-            <div className="info-label">الموقع:</div>
-            <div className="info-value">
-              <i className="fas fa-map-marker-alt"></i> {location || "غير متوفر"}
+            <div className="info-item">
+              <span className="info-label">
+                <i className="fas fa-map-marker-alt" aria-hidden="true" /> الموقع
+              </span>
+              <span className="info-value">{location || "غير متوفر"}</span>
             </div>
           </div>
         </div>
 
-        {/* META */}
+        {/* ===== META ===== */}
         <div className="donation-meta">
-          <i className="fas fa-clock me-1"></i>
-          <strong>تاريخ الإضافة: </strong>
-          {addedAt}
+          <i className="far fa-clock me-1" aria-hidden="true" />
+          <span>تمت إضافة الحالة في </span>
+          <strong>{addedAt}</strong>
         </div>
 
-        {/* ACTIONS */}
+        {/* ===== ACTIONS ===== */}
         <div className="donation-actions">
           <Link to={`/blood-donation-details/${_id}`} className="w-100">
-            <button className="btn-details w-100">
-              <i className="fas fa-eye me-1"></i>
+            <button className="btn-details w-100" type="button">
+              <i className="fas fa-eye me-1" aria-hidden="true" />
               تفاصيل الحالة
             </button>
           </Link>
 
           <Link to={`/blood-donation-details/${_id}`} className="w-100">
-            <button className="btn-donate w-100">
-              <i className="fas fa-hand-holding-heart me-1"></i>
-              أنقذ حياة الآن
+            <button className="btn-donate w-100" type="button">
+              <i className="fas fa-hand-holding-heart me-1" aria-hidden="true" />
+              أنقِذ حياة الآن
             </button>
           </Link>
         </div>

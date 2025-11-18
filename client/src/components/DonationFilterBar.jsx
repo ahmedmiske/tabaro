@@ -5,104 +5,145 @@ import './DonationFilterBar.css';
 
 function DonationFilterBar({
   bloodTypes,
+  locations,
   selectedBloodType,
   setSelectedBloodType,
-  deadlineRange,
-  setDeadlineRange,
+  selectedLocation,
+  setSelectedLocation,
   urgentOnly,
   setUrgentOnly,
+  onClearFilters,
 }) {
-  // bloodTypes: array مثل ['ALL','A+','O+','B-']
-  const handleBloodTypeClick = (type) => {
-    // لما يضغط على نفس الاختيار مرة ثانية؟ خليه يظل محدد
-    setSelectedBloodType(type);
-  };
-
-  const handleDeadlineClick = (rangeVal) => {
-    setDeadlineRange(rangeVal);
-  };
-
   const handleUrgentToggle = () => {
-    setUrgentOnly(prev => !prev);
+    setUrgentOnly((prev) => !prev);
   };
 
-  const deadlineOptions = [
-    { value: '24h', label: 'ينتهي خلال 24 ساعة ⏳' },
-    { value: '3d',  label: 'ينتهي خلال 3 أيام' },
-    { value: '7d',  label: 'ينتهي خلال أسبوع' },
-    { value: 'all', label: 'كل المواعيد' },
-  ];
+  const handleBloodChange = (e) => {
+    setSelectedBloodType(e.target.value);
+  };
+
+  const handleLocationChange = (e) => {
+    setSelectedLocation(e.target.value);
+  };
+
+  const handleClear = () => {
+    onClearFilters();
+  };
 
   return (
-    <aside className="filter-bar" dir="rtl">
-      {/* فلتر الفصيلة */}
-      <div className="filter-group">
-        <span className="filter-label">فصيلة الدم</span>
-        <div className="chip-row">
-          {bloodTypes.map(type => (
-            <button
-              key={type}
-              type="button"
-              className={`chip-btn ${selectedBloodType === type ? 'active' : ''}`}
-              onClick={() => handleBloodTypeClick(type)}
+    <section
+      className="filter-shell"
+      dir="rtl"
+      aria-label="تصفية طلبات التبرع بالدم حسب الفصيلة والموقع والأولوية"
+    >
+      {/* رأس شريط الفلاتر */}
+      <header className="filter-header">
+        <div className="filter-header-text">
+          <h2 className="filter-title">تصفية الطلبات</h2>
+          <p className="filter-subtitle">
+            اختر فصيلة الدم والموقع، ويمكنك التركيز فقط على الحالات المستعجلة.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          className="filter-reset-btn"
+          onClick={handleClear}
+        >
+          <span className="filter-reset-icon">↺</span>
+          مسح الفلاتر
+        </button>
+      </header>
+
+      {/* شبكة الحقول */}
+      <div className="filter-grid">
+        {/* الأولوية – أعلى الشريط */}
+        <div className="filter-field urgent-top">
+          <span className="filter-label">الأولوية</span>
+          <div className="urgent-inline">
+            <label className="urgent-switch">
+              <input
+                type="checkbox"
+                checked={urgentOnly}
+                onChange={handleUrgentToggle}
+              />
+              <span className="urgent-slider" />
+            </label>
+            <span className="urgent-text">
+              <span className="urgent-emoji">🚨</span>
+              مستعجل فقط
+            </span>
+          </div>
+        </div>
+
+        {/* فصيلة الدم */}
+        <div className="filter-field middle-field">
+          <label className="filter-label" htmlFor="bloodTypeSelect">
+            فصيلة الدم
+          </label>
+          <div className="filter-select-wrapper">
+            <select
+              id="bloodTypeSelect"
+              className="filter-select"
+              value={selectedBloodType}
+              onChange={handleBloodChange}
             >
-              <span className="chip-emoji">🩸</span>
-              <span>{type === 'ALL' ? 'كل الفصائل' : type}</span>
-            </button>
-          ))}
+              {bloodTypes.map((t) => (
+                <option key={t} value={t}>
+                  {t === 'ALL' ? 'كل الفصائل' : t}
+                </option>
+              ))}
+            </select>
+            <span className="filter-select-icon" aria-hidden="true">
+              🩸
+            </span>
+          </div>
+        </div>
+
+        {/* الموقع */}
+        <div className="filter-field middle-field">
+          <label className="filter-label" htmlFor="locationSelect">
+            الموقع
+          </label>
+          <div className="filter-select-wrapper">
+            <select
+              id="locationSelect"
+              className="filter-select"
+              value={selectedLocation}
+              onChange={handleLocationChange}
+            >
+              {locations.map((loc) => (
+                <option key={loc} value={loc}>
+                  {loc === 'ALL' ? 'كل المناطق' : loc}
+                </option>
+              ))}
+            </select>
+            <span className="filter-select-icon" aria-hidden="true">
+              📍
+            </span>
+          </div>
         </div>
       </div>
-
-      {/* فلتر المدة حتى انتهاء المهلة */}
-      <div className="filter-group">
-        <span className="filter-label">الحاجة قبل انتهاء المهلة</span>
-        <div className="chip-row">
-          {deadlineOptions.map(opt => (
-            <button
-              key={opt.value}
-              type="button"
-              className={`chip-btn ${deadlineRange === opt.value ? 'active' : ''}`}
-              onClick={() => handleDeadlineClick(opt.value)}
-            >
-              <span className="chip-emoji">⏰</span>
-              <span>{opt.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* سويتش المستعجل فقط */}
-      <div className="filter-group urgent-toggle">
-        <label className="filter-label">الأولوية</label>
-        <label className="urgent-switch">
-          <input
-            type="checkbox"
-            checked={urgentOnly}
-            onChange={handleUrgentToggle}
-          />
-          <span className="urgent-slider" />
-        </label>
-        <span className="urgent-text">
-          <span className="urgent-emoji">🚨</span>
-          مستعجل فقط
-        </span>
-      </div>
-    </aside>
+    </section>
   );
 }
 
 DonationFilterBar.propTypes = {
   bloodTypes: PropTypes.arrayOf(PropTypes.string),
+  locations: PropTypes.arrayOf(PropTypes.string),
   selectedBloodType: PropTypes.string.isRequired,
   setSelectedBloodType: PropTypes.func.isRequired,
-  deadlineRange: PropTypes.string.isRequired,
-  setDeadlineRange: PropTypes.func.isRequired,
+  selectedLocation: PropTypes.string.isRequired,
+  setSelectedLocation: PropTypes.func.isRequired,
   urgentOnly: PropTypes.bool.isRequired,
   setUrgentOnly: PropTypes.func.isRequired,
+  onClearFilters: PropTypes.func,
 };
 
 DonationFilterBar.defaultProps = {
   bloodTypes: [],
+  locations: [],
+  onClearFilters: () => {},
 };
 
 export default DonationFilterBar;

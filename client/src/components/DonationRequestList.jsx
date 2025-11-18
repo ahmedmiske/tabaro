@@ -1,3 +1,4 @@
+// src/components/DonationRequestList.jsx
 import React, { useEffect, useMemo, useState } from 'react';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import { Link } from 'react-router-dom';
@@ -12,6 +13,36 @@ const DEFAULT_Q = {
   urgent: false,
   page: 1,
   limit: 12,
+};
+
+// دالة مساعدة لإرجاع أيقونة حسب المجال / التصنيف
+const getCategoryIconClass = (rawCategory = '') => {
+  const cat = (rawCategory || '').trim();
+
+  if (!cat) return 'fas fa-hands-helping';
+
+  // تعليم
+  if (cat.includes('تعليم') || cat.includes('منح') || cat.includes('مدرس'))
+    return 'fas fa-graduation-cap';
+
+  // صحة
+  if (cat.includes('صحة') || cat.includes('مرض') || cat.includes('علاج') || cat.includes('دواء'))
+    return 'fas fa-heartbeat';
+
+  // سكن
+  if (cat.includes('سكن') || cat.includes('إيجار') || cat.includes('مسكن') || cat.includes('منزل'))
+    return 'fas fa-home';
+
+  // غذاء / سلة / طعام
+  if (cat.includes('غذ') || cat.includes('طعام') || cat.includes('سلة') || cat.includes('مواد'))
+    return 'fas fa-utensils';
+
+  // عمل / مشروع
+  if (cat.includes('عمل') || cat.includes('وظيفة') || cat.includes('مشروع'))
+    return 'fas fa-briefcase';
+
+  // افتراضي: مساعدة عامة
+  return 'fas fa-hands-helping';
 };
 
 function DonationRequestList() {
@@ -32,6 +63,7 @@ function DonationRequestList() {
   const [openPlace, setOpenPlace] = useState(false);
 
   // ============ جلب البيانات ============
+
   const load = async () => {
     setLoading(true);
     setError('');
@@ -78,27 +110,29 @@ function DonationRequestList() {
   }, [q.page, q.category, q.type, q.place, q.urgent]);
 
   // ============ لوائح الخيارات الديناميكية ============
+
   const categories = useMemo(
-    () => [...new Set(items.map(i => i.category).filter(Boolean))],
+    () => [...new Set(items.map((i) => i.category).filter(Boolean))],
     [items]
   );
 
   const types = useMemo(() => {
     const source = q.category
-      ? items.filter(i => i.category === q.category)
+      ? items.filter((i) => i.category === q.category)
       : items;
-    return [...new Set(source.map(i => i.type).filter(Boolean))];
+    return [...new Set(source.map((i) => i.type).filter(Boolean))];
   }, [items, q.category]);
 
   const places = useMemo(
-    () => [...new Set(items.map(i => i.place).filter(Boolean))],
+    () => [...new Set(items.map((i) => i.place).filter(Boolean))],
     [items]
   );
 
   // ============ أدوات ============
+
   const truncate = (txt, n = 110) => {
     if (!txt) return '—';
-    return txt.length > n ? txt.slice(0, n) + '…' : txt;
+    return txt.length > n ? `${txt.slice(0, n)}…` : txt;
   };
 
   const resetFilters = () => {
@@ -110,7 +144,7 @@ function DonationRequestList() {
 
   // تحديث فلتر + إرجاع للصفحة 1
   const setFilter = (key, value) => {
-    setQ(prev => ({
+    setQ((prev) => ({
       ...prev,
       [key]: value,
       page: 1,
@@ -135,13 +169,14 @@ function DonationRequestList() {
     <section className="donation-requests-wrapper" dir="rtl">
       {/* ===== العنوان الرئيسي أعلى الصفحة ===== */}
       <header className="donation-header-block">
+        {/* TitleMain سيضع الـ h2 والـ subtitle، ونحن فقط نغلفه بخلفية جميلة */}
         <TitleMain
           title={
             <>
               الطلبات العامة للتبرع <span className="heart-emoji">💚</span>
             </>
           }
-          subtitle="طلبات متنوعة: مساعدة اجتماعية / دعم مادي / مستلزمات / سكن / غذاء..."
+          subtitle="طلبات متنوعة: دعم اجتماعي، مساعدات مادية، مستلزمات، سكن، غذاء... لتقريب المحتاج من أهل الخير."
           align="center"
           size="lg"
         />
@@ -159,7 +194,7 @@ function DonationRequestList() {
               checked={q.urgent}
               onChange={(e) => setFilter('urgent', e.target.checked)}
             />
-            <span className="mini-toggle-ui"></span>
+            <span className="mini-toggle-ui" />
           </label>
 
           <div className="urgent-caption">
@@ -182,7 +217,9 @@ function DonationRequestList() {
 
           <button
             type="button"
-            className={`filter-chip dropdown-trigger ${openPlace ? 'open' : ''}`}
+            className={`filter-chip dropdown-trigger ${
+              openPlace ? 'open' : ''
+            }`}
             onClick={() => {
               setOpenPlace(!openPlace);
               setOpenCategory(false);
@@ -197,13 +234,13 @@ function DonationRequestList() {
 
           {openPlace && places.length > 0 && (
             <div className="dropdown-list">
-              {places.map(p => (
+              {places.map((p) => (
                 <button
                   type="button"
                   key={p}
-                  className={
-                    'dropdown-item ' + (q.place === p ? 'active' : '')
-                  }
+                  className={`dropdown-item ${
+                    q.place === p ? 'active' : ''
+                  }`}
                   onClick={() => selectPlace(p)}
                 >
                   {p}
@@ -226,7 +263,9 @@ function DonationRequestList() {
 
           <button
             type="button"
-            className={`filter-chip dropdown-trigger ${openType ? 'open' : ''}`}
+            className={`filter-chip dropdown-trigger ${
+              openType ? 'open' : ''
+            }`}
             disabled={!types.length}
             onClick={() => {
               if (!types.length) return;
@@ -243,13 +282,13 @@ function DonationRequestList() {
 
           {openType && types.length > 0 && (
             <div className="dropdown-list">
-              {types.map(t => (
+              {types.map((t) => (
                 <button
                   type="button"
                   key={t}
-                  className={
-                    'dropdown-item ' + (q.type === t ? 'active' : '')
-                  }
+                  className={`dropdown-item ${
+                    q.type === t ? 'active' : ''
+                  }`}
                   onClick={() => selectType(t)}
                 >
                   {t}
@@ -272,7 +311,9 @@ function DonationRequestList() {
 
           <button
             type="button"
-            className={`filter-chip dropdown-trigger ${openCategory ? 'open' : ''}`}
+            className={`filter-chip dropdown-trigger ${
+              openCategory ? 'open' : ''
+            }`}
             onClick={() => {
               setOpenCategory(!openCategory);
               setOpenPlace(false);
@@ -287,13 +328,13 @@ function DonationRequestList() {
 
           {openCategory && categories.length > 0 && (
             <div className="dropdown-list">
-              {categories.map(cat => (
+              {categories.map((cat) => (
                 <button
                   type="button"
                   key={cat}
-                  className={
-                    'dropdown-item ' + (q.category === cat ? 'active' : '')
-                  }
+                  className={`dropdown-item ${
+                    q.category === cat ? 'active' : ''
+                  }`}
                   onClick={() => selectCategory(cat)}
                 >
                   {cat}
@@ -337,15 +378,32 @@ function DonationRequestList() {
                     {/* رأس البطاقة */}
                     <div className="donation-card-head-colored">
                       <div className="donation-head-right">
-                        <div className="donation-cat">
-                          {item.category || '—'}
+                        <div className="donation-cat-line">
+                          <span className="donation-cat-icon">
+                            <i
+                              className={getCategoryIconClass(
+                                item.category
+                              )}
+                              aria-hidden="true"
+                            />
+                          </span>
+                          <span className="donation-cat-label">
+                            {item.category || '—'}
+                          </span>
                         </div>
-                        <div className="donation-type">
-                          {item.type || '—'}
-                        </div>
-                        <div className="donation-place">
-                          {item.place || '—'}
-                        </div>
+
+                        {item.type && (
+                          <div className="donation-type">
+                            {item.type}
+                          </div>
+                        )}
+
+                        {item.place && (
+                          <div className="donation-place-line">
+                            <i className="fas fa-map-marker-alt" />
+                            <span>{item.place}</span>
+                          </div>
+                        )}
                       </div>
 
                       <div
@@ -361,7 +419,10 @@ function DonationRequestList() {
                     {/* مبلغ */}
                     {'amount' in item && (
                       <div className="donation-amount-row">
-                        <span className="label">المبلغ المطلوب:</span>
+                        <span className="label">
+                          <i className="fas fa-hand-holding-usd" />
+                          المبلغ المطلوب:
+                        </span>
                         <span className="value">
                           {item.amount ?? '—'}
                         </span>
@@ -373,9 +434,10 @@ function DonationRequestList() {
                       {truncate(item.description)}
                     </div>
 
-                    {/* فوتر */}
+                    {/* فوتر البطاقة */}
                     <div className="donation-card-footer">
                       <div className="donation-date">
+                        <i className="far fa-calendar-alt" />
                         {item.createdAt
                           ? new Date(item.createdAt).toLocaleDateString(
                               'ar-MA'
@@ -403,7 +465,7 @@ function DonationRequestList() {
                 className="pg-btn prev"
                 disabled={q.page <= 1}
                 onClick={() =>
-                  setQ(prev => ({
+                  setQ((prev) => ({
                     ...prev,
                     page: Math.max(prev.page - 1, 1),
                   }))
@@ -421,12 +483,9 @@ function DonationRequestList() {
                 className="pg-btn next"
                 disabled={q.page >= (meta.pages || 1)}
                 onClick={() =>
-                  setQ(prev => ({
+                  setQ((prev) => ({
                     ...prev,
-                    page: Math.min(
-                      prev.page + 1,
-                      meta.pages || 1
-                    ),
+                    page: Math.min(prev.page + 1, meta.pages || 1),
                   }))
                 }
               >
