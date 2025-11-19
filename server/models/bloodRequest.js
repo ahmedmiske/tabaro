@@ -15,12 +15,23 @@ const DocumentSchema = new mongoose.Schema(
 const BloodRequestSchema = new mongoose.Schema(
   {
     bloodType: { type: String, required: true },
+
     isUrgent: { type: Boolean, default: false },
+
+    // ✅ مدينة / منطقة (اختياري)
+    city: { type: String, default: "" },
+
+    // ✅ اسم المستشفى (اختياري)
+    hospitalName: { type: String, default: "" },
+
+    // حقل عام قديم/حر (يقبل أي وصف للمكان – نحافظ عليه للتوافق)
     location: { type: String, default: "" },
+
     deadline: { type: Date, required: true },
     description: { type: String, default: "" },
 
     contactMethods: [{ method: String, number: String }],
+
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

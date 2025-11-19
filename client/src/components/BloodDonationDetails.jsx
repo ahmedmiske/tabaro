@@ -9,7 +9,7 @@ import {
   Table,
   Alert,
   Form,
-  Modal, // ⬅️ تمت الإضافة
+  Modal,
 } from 'react-bootstrap';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
@@ -77,7 +77,7 @@ RatingStars.propTypes = {
 const statusLabel = (s) =>
   ({
     pending: 'قيد الاستلام',
-    accepted: 'تم الاستلام',
+    accepted: 'تم القبول',
     fulfilled: 'تم التنفيذ',
     rated: 'تم التقييم',
   }[s] || 'قيد الاستلام');
@@ -291,7 +291,6 @@ export default function BloodDonationDetails() {
     const start = new Date(request.createdAt).getTime();
     const end = new Date(request.deadline).getTime();
 
-    // now قد يكون Date أو رقم أو string، نحوله دائماً إلى timestamp
     let nowTs;
     if (now instanceof Date) {
       nowTs = now.getTime();
@@ -341,6 +340,23 @@ export default function BloodDonationDetails() {
 
   /* ---------- Handlers ---------- */
 
+  // ✅ صاحب الطلب: قبول عرض (status: pending → accepted)
+  const handleAccept = async (offerId) => {
+    try {
+      const res = await fetchWithInterceptors(
+        `/api/donation-confirmations/${offerId}/accept`,
+        { method: 'PATCH' },
+      );
+      if (res.ok) {
+        await fetchData();
+      }
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error('accept failed', e);
+    }
+  };
+
+  // ✅ تأكيد التنفيذ (بعد الاتفاق بين الطرفين)
   const handleFulfill = async (offerId) => {
     try {
       const res = await fetchWithInterceptors(
@@ -386,7 +402,6 @@ export default function BloodDonationDetails() {
 
   const submitRating = async () => {
     if (!rateOffer || !rateValue) {
-      // يمكنك لاحقًا استبدالها بتوست جميل
       // eslint-disable-next-line no-alert
       window.alert('الرجاء اختيار تقييم من 1 إلى 5 نجوم.');
       return;
@@ -476,7 +491,6 @@ export default function BloodDonationDetails() {
   };
 
   const handleReport = () => {
-    // هنا فيما بعد ممكن تستعمل API خاص بالتبليغ
     // eslint-disable-next-line no-alert
     window.alert('سيتم إضافة نظام تبليغ متكامل لاحقًا، شكرًا لتنبيهك 🙏');
   };
@@ -487,7 +501,6 @@ export default function BloodDonationDetails() {
     <div className="blood-details-container" dir="rtl">
       {/* ---------- بطاقة التفاصيل الرئيسية ---------- */}
       <Card className="details-card w-100 mb-3" style={{ maxWidth: 1200 }}>
-        {/* هيدر بسيط متدرّج من اليمين لليسار */}
         <Card.Header className="details-header-compact text-white">
           <div className="details-header-layout">
             <Button
@@ -764,9 +777,16 @@ export default function BloodDonationDetails() {
       {isOwner ? (
         <>
           <div
-            className="d-flex gap-2 w-100 mb-3"
-            style={{ maxWidth: 1200 }}
+            className="d-flex flex-column w-100 mb-3"
+            style={{ maxWidth: 1200, gap: 8 }}
           >
+            {/* 🔹 فقرة توضيحية لصاحب الطلب */}
+            <Alert variant="info" className="mb-1 small">
+              ➊ عند وصول عروض جديدة، يمكنك <strong>قبول العرض المناسب</strong> أولاً.<br />
+              ➋ بعد تنفيذ التبرع فعليًا، اضغط على <strong>تأكيد الاستلام</strong> لتسجيل التنفيذ.<br />
+              ➌ بعد ذلك يمكنك <strong>إضافة تقييم للمتبرع</strong> لتحسين موثوقية المنصة.
+            </Alert>
+
             <Button
               variant={tab === 'offers' ? 'success' : 'outline-success'}
               size="sm"
@@ -801,6 +821,8 @@ export default function BloodDonationDetails() {
                     [donor.firstName, donor.lastName].filter(Boolean).join(' ') || '—';
 
                   const canManage = !isExpired(request.deadline);
+                  const canAccept = canManage && ofr.status === 'pending';
+                  const canFulfill = canManage && ofr.status === 'accepted';
                   const canRate = ofr.status === 'fulfilled' || ofr.status === 'rated';
 
                   return (
@@ -828,20 +850,30 @@ export default function BloodDonationDetails() {
                             </Button>
                           )}
 
-                          {canManage &&
-                            (ofr.status === 'pending' ||
-                              ofr.status === 'accepted') && (
-                              <Button
-                                size="sm"
-                                variant="success"
-                                onClick={() => handleFulfill(ofr._id)}
-                              >
-                                ✅ تأكيد الاستلام
-                              </Button>
-                            )}
+                          {/* ✅ زر قبول العرض (صاحب الطلب) */}
+                          {canAccept && (
+                            <Button
+                              size="sm"
+                              variant="outline-success"
+                              onClick={() => handleAccept(ofr._id)}
+                            >
+                              ✔️ قبول العرض
+                            </Button>
+                          )}
+
+                          {/* ✅ تأكيد الاستلام بعد القبول */}
+                          {canFulfill && (
+                            <Button
+                              size="sm"
+                              variant="success"
+                              onClick={() => handleFulfill(ofr._id)}
+                            >
+                              ✅ تأكيد الاستلام
+                            </Button>
+                          )}
 
                           {/* 🔹 عرض/إضافة تقييم عبر مودال */}
-                          {canManage && canRate && (
+                          {canRate && (
                             <div className="d-inline-flex flex-column align-items-start gap-1">
                               {ofr.ratingByRecipient > 0 ? (
                                 <div className="d-inline-flex align-items-center gap-2">
@@ -924,6 +956,33 @@ export default function BloodDonationDetails() {
 
             {myOffer ? (
               <div className="d-grid gap-2">
+                {/* 🔹 نص يوضح المرحلة الحالية للمتبرع */}
+                <div className="small text-muted">
+                  {myOffer.status === 'pending' && (
+                    <>
+                      عرضك في مرحلة <strong>الانتظار</strong>. سيتمكن صاحب الطلب من مراجعة
+                      العروض، وعند قبول عرضك ستصلك إشعارات بالتحديث.
+                    </>
+                  )}
+                  {myOffer.status === 'accepted' && (
+                    <>
+                      تم <strong>قبول عرضك</strong> 🎉. يُفضّل التواصل مع صاحب الطلب لتنسيق
+                      موعد ومكان التبرع، وبعد التنفيذ سيتم تأكيد العملية من النظام.
+                    </>
+                  )}
+                  {myOffer.status === 'fulfilled' && (
+                    <>
+                      تم <strong>تأكيد تنفيذ التبرع</strong>. يمكنك لاحقاً إضافة تقييمك
+                      للتجربة من صفحة <strong>عروضي على طلبات التبرع بالدم</strong>.
+                    </>
+                  )}
+                  {myOffer.status === 'rated' && (
+                    <>
+                      اكتملت عملية التبرع والتقييم. شكرًا لمساهمتك في إنقاذ حياة 🙏.
+                    </>
+                  )}
+                </div>
+
                 <div>
                   لقد أعلنت تبرعك لهذا الطلب في{' '}
                   <strong>

@@ -2,11 +2,19 @@ const mongoose = require("mongoose");
 
 const donationRequestConfirmationSchema = new mongoose.Schema(
   {
-    requestId: { type: mongoose.Schema.Types.ObjectId, ref: "DonationRequest", required: true },
-    donor:     { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    requestId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "DonationRequest",
+      required: true,
+    },
+    donor: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
 
     message: { type: String, trim: true },
-    amount:  { type: Number, default: 0 },
+    amount: { type: Number, default: 0 },
 
     method: {
       type: String,
@@ -22,11 +30,13 @@ const donationRequestConfirmationSchema = new mongoose.Schema(
       default: "pending",
     },
 
+    // إثباتات التحويل / التبرع (صور / PDF)
     proofFiles: { type: [String], default: [] },
 
-    acceptedAt:  { type: Date },
+    acceptedAt: { type: Date },
     fulfilledAt: { type: Date },
-    ratingByDonor:     { type: Number, min: 1, max: 5 },
+
+    ratingByDonor: { type: Number, min: 1, max: 5 },
     ratingByRecipient: { type: Number, min: 1, max: 5 },
   },
   { timestamps: true }

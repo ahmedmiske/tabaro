@@ -1,11 +1,8 @@
+// server/controllers/donationConfirmationController.js
 const mongoose = require("mongoose");
 const BloodRequest = require("../models/bloodRequest");
 const DonationConfirmation = require("../models/DonationConfirmation");
 const Notification = require("../models/Notification");
-const {
-  updateUserRatingAsRecipient,
-  updateUserRatingAsDonor,
-} = require("./ratingHelpers");
 
 /** إنشاء عرض تبرع لطلب دم (مرّة واحدة لكل متبرّع/طلب) */
 async function createDonationConfirmation(req, res) {
@@ -22,10 +19,12 @@ async function createDonationConfirmation(req, res) {
     const request = await BloodRequest.findById(requestId).lean();
     if (!request) return res.status(404).json({ message: "طلب غير موجود" });
 
+    // لا يمكن للمالك أن يعلن التبرع لنفس طلبه
     if (String(request.userId) === String(userId)) {
       return res.status(400).json({ message: "لا يمكنك إعلان التبرع لطلبك." });
     }
 
+    // منع التكرار — متبرع واحد لكل طلب
     const existing = await DonationConfirmation.findOne({ requestId, donor: userId });
     if (existing) {
       return res.status(200).json({ already: true, id: existing._id });
@@ -43,9 +42,11 @@ async function createDonationConfirmation(req, res) {
       proposedTime: proposedTime ? new Date(proposedTime) : undefined,
     });
 
+    // إشعار لصاحب الطلب بوصول عرض جديد
     try {
       await Notification.create({
         userId: request.userId,
+        sender: userId,
         title: "عرض تبرع جديد",
         message: "لديك عرض تبرع جديد على طلب الدم الخاص بك.",
         read: false,
@@ -64,22 +65,54 @@ async function createDonationConfirmation(req, res) {
   }
 }
 
-/** (توافقي) قبول العرض — لا تستخدمه الواجهة */
+/** ✅ قبول العرض من طرف صاحب الطلب */
 async function acceptDonationConfirmation(req, res) {
   try {
     const { id } = req.params;
+
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "معرّف غير صالح" });
     }
-    const c = await DonationConfirmation.findById(id).populate("donor requestId");
+
+    const c = await DonationConfirmation.findById(id).populate("requestId");
     if (!c) return res.status(404).json({ message: "العرض غير موجود" });
+
+    // صاحب الطلب هو الوحيد المخوّل بقبول العرض
     if (String(c.recipientId) !== String(req.user._id)) {
-      return res.status(403).json({ message: "غير مصرح" });
+      return res.status(403).json({ message: "غير مصرح: فقط صاحب الطلب يمكنه قبول العرض" });
     }
+
+    // العرض لا يزال في الانتظار
+    if (c.status !== "pending") {
+      return res.status(400).json({ message: "هذا العرض تمت معالجته مسبقًا" });
+    }
+
+    // (اختياري) التحقق أن الطلب نفسه لم ينتهِ
+    if (c.requestId?.deadline) {
+      const deadline = new Date(c.requestId.deadline);
+      if (!Number.isNaN(deadline.getTime()) && deadline < new Date()) {
+        return res.status(400).json({ message: "لا يمكن قبول عرض بعد انتهاء المهلة المحددة للطلب" });
+      }
+    }
+
     c.status = "accepted";
     c.acceptedAt = new Date();
     await c.save();
-    res.json({ message: "تم تحديث العرض إلى قيد الاستلام (مقبول داخليًا)" });
+
+    // إشعار للمتبرّع أن عرضه تم قبوله
+    try {
+      await Notification.create({
+        userId: c.donor,
+        sender: req.user._id,
+        title: "تم قبول عرض التبرع",
+        message: "تم قبول عرضك للتبرع بالدم، الرجاء التنسيق مع صاحب الطلب لإتمام التبرع.",
+        read: false,
+        type: "donation_offer_accepted",
+        referenceId: c._id,
+      });
+    } catch (_) {}
+
+    return res.json({ message: "تم قبول العرض بنجاح", confirmation: c });
   } catch (err) {
     console.error("❌ acceptDonationConfirmation:", err);
     res.status(500).json({ message: "خطأ في السيرفر" });
@@ -102,13 +135,20 @@ async function markAsFulfilled(req, res) {
       return res.json({ message: "محفوظ مسبقًا", confirmation: c });
     }
 
+    // من المنطقي أن يكون مقبولاً قبل التنفيذ، لكن لا نلزم ذلك بقوة (يمكنك تفعيل الشرط لو رغبت)
+    // if (c.status !== "accepted") {
+    //   return res.status(400).json({ message: "يجب قبول العرض أولاً قبل تأكيد التنفيذ" });
+    // }
+
     c.status = "fulfilled";
     c.fulfilledAt = new Date();
     await c.save();
 
+    // إشعار للطرف الآخر
     try {
       await Notification.create({
         userId: isDonor ? c.recipientId : c.donor,
+        sender: req.user._id,
         title: "تم تأكيد التنفيذ",
         message: "تم تأكيد تنفيذ التبرع. يمكنك الآن إضافة التقييم.",
         read: false,
@@ -133,9 +173,7 @@ async function rateDonation(req, res) {
     let { rating } = req.body;
     rating = Number(rating);
     if (!rating || rating < 1 || rating > 5) {
-      return res
-        .status(400)
-        .json({ message: "قيمة التقييم يجب أن تكون بين 1 و 5" });
+      return res.status(400).json({ message: "قيمة التقييم يجب أن تكون بين 1 و 5" });
     }
 
     const isDonor = String(req.user._id) === String(c.donor);
@@ -144,27 +182,18 @@ async function rateDonation(req, res) {
       return res.status(403).json({ message: "غير مصرح للتقييم" });
     }
 
-    // حفظ التقييم في السجل
-    if (isDonor) {
-      c.ratingByDonor = rating;        // المتبرع يقيّم صاحب الطلب
-    }
-    if (isRecipient) {
-      c.ratingByRecipient = rating;    // صاحب الطلب يقيّم المتبرع
+    // ❗️مهم: لا تقييم قبل تنفيذ التبرع
+    if (c.status !== "fulfilled" && c.status !== "rated") {
+      return res.status(400).json({
+        message: "لا يمكن التقييم إلا بعد تأكيد تنفيذ التبرع (تم التنفيذ).",
+      });
     }
 
-    // نعتبرها حالة "rated" طالما هناك تقييم واحد على الأقل
+    if (isDonor) c.ratingByDonor = rating;
+    if (isRecipient) c.ratingByRecipient = rating;
+
     c.status = "rated";
     await c.save();
-
-    // 🔁 تحديث تقييم المستخدم الهدف:
-    // - لو الحالي متبرع → يقيم صاحب الطلب → تحديث ratingAsRecipient لصاحب الطلب
-    // - لو الحالي صاحب طلب → يقيم المتبرع → تحديث ratingAsDonor للمتبرع
-    if (isDonor) {
-      await updateUserRatingAsRecipient(c.recipientId);
-    }
-    if (isRecipient) {
-      await updateUserRatingAsDonor(c.donor);
-    }
 
     res.json({ message: "تم حفظ التقييم", confirmation: c });
   } catch (err) {
@@ -231,12 +260,15 @@ async function cancelDonationConfirmation(req, res) {
 
     const c = await DonationConfirmation.findById(id);
     if (!c) return res.status(404).json({ message: "العرض غير موجود" });
+
     if (String(c.donor) !== String(req.user._id)) {
       return res.status(403).json({ message: "غير مصرح" });
     }
+
     if (c.status !== "pending") {
       return res.status(400).json({ message: "لا يمكن إلغاء العرض بعد معالجته" });
     }
+
     await c.deleteOne();
     res.json({ message: "تم الإلغاء" });
   } catch (err) {
@@ -245,7 +277,7 @@ async function cancelDonationConfirmation(req, res) {
   }
 }
 
-/** ✅ الحصول على تأكيد واحد بالمعرّف */
+/** الحصول على تأكيد واحد بالمعرّف */
 async function getDonationConfirmationById(req, res) {
   try {
     const { id } = req.params;
@@ -257,21 +289,11 @@ async function getDonationConfirmationById(req, res) {
       .populate({
         path: "requestId",
         model: "BloodRequest",
-        select: "title bloodType deadline userId requestType kind category",
-        populate: {
-          path: "userId",
-          model: "User",
-          select: "firstName lastName profileImage ratingAsRecipient ratingAsDonor",
-        },
+        select: "title bloodType deadline userId requestType kind category city hospitalName location",
+        populate: { path: "userId", model: "User", select: "firstName lastName profileImage" },
       })
-      .populate({
-        path: "donor",
-        select: "firstName lastName profileImage ratingAsDonor ratingAsRecipient",
-      })
-      .populate({
-        path: "recipientId",
-        select: "firstName lastName profileImage ratingAsDonor ratingAsRecipient",
-      })
+      .populate({ path: "donor",       select: "firstName lastName profileImage" })
+      .populate({ path: "recipientId", select: "firstName lastName profileImage" })
       .lean();
 
     if (!doc) return res.status(404).json({ message: "غير موجود" });

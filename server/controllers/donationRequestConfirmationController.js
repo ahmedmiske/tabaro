@@ -17,9 +17,14 @@ exports.createConfirmation = async (req, res) => {
     // جمع الملفات المرفوعة (اسم الحقل: files)
     const files = [];
     if (req.files?.files) {
-      for (const f of req.files.files) files.push(`/uploads/donationRequestConfirmations/${f.filename}`);
+      // احتمال أن الميدل وير ترجع req.files.files
+      for (const f of req.files.files) {
+        files.push(`/uploads/donationRequestConfirmations/${f.filename}`);
+      }
     } else if (Array.isArray(req.files)) {
-      for (const f of req.files) files.push(`/uploads/donationRequestConfirmations/${f.filename}`);
+      for (const f of req.files) {
+        files.push(`/uploads/donationRequestConfirmations/${f.filename}`);
+      }
     } else if (req.file) {
       files.push(`/uploads/donationRequestConfirmations/${req.file.filename}`);
     }
@@ -36,16 +41,22 @@ exports.createConfirmation = async (req, res) => {
     });
 
     // إشعار صاحب الطلب
-    const request = await DonationRequest.findById(requestId).select("userId category type");
+    const request = await DonationRequest.findById(requestId).select(
+      "userId category type"
+    );
+
     if (request?.userId) {
       await notifyUser({
         app: req.app,
         userId: request.userId,
         sender: donorId,
         title: "تأكيد تبرع جديد",
-        message: (message && message.trim())
-          ? message.trim()
-          : `تلقّيت تأكيد تبرع لطلبك ${request?.category || ""}${request?.type ? ` (${request.type})` : ""}`,
+        message:
+          (message && message.trim())
+            ? message.trim()
+            : `تلقّيت تأكيد تبرع لطلبك ${
+                request?.category || ""
+              }${request?.type ? ` (${request.type})` : ""}`,
         type: "donation_request_confirmation",
         referenceId: doc._id,
       });
@@ -54,15 +65,19 @@ exports.createConfirmation = async (req, res) => {
     return res.status(201).json({ message: "تم إنشاء التأكيد", data: doc });
   } catch (e) {
     console.error("createConfirmation error:", e);
-    return res.status(500).json({ message: "فشل إنشاء التأكيد", error: e.message });
+    return res
+      .status(500)
+      .json({ message: "فشل إنشاء التأكيد", error: e.message });
   }
 };
 
-/** (اختياري) قبول داخلي للتوافق — الواجهة لا تستخدمه */
+/** (اختياري) قبول داخلي للتوافق — الواجهة لا تستخدمه للتبرع عن بُعد */
 exports.acceptConfirmation = async (req, res) => {
   try {
     const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ message: "معرّف غير صالح" });
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "معرّف غير صالح" });
+    }
 
     const c = await DonationRequestConfirmation.findById(id);
     if (!c) return res.status(404).json({ message: "التأكيد غير موجود" });
@@ -76,10 +91,10 @@ exports.acceptConfirmation = async (req, res) => {
     c.acceptedAt = new Date();
     await c.save();
 
-    res.json({ message: "تم التحديث إلى قيد الاستلام", data: c });
+    return res.json({ message: "تم التحديث إلى قيد الاستلام", data: c });
   } catch (e) {
     console.error("acceptConfirmation error:", e);
-    res.status(500).json({ message: "خطأ في السيرفر" });
+    return res.status(500).json({ message: "خطأ في السيرفر" });
   }
 };
 
@@ -87,83 +102,166 @@ exports.acceptConfirmation = async (req, res) => {
 exports.fulfillConfirmation = async (req, res) => {
   try {
     const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ message: "معرّف غير صالح" });
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "معرّف غير صالح" });
+    }
 
     const c = await DonationRequestConfirmation.findById(id);
     if (!c) return res.status(404).json({ message: "التأكيد غير موجود" });
 
     const reqDoc = await DonationRequest.findById(c.requestId).select("userId");
     if (!reqDoc || String(reqDoc.userId) !== String(req.user._id)) {
-      return res.status(403).json({ message: "غير مصرح: فقط صاحب الطلب" });
+      return res
+        .status(403)
+        .json({ message: "غير مصرح: فقط صاحب الطلب يمكنه التأكيد" });
     }
 
     c.status = "fulfilled";
     c.fulfilledAt = new Date();
     await c.save();
 
-    res.json({ message: "تم تأكيد الاستلام", data: c });
+    // ✅ إشعار المتبرع أن التبرع تم تأكيد استلامه (تحسين UX)
+    try {
+      await notifyUser({
+        app: req.app,
+        userId: c.donor,
+        sender: reqDoc.userId,
+        title: "تم تأكيد استلام تبرعك",
+        message: "شكرًا لتبرعك 💚، قام صاحب الطلب بتأكيد الاستلام.",
+        type: "donation_request_fulfilled",
+        referenceId: c._id,
+      });
+    } catch (notifyErr) {
+      console.error("notify on fulfill error:", notifyErr);
+    }
+
+    return res.json({ message: "تم تأكيد الاستلام", data: c });
   } catch (e) {
     console.error("fulfillConfirmation error:", e);
-    res.status(500).json({ message: "خطأ في السيرفر" });
+    return res.status(500).json({ message: "خطأ في السيرفر" });
   }
 };
 
-/** تقييم */
+/** تقييم (بعد الاستلام فقط) */
 exports.rateConfirmation = async (req, res) => {
   try {
     const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ message: "معرّف غير صالح" });
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "معرّف غير صالح" });
+    }
 
     const c = await DonationRequestConfirmation.findById(id);
     if (!c) return res.status(404).json({ message: "التأكيد غير موجود" });
 
     const { rating } = req.body || {};
-    if (rating == null) return res.status(400).json({ message: "الرجاء إرسال التقييم" });
+    if (rating == null) {
+      return res.status(400).json({ message: "الرجاء إرسال التقييم" });
+    }
+
+    // ✅ لا تقييم قبل أن يكون التبرع مُستلم (fulfilled أو rated)
+    if (!["fulfilled", "rated"].includes(c.status)) {
+      return res.status(400).json({
+        message: "لا يمكن التقييم قبل تأكيد استلام التبرع.",
+      });
+    }
 
     const reqDoc = await DonationRequest.findById(c.requestId).select("userId");
-    if (String(req.user._id) === String(c.donor)) c.ratingByDonor = rating;
-    else if (reqDoc && String(reqDoc.userId) === String(req.user._id)) c.ratingByRecipient = rating;
-    else return res.status(403).json({ message: "غير مصرح للتقييم" });
+
+    let raterType = null;
+
+    if (String(req.user._id) === String(c.donor)) {
+      c.ratingByDonor = rating;
+      raterType = "donor";
+    } else if (reqDoc && String(reqDoc.userId) === String(req.user._id)) {
+      c.ratingByRecipient = rating;
+      raterType = "recipient";
+    } else {
+      return res.status(403).json({ message: "غير مصرح للتقييم" });
+    }
 
     c.status = "rated";
     await c.save();
 
-    res.json({ message: "تم حفظ التقييم", data: c });
+    // ✅ إشعارات بسيطة بين الطرفين (تحسين تجربة المستخدم)
+    try {
+      if (raterType === "donor" && reqDoc?.userId) {
+        await notifyUser({
+          app: req.app,
+          userId: reqDoc.userId,
+          sender: c.donor,
+          title: "تقييم جديد من المتبرع",
+          message: "قام المتبرع بتقييم تجربته مع طلبك.",
+          type: "donation_request_rated",
+          referenceId: c._id,
+        });
+      } else if (raterType === "recipient") {
+        await notifyUser({
+          app: req.app,
+          userId: c.donor,
+          sender: reqDoc?.userId,
+          title: "تقييم جديد من صاحب الطلب",
+          message: "قام صاحب الطلب بتقييم تجربته مع تبرعك.",
+          type: "donation_request_rated",
+          referenceId: c._id,
+        });
+      }
+    } catch (notifyErr) {
+      console.error("notify on rate error:", notifyErr);
+    }
+
+    return res.json({ message: "تم حفظ التقييم", data: c });
   } catch (e) {
     console.error("rateConfirmation error:", e);
-    res.status(500).json({ message: "خطأ في السيرفر" });
+    return res.status(500).json({ message: "خطأ في السيرفر" });
   }
 };
 
 /** العروض التي تلقيتها (أنا صاحب الطلب) */
 exports.getMyDonationOffers = async (req, res) => {
   try {
-    const myRequests = await DonationRequest.find({ userId: req.user._id }).select("_id");
-    const ids = myRequests.map(r => r._id);
-    const items = await DonationRequestConfirmation.find({ requestId: { $in: ids } })
-      .populate("donor", "firstName lastName email phoneNumber profileImage rating averageRating")
+    const myRequests = await DonationRequest.find({
+      userId: req.user._id,
+    }).select("_id");
+    const ids = myRequests.map((r) => r._id);
+
+    const items = await DonationRequestConfirmation.find({
+      requestId: { $in: ids },
+    })
+      .populate(
+        "donor",
+        "firstName lastName email phoneNumber profileImage rating averageRating"
+      )
       .sort({ createdAt: -1 });
-    res.json(items);
+
+    return res.json(items);
   } catch (e) {
     console.error("getMyDonationOffers error:", e);
-    res.status(500).json({ message: "خطأ في السيرفر" });
+    return res.status(500).json({ message: "خطأ في السيرفر" });
   }
 };
 
 /** العروض التي أرسلتها (أنا المتبرع) */
 exports.getMySentOffers = async (req, res) => {
   try {
-    const items = await DonationRequestConfirmation.find({ donor: req.user._id })
+    const items = await DonationRequestConfirmation.find({
+      donor: req.user._id,
+    })
       .populate({
         path: "requestId",
         model: "DonationRequest",
-        populate: { path: "userId", model: "User", select: "firstName lastName profileImage rating averageRating" },
+        populate: {
+          path: "userId",
+          model: "User",
+          select:
+            "firstName lastName profileImage rating averageRating",
+        },
       })
       .sort({ createdAt: -1 });
-    res.json(items);
+
+    return res.json(items);
   } catch (e) {
     console.error("getMySentOffers error:", e);
-    res.status(500).json({ message: "خطأ في السيرفر" });
+    return res.status(500).json({ message: "خطأ في السيرفر" });
   }
 };
 
@@ -171,15 +269,21 @@ exports.getMySentOffers = async (req, res) => {
 exports.getOffersByRequestId = async (req, res) => {
   try {
     const { requestId } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(requestId)) return res.status(400).json({ message: "requestId غير صالح" });
+    if (!mongoose.Types.ObjectId.isValid(requestId)) {
+      return res.status(400).json({ message: "requestId غير صالح" });
+    }
 
     const list = await DonationRequestConfirmation.find({ requestId })
-      .populate("donor", "firstName lastName email phoneNumber profileImage rating averageRating")
+      .populate(
+        "donor",
+        "firstName lastName email phoneNumber profileImage rating averageRating"
+      )
       .sort({ createdAt: -1 });
-    res.json(list);
+
+    return res.json(list);
   } catch (e) {
     console.error("getOffersByRequestId error:", e);
-    res.status(500).json({ message: "خطأ في السيرفر" });
+    return res.status(500).json({ message: "خطأ في السيرفر" });
   }
 };
 
@@ -187,22 +291,30 @@ exports.getOffersByRequestId = async (req, res) => {
 exports.cancelConfirmation = async (req, res) => {
   try {
     const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) return res.status(400).json({ message: "معرّف غير صالح" });
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "معرّف غير صالح" });
+    }
 
     const c = await DonationRequestConfirmation.findById(id);
     if (!c) return res.status(404).json({ message: "التأكيد غير موجود" });
-    if (String(c.donor) !== String(req.user._id)) return res.status(403).json({ message: "غير مصرح" });
-    if (c.status !== "pending") return res.status(400).json({ message: "لا يمكن إلغاء التأكيد بعد معالجته" });
+    if (String(c.donor) !== String(req.user._id)) {
+      return res.status(403).json({ message: "غير مصرح" });
+    }
+    if (c.status !== "pending") {
+      return res
+        .status(400)
+        .json({ message: "لا يمكن إلغاء التأكيد بعد معالجته" });
+    }
 
     await c.deleteOne();
-    res.json({ message: "تم الإلغاء" });
+    return res.json({ message: "تم الإلغاء" });
   } catch (e) {
     console.error("cancelConfirmation error:", e);
-    res.status(500).json({ message: "خطأ في السيرفر" });
+    return res.status(500).json({ message: "خطأ في السيرفر" });
   }
 };
 
-/** ✅ جديد: جلب تأكيد طلب تبرّع واحد بالمعرّف */
+/** ✅ جلب تأكيد طلب تبرّع واحد بالمعرّف */
 exports.getDonationRequestConfirmationById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -215,9 +327,16 @@ exports.getDonationRequestConfirmationById = async (req, res) => {
         path: "requestId",
         model: "DonationRequest",
         select: "title category type deadline userId",
-        populate: { path: "userId", model: "User", select: "firstName lastName profileImage" },
+        populate: {
+          path: "userId",
+          model: "User",
+          select: "firstName lastName profileImage",
+        },
       })
-      .populate({ path: "donor", select: "firstName lastName profileImage" })
+      .populate({
+        path: "donor",
+        select: "firstName lastName profileImage",
+      })
       .lean();
 
     if (!doc) return res.status(404).json({ message: "غير موجود" });
@@ -225,6 +344,6 @@ exports.getDonationRequestConfirmationById = async (req, res) => {
     return res.json({ data: doc });
   } catch (e) {
     console.error("getDonationRequestConfirmationById error:", e);
-    res.status(500).json({ message: "خطأ في السيرفر" });
+    return res.status(500).json({ message: "خطأ في السيرفر" });
   }
 };
