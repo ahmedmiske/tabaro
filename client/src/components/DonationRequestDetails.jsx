@@ -933,7 +933,7 @@ export default function DonationRequestDetails() {
           {/* المالك: عرض العروض */}
           {isOwner && (
             <div className="section-card mt-3">
-              <div className="section-title">العروض المقدّمة</div>
+              <div className="dtg-section-title">العروض المقدّمة</div>
               <Table
                 striped
                 bordered
@@ -1221,7 +1221,7 @@ export default function DonationRequestDetails() {
                                     </div>
 
                                     <div className="mb-3">
-                                      <div className="section-title">
+                                      <div className="dtg-section-title">
                                         المرفقات
                                       </div>
                                       {confFiles2.length === 0 ? (
@@ -1332,7 +1332,7 @@ export default function DonationRequestDetails() {
                                     </div>
 
                                     <div>
-                                      <div className="section-title">
+                                      <div className="dtg-section-title">
                                         سجل النشاط
                                       </div>
                                       {activityById[c._id]
@@ -1449,7 +1449,7 @@ export default function DonationRequestDetails() {
               {/* تبرعاتي السابقة لهذا الطلب */}
               {myOffers.length > 0 && (
                 <div className="section-card mt-3">
-                  <div className="section-title">
+                  <div className="dtg-section-title">
                     تبرعاتك السابقة لهذا الطلب
                   </div>
 
@@ -1537,7 +1537,7 @@ export default function DonationRequestDetails() {
               )}
 
               <div className="d-flex justify-content-between align-items-center mt-3 mb-2">
-                <div className="section-title m-0">
+                <div className="dtg-section-title m-0">
                   التفاعل مع الطلب
                 </div>
               </div>

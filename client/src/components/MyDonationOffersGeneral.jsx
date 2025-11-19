@@ -201,7 +201,7 @@ const MyDonationOffersGeneral = () => {
   return (
     <div className="my-donation-offers">
       <div className="header-bar mb-3">
-        <div className="title-wrap">
+        <div className="dg-title-wrap">
           <span className="title-icon"><i className="fas fa-hand-holding-heart" /></span>
           <h4 className="m-0 fw-bold">عروضي على طلبات التبرع العامة</h4>
         </div>
