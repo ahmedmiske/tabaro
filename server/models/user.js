@@ -1,4 +1,3 @@
-// server/models/user.js
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
@@ -39,6 +38,18 @@ const userSchema = new mongoose.Schema(
 
     // صورة المستخدم
     profileImage: { type: String, default: "" },
+
+    // ⭐ تقييم المستخدم كمتبرِّع (يُقيّمه أصحاب الطلبات)
+    ratingAsDonor: {
+      avg: { type: Number, default: 0 },   // متوسط التقييم 1–5
+      count: { type: Number, default: 0 }, // عدد التقييمات
+    },
+
+    // ⭐ تقييم المستخدم كصاحب طلب (يُقيّمه المتبرعون)
+    ratingAsRecipient: {
+      avg: { type: Number, default: 0 },
+      count: { type: Number, default: 0 },
+    },
 
     // الدور والحالة
     role: {

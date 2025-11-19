@@ -2,6 +2,10 @@ const mongoose = require("mongoose");
 const BloodRequest = require("../models/bloodRequest");
 const DonationConfirmation = require("../models/DonationConfirmation");
 const Notification = require("../models/Notification");
+const {
+  updateUserRatingAsRecipient,
+  updateUserRatingAsDonor,
+} = require("./ratingHelpers");
 
 /** إنشاء عرض تبرع لطلب دم (مرّة واحدة لكل متبرّع/طلب) */
 async function createDonationConfirmation(req, res) {
@@ -129,7 +133,9 @@ async function rateDonation(req, res) {
     let { rating } = req.body;
     rating = Number(rating);
     if (!rating || rating < 1 || rating > 5) {
-      return res.status(400).json({ message: "قيمة التقييم يجب أن تكون بين 1 و 5" });
+      return res
+        .status(400)
+        .json({ message: "قيمة التقييم يجب أن تكون بين 1 و 5" });
     }
 
     const isDonor = String(req.user._id) === String(c.donor);
@@ -138,11 +144,27 @@ async function rateDonation(req, res) {
       return res.status(403).json({ message: "غير مصرح للتقييم" });
     }
 
-    if (isDonor) c.ratingByDonor = rating;
-    if (isRecipient) c.ratingByRecipient = rating;
+    // حفظ التقييم في السجل
+    if (isDonor) {
+      c.ratingByDonor = rating;        // المتبرع يقيّم صاحب الطلب
+    }
+    if (isRecipient) {
+      c.ratingByRecipient = rating;    // صاحب الطلب يقيّم المتبرع
+    }
 
+    // نعتبرها حالة "rated" طالما هناك تقييم واحد على الأقل
     c.status = "rated";
     await c.save();
+
+    // 🔁 تحديث تقييم المستخدم الهدف:
+    // - لو الحالي متبرع → يقيم صاحب الطلب → تحديث ratingAsRecipient لصاحب الطلب
+    // - لو الحالي صاحب طلب → يقيم المتبرع → تحديث ratingAsDonor للمتبرع
+    if (isDonor) {
+      await updateUserRatingAsRecipient(c.recipientId);
+    }
+    if (isRecipient) {
+      await updateUserRatingAsDonor(c.donor);
+    }
 
     res.json({ message: "تم حفظ التقييم", confirmation: c });
   } catch (err) {
@@ -151,7 +173,7 @@ async function rateDonation(req, res) {
   }
 }
 
-/** العروض التي تلقيتها */
+/** العروض التي تلقيتها (أنا صاحب الطلب) */
 async function getMyDonationOffers(req, res) {
   try {
     const items = await DonationConfirmation.find({ recipientId: req.user._id })
@@ -164,7 +186,7 @@ async function getMyDonationOffers(req, res) {
   }
 }
 
-/** العروض التي أرسلتها */
+/** العروض التي أرسلتها (أنا المتبرع) */
 async function getMySentOffers(req, res) {
   try {
     const items = await DonationConfirmation.find({ donor: req.user._id })
@@ -223,7 +245,7 @@ async function cancelDonationConfirmation(req, res) {
   }
 }
 
-/** ✅ جديد: الحصول على تأكيد واحد بالمعرّف */
+/** ✅ الحصول على تأكيد واحد بالمعرّف */
 async function getDonationConfirmationById(req, res) {
   try {
     const { id } = req.params;
@@ -236,10 +258,20 @@ async function getDonationConfirmationById(req, res) {
         path: "requestId",
         model: "BloodRequest",
         select: "title bloodType deadline userId requestType kind category",
-        populate: { path: "userId", model: "User", select: "firstName lastName profileImage" },
+        populate: {
+          path: "userId",
+          model: "User",
+          select: "firstName lastName profileImage ratingAsRecipient ratingAsDonor",
+        },
       })
-      .populate({ path: "donor",       select: "firstName lastName profileImage" })
-      .populate({ path: "recipientId", select: "firstName lastName profileImage" })
+      .populate({
+        path: "donor",
+        select: "firstName lastName profileImage ratingAsDonor ratingAsRecipient",
+      })
+      .populate({
+        path: "recipientId",
+        select: "firstName lastName profileImage ratingAsDonor ratingAsRecipient",
+      })
       .lean();
 
     if (!doc) return res.status(404).json({ message: "غير موجود" });
@@ -260,5 +292,5 @@ module.exports = {
   getMySentOffers,
   getOffersByRequestId,
   cancelDonationConfirmation,
-  getDonationConfirmationById, // ✅ تصدير الجديد
+  getDonationConfirmationById,
 };

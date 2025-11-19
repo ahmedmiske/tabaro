@@ -1,37 +1,259 @@
-.my-donation-offers .clickable-row:hover { background: #f7f9fc; }
-
-.header-bar {
-  display:flex; gap:12px; align-items:center; justify-content:space-between;
-  padding:10px 12px; border:1px solid #e9ecef; border-radius:12px; background:#fff;
+.my-donation-offers .clickable-row:hover {
+  background: #f7f9fc;
 }
-.header-bar.sticky { position:sticky; top:68px; z-index:10; box-shadow:0 4px 18px rgba(0,0,0,0.04); }
-.header-bar .title-wrap { display:flex; align-items:center; gap:10px; }
-.header-bar .title-icon { width:36px;height:36px;border-radius:10px;background:#f1f5ff;display:inline-flex;align-items:center;justify-content:center;font-size:16px;color:#1f57ff; }
-.header-bar .status-filter { min-width:220px; text-align:center; }
-.form-select { font-size:14px; padding:6px 12px; border:1px solid #d1d5db; border-radius:8px; background:#fff; text-align:center; }
 
-@media (max-width:576px){ .header-bar{flex-direction:column; align-items:stretch; gap:8px;} .header-bar .status-filter{min-width:auto;} }
+/* ===== الهيدر ===== */
+.header-bar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  background: #fff;
+}
+.header-bar.sticky {
+  position: sticky;
+  top: 68px;
+  z-index: 10;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+}
+.header-bar .title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.header-bar .title-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #f1f5ff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: #1f57ff;
+}
+.header-bar .header-subtitle {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 2px;
+}
+.header-bar .status-filter {
+  min-width: 220px;
+  text-align: center;
+}
+.form-select {
+  font-size: 14px;
+  padding: 6px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  text-align: center;
+}
 
-.section-card { border:1px solid #e9ecef; border-radius:12px; background:#fff; overflow:hidden; }
-.section-head { padding:10px 12px; display:flex; align-items:center; justify-content:space-between; background:#fafbff; border-bottom:1px solid #eef1f6; }
+@media (max-width: 576px) {
+  .header-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .header-bar .status-filter {
+    min-width: auto;
+  }
+}
+
+/* ===== لوحة الإحصائيات ===== */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+  margin-bottom: 6px;
+}
+.stat-card {
+  border-radius: 12px;
+  padding: 6px 8px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+.stat-label {
+  font-size: 11px;
+  color: #6b7280;
+}
+.stat-value {
+  font-weight: 800;
+  font-size: 16px;
+  margin-top: 2px;
+}
+
+.stat-total {
+  background: #f5f5ff;
+  border-color: #d4d4ff;
+}
+.stat-pending {
+  background: #fff9e8;
+  border-color: #ffe1a3;
+}
+.stat-accepted {
+  background: #e8f7ff;
+  border-color: #b3e1ff;
+}
+.stat-done {
+  background: #e8fff4;
+  border-color: #a7f3d0;
+}
+.stat-canceled {
+  background: #f3f4f6;
+  border-color: #e5e7eb;
+}
+
+@media (max-width: 768px) {
+  .stats-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ===== كروت الأقسام ===== */
+.section-card {
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+}
+.section-head {
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fafbff;
+  border-bottom: 1px solid #eef1f6;
+}
+.section-head-titles {
+  display: flex;
+  flex-direction: column;
+}
+.section-sub {
+  margin-top: 2px;
+}
 
 /* كبسولة الوقت */
-.time-chip{ display:inline-flex; align-items:center; justify-content:center; gap:2px; width:52px; height:36px; border-radius:999px; font-weight:700; letter-spacing:.5px; border:1px solid #e6e9f0; background:#ffffff; }
-.time-chip .t{ font-size:12px; } .time-chip .b{ font-size:10px; opacity:.8; }
-.time-chip.chip--na{ opacity:.6; } .time-chip.chip--ok{ background:#f5fbff; border-color:#d7ecff; }
-.time-chip.chip--soon{ background:#fff9e9; border-color:#ffe6a8; }
-.time-chip.chip--urgent{ background:#fff1f1; border-color:#ffd5d5; }
-.time-chip.chip--expired{ background:#f2f2f2; border-color:#e1e1e1; color:#8f8f8f; }
+.time-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 52px;
+  height: 36px;
+  border-radius: 999px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  border: 1px solid #e6e9f0;
+  background: #ffffff;
+}
+.time-chip .t {
+  font-size: 12px;
+}
+.time-chip .b {
+  font-size: 10px;
+  opacity: 0.8;
+}
+.time-chip.chip--na {
+  opacity: 0.6;
+}
+.time-chip.chip--ok {
+  background: #f5fbff;
+  border-color: #d7ecff;
+}
+.time-chip.chip--soon {
+  background: #fff9e9;
+  border-color: #ffe6a8;
+}
+.time-chip.chip--urgent {
+  background: #fff1f1;
+  border-color: #ffd5d5;
+}
+.time-chip.chip--expired {
+  background: #f2f2f2;
+  border-color: #e1e1e1;
+  color: #8f8f8f;
+}
+
+/* خلية العنوان في الجدول */
+.cell-main-title {
+  font-weight: 700;
+  font-size: 0.94rem;
+  color: #0f172a;
+}
+.cell-sub {
+  font-size: 11px;
+  margin-top: 2px;
+}
+.dot-sep::before {
+  content: '•';
+}
 
 /* ==== بطاقات الموبايل ==== */
-.card-list{ list-style:none; margin:.5rem 0 0; padding:0; display:grid; gap:.75rem; }
-.card-item{
-  border:1px solid #e9ecef; border-radius:12px; background:#fff; padding:.8rem .9rem;
-  box-shadow:0 8px 18px rgba(0,0,0,.04); cursor:pointer;
+.card-list {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
 }
-.card-item:hover{ background:#f8fbff; }
-.card-item .ci-head{ display:flex; align-items:center; justify-content:space-between; gap:.75rem; margin-bottom:.5rem; }
-.card-item .ci-title{ font-weight:800; color:#0f172a; font-size:.98rem; }
-.card-item .ci-meta{ display:flex; flex-wrap:wrap; gap:.4rem; margin:.25rem 0 .6rem; }
-.card-item .ci-actions{ display:flex; gap:.4rem; flex-wrap:wrap; }
-.card-item .ci-rating{ display:flex; align-items:center; gap:.5rem; }
+.card-item {
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  background: #fff;
+  padding: 0.8rem 0.9rem;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+}
+.card-item:hover {
+  background: #f8fbff;
+}
+.card-item .ci-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+.card-item .ci-title {
+  font-weight: 800;
+  color: #0f172a;
+  font-size: 0.98rem;
+}
+.card-item .ci-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.25rem 0 0.3rem;
+}
+.card-item .ci-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-top: 0.4rem;
+}
+.card-item .ci-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+.ci-subinfo {
+  margin-top: 2px;
+}
+
+/* حاوية رئيسية */
+.my-donation-offers {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

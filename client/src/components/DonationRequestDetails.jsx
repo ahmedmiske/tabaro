@@ -507,7 +507,7 @@ export default function DonationRequestDetails() {
 
           {/* تفاصيل الطلب */}
           <div className="section-card">
-            <div className="section-title">تفاصيل الطلب</div>
+            <div className="dtg-section-title">تفاصيل الطلب</div>
 
             <div className="meta-row">
               <span className="chip">{req.category || '-'}</span>
@@ -538,7 +538,7 @@ export default function DonationRequestDetails() {
             {(isOwner || myOffers.length > 0 || contactForceOpen) &&
               Array.isArray(req.contactMethods) && req.contactMethods.length > 0 && (
                 <>
-                  <div className="section-title mt-3">وسائل التواصل</div>
+                  <div className="dtg-section-title mt-3">وسائل التواصل</div>
                   <div className="meta-row">
                     {req.contactMethods.map((c, i) => (<span key={i} className="chip">{methodLabel(c.method)}: {c.number || '-'}</span>))}
                   </div>
@@ -547,7 +547,7 @@ export default function DonationRequestDetails() {
 
             {Array.isArray(req.paymentMethods) && req.paymentMethods.length > 0 && (
               <>
-                <div className="section-title mt-3">وسائل الدفع</div>
+                <div className="dtg-section-title mt-3">وسائل الدفع</div>
                 <div className="meta-row">
                   {req.paymentMethods.map((p, i) => (<span key={i} className="chip">{p.method}: {p.phone || '-'}</span>))}
                 </div>
@@ -558,7 +558,7 @@ export default function DonationRequestDetails() {
           {/* وثائق داعمة */}
           {!!docs.length && (
             <div className="section-card mt-3">
-              <div className="section-title">الوثائق الداعمة</div>
+              <div className="dtg-section-title">الوثائق الداعمة</div>
               <div className="docs-grid">
                 {docs.map((d, i) => (
                   <div className="doc-tile" key={i}>
@@ -797,7 +797,7 @@ export default function DonationRequestDetails() {
               </div>
               <div className="action-toolbar mb-3">
                 {!expired && (
-                  <button type="button" className="btn-circle btn-donate" title="تأكيد التبرع"
+                  <button type="button" className="btn-circle gr-btn-donate" title="تأكيد التبرع"
                     onClick={() => toggleSection('confirm')} aria-label="تأكيد التبرع" disabled={submittingConfirm}>
                     <span role="img" aria-label="heart">💚</span>
                   </button>
