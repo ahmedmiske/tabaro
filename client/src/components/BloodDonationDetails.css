@@ -95,6 +95,7 @@
   border-radius: 999px;
   padding: 3px 10px;
   font-size: 0.8rem;
+  color: #065f46;
 }
 
 /* ========== الكروت الداخلية (تفاصيل، تواصل، وثائق) ========== */
@@ -185,16 +186,9 @@
 }
 
 .blood-details-container .chip {
-  background: #59d15f;
-  border: 1px solid #c1a23b;
-  color: white;
   padding: 4px 10px;
-  border-radius: 999px;
   font-size: 0.9rem;
-  -webkit-border-radius: 999px;
-  -moz-border-radius: 999px;
-  -ms-border-radius: 999px;
-  -o-border-radius: 999px;
+ 
 }
 
 .blood-details-container .chip .icon {
