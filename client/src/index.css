@@ -581,7 +581,7 @@ body {
 /* ========= أزرار إضافية من ملف المعاينة ========= */
 
 /* زر التبرع مع القلب النابض */
-.btn-donate {
+/* .btn-donate {
   background: linear-gradient(135deg, 
     var(--accent) 0%, 
     #FF8C42 25%, 
@@ -599,9 +599,9 @@ body {
     0 10px 30px rgba(var(--accent-rgb), 0.4),
     0 4px 15px rgba(255, 140, 66, 0.3);
   border: none;
-}
+} */
 
-.btn-donate::before {
+/* .btn-donate::before {
   content: '❤️';
   position: absolute;
   left: 20px;
@@ -610,7 +610,7 @@ body {
   font-size: 18px;
   animation: heartbeat 2s infinite;
 }
-
+ */
 @keyframes heartbeat {
   0%, 100% { transform: translateY(-50%) scale(1); }
   50% { transform: translateY(-50%) scale(1.2); }
