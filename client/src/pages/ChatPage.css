@@ -1,0 +1,108 @@
+/* ====== Chat Page Styles - Arabic Optimized ====== */
+
+.chat-page-container {
+  padding: 2rem 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  direction: rtl;
+}
+
+/* العنوان الرئيسي */
+.chat-page-title {
+  text-align: center;
+  margin-bottom: 2rem;
+  position: relative;
+  padding-bottom: 1rem;
+}
+
+.chat-page-title h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 50%, #388E3C 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.chat-page-title-icon {
+  color: #4CAF50;
+  -webkit-text-fill-color: #4CAF50;
+  font-size: 2rem;
+}
+
+.chat-page-title-underline {
+  position: absolute;
+  bottom: 0;
+  right: 50%;
+  transform: translateX(50%);
+  width: 120px;
+  height: 4px;
+  background: linear-gradient(90deg, #4CAF50, #66BB6A, #388E3C);
+  border-radius: 2px;
+}
+
+/* تنبيه عدم توفر المحادثة */
+.chat-unavailable-alert {
+  text-align: center;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #fff5e6 0%, #ffe0b2 100%);
+  border: 1px solid #ff9800;
+  border-radius: 12px;
+  color: #e65100;
+  font-weight: 600;
+  margin-top: 2rem;
+}
+
+/* ============================================ */
+/* 📱 Responsive Design - Mobile First */
+/* ============================================ */
+
+/* الهواتف الصغيرة */
+@media (max-width: 576px) {
+  .chat-page-container {
+    padding: 1rem 0.5rem;
+  }
+
+  .chat-page-title h2 {
+    font-size: 1.5rem;
+  }
+
+  .chat-page-title-icon {
+    font-size: 1.5rem;
+  }
+
+  .chat-page-title-underline {
+    width: 80px;
+    height: 3px;
+  }
+}
+
+/* التابلت */
+@media (min-width: 577px) and (max-width: 992px) {
+  .chat-page-container {
+    padding: 1.5rem 1rem;
+  }
+
+  .chat-page-title h2 {
+    font-size: 1.75rem;
+  }
+}
+
+/* الشاشات الكبيرة */
+@media (min-width: 993px) {
+  .chat-page-container {
+    padding: 2.5rem 2rem;
+  }
+
+  .chat-page-title h2 {
+    font-size: 2.5rem;
+  }
+
+  .chat-page-title-underline {
+    width: 150px;
+  }
+}

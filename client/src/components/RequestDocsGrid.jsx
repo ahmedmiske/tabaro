@@ -1,8 +1,15 @@
 import React from 'react';
 import { Card, Button } from 'react-bootstrap';
 
-const RequestDocsGrid = ({ documents = [] }) => {
-  if (!documents.length) return null;
+const RequestDocsGrid = ({ documents = [], emptyMessage = "لا توجد مستندات مرفقة" }) => {
+  if (!documents.length) {
+    return (
+      <div className="docs-empty-state">
+        <i className="fas fa-folder-open" style={{ fontSize: '3rem', color: '#cbd5e1', marginBottom: '1rem' }} />
+        <p style={{ color: '#64748b', fontSize: '0.95rem' }}>{emptyMessage}</p>
+      </div>
+    );
+  }
 
   const fileUrl = (d) =>
     d.url?.startsWith('/uploads')
@@ -33,8 +40,10 @@ const RequestDocsGrid = ({ documents = [] }) => {
               href={fileUrl(d)}
               target="_blank"
               rel="noopener noreferrer"
+              title="عرض المستند في نافذة جديدة"
             >
-              فتح
+              <i className="fas fa-external-link-alt" style={{ marginLeft: '0.3rem' }} />
+              معاينة
             </Button>
             <Button
               size="sm"
@@ -42,8 +51,10 @@ const RequestDocsGrid = ({ documents = [] }) => {
               as="a"
               href={fileUrl(d)}
               download
+              title="تحميل المستند على جهازك"
             >
-              تنزيل
+              <i className="fas fa-download" style={{ marginLeft: '0.3rem' }} />
+              حفظ
             </Button>
           </div>
         </div>

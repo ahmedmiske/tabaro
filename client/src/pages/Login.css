@@ -1,60 +1,47 @@
-/* ========== صفحة تسجيل الدخول - تنسيق متناسق مع باقي الموقع ========== */
+/* ========== صفحة تسجيل الدخول - تصميم Grid محترف ========== */
 
 .login-page {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  min-height: calc(100vh - 100px);
+  max-width: 1400px;
+  margin: 2rem auto;
+  padding: 2rem;
   align-items: center;
-  justify-content: center;
-  min-width: 100%;
-  min-height: 85vh;
-  margin-top: 40px;
-  margin-bottom: 60px;
-  gap: 30px;
-  padding: 20px 40px;
-  box-sizing: border-box;
-  
 }
 
-
 .login-img {
-  flex: 1 1 45%;
-  min-width: 300px;
-  padding: 0px;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  height: 100%;
 }
 
 .login-img img {
-  max-width: 100%;
+  width: 100%;
+  max-width: 600px;
   height: auto;
-  border-radius: 12px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  -webkit-border-radius: 12px;
-  -moz-border-radius: 12px;
-  -ms-border-radius: 12px;
-  -o-border-radius: 12px;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  object-fit: cover;
 }
 
 .login-container {
-  flex: 1 1 400px;
-  min-width: 350px;
-  background-color: #fff;
-  margin-right: 20px;
-  border: none;
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-  text-align: right;
-  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: #FFFFFF;
+  padding: 3rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #E5E7EB;
+  height: fit-content;
+  max-width: 550px;
   width: 100%;
-  box-sizing: border-box;
-  -webkit-border-radius: 12px;
-  -moz-border-radius: 12px;
-  -ms-border-radius: 12px;
-  -o-border-radius: 12px;
+  margin: 0 auto;
 }
-
+ 
 .login-container h2 {
   text-align: center;
   color: var(--main-color-alt);
@@ -100,21 +87,21 @@
 }
 
 .form-login button[type="submit"] {
-  background: linear-gradient(135deg, #FF7A45 0%, #FF9A6C 50%, #E05A2E 100%);
+  background: linear-gradient(135deg, #EA580C 0%, #F97316 100%);
   border: none;
   color: white;
   font-size: 17px;
-  font-weight: bold;
-  padding: 10px;
-  border-radius: 8px;
+  font-weight: 600;
+  padding: 14px;
+  border-radius: 12px;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(255, 122, 69, 0.3);
+  box-shadow: 0 4px 15px rgba(234, 88, 12, 0.3);
 }
 
 .form-login button[type="submit"]:hover {
-  background: linear-gradient(135deg, #FF8C42 0%, #FF9A6C 50%, #FF6B35 100%);
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 8px 25px rgba(255, 122, 69, 0.5);
+  background: linear-gradient(135deg, #C2410C 0%, #EA580C 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(234, 88, 12, 0.4);
 }
 
 .signup-link,
@@ -210,96 +197,62 @@
   transform: translateY(-1px) !important;
 }
 
-/* 📱 تصميم متجاوب محسن للأجهزة المختلفة */
+/* 📱 تصميم متجاوب - إخفاء الصورة على الأجهزة الصغيرة */
 
-/* الأجهزة اللوحية الكبيرة والشاشات الصغيرة */
+/* التابلت والأجهزة الصغيرة - إخفاء الصورة وتوسيط الفورم */
 @media (max-width: 992px) {
   .login-page {
-    flex-direction: column;
-    min-height: 90vh;
-    padding: 20px;
-    margin-top: 20px;
-    gap: 30px;
+    grid-template-columns: 1fr;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    gap: 0;
+    place-items: center;
   }
   
   .login-img {
-    flex: 0 0 300px;
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto;
+    display: none; /* إخفاء الصورة تماماً */
   }
   
   .login-container {
-    flex: 1;
-    margin-right: 0;
-    margin: 0 auto;
     max-width: 500px;
     width: 100%;
+    padding: 2.5rem;
   }
 }
 
 /* الأجهزة اللوحية المتوسطة */
 @media (max-width: 768px) {
   .login-page {
-    min-height: 85vh;
-    padding: 15px;
-    gap: 25px;
-  }
-  
-  .login-img {
-    display: none; /* إخفاء الصورة في الشاشات الصغيرة */
+    padding: 1.5rem 1rem;
   }
   
   .login-container {
-    padding: 25px;
-    margin: 0 auto;
+    padding: 2rem;
     max-width: 450px;
   }
   
   .login-container h2 {
     font-size: 22px;
-    margin-bottom: 25px;
-  }
-  
-  .form-login {
-    gap: 18px;
   }
 }
 
-/* الهواتف الذكية الكبيرة */
+/* الهواتف الذكية */
 @media (max-width: 576px) {
   .login-page {
+    padding: 1rem;
     min-height: 100vh;
-    padding: 10px;
-    margin-top: 0;
-    gap: 20px;
-    justify-content: center;
-  }
-  
-  .login-img {
-    flex: 0 0 200px;
-    max-width: 300px;
-  }
-  
-  .login-img img {
-    border-radius: 8px;
   }
   
   .login-container {
-    padding: 20px;
-    margin: 0;
-    max-width: 100%;
+    padding: 1.5rem;
     width: 95%;
-    border-radius: 8px;
+    max-width: 100%;
+    border-radius: 12px;
   }
   
   .login-container h2 {
     font-size: 20px;
-    margin-bottom: 20px;
-  }
-  
-  .form-login {
-    gap: 15px;
+    margin-bottom: 1.5rem;
   }
   
   .form-login input {
@@ -308,51 +261,35 @@
   }
   
   .form-login button[type="submit"] {
-    padding: 12px;
+    padding: 13px;
     font-size: 16px;
   }
   
   .signup-link {
-    flex-direction: column;
-    gap: 10px;
-    align-items: center;
+    flex-direction: column !important;
+    gap: 12px !important;
+    align-items: stretch !important;
   }
   
   .form-secondary-btn {
     width: 100% !important;
     text-align: center !important;
-    padding: 12px 20px !important;
   }
 }
 
-/* الهواتف الذكية الصغيرة جداً */
+/* الهواتف الصغيرة جداً */
 @media (max-width: 380px) {
   .login-page {
-    padding: 8px;
-    gap: 15px;
-  }
-  
-  .login-img {
-    flex: 0 0 150px;
-    max-width: 250px;
+    padding: 0.5rem;
   }
   
   .login-container {
-    padding: 15px;
+    padding: 1.25rem;
     width: 98%;
   }
   
   .login-container h2 {
     font-size: 18px;
-    margin-bottom: 15px;
-  }
-  
-  .form-login {
-    gap: 12px;
-  }
-  
-  .form-login .input label {
-    font-size: 14px;
   }
   
   .form-login input {
@@ -361,21 +298,22 @@
   }
 }
 
+
 /* الشاشات العريضة جداً */
 @media (min-width: 1400px) {
   .login-page {
-    max-width: 1200px;
-    margin: 40px auto 60px auto;
-    padding: 20px 60px;
+    max-width: 1400px;
+    padding: 3rem;
+    gap: 4rem;
   }
   
-  .login-img {
-    max-width: 600px;
+  .login-img img {
+    max-width: 650px;
   }
   
   .login-container {
-    max-width: 550px;
-    padding: 40px;
+    max-width: 600px;
+    padding: 3.5rem;
   }
   
   .login-container h2 {

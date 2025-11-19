@@ -232,12 +232,55 @@
   border-radius: 2rem;
   padding: 0.8rem 2rem;
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   cursor: pointer;
   transition: var(--transition);
   box-shadow: 0 4px 12px rgba(255, 122, 69, 0.3);
   position: relative;
   overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* أنواع الأزرار - نظام الألوان المبسط (60-30-10) */
+
+/* PRIMARY COLOR (60%) - جميع أعمال التبرع والعطاء - الأخضر */
+.service-btn.btn-primary {
+  background: linear-gradient(135deg, #12B279 0%, #45C897 100%);
+  box-shadow: 0 4px 12px rgba(18, 178, 121, 0.3);
+}
+
+.service-btn.btn-primary:hover {
+  box-shadow: 0 6px 20px rgba(18, 178, 121, 0.4);
+  background: linear-gradient(135deg, #0EA472 0%, #3BB889 100%);
+}
+
+/* SECONDARY COLOR (30%) - جميع أعمال الطلب والمساعدة - الأزرق */
+.service-btn.btn-secondary {
+  background: linear-gradient(135deg, #2563EB 0%, #3B82F6 100%);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  color: #ffffff;
+}
+
+.service-btn.btn-secondary:hover {
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+  background: linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%);
+  color: #ffffff;
+}
+
+/* ACCENT COLOR (10%) - الإجراءات الخاصة والإعلانات - البرتقالي الداكن */
+.service-btn.btn-accent {
+  background: linear-gradient(135deg, #EA580C 0%, #F97316 100%);
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.3);
+  color: #ffffff;
+}
+
+.service-btn.btn-accent:hover {
+  box-shadow: 0 6px 20px rgba(234, 88, 12, 0.4);
+  background: linear-gradient(135deg, #C2410C 0%, #EA580C 100%);
+  color: #ffffff;
 }
 
 .service-btn::before {
