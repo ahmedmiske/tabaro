@@ -21,15 +21,15 @@ function PasswordReset() {
     3: { title: "🔐 إعادة تعيين كلمة المرور", subtitle: "🆕 كلمة المرور الجديدة" }
   }), []);
 
-  useEffect(() => {
-    const currentStep = stepInfo[step];
-    if (currentStep) {
-      document.title = `${currentStep.title} - ${currentStep.subtitle}`;
-    }
-    return () => {
-      document.title = 'تبارو - Tabaro';
-    };
-  }, [step, stepInfo]);
+  // useEffect(() => {
+  //   const currentStep = stepInfo[step];
+  //   if (currentStep) {
+  //     document.title = `${currentStep.title} - ${currentStep.subtitle}`;
+  //   }
+  //   return () => {
+  //     document.title = 'تبارو - Tabaro';
+  //   }
+  // }, [step, stepInfo]);
 
   const handleSendOtp = async () => {
     try {

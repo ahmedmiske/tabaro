@@ -86,12 +86,12 @@ const BloodDonationForm = () => {
   };
 
   // ====== إعدادات عامة ======
-  useEffect(() => {
-    document.title = 'طلب تبرع بالدم - تبارو';
-    return () => {
-      document.title = 'تبارو - منصة التبرعات';
-    };
-  }, []);
+  // useEffect(() => {
+  //   document.title = 'طلب تبرع بالدم - تبارو';
+  //   return () => {
+  //     document.title = 'تبارو - منصة التبرعات';
+  //   };
+  // }, []);
 
   useEffect(() => {
     if (formSubmitted) {

@@ -15,10 +15,10 @@ const MIN_DESC = 30;
 const SocialForm = () => {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    document.title = 'إعلان اجتماعي - تبارو';
-    return () => { document.title = 'تبارو - منصة التبرعات'; };
-  }, []);
+  // useEffect(() => {
+  //   document.title = 'إعلان اجتماعي - تبارو';
+  //   return () => { document.title = 'تبارو - منصة التبرعات'; };
+  // }, []);
 
   // ========= الحالة =========
   const [step, setStep] = useState(1);

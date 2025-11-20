@@ -57,12 +57,12 @@ const DonationRequestForm = () => {
   };
 
   // تحديث الـ <title>
-  useEffect(() => {
-    document.title = 'طلب تبرع عام - تبارو';
-    return () => {
-      document.title = 'تبارو - منصة التبرعات';
-    };
-  }, []);
+  // useEffect(() => {
+  //   document.title = 'طلب تبرع عام - تبارو';
+  //   return () => {
+  //     document.title = 'تبارو - منصة التبرعات';
+  //   };
+  // }, []);
 
   // الحالة الرئيسية للنموذج
   const [donation, setDonation] = useState({
