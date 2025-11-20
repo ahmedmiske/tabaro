@@ -17,7 +17,7 @@
 .pub-name { font-weight:700; }
 .pub-meta { font-size:.9rem; color:#6b7280; }
 .role-chip.publisher{ display:inline-flex; align-items:center; gap:6px; background:#eef2ff; color:#3730a3; border:1px solid #dfe3ff; padding:2px 10px; border-radius:999px; font-size:.8rem; font-weight:700; }
-
+.text-warning{ background-color:white; }
 /* الوثائق */
 .docs-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; }
 .doc-tile{ background:#fff; border:1px solid #eaeaea; border-radius:10px; overflow:hidden; text-align:center; display:flex; flex-direction:column; justify-content:space-between; }
@@ -34,6 +34,57 @@
 .doc-actions{ display:flex; gap:6px; justify-content:center; padding:8px; }
 .generic-icon{ font-size:42px; color:#9aa0a6; }
 
+/* تفاصيل عرض المتبرّع (داخل العروض المقدّمة) */
+.offer-details-row td { background:#fcfcfc; }
+.offer-details-box{
+  background:#dce6ef;
+  border-radius:12px;
+  border:1px solid #e5e7eb;
+  padding:14px;
+  display: flex;
+  flex-direction: column;
+  gap:8px;
+  align-items:center;
+  justify-content: center;
+  
+}
+.offer-details-box:hover{
+  background:#cbd6e4;
+  border-color:#c0c7d1;
+  cursor:default;
+}
+
+.rounded-circle{
+  width:80px; height:80px; border-radius:50%;
+  border: #10b981 2px solid;
+  display:flex; align-items:center; justify-content:center;
+  background:#fff; border:1px solid #e5e7eb;
+  box-shadow:0 2px 10px rgba(0,0,0,.06);
+  font-size:28px; color:#111827;}
+
+/* خط تواصل المتبرّع */
+.offer-contact-line{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+.contact-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  padding:3px 8px;
+  border-radius:999px;
+  background:#f3f4f6;
+  color:#374151;
+  font-size:.8rem;
+  text-decoration:none;
+}
+.contact-pill:hover{
+  background:#e5e7eb;
+  color:#111827;
+  text-decoration:none;
+}
+
 /* أزرار دائرية نظيفة */
 .action-toolbar{ display:flex; flex-wrap:wrap; gap:12px; align-items:center; }
 .btn-circle{
@@ -49,19 +100,6 @@
 .btn-circle:focus{ outline:none; box-shadow:0 0 0 3px rgba(25,118,210,.2), 0 6px 18px rgba(0,0,0,.10), inset 0 0 0 1px #e5e7eb; }
 .btn-circle svg{ width:22px; height:22px; }
 
-/* زر الرجوع في الراسية (دائري) */
-.header-back{
-  width:42px; height:42px; border-radius:50%;
-  margin-right: 80px;
-  display:flex; align-items:center; justify-content:center;
-  padding:0; line-height:1;
-}
-.header-back:hover{ box-shadow:0 3px 10px rgba(0,0,0,.15); }
-
-/* optional */
-.offer-details-row td { background:#fcfcfc; }
-
-
 /* زر التبرع المتوهّج */
 @keyframes pulseGlow{
   0%{ box-shadow:0 0 0 0 rgba(16,185,129,.5); }
@@ -73,7 +111,6 @@
   color:#fff;
   box-shadow:0 8px 18px rgba(34,197,94,.25);
   animation:pulseGlow 1.8s infinite;
-  
 }
 .gr-btn-donate:hover{ filter:brightness(1.05); }
 

@@ -446,7 +446,7 @@ const MyDonationOffersGeneral = () => {
           <span className="title-icon">
             <i className="fas fa-hand-holding-heart" />
           </span>
-          <h4 className="m-0 fw-bold">عروضي على طلبات التبرع العامة</h4>
+          <h4 className="m-0 fw-bold"> طلباتي مع العروض عليها   </h4>
         </div>
         <div className="status-filter">
           <Form.Select

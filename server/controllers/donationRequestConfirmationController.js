@@ -219,26 +219,35 @@ exports.rateConfirmation = async (req, res) => {
 /** العروض التي تلقيتها (أنا صاحب الطلب) */
 exports.getMyDonationOffers = async (req, res) => {
   try {
+    // 1) كل الطلبات التي أنا صاحبها
     const myRequests = await DonationRequest.find({
       userId: req.user._id,
-    }).select("_id");
+    }).select('_id');
+
     const ids = myRequests.map((r) => r._id);
 
+    // 2) كل التأكيدات على هذه الطلبات
     const items = await DonationRequestConfirmation.find({
       requestId: { $in: ids },
     })
       .populate(
-        "donor",
-        "firstName lastName email phoneNumber profileImage rating averageRating"
+        'donor',
+        'firstName lastName email phoneNumber profileImage rating averageRating'
       )
+      .populate({
+        path: 'requestId',
+        model: 'DonationRequest',
+        select: 'title category type deadline userId',
+      })
       .sort({ createdAt: -1 });
 
     return res.json(items);
   } catch (e) {
-    console.error("getMyDonationOffers error:", e);
-    return res.status(500).json({ message: "خطأ في السيرفر" });
+    console.error('getMyDonationOffers error:', e);
+    return res.status(500).json({ message: 'خطأ في السيرفر' });
   }
 };
+
 
 /** العروض التي أرسلتها (أنا المتبرع) */
 exports.getMySentOffers = async (req, res) => {

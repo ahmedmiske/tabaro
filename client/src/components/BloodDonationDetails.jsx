@@ -570,7 +570,7 @@ export default function BloodDonationDetails() {
                     size="sm"
                     variant="outline-light"
                     className="header-mini-btn"
-                    onClick={() => navigate(`/users/${publisher._id}`)}
+                    onClick={() => navigate(`/profile/${publisher._id}`)}
                   >
                     👤 الملف الشخصي
                   </Button>
@@ -1008,7 +1008,7 @@ export default function BloodDonationDetails() {
                       </Button>
                       <Button
                         variant="outline-secondary"
-                        onClick={() => navigate(`/users/${requester._id}`)}
+                        onClick={() => navigate(`/profile/${requester._id}`)}
                       >
                         👤 الملف الشخصي
                       </Button>
@@ -1062,7 +1062,7 @@ export default function BloodDonationDetails() {
                       </Button>
                       <Button
                         variant="outline-secondary"
-                        onClick={() => navigate(`/users/${requester._id}`)}
+                        onClick={() => navigate(`/profile/${requester._id}`)}
                       >
                         👤 الملف الشخصي
                       </Button>

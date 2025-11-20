@@ -11,7 +11,7 @@ const registerUser = asyncHandler(async (req, res) => {
   const {
     firstName,
     lastName,
-    email, 
+    email,
     password,
     username,
     userType,
@@ -59,7 +59,6 @@ const registerUser = asyncHandler(async (req, res) => {
   });
 });
 
-
 // @desc    Auth user & get token (تسجيل دخول بكلمة مرور - اختياري)
 // @route   POST /api/users/login
 // @access  Public
@@ -91,7 +90,6 @@ const authUser = asyncHandler(async (req, res) => {
   }
 });
 
-
 // @desc    Get all users
 // @route   GET /api/users
 // @access  Private (admin)
@@ -108,7 +106,7 @@ const getUsers = asyncHandler(async (req, res) => {
   res.json({ result: users, page, pages: Math.ceil(total / limit), total });
 });
 
-// @desc    Get user profile
+// @desc    Get user profile (المدخل من التوكن)
 // @route   GET /api/users/profile
 // @access  Private
 const getUser = asyncHandler(async (req, res) => {
@@ -116,7 +114,7 @@ const getUser = asyncHandler(async (req, res) => {
 });
 
 // @desc    Update user information (whitelist)
-// @route   PUT /api/users/:id
+// @route   PUT /api/users/profile
 // @access  Private
 const updateUser = asyncHandler(async (req, res) => {
   const user = req.user;
@@ -197,6 +195,55 @@ const deleteUser = asyncHandler(async (req, res) => {
   res.json({ message: "User profile deleted" });
 });
 
+// @desc    Get public user profile (مُتاح للجميع لزيارة بروفايل أي مستخدم)
+// @route   GET /api/users/:userId/public-profile
+// @access  Public
+const getPublicProfile = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+
+  const user = await User.findById(userId).select(
+    'firstName lastName profileImage address userType phoneNumber email ratingAsDonor ratingAsRecipient createdAt'
+  );
+
+  if (!user) {
+    res.status(404);
+    throw new Error('المستخدم غير موجود');
+  }
+
+  const donor = user.ratingAsDonor || { avg: 0, count: 0 };
+  const recipient = user.ratingAsRecipient || { avg: 0, count: 0 };
+
+  const totalCount = (donor.count || 0) + (recipient.count || 0);
+  let avgRating = 0;
+
+  if (totalCount > 0) {
+    avgRating =
+      ((donor.avg || 0) * (donor.count || 0) +
+        (recipient.avg || 0) * (recipient.count || 0)) /
+      totalCount;
+  }
+
+  res.json({
+    _id: user._id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    profileImage: user.profileImage || '',
+    address: user.address || '',
+    userType: user.userType || 'individual',
+
+    // 👇 المهم هنا
+    phoneNumber: user.phoneNumber || '',
+    email: user.email || '',
+
+    ratingAsDonor: donor,
+    ratingAsRecipient: recipient,
+    avgRating,
+    totalRatings: totalCount,
+    createdAt: user.createdAt,
+  });
+});
+
+
 module.exports = {
   registerUser,
   authUser,
@@ -206,4 +253,5 @@ module.exports = {
   changePassword,
   deleteUser,
   resetPassword,
+  getPublicProfile, // ✅ مضاف
 };

@@ -1,6 +1,7 @@
 // src/pages/UserProfile.jsx
 import React, { useState, useEffect, useMemo } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { FaStar, FaRegStar, FaStarHalfAlt } from 'react-icons/fa';
 
 import UserDetails from '../components/UserDetails.jsx';
 import AccountDetails from '../components/AccountDetails.jsx';
@@ -18,38 +19,118 @@ import './UserProfile.css';
 function UserProfile() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { userId } = useParams(); // لو موجود → زيارة مستخدم آخر
+
+  // 👈 true إذا كانت صفحة مستخدم آخر (زائر)
+  const isVisitorProfile = Boolean(userId);
 
   // ✅ استرجاع التبويب من الرابط ?tab=
   const initialTab = useMemo(() => {
     const q = new URLSearchParams(location.search);
-    return q.get('tab') || 'offers-blood';
-  }, [location.search]);
+    const fromUrl = q.get('tab');
+
+    // لو زائر نجبر التبويب على personal فقط
+    if (isVisitorProfile) return 'personal';
+
+    return fromUrl || 'offers-blood';
+  }, [location.search, isVisitorProfile]);
 
   const [view, setView] = useState(initialTab);
   const [userDetails, setUserDetails] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  // ✅ إظهار القائمة الفرعية لعروضي مفتوحة افتراضيًا
-  const [expandOffers, setExpandOffers] = useState(true);
+  // ✅ إظهار قائمة العروض مفتوحة افتراضيًا لصاحب الحساب فقط
+  const [expandOffers, setExpandOffers] = useState(!isVisitorProfile);
   const [expandRequests, setExpandRequests] = useState(false);
+
+  // 🔢 حساب ملخص التقييم من ratingAsDonor + ratingAsRecipient
+  const getRatingSummary = (user) => {
+    if (!user) {
+      return {
+        avgRating: 0,
+        totalRatings: 0,
+        donor: { avg: 0, count: 0 },
+        recipient: { avg: 0, count: 0 },
+      };
+    }
+
+    const donor = user.ratingAsDonor || { avg: 0, count: 0 };
+    const recipient = user.ratingAsRecipient || { avg: 0, count: 0 };
+
+    const totalCount = (donor.count || 0) + (recipient.count || 0);
+    let avgRating = 0;
+
+    if (totalCount > 0) {
+      avgRating =
+        ((donor.avg || 0) * (donor.count || 0) +
+          (recipient.avg || 0) * (recipient.count || 0)) /
+        totalCount;
+    }
+
+    return {
+      avgRating,
+      totalRatings: totalCount,
+      donor,
+      recipient,
+    };
+  };
+
+  // ⭐ دالة رسم النجوم
+  const renderStars = (avg = 0) => {
+    const stars = [];
+    for (let i = 1; i <= 5; i += 1) {
+      if (avg >= i) {
+        stars.push(<FaStar key={i} className="star full" />);
+      } else if (avg >= i - 0.5) {
+        stars.push(<FaStarHalfAlt key={i} className="star half" />);
+      } else {
+        stars.push(<FaRegStar key={i} className="star empty" />);
+      }
+    }
+    return stars;
+  };
+
+  const ratingSummary = useMemo(
+    () => getRatingSummary(userDetails),
+    [userDetails]
+  );
 
   useEffect(() => {
     fetchUserData();
-    fetchUnreadNotifications();
-  }, []);
+    if (!isVisitorProfile) {
+      fetchUnreadNotifications();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId, isVisitorProfile]);
 
-  // ✅ كلما تغيّر الرابط (العودة من التفاصيل)، حدّث التبويب من ?tab=
+  // ✅ تحديث التبويب عند تغيير الـ URL + حفظ مسار العودة
   useEffect(() => {
     const q = new URLSearchParams(location.search);
     const tab = q.get('tab');
-    if (tab && tab !== view) setView(tab);
-    // خزّن آخر مسار لصفحة اللائحة للرجوع منه
+
+    if (isVisitorProfile) {
+      // الزائر دائمًا على personal
+      if (view !== 'personal') setView('personal');
+    } else if (tab && tab !== view) {
+      setView(tab);
+    }
+
     sessionStorage.setItem('lastListPath', location.pathname + location.search);
-  }, [location.pathname, location.search]); // eslint-disable-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname, location.search, isVisitorProfile]);
 
   const fetchUserData = async () => {
     try {
-      const { body, ok } = await fetchWithInterceptors('/api/users/profile');
+      let url;
+      if (isVisitorProfile) {
+        // بروفايل عام لمستخدم آخر
+        url = `/api/users/${userId}/public-profile`;
+      } else {
+        // بروفايلي أنا
+        url = '/api/users/profile';
+      }
+
+      const { body, ok } = await fetchWithInterceptors(url);
       if (!ok) throw new Error('فشل في جلب بيانات المستخدم');
       setUserDetails(body);
     } catch (err) {
@@ -58,6 +139,7 @@ function UserProfile() {
   };
 
   const fetchUnreadNotifications = async () => {
+    if (isVisitorProfile) return; // لا إشعارات للزائر
     try {
       const res = await fetchWithInterceptors('/api/notifications/unread-count');
       if (res.ok) setUnreadCount(res.body.count || 0);
@@ -67,143 +149,223 @@ function UserProfile() {
   };
 
   const pushTabToUrl = (tab, replace = true) => {
+    if (isVisitorProfile) return; // الزائر لا نغير له ?tab
     const q = new URLSearchParams(location.search);
     q.set('tab', tab);
     navigate({ pathname: location.pathname, search: q.toString() }, { replace });
   };
 
   const handleViewChange = (newView) => {
+    // الزائر مسموح له فقط personal
+    if (isVisitorProfile && newView !== 'personal') return;
+
     setView(newView);
     pushTabToUrl(newView);
-    if (newView === 'notifications') setUnreadCount(0);
-    // افتح/أغلق القوائم بحسب الاختيار
-    if (newView.startsWith('offers-')) {
-      setExpandOffers(true);
-      setExpandRequests(false);
-    } else if (newView.startsWith('req-')) {
-      setExpandRequests(true);
-      setExpandOffers(false);
+
+    if (!isVisitorProfile && newView === 'notifications') {
+      setUnreadCount(0);
+    }
+
+    if (!isVisitorProfile) {
+      if (newView.startsWith('offers-')) {
+        setExpandOffers(true);
+        setExpandRequests(false);
+      } else if (newView.startsWith('req-')) {
+        setExpandRequests(true);
+        setExpandOffers(false);
+      }
     }
   };
 
-  const isOffersActive = view === 'offers-blood' || view === 'offers-general';
-  const isRequestsActive = view === 'req-blood' || view === 'req-general';
+  const isOffersActive =
+    !isVisitorProfile && (view === 'offers-blood' || view === 'offers-general');
+  const isRequestsActive =
+    !isVisitorProfile && (view === 'req-blood' || view === 'req-general');
 
-  // ✅ دالة قياسية لفتح صفحة التفاصيل مع تمرير مسار العودة
+  // ✅ فتح صفحة تفاصيل الطلب مع حفظ مسار العودة
   const openDetails = (requestId) => {
-    // (اختياري) حفظ موضع التمرير
+    if (!requestId) return;
     sessionStorage.setItem('lastListScroll', String(window.scrollY || 0));
-    const from = location.pathname + location.search; // /profile?tab=offers-general مثلا
+    const from = location.pathname + location.search;
     navigate(`/donations/${requestId}`, { state: { from } });
   };
 
   return (
     <div className="user-profile-container">
       <div className="user-profile-layout">
+        {/* الشريط الجانبي */}
         <div className="sidebar">
           <div className="sidebar-header">
-            <h4>الملف الشخصي</h4>
+            <h4>{isVisitorProfile ? 'بطاقة تعريف المستخدم ' : 'ملفي الشخصي'}</h4>
             {userDetails && (
               <div className="user-profile-imag">
                 <img
-                  src={userDetails.profileImage ? `/uploads/profileImages/${userDetails.profileImage}` : '/default-avatar.png'}
+                  src={
+                    userDetails.profileImage
+                      ? `/uploads/profileImages/${userDetails.profileImage}`
+                      : '/default-avatar.png'
+                  }
                   alt="الصورة الشخصية"
                   className="user-avatar"
                 />
                 <div className="user-name">
                   {userDetails.firstName} {userDetails.lastName}
                 </div>
+
+                {/* التقييم أسفل الصورة */}
+                {ratingSummary.totalRatings > 0 && (
+                  <div className="user-rating-summary">
+                    <div className="user-rating-stars">
+                      {renderStars(ratingSummary.avgRating)}
+                    </div>
+                    <div className="user-rating-text">
+                      {ratingSummary.avgRating.toFixed(1)} / 5{' '}
+                      <span>({ratingSummary.totalRatings} تقييم)</span>
+                    </div>
+                    <div className="user-rating-roles">
+                      <div>
+                        كمتبرِّع: {ratingSummary.donor.avg.toFixed(1)} / 5 (
+                        {ratingSummary.donor.count} تقييم)
+                      </div>
+                      <div>
+                        كصاحب طلب: {ratingSummary.recipient.avg.toFixed(1)} / 5 (
+                        {ratingSummary.recipient.count} تقييم)
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
 
           <div className="menu">
+            {/* هذا التبويب يظهر للجميع */}
             <button
               className={`menu-button ${view === 'personal' ? 'active' : ''}`}
               onClick={() => handleViewChange('personal')}
             >
-              معلومات شخصية
+              {isVisitorProfile ? 'بيانات  المستخدم' : 'معلوماتي الشخصية '}
             </button>
 
-            <button
-              className={`menu-button ${view === 'account' ? 'active' : ''}`}
-              onClick={() => handleViewChange('account')}
-            >
-              معلومات الحساب
-            </button>
+            {/* باقي التبويبات لصاحب الحساب فقط */}
+            {!isVisitorProfile && (
+              <>
+                <button
+                  className={`menu-button ${view === 'account' ? 'active' : ''}`}
+                  onClick={() => handleViewChange('account')}
+                >
+                  معلومات الحساب
+                </button>
 
-            {/* عروضي للتبرع */}
-            <button
-              className={`menu-button ${isOffersActive ? 'active' : ''}`}
-              onClick={() => setExpandOffers(v => !v)}
-            >
-              عروضي للتبرع {expandOffers ? '▴' : '▾'}
-            </button>
-            {expandOffers && (
-              <div className="submenu">
+                {/* عروضي للتبرع */}
                 <button
-                  className={`submenu-button ${view === 'offers-blood' ? 'active' : ''}`}
-                  onClick={() => handleViewChange('offers-blood')}
+                  className={`menu-button ${isOffersActive ? 'active' : ''}`}
+                  onClick={() => setExpandOffers((v) => !v)}
                 >
-                  تبرع بالدم
+                  عروضي للتبرع {expandOffers ? '▴' : '▾'}
                 </button>
+                {expandOffers && (
+                  <div className="submenu">
+                    <button
+                      className={`submenu-button ${
+                        view === 'offers-blood' ? 'active' : ''
+                      }`}
+                      onClick={() => handleViewChange('offers-blood')}
+                    >
+                      تبرع بالدم
+                    </button>
+                    <button
+                      className={`submenu-button ${
+                        view === 'offers-general' ? 'active' : ''
+                      }`}
+                      onClick={() => handleViewChange('offers-general')}
+                    >
+                      تبرع عام
+                    </button>
+                  </div>
+                )}
+
+                {/* طلباتي مع العروض */}
                 <button
-                  className={`submenu-button ${view === 'offers-general' ? 'active' : ''}`}
-                  onClick={() => handleViewChange('offers-general')}
+                  className={`menu-button ${isRequestsActive ? 'active' : ''}`}
+                  onClick={() => setExpandRequests((v) => !v)}
                 >
-                  تبرع عام
+                  طلباتي مع العروض {expandRequests ? '▴' : '▾'}
                 </button>
-              </div>
+                {expandRequests && (
+                  <div className="submenu">
+                    <button
+                      className={`submenu-button ${
+                        view === 'req-blood' ? 'active' : ''
+                      }`}
+                      onClick={() => handleViewChange('req-blood')}
+                    >
+                      تبرع بالدم
+                    </button>
+                    <button
+                      className={`submenu-button ${
+                        view === 'req-general' ? 'active' : ''
+                      }`}
+                      onClick={() => handleViewChange('req-general')}
+                    >
+                      تبرع عام
+                    </button>
+                  </div>
+                )}
+
+                <button
+                  className={`menu-button ${
+                    view === 'notifications' ? 'active' : ''
+                  }`}
+                  onClick={() => handleViewChange('notifications')}
+                >
+                  الإشعارات{' '}
+                  {unreadCount > 0 && (
+                    <span className="notification-badge">{unreadCount}</span>
+                  )}
+                </button>
+              </>
             )}
-
-            {/* طلباتي مع العروض */}
-            <button
-              className={`menu-button ${isRequestsActive ? 'active' : ''}`}
-              onClick={() => setExpandRequests(v => !v)}
-            >
-              طلباتي مع العروض {expandRequests ? '▴' : '▾'}
-            </button>
-            {expandRequests && (
-              <div className="submenu">
-                <button
-                  className={`submenu-button ${view === 'req-blood' ? 'active' : ''}`}
-                  onClick={() => handleViewChange('req-blood')}
-                >
-                  تبرع بالدم
-                </button>
-                <button
-                  className={`submenu-button ${view === 'req-general' ? 'active' : ''}`}
-                  onClick={() => handleViewChange('req-general')}
-                >
-                  تبرع عام
-                </button>
-              </div>
-            )}
-
-            <button
-              className={`menu-button ${view === 'notifications' ? 'active' : ''}`}
-              onClick={() => handleViewChange('notifications')}
-            >
-              الإشعارات {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
-            </button>
           </div>
         </div>
 
+        {/* المحتوى الرئيسي */}
         <div className="main-content">
           {view === 'personal' && (
-            <UserDetails userDetails={userDetails} setUserDetails={setUserDetails} />
+            <UserDetails
+              userDetails={userDetails}
+              // في وضع الزائر لا نمرر setUserDetails لكي لا يستطيع الحفظ
+              setUserDetails={isVisitorProfile ? undefined : setUserDetails}
+              isVisitor={isVisitorProfile}
+            />
           )}
-          {view === 'account' && <AccountDetails userDetails={userDetails} />}
 
-          {/* عروضي — نمرر openDetails ليستعملها المكوّن للذهاب للتفاصيل مع from */}
-          {view === 'offers-blood' && <MyDonationOffersBlood onOpenDetails={openDetails} />}
-          {view === 'offers-general' && <MyDonationOffersGeneral onOpenDetails={openDetails} />}
+          {/* باقي التبويبات لصاحب الحساب فقط */}
+          {!isVisitorProfile && (
+            <>
+              {view === 'account' && (
+                <AccountDetails userDetails={userDetails} />
+              )}
 
-          {/* طلباتي مع العروض */}
-          {view === 'req-blood' && <MyRequestsWithOffersBlood onOpenDetails={openDetails} />}
-          {view === 'req-general' && <MyRequestsWithOffersGeneral onOpenDetails={openDetails} />}
+              {view === 'offers-blood' && (
+                <MyDonationOffersBlood onOpenDetails={openDetails} />
+              )}
+              {view === 'offers-general' && (
+                <MyDonationOffersGeneral onOpenDetails={openDetails} />
+              )}
 
-          {view === 'notifications' && <NotificationsPage onOpenDetails={openDetails} />}
+              {view === 'req-blood' && (
+                <MyRequestsWithOffersBlood onOpenDetails={openDetails} />
+              )}
+              {view === 'req-general' && (
+                <MyRequestsWithOffersGeneral onOpenDetails={openDetails} />
+              )}
+
+              {view === 'notifications' && (
+                <NotificationsPage onOpenDetails={openDetails} />
+              )}
+            </>
+          )}
         </div>
       </div>
     </div>
