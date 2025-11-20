@@ -219,14 +219,14 @@ exports.rateConfirmation = async (req, res) => {
 /** العروض التي تلقيتها (أنا صاحب الطلب) */
 exports.getMyDonationOffers = async (req, res) => {
   try {
-    // 1) كل الطلبات التي أنا صاحبها
+    // 1) جلب كل الطلبات التي أنا صاحبها
     const myRequests = await DonationRequest.find({
       userId: req.user._id,
     }).select('_id');
 
     const ids = myRequests.map((r) => r._id);
 
-    // 2) كل التأكيدات على هذه الطلبات
+    // 2) جلب كل التأكيدات على هذه الطلبات
     const items = await DonationRequestConfirmation.find({
       requestId: { $in: ids },
     })
@@ -237,7 +237,7 @@ exports.getMyDonationOffers = async (req, res) => {
       .populate({
         path: 'requestId',
         model: 'DonationRequest',
-        select: 'title category type deadline userId',
+        select: 'title description category type deadline userId',
       })
       .sort({ createdAt: -1 });
 
