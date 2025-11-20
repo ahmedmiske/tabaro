@@ -14,7 +14,7 @@ export default function useSEO({
     document.documentElement.dir = dir;
 
     // العنوان
-    if (title) document.title = title;
+    // if (title) document.title = title; // معطل للحفاظ على العنوان الثابت
 
     // الوصف
     if (description) {
