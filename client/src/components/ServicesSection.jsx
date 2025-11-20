@@ -74,10 +74,10 @@ const ServicesSection = () => {
       icon: "🔍",
       title: "مفقودات",
       description: "ساعد في البحث عن المفقودات أو أعلن عن مفقوداتك",
-      path: "/social",
-      state: { type: "lost" },
+      path: "/under-construction",
+      state: { featureName: "مفقودات", featureIcon: "🔍" },
       buttonText: "بحث/إضافة",
-      buttonClass: "btn-accent"
+      buttonClass: ""
     },
     {
       icon: "🕌",

@@ -25,6 +25,7 @@ import UserProfile from "./pages/UserProfile.jsx";
 import AddUserserPage from "./pages/addUserPage.jsx";
 import About from "./components/About.jsx";
 import NotFound from "./pages/NotFound.jsx";
+import UnderConstruction from "./pages/UnderConstruction.jsx";
 import ReadyToDonateBloodPage from "./pages/ReadyToDonateBloodPage.jsx";
 import ReadyToDonateGeneralPage from "./pages/ReadyToDonateGeneralPage.jsx";
 import ReadyDonors from "./pages/ReadyDonors.jsx";
@@ -129,6 +130,7 @@ function App() {
             <Route path="/donations" element={<DonationRequestPage />} />
             <Route path="/about" element={<About />} />
             <Route path="/users" element={<UserPage />} />
+            <Route path="/under-construction" element={<UnderConstruction />} />
             <Route
               path="/buttons-showcase"
               element={<OrangeButtonsShowcase />}
