@@ -77,7 +77,7 @@ export default function DonationRequestConfirmationDetails() {
   const donor = data?.donor || data?.sender || data?.user;
   const donorId = donor?._id || donor?.id;
   const openChat = () => { if (donorId) navigate(`/chat/${donorId}`); };
-  const openDonorProfile = () => { if (donorId) navigate(`/users/${donorId}`); };
+  const openDonorProfile = () => { if (donorId) navigate(`/profile/${donorId}`); };
 
   if (loading) {
     return <div className="p-4 text-center text-muted"><Spinner animation="border" size="sm" /> جاري التحميل...</div>;

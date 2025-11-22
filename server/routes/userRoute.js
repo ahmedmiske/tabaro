@@ -13,9 +13,14 @@ const {
   changePassword,
   deleteUser,
   resetPassword,
+  getPublicProfile, // ✅ أضفنا هذه
 } = require("../controllers/userController");
 
-const { protect, authorize, protectRegisterUser } = require("../middlewares/authMiddleware");
+const {
+  protect,
+  authorize,
+  protectRegisterUser,
+} = require("../middlewares/authMiddleware");
 
 // تأكد أن مجلد الرفع موجود
 const uploadDir = path.join(__dirname, "../uploads/profileImages");
@@ -50,5 +55,9 @@ router
 
 router.put("/change-password", protect, changePassword);
 router.put("/reset-password", protectRegisterUser, resetPassword);
+
+// 📌 بروفايل عام لأي مستخدم (بدون protect)
+// مثال: GET /api/users/66abc1234f.../public-profile
+router.get("/:userId/public-profile", getPublicProfile);
 
 module.exports.userRoutes = router;

@@ -243,6 +243,8 @@ function App() {
             />
 
             {/* ملفات المستخدمين */}
+            {/* صفحة عامة لزيارة بروفايل أي مستخدم */}
+            <Route path="/profile/:userId" element={<UserProfile />} />
             <Route
               path="/users/:id"
               element={

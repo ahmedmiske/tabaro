@@ -457,3 +457,45 @@
     font-size: 1.1rem;
   }
 }
+
+
+.user-rating-summary {
+  margin-top: 0.5rem;
+  text-align: center;
+  direction: rtl;
+  font-size: 0.85rem;
+}
+
+.user-rating-stars {
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+  margin-bottom: 4px;
+}
+
+.user-rating-text {
+  color: #555;
+  margin-bottom: 4px;
+}
+
+.user-rating-roles {
+  font-size: 0.75rem;
+  color: #777;
+  line-height: 1.4;
+}
+
+.star {
+  font-size: 1rem;
+}
+
+.star.full {
+  color: #ffc107; /* نجوم ذهبية ممتلئة */
+}
+
+.star.half {
+  color: #ffc107;
+}
+
+.star.empty {
+  color: #ccc; /* نجوم فارغة رمادية */
+}

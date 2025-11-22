@@ -25,6 +25,9 @@ import {
   FaArrowRight,
   FaPaperclip,
   FaInfoCircle,
+  FaPhoneAlt,
+  FaEnvelope,
+  FaWhatsapp,
 } from 'react-icons/fa';
 import PropTypes from 'prop-types';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
@@ -59,7 +62,7 @@ const methodLabel = (m) =>
     ? 'الدردشة'
     : m === 'call'
     ? 'الاتصال'
-    : (m || '-');
+    : m || '-';
 
 const daysLeft = (deadline, nowMs) => {
   if (!deadline) return null;
@@ -237,7 +240,6 @@ export default function DonationRequestDetails() {
   const [avatarError, setAvatarError] = useState(false);
 
   const [expandedId, setExpandedId] = useState(null);
-  const [activityById, setActivityById] = useState({});
 
   const currentUserId = useMemo(getCurrentUserId, []);
   const currentUser = useMemo(getCurrentUser, []);
@@ -295,28 +297,31 @@ export default function DonationRequestDetails() {
   }, [id]);
 
   const fetchedOfferOnce = useRef(false);
-  const fetchMyOffers = useCallback(async () => {
-    if (!currentUserId) return;
-    try {
-      const res = await fetchWithInterceptors(
-        `/api/donation-request-confirmations/request/${id}`,
-      );
-      if (!res.ok) return;
-      const offers = res.body?.data ?? res.body ?? [];
-      const mine = offers
-        .filter((o) => {
-          const donorId =
-            o?.donor?._id || o?.donor || o?.user?._id || o?.user;
-          return donorId && String(donorId) === String(currentUserId);
-        })
-        .sort(
-          (a, b) =>
-            new Date(b.createdAt) - new Date(a.createdAt),
+  const fetchMyOffers = useCallback(
+    async () => {
+      if (!currentUserId) return;
+      try {
+        const res = await fetchWithInterceptors(
+          `/api/donation-request-confirmations/request/${id}`,
         );
-      setMyOffers(mine);
-      setMyOffersCount(mine.length);
-    } catch {}
-  }, [id, currentUserId]);
+        if (!res.ok) return;
+        const offers = res.body?.data ?? res.body ?? [];
+        const mine = offers
+          .filter((o) => {
+            const donorId =
+              o?.donor?._id || o?.donor || o?.user?._id || o?.user;
+            return donorId && String(donorId) === String(currentUserId);
+          })
+          .sort(
+            (a, b) =>
+              new Date(b.createdAt) - new Date(a.createdAt),
+          );
+        setMyOffers(mine);
+        setMyOffersCount(mine.length);
+      } catch {}
+    },
+    [id, currentUserId],
+  );
 
   useEffect(() => {
     if (!req || !currentUserId) return;
@@ -423,51 +428,6 @@ export default function DonationRequestDetails() {
     setExpandedId((prev) =>
       prev === conf._id ? null : conf._id,
     );
-
-  useEffect(() => {
-    if (!expandedId) return;
-    if (
-      activityById[expandedId]?.items ||
-      activityById[expandedId]?.loading
-    )
-      return;
-    (async () => {
-      setActivityById((m) => ({
-        ...m,
-        [expandedId]: { loading: true, items: [] },
-      }));
-      try {
-        const res = await fetchWithInterceptors(
-          `/api/activity?confirmationId=${expandedId}`,
-        );
-        const items = res.ok ? res.body?.data || [] : [];
-        setActivityById((m) => ({
-          ...m,
-          [expandedId]: { loading: false, items },
-        }));
-      } catch {
-        setActivityById((m) => ({
-          ...m,
-          [expandedId]: { loading: false, items: [] },
-        }));
-      }
-    })();
-  }, [expandedId, activityById]);
-
-  const renderActionLabel = (lg) => {
-    switch (lg?.action) {
-      case 'confirmation.created':
-        return 'تم إرسال تأكيد التبرّع';
-      case 'confirmation.files_added':
-        return 'تم إضافة مرفقات';
-      case 'confirmation.status_changed':
-        return 'تغيّرَت الحالة';
-      case 'confirmation.rated':
-        return 'تم حفظ تقييم';
-      default:
-        return lg?.action || '';
-    }
-  };
 
   const handleFulfill = async (confId) => {
     try {
@@ -716,7 +676,7 @@ export default function DonationRequestDetails() {
                     variant="outline-primary"
                     className="ms-2"
                     onClick={() =>
-                      navigate(`/users/${publisher._id}`, {
+                      navigate(`/profile/${publisher._id}`, {
                         state: { from: backTarget },
                       })
                     }
@@ -990,7 +950,7 @@ export default function DonationRequestDetails() {
                                 className="p-0 ms-2"
                                 onClick={() =>
                                   navigate(
-                                    `/users/${donor._id}`,
+                                    `/profile/${donor._id}`,
                                     {
                                       state: {
                                         from: backTarget,
@@ -1065,10 +1025,9 @@ export default function DonationRequestDetails() {
 
                         {isExpanded &&
                           (() => {
-                            const donorAvatar =
-                              resolveAvatar(
-                                donor?.profileImage,
-                              );
+                            const donorAvatar = resolveAvatar(
+                              donor?.profileImage,
+                            );
                             const donorRating =
                               typeof (
                                 donor?.averageRating ??
@@ -1077,106 +1036,130 @@ export default function DonationRequestDetails() {
                                 ? donor?.averageRating ??
                                   donor?.rating
                                 : null;
-                            const confFiles2 =
-                              Array.isArray(c?.files)
-                                ? c.files
-                                : c?.proofFiles ||
-                                  c?.documents ||
-                                  c?.attachments ||
-                                  c?.proofDocuments ||
-                                  [];
+                            const confFiles2 = Array.isArray(
+                              c?.files,
+                            )
+                              ? c.files
+                              : c?.proofFiles ||
+                                c?.documents ||
+                                c?.attachments ||
+                                c?.proofDocuments ||
+                                [];
+                            const whats =
+                              donor?.whatsappNumber ||
+                              donor?.phoneWhatsapp;
+
                             return (
                               <tr className="offer-details-row">
                                 <td colSpan={6}>
-                                  <div
-                                    className="p-3 rounded border"
-                                    style={{
-                                      background: '#fafafa',
-                                    }}
-                                  >
-                                    <div className="d-flex align-items-center gap-3 mb-3">
-                                      {donorAvatar ? (
-                                        <img
-                                          src={donorAvatar}
-                                          alt="المتبرّع"
-                                          className="rounded-circle"
-                                          width={40}
-                                          height={40}
-                                          onError={(e) => {
-                                            e.currentTarget.replaceWith(
-                                              Object.assign(
-                                                document.createElement(
-                                                  'div',
-                                                ),
-                                                {
-                                                  className:
-                                                    'pub-avatar fallback',
-                                                  textContent:
-                                                    (
+                                  <div className="offer-details-box">
+                                    {/* رأس الكارد مع زر إغلاق */}
+                                    <div className="d-flex justify-content-between align-items-start mb-3">
+                                      <div className="d-flex align-items-center gap-3 img-donor-box">
+                                        {donorAvatar ? (
+                                          <img
+                                            src={donorAvatar}
+                                            alt="المتبرّع"
+                                            className="rounded-circle"
+                                            width={40}
+                                            height={40}
+                                            onError={(e) => {
+                                              e.currentTarget.replaceWith(
+                                                Object.assign(
+                                                  document.createElement(
+                                                    'div',
+                                                  ),
+                                                  {
+                                                    className:
+                                                      'pub-avatar fallback',
+                                                    textContent: (
                                                       donor
                                                         ?.firstName?.[0] ||
                                                       'م'
                                                     ).toUpperCase(),
-                                                },
-                                              ),
-                                            );
-                                          }}
-                                        />
-                                      ) : (
-                                        <div
-                                          className="pub-avatar fallback"
-                                          style={{
-                                            width: 40,
-                                            height: 40,
-                                          }}
-                                        >
-                                          {(
-                                            donor?.firstName?.[0] ||
-                                            'م'
-                                          ).toUpperCase()}
-                                          {(
-                                            donor?.lastName?.[0] ||
-                                            ''
-                                          ).toUpperCase()}
-                                        </div>
-                                      )}
-                                      <div className="flex-grow-1">
-                                        <div className="fw-bold d-flex align-items-center gap-2">
-                                          {donorName}
-                                          {typeof donorRating ===
-                                            'number' && (
-                                            <span className="text-warning small">
-                                              {donorRating.toFixed(
-                                                1,
-                                              )}{' '}
-                                              ★
-                                            </span>
-                                          )}
-                                        </div>
-                                        <div className="text-muted small">
-                                          {donor?.email && (
-                                            <>
-                                              ✉️ {donor.email} •{' '}
-                                            </>
-                                          )}
-                                          {donor?.phoneNumber && (
-                                            <>📱 {donor.phoneNumber}</>
-                                          )}
+                                                  },
+                                                ),
+                                              );
+                                            }}
+                                          />
+                                        ) : (
+                                          <div
+                                            className="pub-avatar fallback"
+                                            style={{
+                                              width: 50,
+                                              height: 50,
+                                            }}
+                                          >
+                                            {(
+                                              donor?.firstName?.[0] ||
+                                              'م'
+                                            ).toUpperCase()}
+                                            {(
+                                              donor?.lastName?.[0] ||
+                                              ''
+                                            ).toUpperCase()}
+                                          </div>
+                                        )}
+
+                                        <div className="flex-grow-1">
+                                          <div className="fw-bold d-flex align-items-center gap-2">
+                                            {donorName}
+                                            {typeof donorRating ===
+                                              'number' && (
+                                              <span className="text-warning small">
+                                                {donorRating.toFixed(
+                                                  1,
+                                                )}{' '}
+                                                ★
+                                              </span>
+                                            )}
+                                          </div>
+
+                                          {/* البريد والهاتف والواتساب بشكل منظم */}
+                                          <div className="offer-contact-line text-muted small mt-1">
+                                            {donor?.email && (
+                                              <a
+                                                href={`mailto:${donor.email}`}
+                                                className="contact-pill"
+                                              >
+                                                <FaEnvelope className="ms-1" />
+                                                <span>
+                                                  {donor.email}
+                                                </span>
+                                              </a>
+                                            )}
+                                            {donor?.phoneNumber && (
+                                              <a
+                                                href={`tel:${donor.phoneNumber}`}
+                                                className="contact-pill"
+                                              >
+                                                <FaPhoneAlt className="ms-1" />
+                                                <span>
+                                                  {
+                                                    donor.phoneNumber
+                                                  }
+                                                </span>
+                                              </a>
+                                            )}
+                                            {whats && (
+                                              <a
+                                                href={`https://wa.me/${whats}`}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="contact-pill"
+                                              >
+                                                <FaWhatsapp className="ms-1" />
+                                                <span>{whats}</span>
+                                              </a>
+                                            )}
+                                          </div>
                                         </div>
                                       </div>
-                                      <div>
-                                        <Badge
-                                          bg={statusVariant(
-                                            c.status,
-                                          )}
-                                        >
-                                          {statusLabel(
-                                            c.status,
-                                          )}
-                                        </Badge>
-                                      </div>
+
+                                     
                                     </div>
 
+                                    {/* الأزرار (تأكيد الاستلام / التقييم) */}
                                     <div className="d-flex flex-wrap gap-2 mb-3">
                                       {(c.status === 'pending' ||
                                         c.status ===
@@ -1185,9 +1168,7 @@ export default function DonationRequestDetails() {
                                           size="sm"
                                           variant="success"
                                           onClick={() =>
-                                            handleFulfill(
-                                              c._id,
-                                            )
+                                            handleFulfill(c._id)
                                           }
                                         >
                                           ✅ تأكيد الاستلام
@@ -1199,7 +1180,7 @@ export default function DonationRequestDetails() {
                                           'rated') && (
                                         <div className="d-inline-flex align-items-center gap-2">
                                           <span className="text-muted small">
-                                            تقييمك:
+                                            التقييم:
                                           </span>
                                           <RatingStars
                                             value={
@@ -1220,12 +1201,31 @@ export default function DonationRequestDetails() {
                                       )}
                                     </div>
 
-                                    <div className="mb-3">
-                                      <div className="dtg-section-title">
+                                    {/* ⭐ رسالة المتبرّع */}
+                                    {(c.message ||
+                                      c.note ||
+                                      c.comment ||
+                                      c.description) && (
+                                      <div className="donor-message-box mb-3">
+                                        <div className="donor-message-label">
+                                          رسالة المتبرع
+                                        </div>
+                                        <div className="donor-message-body">
+                                          {c.message ||
+                                            c.note ||
+                                            c.comment ||
+                                            c.description}
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    {/* المرفقات */}
+                                    <div className="mb-0">
+                                      <div className="dtg-section-title mb-1">
                                         المرفقات
                                       </div>
                                       {confFiles2.length === 0 ? (
-                                        <div className="text-muted">
+                                        <div className="text-muted small">
                                           لا توجد مرفقات.
                                         </div>
                                       ) : (
@@ -1247,7 +1247,9 @@ export default function DonationRequestDetails() {
                                                 f?.name ||
                                                 (url
                                                   ? url
-                                                      .split('/')
+                                                      .split(
+                                                        '/',
+                                                      )
                                                       .pop()
                                                   : `file-${
                                                       i + 1
@@ -1328,107 +1330,18 @@ export default function DonationRequestDetails() {
                                             },
                                           )}
                                         </div>
+                                        
                                       )}
-                                    </div>
-
-                                    <div>
-                                      <div className="dtg-section-title">
-                                        سجل النشاط
-                                      </div>
-                                      {activityById[c._id]
-                                        ?.loading ? (
-                                        <div className="text-muted">
-                                          جارِ التحميل…
-                                        </div>
-                                      ) : (
-                                        (activityById[c._id]
-                                          ?.items || []).length ===
-                                        0
-                                      ) ? (
-                                        <div className="text-muted">
-                                          لا توجد أحداث مسجّلة.
-                                        </div>
-                                      ) : (
-                                        <ul className="list-unstyled m-0">
-                                          {activityById[
-                                            c._id
-                                          ].items.map(
-                                            (lg, idx) => (
-                                              <li
-                                                key={idx}
-                                                className="d-flex gap-2 align-items-start mb-2"
-                                              >
-                                                <span className="badge bg-light text-dark"
-                                                  style={{
-                                                    minWidth: 110,
-                                                  }}
-                                                >
-                                                  {fmtDateTime(
-                                                    lg.createdAt,
-                                                  )}
-                                                </span>
-                                                <div>
-                                                  <div className="fw-semibold">
-                                                    {renderActionLabel(
-                                                      lg,
-                                                    )}
-                                                  </div>
-                                                  {lg.meta &&
-                                                    Object.keys(
-                                                      lg.meta,
-                                                    )
-                                                      .length >
-                                                      0 && (
-                                                      <div className="text-muted small">
-                                                        {Object.entries(
-                                                          lg.meta,
-                                                        ).map(
-                                                          ([
-                                                            k,
-                                                            v,
-                                                          ]) => (
-                                                            <div
-                                                              key={
-                                                                k
-                                                              }
-                                                            >
-                                                              <strong>
-                                                                {
-                                                                  k
-                                                                }
-                                                                :
-                                                              </strong>{' '}
-                                                              {Array.isArray(
-                                                                v,
-                                                              )
-                                                                ? v.join(
-                                                                    ', ',
-                                                                  )
-                                                                : String(
-                                                                    v,
-                                                                  )}
-                                                            </div>
-                                                          ),
-                                                        )}
-                                                      </div>
-                                                    )}
-                                                  {lg.actor
-                                                    ?.name && (
-                                                    <div className="small text-muted">
-                                                      بواسطة:{' '}
-                                                      {
-                                                        lg
-                                                          .actor
-                                                          .name
-                                                      }
-                                                    </div>
-                                                  )}
-                                                </div>
-                                              </li>
-                                            ),
-                                          )}
-                                        </ul>
-                                      )}
+                                       {/* زر إغلاق التفاصيل */}
+                                      <Button
+                                        size="sm"
+                                        variant="outline-secondary"
+                                        onClick={() =>
+                                          setExpandedId(null)
+                                        }
+                                      >
+                                        إغلاق
+                                      </Button>
                                     </div>
                                   </div>
                                 </td>
