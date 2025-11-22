@@ -1,0 +1,198 @@
+/* ============================= */
+/*     صفحة نتائج البحث فقط      */
+/* ============================= */
+
+.search-page {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+/* العنوان الرئيسي في أعلى الصفحة */
+.search-page__title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #222;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.search-page__title span {
+  color: #0fa958;
+  font-weight: 900;
+}
+
+/* صندوق الملخص أعلى النتائج */
+.search-page__summary-box {
+  background: #ffffff;
+  padding: 15px 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  margin: 0 auto 25px;
+  border: 1px solid #e7e7e7;
+}
+
+/* شارات العدّادات */
+.search-page__summary-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* أزرار الذهاب للقوائم */
+.search-page__summary-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.search-page__summary-buttons .btn {
+  font-weight: 600;
+  border-radius: 10px;
+}
+
+/* ============================= */
+/*     عناوين الأقسام الفرعية    */
+/* ============================= */
+
+.search-page__section-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #333;
+  text-align: center;
+  margin: 35px 0 18px;
+  position: relative;
+
+  background: none !important;
+  -webkit-background-clip: initial !important;
+}
+
+/* خط أنيق تحت العنوان */
+.search-page__section-title::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  right: 50%;
+  transform: translateX(50%);
+  width: 120px;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #0fa958, #ff8a3d);
+}
+
+/* ============================= */
+/*            الكروت             */
+/* ============================= */
+
+.search-page__card {
+  border-radius: 18px;
+  border: 1px solid #eee;
+  transition: 0.2s ease-in-out;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* الكارد يملأ العمود ويُسمح له بالتمدد */
+.search-page .col-12,
+.search-page .col-md-8,
+.search-page .col-lg-6 {
+  display: flex;
+}
+
+.search-page__card .card-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 210px;
+}
+
+.search-page__card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* عنوان الكارد */
+.search-page__card .card-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+/* نص الوصف */
+.search-page__card .card-text {
+  line-height: 1.5;
+  margin-top: 6px;
+}
+
+/* البادجات داخل الكارت */
+.search-page__card .badge {
+  font-size: 0.8rem;
+}
+
+/* صف الميتاداتا (فصيلة/نوع + مدينة) */
+.search-page__meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+/* سطر الموقع */
+.search-page__location {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.search-page__location svg {
+  color: #0fa958;
+  margin-top: -1px;
+}
+
+/* منطقة الأزرار أسفل الكارت */
+.search-page__card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-end;
+  margin-top: 12px;
+}
+
+/* زر الانتقال إلى القائمة أصغر وخفيف */
+.search-page__link-to-list {
+  padding: 0;
+  font-size: 0.8rem;
+  color: #0d6efd;
+}
+
+.search-page__link-to-list:hover {
+  text-decoration: underline;
+}
+
+/* ============================= */
+/*            الموبايل           */
+/* ============================= */
+
+@media (max-width: 768px) {
+  .search-page {
+    padding-inline: 10px;
+  }
+
+  .search-page__summary-box {
+    text-align: center;
+  }
+
+  .search-page__summary-buttons {
+    justify-content: center;
+  }
+
+  .search-page__section-title {
+    font-size: 1.4rem;
+  }
+
+  .search-page__card-actions {
+    align-items: center;
+  }
+}

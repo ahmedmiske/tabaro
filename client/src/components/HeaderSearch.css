@@ -1,0 +1,128 @@
+/* ================================
+   BASE STYLES
+===================================*/
+
+.hs-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* زر الأيقونة (سنخفيه في الديسكتوب) */
+.hs-icon-btn {
+  background: none;
+  border: none;
+  color: var(--eh-text-color, #333);
+  font-size: 1.5rem;
+  padding: 6px;
+  cursor: pointer;
+  display: none; /* ⬅️ مهم: مخفي افتراضياً (يظهر فقط في الموبايل) */
+  align-items: center;
+}
+
+/* شريط البحث (يظهر في الديسكتوب) */
+.hs-form {
+  display: flex;
+  align-items: center;
+  background: #f4f4f4;
+  border-radius: 30px;
+  padding: 4px 10px;
+  margin-left: 10px;
+  transition: all 0.25s ease-in-out;
+}
+
+.hs-input {
+  width: 180px;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 8px;
+  font-size: 0.9rem;
+  direction: rtl;
+}
+
+/* زر التنفيذ داخل الحقل */
+.hs-submit {
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  color: #666;
+  cursor: pointer;
+  padding: 4px;
+}
+
+/* زر إغلاق البحث للموبايل (مخفي في الديسكتوب) */
+.hs-close-mobile {
+  display: none;
+}
+
+/* ===============================
+   MOBILE FIRST
+==================================*/
+
+@media (max-width: 768px) {
+  /* في الموبايل: نظهر أيقونة البحث فقط داخل الهيدر */
+  .hs-icon-btn {
+    display: flex;       /* ⬅️ تظهر الأيقونة هنا */
+    font-size: 1.7rem;
+  }
+
+  /* نخفي الفورم افتراضياً */
+  .hs-form {
+    display: none;
+  }
+
+  /* عندما يكون البحث مفتوحاً في الموبايل */
+  .hs-wrapper.hs-mobile-open .hs-form {
+    display: flex;
+    position: fixed;
+    top: var(--header-height, 70px);
+    right: 0;
+    width: 100%;
+    z-index: 9999;
+
+    background: #fff;
+    padding: 10px 15px;
+    border-radius: 0;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+
+    animation: hs-slide-in 0.25s ease-out forwards;
+  }
+
+  .hs-wrapper.hs-mobile-open .hs-input {
+    width: 100%;
+    background: #f2f2f2;
+    border-radius: 20px;
+    padding: 10px 15px;
+    font-size: 1rem;
+  }
+
+  .hs-wrapper.hs-mobile-open .hs-submit {
+    font-size: 1.5rem;
+    color: var(--eh-primary, #0073ff);
+    padding: 8px;
+  }
+
+  .hs-close-mobile {
+    display: block !important;
+    background: none;
+    border: none;
+    font-size: 1.6rem;
+    color: #444;
+    padding: 5px 10px;
+    margin-right: 8px;
+    cursor: pointer;
+  }
+}
+
+/* تأثير الانزلاق */
+@keyframes hs-slide-in {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
