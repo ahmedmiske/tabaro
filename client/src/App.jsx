@@ -56,6 +56,7 @@ import GeneralDonors from "./pages/GeneralDonors.jsx";
 import ChatPage from "./pages/ChatPage.jsx";
 import ChatList from "./pages/ChatList.jsx";
 import NotificationsPage from "./pages/NotificationsPage.jsx";
+import SearchResults from "./components/SearchResults.jsx";
 
 // Demos
 import OrangeButtonsShowcase from "./components/OrangeButtonsShowcase.jsx";
@@ -135,6 +136,9 @@ function App() {
             />
             <Route path="/buttons-demo" element={<ButtonsDemo />} />
             <Route path="/404" element={<NotFound />} />
+
+            {/* 🔎 صفحة نتائج البحث */}
+            <Route path="/search" element={<SearchResults />} />
 
             {/* صفحات الاستعداد للتبرع (محميّة) */}
             <Route
@@ -241,7 +245,6 @@ function App() {
             />
 
             {/* ملفات المستخدمين */}
-            {/* صفحة عامة لزيارة بروفايل أي مستخدم */}
             <Route path="/profile/:userId" element={<UserProfile />} />
             <Route
               path="/users/:id"

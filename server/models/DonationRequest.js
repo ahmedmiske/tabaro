@@ -1,3 +1,4 @@
+// server/models/DonationRequest.js
 const mongoose = require("mongoose");
 
 const paymentMethodSchema = new mongoose.Schema(
@@ -5,7 +6,7 @@ const paymentMethodSchema = new mongoose.Schema(
     method: { type: String, required: true, trim: true },
     phone: { type: String, required: true, trim: true }, // 8 أرقام
   },
-  { _id: false },
+  { _id: false }
 );
 
 const contactMethodSchema = new mongoose.Schema(
@@ -13,7 +14,7 @@ const contactMethodSchema = new mongoose.Schema(
     method: { type: String, required: true, trim: true }, // phone | whatsapp | ...
     number: { type: String, required: true, trim: true }, // 8 أرقام
   },
-  { _id: false },
+  { _id: false }
 );
 
 const donationRequestSchema = new mongoose.Schema(
@@ -69,7 +70,9 @@ const donationRequestSchema = new mongoose.Schema(
       default: "active",
     },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
-module.exports = mongoose.model("DonationRequest", donationRequestSchema);
+module.exports =
+  mongoose.models.DonationRequest ||
+  mongoose.model("DonationRequest", donationRequestSchema);

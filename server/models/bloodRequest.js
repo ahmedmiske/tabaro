@@ -9,7 +9,7 @@ const DocumentSchema = new mongoose.Schema(
     size: Number,
     url: String, // مسار الوصول الجاهز للواجهة /uploads/...
   },
-  { _id: false },
+  { _id: false }
 );
 
 const BloodRequestSchema = new mongoose.Schema(
@@ -44,7 +44,10 @@ const BloodRequestSchema = new mongoose.Schema(
     // (اختياري) توافق للخلف — لو موجودة في سجلات قديمة
     files: { type: [String], default: [] },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
-module.exports = mongoose.model("BloodRequest", BloodRequestSchema);
+// ✅ هذا يمنع OverwriteModelError
+module.exports =
+  mongoose.models.BloodRequest ||
+  mongoose.model("BloodRequest", BloodRequestSchema);

@@ -10,6 +10,7 @@
     "bootstrap": "^5.3.8",
     "date-fns": "^3.6.0",
     "dayjs": "^1.11.19",
+    "express": "^4.21.2",
     "jwt-decode": "^4.0.0",
     "prop-types": "^15.8.1",
     "react": "^18.3.1",
