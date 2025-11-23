@@ -3,37 +3,133 @@ const bcrypt = require("bcryptjs");
 const User = require("../models/user");
 const Wilaya = require("../models/wilayas");
 const Moughataa = require("../models/moughataas");
+const Commune = require("../models/communes");
 const asyncHandler = require("../utils/asyncHandler");
 const { generateToken } = require("../utils/otpUtils");
+const normalizeLocationValue = (value) =>
+  typeof value === "string" ? value.trim() : "";
 
-const isWilayaValid = async (raw) => {
-  const trimmed = typeof raw === "string" ? raw.trim() : "";
-  if (!trimmed) return false;
+const getDisplayName = (doc) =>
+  (doc?.name_ar || "").trim();
 
-  const match = await Wilaya.findOne({
+const buildLocationResolver = (Model) => async (raw) => {
+  const trimmed = normalizeLocationValue(raw);
+  if (!trimmed) return null;
+  return Model.findOne({
     is_active: true,
     name_ar: trimmed
   })
-    .select("code name_ar")
+    .select("code name_ar name_fr")
     .lean();
-
-  if (!match) return false;
-  return true;
 };
 
-const isMoughataaValid = async (raw) => {
-  const trimmed = typeof raw === "string" ? raw.trim() : "";
-  if (!trimmed) return false;
-
-  const match = await Moughataa.findOne({
-    is_active: true,
-    name_ar: trimmed
-  })
-    .select("code name_ar")
+const findByCode = async (Model, code) => {
+  if (!code) return null;
+  return Model.findOne({ is_active: true, code })
+    .select("code name_ar name_fr")
     .lean();
+};
 
-  if (!match) return false;
-  return true;
+const resolveWilaya = buildLocationResolver(Wilaya);
+const resolveMoughataa = buildLocationResolver(Moughataa);
+const resolveCommune = buildLocationResolver(Commune);
+
+const normalizeLocationsOrThrow = async ({ wilaya, moughataa, commune }) => {
+  let resolvedWilaya = null;
+  let resolvedMoughataa = null;
+  let resolvedCommune = null;
+
+  const wilayaInput = normalizeLocationValue(wilaya);
+  const moughataaInput = normalizeLocationValue(moughataa);
+  const communeInput = normalizeLocationValue(commune);
+
+  if (wilayaInput) {
+    resolvedWilaya = await resolveWilaya(wilayaInput);
+    if (!resolvedWilaya) {
+      throw new Error("الولاية غير معروفة أو غير مفعلة");
+    }
+  }
+
+  if (moughataaInput) {
+    resolvedMoughataa = await resolveMoughataa(moughataaInput);
+    if (!resolvedMoughataa) {
+      throw new Error("المقاطعة غير معروفة أو غير مفعلة");
+    }
+  }
+
+  if (communeInput) {
+    resolvedCommune = await resolveCommune(communeInput);
+    if (!resolvedCommune) {
+      throw new Error("البلدية غير معروفة أو غير مفعلة");
+    }
+  }
+
+  if (resolvedCommune) {
+    const communeMoughataaCode = resolvedCommune.code?.slice(0, 4);
+    if (communeMoughataaCode) {
+      if (!resolvedMoughataa || resolvedMoughataa.code !== communeMoughataaCode) {
+        resolvedMoughataa =
+          (await findByCode(Moughataa, communeMoughataaCode)) || resolvedMoughataa;
+      }
+      if (!resolvedMoughataa) {
+        throw new Error("البلدية تشير إلى مقاطعة غير مفعلة");
+      }
+    }
+
+    const communeWilayaCode = resolvedCommune.code?.slice(0, 2);
+    if (communeWilayaCode) {
+      if (!resolvedWilaya || resolvedWilaya.code !== communeWilayaCode) {
+        resolvedWilaya =
+          (await findByCode(Wilaya, communeWilayaCode)) || resolvedWilaya;
+      }
+      if (!resolvedWilaya) {
+        throw new Error("البلدية تشير إلى ولاية غير مفعلة");
+      }
+    }
+  }
+
+  if (resolvedMoughataa) {
+    const moughataaWilayaCode = resolvedMoughataa.code?.slice(0, 2);
+    if (moughataaWilayaCode) {
+      if (!resolvedWilaya || resolvedWilaya.code !== moughataaWilayaCode) {
+        resolvedWilaya =
+          (await findByCode(Wilaya, moughataaWilayaCode)) || resolvedWilaya;
+      }
+      if (!resolvedWilaya) {
+        throw new Error("المقاطعة تشير إلى ولاية غير مفعلة");
+      }
+    }
+  }
+
+  if (
+    resolvedWilaya &&
+    resolvedMoughataa &&
+    !resolvedMoughataa.code?.startsWith(resolvedWilaya.code || "")
+  ) {
+    throw new Error("المقاطعة لا تتبع الولاية المحددة");
+  }
+
+  if (
+    resolvedMoughataa &&
+    resolvedCommune &&
+    !resolvedCommune.code?.startsWith(resolvedMoughataa.code || "")
+  ) {
+    throw new Error("البلدية لا تتبع المقاطعة المحددة");
+  }
+
+  return {
+    wilaya: resolvedWilaya ? getDisplayName(resolvedWilaya) : wilayaInput ? wilayaInput : "",
+    moughataa: resolvedMoughataa
+      ? getDisplayName(resolvedMoughataa)
+      : moughataaInput
+      ? moughataaInput
+      : "",
+    commune: resolvedCommune
+      ? getDisplayName(resolvedCommune)
+      : communeInput
+      ? communeInput
+      : "",
+  };
 };
 
 // @desc Register a new user (بعد verify-otp)
@@ -56,6 +152,7 @@ const registerUser = asyncHandler(async (req, res) => {
     phoneNumber,
     wilaya,
     moughataa,
+    commune,
   } = req.body;
 
   if (!phoneNumber) {
@@ -64,15 +161,16 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   const profileImage = req.file?.filename;
-  const isWilayaValidResult = await isWilayaValid(wilaya);
-  if (wilaya?.trim() && !isWilayaValidResult) {
+  let normalizedLocations;
+  try {
+    normalizedLocations = await normalizeLocationsOrThrow({
+      wilaya,
+      moughataa,
+      commune,
+    });
+  } catch (err) {
     res.status(400);
-    throw new Error("الولاية غير معروفة أو غير مفعلة");
-  }
-  const isMoughataaValidResult = await isMoughataaValid(moughataa);
-  if (moughataa?.trim() && !isMoughataaValidResult) {
-    res.status(400);
-    throw new Error("المقاطعة غير معروفة أو غير مفعلة");
+    throw err;
   }
 
   const newUser = new User({
@@ -89,8 +187,9 @@ const registerUser = asyncHandler(async (req, res) => {
     institutionWebsite,
     address,
     phoneNumber,
-    wilaya,
-    moughataa,
+    wilaya: normalizedLocations.wilaya,
+    moughataa: normalizedLocations.moughataa,
+    commune: normalizedLocations.commune,
     profileImage,
     status: "verified", // مؤقتًا لحد ما نربط OTP
   });
@@ -103,6 +202,7 @@ const registerUser = asyncHandler(async (req, res) => {
     email: savedUser.email, // ممكن يرجع null
     wilaya: savedUser.wilaya || null,
     moughataa: savedUser.moughataa || null,
+    commune: savedUser.commune || null,
     token: generateToken(savedUser._id),
   });
 });
@@ -131,6 +231,7 @@ const authUser = asyncHandler(async (req, res) => {
         userType: user.userType,
         wilaya: user.wilaya || null,
         moughataa: user.moughataa || null,
+        commune: user.commune || null,
         profileImage: user.profileImage || "",
       },
     });
@@ -188,29 +289,32 @@ const updateUser = asyncHandler(async (req, res) => {
     if (k in req.body) user[k] = req.body[k];
   }
 
-  if ("wilaya" in req.body) {
-    const value = req.body.wilaya.trim();
-    if(value){
-      const isWilayaValidResult = await isWilayaValid(value);
-      if (!isWilayaValidResult) {
-        res.status(400);
-        throw new Error("الولاية غير معروفة أو غير مفعلة");
-      }
-      user.wilaya = value;
+  const locationFieldsTouched = ["wilaya", "moughataa", "commune"].some((field) =>
+    Object.prototype.hasOwnProperty.call(req.body, field)
+  );
 
+  if (locationFieldsTouched) {
+    let normalizedLocations;
+    try {
+      normalizedLocations = await normalizeLocationsOrThrow({
+        wilaya: Object.prototype.hasOwnProperty.call(req.body, "wilaya")
+          ? req.body.wilaya
+          : user.wilaya,
+        moughataa: Object.prototype.hasOwnProperty.call(req.body, "moughataa")
+          ? req.body.moughataa
+          : user.moughataa,
+        commune: Object.prototype.hasOwnProperty.call(req.body, "commune")
+          ? req.body.commune
+          : user.commune,
+      });
+    } catch (err) {
+      res.status(400);
+      throw err;
     }
-  }
 
-  if ("moughataa" in req.body) {
-    const value = req.body.moughataa.trim();
-    if(value){
-      const isMoughataaValidResult = await isMoughataaValid(value);
-      if (!isMoughataaValidResult) {
-        res.status(400);
-        throw new Error("المقاطعة غير معروفة أو غير مفعلة");
-      }
-      user.moughataa = value;
-    }
+    user.wilaya = normalizedLocations.wilaya;
+    user.moughataa = normalizedLocations.moughataa;
+    user.commune = normalizedLocations.commune;
   }
 
   if (req.file?.filename) user.profileImage = req.file.filename;
@@ -277,7 +381,7 @@ const getPublicProfile = asyncHandler(async (req, res) => {
   const { userId } = req.params;
 
   const user = await User.findById(userId).select(
-    'firstName lastName profileImage address wilaya moughataa userType phoneNumber email ratingAsDonor ratingAsRecipient createdAt'
+    'firstName lastName profileImage address wilaya moughataa commune userType phoneNumber email ratingAsDonor ratingAsRecipient createdAt'
   );
 
   if (!user) {
@@ -306,6 +410,7 @@ const getPublicProfile = asyncHandler(async (req, res) => {
     address: user.address || '',
     wilaya: user.wilaya || '',
     moughataa: user.moughataa || '',
+    commune: user.commune || '',
     userType: user.userType || 'individual',
 
     // 👇 المهم هنا

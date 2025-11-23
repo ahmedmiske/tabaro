@@ -41,6 +41,7 @@ function UserForm({
   const [profileImage, setProfileImage] = useState(null);
   const [wilayaOptions, setWilayaOptions] = useState([]);
   const [moughataaOptions, setMoughataaOptions] = useState([]);
+  const [communeOptions, setCommuneOptions] = useState([]);
 
   const step = currentStep;
   const [error, setError] = useState('');
@@ -50,15 +51,24 @@ function UserForm({
 
   const navigate = useNavigate();
 
-  const findWilayaOption = (value) => {
-    if (!value) return null;
-    return wilayaOptions.find((w) => w.name_ar === value) || null;
+  const normalizeValue = (value) =>
+    typeof value === 'string' ? value.trim() : '';
+  const optionMatchesValue = (option, normalizedValue) => {
+    if (!option || !normalizedValue) return false;
+    return normalizeValue(option.name_ar) === normalizedValue;
   };
-  const findMoughataaOption = (value) => {
-    if (!value) return null;
-    return moughataaOptions.find((m) => m.name_ar === value) || null;
+  const createFinder = (options) => (value) => {
+    const normalized = normalizeValue(value);
+    if (!normalized) return null;
+    return options.find((option) => optionMatchesValue(option, normalized)) || null;
   };
+  const getOptionLabel = (option) =>
+    option?.name_ar || '';
+  const findWilayaOption = createFinder(wilayaOptions);
+  const findMoughataaOption = createFinder(moughataaOptions);
+  const findCommuneOption = createFinder(communeOptions);
 
+  // جلب الخيارات من الخادم عند التحميل الأولي 
   useEffect(() => {
     let ignore = false;
     const fetchOptions = async (endpoint, setter, label) => {
@@ -74,6 +84,7 @@ function UserForm({
 
     fetchOptions('/api/wilayas', setWilayaOptions, 'wilayas');
     fetchOptions('/api/moughataas', setMoughataaOptions, 'moughataas');
+    fetchOptions('/api/communes', setCommuneOptions, 'communes');
 
     return () => {
       ignore = true;
@@ -82,29 +93,67 @@ function UserForm({
 
   const selectedWilaya = findWilayaOption(user.wilaya);
   const selectedMoughataa = findMoughataaOption(user.moughataa);
+  const selectedCommune = findCommuneOption(user.commune);
   const filteredMoughataaOptions = useMemo(() => {
     if (!selectedWilaya?.code) return moughataaOptions;
     return moughataaOptions.filter((m) => (m?.code || '').startsWith(selectedWilaya.code));
   }, [selectedWilaya, moughataaOptions]);
+  const filteredCommuneOptions = useMemo(() => {
+    if (!selectedMoughataa?.code && !selectedWilaya?.code) return communeOptions;
+    if (selectedMoughataa?.code) {
+      return communeOptions.filter((c) => (c?.code || '').startsWith(selectedMoughataa.code));
+    }
+    return communeOptions.filter((c) => (c?.code || '').startsWith(selectedWilaya.code));
+  }, [selectedWilaya, selectedMoughataa, communeOptions]);
 
+  // مزامنة الحقول بناءً على اختيار المقاطعة (ضبط الولاية تلقائياً) 
   useEffect(() => {
     if (!selectedMoughataa?.code) return;
     const derivedCode = selectedMoughataa.code.slice(0, 2);
     if (!derivedCode) return;
     const matchingWilaya = wilayaOptions.find((w) => (w?.code || '').startsWith(derivedCode));
     if (!matchingWilaya) return;
-    const desiredValue = matchingWilaya.name_ar;
-    if (user.wilaya !== desiredValue) {
+    const desiredValue = getOptionLabel(matchingWilaya);
+    if (normalizeValue(user.wilaya) !== normalizeValue(desiredValue)) {
       setUser((prev) => ({ ...prev, wilaya: desiredValue }));
     }
   }, [selectedMoughataa, wilayaOptions]);
 
+  // مزامنة الحقول بناءً على التسلسل الهرمي (الولاية > المقاطعة > البلدية) 
   useEffect(() => {
-    if (!selectedWilaya?.code || !selectedMoughataa?.code) return;
-    if (!selectedMoughataa.code.startsWith(selectedWilaya.code)) {
-      setUser((prev) => ({ ...prev, moughataa: '' }));
+    if (selectedWilaya?.code && selectedMoughataa?.code && !selectedMoughataa.code.startsWith(selectedWilaya.code)) {
+      setUser((prev) => ({ ...prev, moughataa: '', commune: '' }));
     }
-  }, [selectedWilaya, selectedMoughataa]);
+    if (selectedCommune?.code && selectedMoughataa?.code && !selectedCommune.code.startsWith(selectedMoughataa.code)) {
+      setUser((prev) => ({ ...prev, commune: '' }));
+    }
+  }, [selectedWilaya, selectedMoughataa, selectedCommune]);
+
+  // مزامنة الحقول بناءً على اختيار البلدية (ضبط المقاطعة والولاية تلقائياً) 
+  useEffect(() => {
+    if (!selectedCommune?.code) return;
+    const derivedMoughataaCode = selectedCommune.code.slice(0, 4);
+    if (derivedMoughataaCode) {
+      const matchingMoughataa = moughataaOptions.find((m) => m?.code === derivedMoughataaCode);
+      if (matchingMoughataa) {
+        const desiredMoughataa = getOptionLabel(matchingMoughataa);
+        if (normalizeValue(user.moughataa) !== normalizeValue(desiredMoughataa)) {
+          setUser((prev) => ({ ...prev, moughataa: desiredMoughataa }));
+        }
+      }
+    }
+
+    const derivedWilayaCode = selectedCommune.code.slice(0, 2);
+    if (derivedWilayaCode) {
+      const matchingWilaya = wilayaOptions.find((w) => w?.code === derivedWilayaCode);
+      if (matchingWilaya) {
+        const desiredWilaya = getOptionLabel(matchingWilaya);
+        if (normalizeValue(user.wilaya) !== normalizeValue(desiredWilaya)) {
+          setUser((prev) => ({ ...prev, wilaya: desiredWilaya }));
+        }
+      }
+    }
+  }, [selectedCommune, moughataaOptions, wilayaOptions]);
 
   const isWilayaValueValid = (value) => {
     if (!value?.trim()) return true;
@@ -118,6 +167,12 @@ function UserForm({
     return Boolean(findMoughataaOption(value));
   };
   const moughataaInputInvalid = Boolean(user.moughataa?.trim()) && !isMoughataaValueValid(user.moughataa);
+  const isCommuneValueValid = (value) => {
+    if (!value?.trim()) return true;
+    if (!Array.isArray(communeOptions) || communeOptions.length === 0) return true;
+    return Boolean(findCommuneOption(value));
+  };
+  const communeInputInvalid = Boolean(user.commune?.trim()) && !isCommuneValueValid(user.commune);
 
   const handleChange = (e) => setUser({ ...user, [e.target.name]: e.target.value });
 
@@ -148,7 +203,8 @@ function UserForm({
           !user.firstName?.trim() ||
           !user.lastName?.trim() ||
           !isWilayaValueValid(user.wilaya) ||
-          !isMoughataaValueValid(user.moughataa)
+          !isMoughataaValueValid(user.moughataa) ||
+          !isCommuneValueValid(user.commune)
         ) {
           valid = false;
         }
@@ -284,8 +340,9 @@ function UserForm({
                     />
                     <datalist id="wilayas-options">
                       {wilayaOptions.map((w) => {
+                        const optionValue = getOptionLabel(w);
                         return (
-                          <option key={w?.code} value={w?.name_ar} label={w?.name_ar} />
+                          <option key={w?.code || optionValue} value={optionValue} label={optionValue} />
                         );
                       })}
                     </datalist>
@@ -308,15 +365,41 @@ function UserForm({
                       isInvalid={moughataaInputInvalid}
                     />
                     <datalist id="moughataas-options">
-                      {filteredMoughataaOptions.map((m) => (
-                        <option key={m?.code} value={m?.name_ar} label={m?.name_ar} />
-                      ))}
+                      {filteredMoughataaOptions.map((m) => {
+                        const optionValue = getOptionLabel(m);
+                        return (
+                          <option key={m?.code || optionValue} value={optionValue} label={optionValue} />
+                        );
+                      })}
                     </datalist>
                     <Form.Control.Feedback type="invalid">
                       اختر مقاطعة من القائمة (أو اترك الحقل فارغاً).
                     </Form.Control.Feedback>
                     <Form.Text className="text-muted">
                       اختيار المقاطعة يساعدنا على تقريب المتبرعين منك، ويمكن ترك الحقل فارغاً.
+                    </Form.Text>
+                  </Form.Group>
+                  <Form.Group>
+                    <Form.Label>البلدية</Form.Label>
+                    <Form.Control
+                      name="commune"
+                      value={user.commune}
+                      onChange={handleChange}
+                      placeholder="اكتب جزءاً من اسم البلدية لاختيارها"
+                      list="communes-options"
+                      autoComplete="off"
+                      isInvalid={communeInputInvalid}
+                    />
+                    <datalist id="communes-options">
+                      {filteredCommuneOptions.map((c) => (
+                        <option key={c?.code} value={getOptionLabel(c)} label={getOptionLabel(c)} />
+                      ))}
+                    </datalist>
+                    <Form.Control.Feedback type="invalid">
+                      اختر بلدية من القائمة (أو اترك الحقل فارغاً).
+                    </Form.Control.Feedback>
+                    <Form.Text className="text-muted">
+                      عند اختيار بلدية سنحاول ضبط المقاطعة والولاية المرتبطتين بها تلقائياً.
                     </Form.Text>
                   </Form.Group>
                   <Form.Group>

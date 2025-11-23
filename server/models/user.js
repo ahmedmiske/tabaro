@@ -37,6 +37,7 @@ const userSchema = new mongoose.Schema(
     address: { type: String },
     wilaya: { type: String, trim: true },
     moughataa: { type: String, trim: true },
+    commune: { type: String, trim: true },
 
     // صورة المستخدم
     profileImage: { type: String, default: "" },
