@@ -232,7 +232,7 @@ export default function ReadyToDonateBlood() {
                 name="bloodType"
                 value={form.bloodType}
                 onChange={handleChange}
-                isInvalid={touched.bloodType && !!errors.bloodType}
+                isInvalid={touched.bloodType && !!errors. Type}
               >
                 <option value="">-- اختر --</option>
                 {bloodTypes.map((b) => (
