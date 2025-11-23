@@ -1058,6 +1058,81 @@
   animation: eh-ping 1.3s cubic-bezier(0.22, 1, 0.36, 1) 2;
 }
 
+.eh-header-modern,
+.header-precinpal {
+  position: relative;
+}
+
+/* زر السلة في الهيدر */
+.eh-cart-icon {
+  position: relative;
+  border: none;
+  background: #f1f5f9;
+  border-radius: 999px;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.eh-cart-icon:hover {
+  background: #e2e8f0;
+}
+
+.eh-cart-icon.is-open {
+  background: #16a34a;
+  color: #fff;
+}
+
+/* زر السلة في الهيدر */
+.eh-cart-toggle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.eh-cart-toggle svg {
+  font-size: 22px;
+}
+
+.eh-cart-toggle:hover {
+  background: rgba(15, 23, 42, 0.08);
+}
+
+/* عدّاد السلة ملتصق بالأيقونة */
+.eh-cart-badge {
+  position: absolute;
+  top: 0;
+  inset-inline-end: 0; /* مع dir="rtl" تشتغل يمين/يسار بشكل صحيح */
+  transform: translate(35%, -35%);
+  min-width: 18px;
+  height: 18px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background: #e63946;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 2px #f8fafc;
+}
+
+
+
+
 @keyframes eh-ping {
   0% {
     box-shadow: 0 0 0 0 rgba(239, 68, 68, .55);
