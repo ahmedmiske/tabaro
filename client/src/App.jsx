@@ -5,6 +5,9 @@ import React, { useEffect } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import PrivacyPolicy from "./pages/PrivacyPolicy.jsx";
 
+// ✅ مزوّد العربة
+import { CartProvider } from "./CartContext.jsx";
+
 // Styles & providers
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
@@ -59,6 +62,9 @@ import ChatList from "./pages/ChatList.jsx";
 import NotificationsPage from "./pages/NotificationsPage.jsx";
 import SearchResults from "./components/SearchResults.jsx";
 
+// ✅ صفحة العربة
+import CartPage from "./pages/CartPage.jsx";
+
 // Demos
 import OrangeButtonsShowcase from "./components/OrangeButtonsShowcase.jsx";
 import ButtonsDemo from "./components/ButtonsDemo.jsx";
@@ -110,17 +116,19 @@ function App() {
   }, [location]);
 
   return (
-    <AuthProvider>
-      <div className="page-app">
-        {/* تمرير الصفحة لأعلى عند تغيير المسار */}
-        <ScrollToTop />
+    // ✅ نلفّ التطبيق كاملًا بـ CartProvider ثم AuthProvider
+    <CartProvider>
+      <AuthProvider>
+        <div className="page-app">
+          {/* تمرير الصفحة لأعلى عند تغيير المسار */}
+          <ScrollToTop />
 
-        <Header />
-        <SocialMedia />
+          <Header />
+          <SocialMedia />
 
-        <div className="page-wrapper">
-          <Routes>
-            <Route path="/privacy" element={<PrivacyPolicy />} />
+          <div className="page-wrapper">
+            <Routes>
+              <Route path="/privacy" element={<PrivacyPolicy />} />
 
             {/* عامة */}
             <Route path="/" element={<LandingPage />} />
@@ -132,221 +140,222 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/users" element={<UserPage />} />
             <Route path="/under-construction" element={<UnderConstruction />} />
-            <Route
-              path="/buttons-showcase"
-              element={<OrangeButtonsShowcase />}
-            />
+            <Route path="/buttons-showcase" element={<OrangeButtonsShowcase />} />
             <Route path="/buttons-demo" element={<ButtonsDemo />} />
             <Route path="/404" element={<NotFound />} />
 
-            {/* 🔎 صفحة نتائج البحث */}
-            <Route path="/search" element={<SearchResults />} />
+              {/* 🔎 صفحة نتائج البحث */}
+              <Route path="/search" element={<SearchResults />} />
 
-            {/* صفحات الاستعداد للتبرع (محميّة) */}
-            <Route
-              path="/ready/blood"
-              element={
-                <RequireAuth>
-                  <ReadyToDonateBloodPage />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/ready/general"
-              element={
-                <RequireAuth>
-                  <ReadyToDonateGeneralPage />
-                </RequireAuth>
-              }
-            />
+              {/* 🛒 صفحة العربة */}
+              <Route path="/cart" element={<CartPage />} />
 
-            {/* صفحات التفاصيل (محميّة) */}
-            <Route
-              path="/donation-details/:id"
-              element={
-                <RequireAuth>
-                  <DonationDetails />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/blood-donation-details/:id"
-              element={
-                <RequireAuth>
-                  <BloodDonationDetails />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/campaign/:id"
-              element={
-                <RequireAuth>
-                  <CampaignDetails />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/donations/:id"
-              element={
-                <RequireAuth>
-                  <DonationRequestDetails />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/my-request-details/:id"
-              element={
-                <RequireAuth>
-                  <MyRequestDetails />
-                </RequireAuth>
-              }
-            />
+              {/* صفحات الاستعداد للتبرع (محميّة) */}
+              <Route
+                path="/ready/blood"
+                element={
+                  <RequireAuth>
+                    <ReadyToDonateBloodPage />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/ready/general"
+                element={
+                  <RequireAuth>
+                    <ReadyToDonateGeneralPage />
+                  </RequireAuth>
+                }
+              />
 
-            {/* نماذج الطلبات (محميّة) */}
-            <Route
-              path="/donation-requests"
-              element={
-                <RequireAuth>
-                  <DonationRequestForm />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/blood-donation"
-              element={
-                <RequireAuth>
-                  <BloodDonationForm />
-                </RequireAuth>
-              }
-            />
+              {/* صفحات التفاصيل (محميّة) */}
+              <Route
+                path="/donation-details/:id"
+                element={
+                  <RequireAuth>
+                    <DonationDetails />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/blood-donation-details/:id"
+                element={
+                  <RequireAuth>
+                    <BloodDonationDetails />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/campaign/:id"
+                element={
+                  <RequireAuth>
+                    <CampaignDetails />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/donations/:id"
+                element={
+                  <RequireAuth>
+                    <DonationRequestDetails />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/my-request-details/:id"
+                element={
+                  <RequireAuth>
+                    <MyRequestDetails />
+                  </RequireAuth>
+                }
+              />
 
-            {/* الدردشة والإشعارات */}
-            <Route
-              path="/chat/:recipientId"
-              element={
-                <RequireAuth>
-                  <ChatPage />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/messages"
-              element={
-                <RequireAuth>
-                  <ChatList />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/notifications"
-              element={
-                <RequireAuth>
-                  <NotificationsPage />
-                </RequireAuth>
-              }
-            />
+              {/* نماذج الطلبات (محميّة) */}
+              <Route
+                path="/donation-requests"
+                element={
+                  <RequireAuth>
+                    <DonationRequestForm />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/blood-donation"
+                element={
+                  <RequireAuth>
+                    <BloodDonationForm />
+                  </RequireAuth>
+                }
+              />
 
-            {/* ملفات المستخدمين */}
-            <Route path="/profile/:userId" element={<UserProfile />} />
-            <Route
-              path="/users/:id"
-              element={
-                <RequireAuth>
-                  <PublicProfile />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/profile"
-              element={
-                <RequireAuth>
-                  <UserProfile />
-                </RequireAuth>
-              }
-            />
+              {/* الدردشة والإشعارات */}
+              <Route
+                path="/chat/:recipientId"
+                element={
+                  <RequireAuth>
+                    <ChatPage />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/messages"
+                element={
+                  <RequireAuth>
+                    <ChatList />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/notifications"
+                element={
+                  <RequireAuth>
+                    <NotificationsPage />
+                  </RequireAuth>
+                }
+              />
 
-            {/* لوحة التحكم وإدارة المركز */}
-            <Route
-              path="/dashboard"
-              element={
-                <RequireAuth>
-                  <DashboardWrapper />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/manage"
-              element={
-                <RequireAuth>
-                  <ManageCenter />
-                </RequireAuth>
-              }
-            />
+              {/* ملفات المستخدمين */}
+              <Route path="/profile/:userId" element={<UserProfile />} />
+              <Route
+                path="/users/:id"
+                element={
+                  <RequireAuth>
+                    <PublicProfile />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <RequireAuth>
+                    <UserProfile />
+                  </RequireAuth>
+                }
+              />
 
-            {/* صفحات الإعلانات الاجتماعية */}
-            <Route path="/social" element={<SocialList />} />
-            <Route
-              path="/social/new"
-              element={
-                <RequireAuth>
-                  <SocialForm />
-                </RequireAuth>
-              }
-            />
-            <Route path="/social/:id" element={<SocialDetails />} />
+              {/* لوحة التحكم وإدارة المركز */}
+              <Route
+                path="/dashboard"
+                element={
+                  <RequireAuth>
+                    <DashboardWrapper />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/manage"
+                element={
+                  <RequireAuth>
+                    <ManageCenter />
+                  </RequireAuth>
+                }
+              />
 
-            {/* صفحات المتبرعين */}
-            <Route
-              path="/ready-donors"
-              element={
-                <RequireAuth>
-                  <ReadyDonors />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/blood-donors"
-              element={
-                <RequireAuth>
-                  <BloodDonors />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/general-donors"
-              element={
-                <RequireAuth>
-                  <GeneralDonors />
-                </RequireAuth>
-              }
-            />
+              {/* صفحات الإعلانات الاجتماعية */}
+              <Route path="/social" element={<SocialList />} />
+              <Route
+                path="/social/new"
+                element={
+                  <RequireAuth>
+                    <SocialForm />
+                  </RequireAuth>
+                }
+              />
+              <Route path="/social/:id" element={<SocialDetails />} />
 
-            {/* تفاصيل التأكيد */}
-            <Route
-              path="/donation-confirmations/:id"
-              element={
-                <RequireAuth>
-                  <DonationConfirmationDetails />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/donation-request-confirmations/:id"
-              element={
-                <RequireAuth>
-                  <DonationRequestConfirmationDetails />
-                </RequireAuth>
-              }
-            />
+              {/* صفحات المتبرعين */}
+              <Route
+                path="/ready-donors"
+                element={
+                  <RequireAuth>
+                    <ReadyDonors />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/blood-donors"
+                element={
+                  <RequireAuth>
+                    <BloodDonors />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/general-donors"
+                element={
+                  <RequireAuth>
+                    <GeneralDonors />
+                  </RequireAuth>
+                }
+              />
 
-            {/* 404 */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+              {/* تفاصيل التأكيد */}
+              <Route
+                path="/donation-confirmations/:id"
+                element={
+                  <RequireAuth>
+                    <DonationConfirmationDetails />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/donation-request-confirmations/:id"
+                element={
+                  <RequireAuth>
+                    <DonationRequestConfirmationDetails />
+                  </RequireAuth>
+                }
+              />
+
+              {/* 404 */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </div>
+
+          <Footer />
         </div>
-
-        <Footer />
-      </div>
-    </AuthProvider>
+      </AuthProvider>
+    </CartProvider>
   );
 }
 

@@ -1,3 +1,4 @@
+// src/components/Header.jsx
 import React, {
   useCallback,
   useEffect,
@@ -25,11 +26,22 @@ import {
 import fetchWithInterceptors from '../services/fetchWithInterceptors.js';
 import TopBar from './TopBar.jsx';
 import HeaderSearch from './HeaderSearch.jsx';
+import CartDropdown from './CartDropdown.jsx';
+import { useCart } from '../CartContext.jsx';
 import './Header.css';
 
 function Header({ notifCount }) {
   const location = useLocation();
   const navigate = useNavigate();
+
+  // ===== Cart =====
+  const { cartItems } = useCart();
+  const cartCount = useMemo(
+    () =>
+      (cartItems || []).filter((item) => item.status !== 'donated').length,
+    [cartItems],
+  );
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   // ===== User state + instant sync =====
   const [user, setUser] = useState(() => {
@@ -148,6 +160,7 @@ function Header({ notifCount }) {
       if (e.key === 'Escape') {
         setOpen(null);
         setMobileOpen(false);
+        setIsCartOpen(false);
       }
     };
     document.addEventListener('pointerdown', onDocPointer);
@@ -185,7 +198,7 @@ function Header({ notifCount }) {
     if (typeof document === 'undefined') return undefined;
     const body = document.body;
     const prevOverflow = body.style.overflow;
-    if (mobileOpen) {
+    if (mobileOpen || isCartOpen) {
       prevFocusRef.current = document.activeElement;
       body.style.overflow = 'hidden';
       setTimeout(() => firstDrawerFocusableRef.current?.focus(), 0);
@@ -197,7 +210,7 @@ function Header({ notifCount }) {
     return () => {
       body.style.overflow = prevOverflow || '';
     };
-  }, [mobileOpen]);
+  }, [mobileOpen, isCartOpen]);
 
   // Fetch notifications count (unread) — ONLY if authenticated
   useEffect(() => {
@@ -285,7 +298,7 @@ function Header({ notifCount }) {
         const isSmallScreen = window.matchMedia('(max-width: 1024px)').matches;
 
         const shouldHide =
-          goingDown && thresholdPassed && !mobileOpen && isSmallScreen;
+          goingDown && thresholdPassed && !mobileOpen && isSmallScreen && !isCartOpen;
 
         setIsHeaderHidden(!!shouldHide);
         lastY = y;
@@ -295,7 +308,7 @@ function Header({ notifCount }) {
 
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
-  }, [mobileOpen]);
+  }, [mobileOpen, isCartOpen]);
 
   return (
     <header
@@ -338,12 +351,8 @@ function Header({ notifCount }) {
             <nav className="eh-nav-left">
               <div className={`eh-nav-item ${open === 'blood' ? 'open' : ''}`}>
                 <button
-                  className={`eh-nav-link ${
-                    bloodActive ? 'active' : ''
-                  }`}
-                  onClick={() =>
-                    setOpen(open === 'blood' ? null : 'blood')
-                  }
+                  className={`eh-nav-link ${bloodActive ? 'active' : ''}`}
+                  onClick={() => setOpen(open === 'blood' ? null : 'blood')}
                   onMouseEnter={() => setOpen('blood')}
                   aria-expanded={open === 'blood'}
                   aria-controls="mega-blood"
@@ -356,17 +365,11 @@ function Header({ notifCount }) {
               </div>
 
               <div
-                className={`eh-nav-item ${
-                  open === 'general' ? 'open' : ''
-                }`}
+                className={`eh-nav-item ${open === 'general' ? 'open' : ''}`}
               >
                 <button
-                  className={`eh-nav-link ${
-                    generalActive ? 'active' : ''
-                  }`}
-                  onClick={() =>
-                    setOpen(open === 'general' ? null : 'general')
-                  }
+                  className={`eh-nav-link ${generalActive ? 'active' : ''}`}
+                  onClick={() => setOpen(open === 'general' ? null : 'general')}
                   onMouseEnter={() => setOpen('general')}
                   aria-expanded={open === 'general'}
                   aria-controls="mega-general"
@@ -379,14 +382,10 @@ function Header({ notifCount }) {
               </div>
 
               <div
-                className={`eh-nav-item ${
-                  open === 'campaigns' ? 'open' : ''
-                }`}
+                className={`eh-nav-item ${open === 'campaigns' ? 'open' : ''}`}
               >
                 <button
-                  className={`eh-nav-link ${
-                    campaignsActive ? 'active' : ''
-                  }`}
+                  className={`eh-nav-link ${campaignsActive ? 'active' : ''}`}
                   onClick={() =>
                     setOpen(open === 'campaigns' ? null : 'campaigns')
                   }
@@ -408,14 +407,18 @@ function Header({ notifCount }) {
               <HeaderSearch />
 
               <div className="eh-nav-actions">
-                <Link
-                  to="/cart"
-                  className="eh-cart-icon"
+                {/* زر السلة */}
+                <button
+                  type="button"
+                  className="eh-cart-toggle"
+                  onClick={() => setIsCartOpen((o) => !o)}
                   aria-label="سلة التبرعات"
-                  onClick={() => setOpen(null)}
                 >
                   <FiShoppingCart />
-                </Link>
+                  {cartCount > 0 && (
+                    <span className="eh-cart-badge">{cartCount}</span>
+                  )}
+                </button>
 
                 {/* زر الهامبرغر */}
                 <button
@@ -440,9 +443,7 @@ function Header({ notifCount }) {
           {/* التبرع بالدم */}
           <div
             id="mega-blood"
-            className={`eh-mega-panel ${
-              open === 'blood' ? 'open' : ''
-            }`}
+            className={`eh-mega-panel ${open === 'blood' ? 'open' : ''}`}
             onMouseEnter={() => setOpen('blood')}
             onMouseLeave={() => setOpen(null)}
             role="region"
@@ -510,9 +511,7 @@ function Header({ notifCount }) {
           {/* تبرعات عامة */}
           <div
             id="mega-general"
-            className={`eh-mega-panel ${
-              open === 'general' ? 'open' : ''
-            }`}
+            className={`eh-mega-panel ${open === 'general' ? 'open' : ''}`}
             onMouseEnter={() => setOpen('general')}
             onMouseLeave={() => setOpen(null)}
             role="region"
@@ -580,9 +579,7 @@ function Header({ notifCount }) {
           {/* الاعلانات الاجتماعية */}
           <div
             id="social-campaigns"
-            className={`eh-mega-panel ${
-              open === 'campaigns' ? 'open' : ''
-            }`}
+            className={`eh-mega-panel ${open === 'campaigns' ? 'open' : ''}`}
             onMouseEnter={() => setOpen('campaigns')}
             onMouseLeave={() => setOpen(null)}
             role="region"
@@ -787,6 +784,12 @@ function Header({ notifCount }) {
           </div>
         </div>
       </div>
+
+      {/* 🔽 Drawer السلة (يظهر فوق الصفحة مثل أمازون) */}
+      <CartDropdown
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+      />
     </header>
   );
 }

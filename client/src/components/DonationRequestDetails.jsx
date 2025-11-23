@@ -28,11 +28,13 @@ import {
   FaPhoneAlt,
   FaEnvelope,
   FaWhatsapp,
+  FaShoppingCart,
 } from 'react-icons/fa';
 import PropTypes from 'prop-types';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import ChatBox from './ChatBox.jsx';
 import useTicker from '../hooks/useTicker';
+import { useCart } from '../CartContext.jsx';
 import './DonationRequestDetails.css';
 
 const API_BASE =
@@ -202,6 +204,12 @@ export default function DonationRequestDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const { cartItems, addToCart, markAsDonated } = useCart();
+  const alreadyInCart = useMemo(
+    () => (cartItems || []).some((item) => String(item.id) === String(id)),
+    [cartItems, id],
+  );
 
   const FALLBACK_LIST_PATH = '/donations/general';
 
@@ -515,6 +523,9 @@ export default function DonationRequestDetails() {
         throw new Error(
           res.body?.message || 'فشل إرسال تأكيد التبرع',
         );
+
+      // ✅ تعليم الطلب في السلة كـ "تم التبرع"
+      markAsDonated(id);
 
       localStorage.setItem(LS_CONFIRMED_KEY, '1');
       setContactForceOpen(true);
@@ -989,11 +1000,7 @@ export default function DonationRequestDetails() {
                           <td className="text-nowrap">
                             <Button
                               size="sm"
-                              variant={
-                                isExpanded
-                                  ? 'secondary'
-                                  : 'outline-primary'
-                              }
+                              variant={isExpanded ? 'secondary' : 'outline-primary'}
                               className="me-2"
                               onClick={() =>
                                 toggleRow({ _id: c._id })
@@ -1053,7 +1060,6 @@ export default function DonationRequestDetails() {
                               <tr className="offer-details-row">
                                 <td colSpan={6}>
                                   <div className="offer-details-box">
-                                    {/* رأس الكارد مع زر إغلاق */}
                                     <div className="d-flex justify-content-between align-items-start mb-3">
                                       <div className="d-flex align-items-center gap-3 img-donor-box">
                                         {donorAvatar ? (
@@ -1115,7 +1121,6 @@ export default function DonationRequestDetails() {
                                             )}
                                           </div>
 
-                                          {/* البريد والهاتف والواتساب بشكل منظم */}
                                           <div className="offer-contact-line text-muted small mt-1">
                                             {donor?.email && (
                                               <a
@@ -1155,11 +1160,8 @@ export default function DonationRequestDetails() {
                                           </div>
                                         </div>
                                       </div>
-
-                                     
                                     </div>
 
-                                    {/* الأزرار (تأكيد الاستلام / التقييم) */}
                                     <div className="d-flex flex-wrap gap-2 mb-3">
                                       {(c.status === 'pending' ||
                                         c.status ===
@@ -1201,7 +1203,6 @@ export default function DonationRequestDetails() {
                                       )}
                                     </div>
 
-                                    {/* ⭐ رسالة المتبرّع */}
                                     {(c.message ||
                                       c.note ||
                                       c.comment ||
@@ -1219,7 +1220,6 @@ export default function DonationRequestDetails() {
                                       </div>
                                     )}
 
-                                    {/* المرفقات */}
                                     <div className="mb-0">
                                       <div className="dtg-section-title mb-1">
                                         المرفقات
@@ -1330,9 +1330,7 @@ export default function DonationRequestDetails() {
                                             },
                                           )}
                                         </div>
-                                        
                                       )}
-                                       {/* زر إغلاق التفاصيل */}
                                       <Button
                                         size="sm"
                                         variant="outline-secondary"
@@ -1457,6 +1455,47 @@ export default function DonationRequestDetails() {
 
               {/* شريط الأزرار الدائرية */}
               <div className="action-toolbar mb-3">
+                {/* حفظ في السلة */}
+                {!expired && (
+                  <button
+                    type="button"
+                    className={`btn-circle btn-light ${
+                      alreadyInCart ? 'btn-disabled' : ''
+                    }`}
+                    title={
+                      alreadyInCart
+                        ? 'محفوظ في السلة'
+                        : 'حفظ الطلب في السلة لاحقاً'
+                    }
+                    onClick={() => {
+                      if (alreadyInCart) return;
+                      addToCart({
+                        id,
+                        kind: 'general',
+                        category: req.category,
+                        title:
+                          req.title || req.type || 'طلب تبرع',
+                        type: req.type,
+                        place: req.place,
+                        deadline: req.deadline,
+                        amount:
+                          'amount' in (req || {})
+                            ? toMRU(req.amount)
+                            : null,
+                        status: 'pending',
+                      });
+                      setInfoMessage(
+                        '🧺 تم حفظ الطلب في سلة التبرعات.',
+                      );
+                    }}
+                    aria-label="حفظ في السلة"
+                    disabled={alreadyInCart}
+                  >
+                    <FaShoppingCart />
+                  </button>
+                )}
+
+                {/* تأكيد التبرع */}
                 {!expired && (
                   <button
                     type="button"
@@ -1634,9 +1673,7 @@ export default function DonationRequestDetails() {
                     <div className="chat-topic">
                       موضوع: {req.category || '—'} —{' '}
                       {req.type || '—'}
-                      {req.place
-                        ? ` • ${req.place}`
-                        : ''}
+                      {req.place ? ` • ${req.place}` : ''}
                     </div>
                     <ChatBox
                       conversationId={conversationId}

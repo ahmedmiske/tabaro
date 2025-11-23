@@ -1,0 +1,270 @@
+/* الخلفية الشفافة لإغلاق السلة عند الضغط خارجها */
+.cart-dropdown-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  background: transparent;
+  pointer-events: none;
+}
+
+.cart-dropdown-overlay.open {
+  pointer-events: auto;
+}
+
+/* لوحة السلة: دروب داون صغير تحت الهيدر وتحت أيقونة السلة تقريبًا */
+.cart-dropdown-panel {
+  position: absolute;
+  top: calc(var(--header-height, 72px) + 8px); /* أسفل الهيدر مباشرة */
+  inset-inline-end: 12px; /* ملاصقة تقريبًا لأيقونة السلة على اليمين */
+  width: min(380px, 92vw);
+  max-height: 70vh;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.25);
+  padding: 12px 14px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.cart-dropdown-panel.open {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* الهيدر داخل السلة */
+.cart-dropdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.cart-dropdown-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.cart-close-btn {
+  border: none;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  cursor: pointer;
+  color: #64748b;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.cart-close-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+/* السطر أسفل العنوان */
+.cart-dropdown-subtitle {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+.cart-dropdown-subtitle .count-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  height: 20px;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* قائمة العناصر */
+.cart-items-container {
+  margin-top: 4px;
+  padding-right: 2px;
+  padding-left: 2px;
+  overflow-y: auto;
+  max-height: 45vh;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* كارت كل عنصر في السلة */
+.cart-item-card {
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: #ffffff;
+}
+
+.cart-item-card.is-archived {
+  background: #f9fafb;
+  border-style: dashed;
+  opacity: 0.9;
+}
+
+/* رأس الكرت */
+.cart-item-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+/* الشيبس */
+.cart-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 6px;
+  height: 20px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.cart-chip.kind {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.cart-chip.category {
+  background: #eef2ff;
+  color: #4338ca;
+}
+
+.cart-chip.archived {
+  background: #ecfeff;
+  color: #0f766e;
+}
+
+/* جسم الكرت */
+.cart-item-body {
+  margin-top: 4px;
+}
+
+.cart-item-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 2px;
+}
+
+.cart-item-meta {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* الفوتر */
+.cart-item-footer {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.cart-item-footer .btn-group {
+  display: inline-flex;
+  gap: 6px;
+}
+
+/* أزرار عامة */
+.btn-cart {
+  border-radius: 999px;
+  border: 1px solid transparent;
+  padding: 4px 10px;
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.btn-cart.small {
+  padding: 3px 9px;
+  font-size: 11px;
+}
+
+.btn-cart.primary {
+  background: #16a34a;
+  border-color: #15803d;
+  color: #ffffff;
+}
+
+.btn-cart.primary:hover {
+  background: #15803d;
+}
+
+.btn-cart.outline {
+  background: #ffffff;
+  border-color: #e5e7eb;
+  color: #1f2937;
+}
+
+.btn-cart.outline:hover {
+  background: #f3f4f6;
+}
+
+.btn-cart.danger {
+  background: #fee2e2;
+  border-color: #fecaca;
+  color: #b91c1c;
+}
+
+.btn-cart.danger.full {
+  width: 100%;
+  margin-top: 6px;
+}
+
+.btn-cart.danger:hover {
+  background: #fecaca;
+}
+
+/* زر الأيقونة للحذف */
+.btn-icon {
+  border-radius: 999px;
+  border: none;
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: #fee2e2;
+  color: #b91c1c;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.btn-icon:hover {
+  background: #fecaca;
+  transform: translateY(-1px);
+}
+
+/* فوتر السلة */
+.cart-dropdown-footer {
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px solid #e5e7eb;
+}
