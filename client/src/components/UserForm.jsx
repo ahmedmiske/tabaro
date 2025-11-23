@@ -1,5 +1,5 @@
 // src/components/UserForm.jsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import { Form, Button, Toast, Alert } from 'react-bootstrap';
@@ -50,6 +50,15 @@ function UserForm({
 
   const navigate = useNavigate();
 
+  const findWilayaOption = (value) => {
+    if (!value) return null;
+    return wilayaOptions.find((w) => w.name_ar === value) || null;
+  };
+  const findMoughataaOption = (value) => {
+    if (!value) return null;
+    return moughataaOptions.find((m) => m.name_ar === value) || null;
+  };
+
   useEffect(() => {
     let ignore = false;
     const fetchOptions = async (endpoint, setter, label) => {
@@ -71,20 +80,42 @@ function UserForm({
     };
   }, []);
 
+  const selectedWilaya = findWilayaOption(user.wilaya);
+  const selectedMoughataa = findMoughataaOption(user.moughataa);
+  const filteredMoughataaOptions = useMemo(() => {
+    if (!selectedWilaya?.code) return moughataaOptions;
+    return moughataaOptions.filter((m) => (m?.code || '').startsWith(selectedWilaya.code));
+  }, [selectedWilaya, moughataaOptions]);
+
+  useEffect(() => {
+    if (!selectedMoughataa?.code) return;
+    const derivedCode = selectedMoughataa.code.slice(0, 2);
+    if (!derivedCode) return;
+    const matchingWilaya = wilayaOptions.find((w) => (w?.code || '').startsWith(derivedCode));
+    if (!matchingWilaya) return;
+    const desiredValue = matchingWilaya.name_ar;
+    if (user.wilaya !== desiredValue) {
+      setUser((prev) => ({ ...prev, wilaya: desiredValue }));
+    }
+  }, [selectedMoughataa, wilayaOptions]);
+
+  useEffect(() => {
+    if (!selectedWilaya?.code || !selectedMoughataa?.code) return;
+    if (!selectedMoughataa.code.startsWith(selectedWilaya.code)) {
+      setUser((prev) => ({ ...prev, moughataa: '' }));
+    }
+  }, [selectedWilaya, selectedMoughataa]);
+
   const isWilayaValueValid = (value) => {
-    const trimmed = value?.trim();
-    if (!trimmed) return true;
+    if (!value?.trim()) return true;
     if (!Array.isArray(wilayaOptions) || wilayaOptions.length === 0) return true;
-    const normalized = trimmed.toLowerCase();
-    return wilayaOptions.some((w) => w?.name_ar === normalized);
+    return Boolean(findWilayaOption(value));
   };
   const wilayaInputInvalid = Boolean(user.wilaya?.trim()) && !isWilayaValueValid(user.wilaya);
   const isMoughataaValueValid = (value) => {
-    const trimmed = value?.trim();
-    if (!trimmed) return true;
+    if (!value?.trim()) return true;
     if (!Array.isArray(moughataaOptions) || moughataaOptions.length === 0) return true;
-    const normalized = trimmed.toLowerCase();
-    return moughataaOptions.some((m) => m?.name_ar === normalized);
+    return Boolean(findMoughataaOption(value));
   };
   const moughataaInputInvalid = Boolean(user.moughataa?.trim()) && !isMoughataaValueValid(user.moughataa);
 
@@ -277,7 +308,7 @@ function UserForm({
                       isInvalid={moughataaInputInvalid}
                     />
                     <datalist id="moughataas-options">
-                      {moughataaOptions.map((m) => (
+                      {filteredMoughataaOptions.map((m) => (
                         <option key={m?.code} value={m?.name_ar} label={m?.name_ar} />
                       ))}
                     </datalist>
