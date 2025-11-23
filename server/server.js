@@ -21,6 +21,9 @@ const notificationRoutes = require("./routes/notificationRoutes");
 const readyToDonateBloodRoute = require('./routes/readyToDonateBloodRoute');
 const readyToDonateGeneralRoute = require('./routes/readyToDonateGeneralRoute');
 const socialAdRoutes = require('./routes/socialAdroutes');
+const communeRoutes = require("./routes/communeRoutes");
+const wilayaRoutes = require("./routes/wilayaRoutes");
+const moughataaRoutes = require("./routes/moughataaRoutes");
 const setupSocket = require("./socket");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const searchRoute = require( "./routes/searchRoute.js");
@@ -91,6 +94,9 @@ app.use('/api/ready-to-donate-blood', readyToDonateBloodRoute);
 app.use('/api/ready-to-donate-general', readyToDonateGeneralRoute);
 
 app.use('/api/social-ads', socialAdRoutes);
+app.use("/api/communes", communeRoutes);
+app.use("/api/wilayas", wilayaRoutes);
+app.use("/api/moughataas", moughataaRoutes);
 /* Swagger dev-only */
 if (!process.env.NODE_ENV || process.env.NODE_ENV !== "production") {
   require("./swagger")(app);
