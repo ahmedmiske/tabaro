@@ -188,7 +188,10 @@
 .blood-details-container .chip {
   padding: 4px 10px;
   font-size: 0.9rem;
- 
+  background: #f3f4f6;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  color: #374151;
 }
 
 .blood-details-container .chip .icon {
@@ -420,7 +423,55 @@
 }
 
 .blood-details-container .offers-table .actions-col {
-  min-width: 220px;
+  min-width: 260px;
+}
+
+/* صف تفاصيل العرض */
+.blood-details-container .offer-details-row td {
+  background: #f9fafb;
+  border-top: none;
+  padding-top: 0;
+}
+
+.blood-details-container .offer-details-box {
+  background: #eef2ff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.blood-details-container .offer-details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.blood-details-container .offer-contact-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.blood-details-container .offer-message-box {
+  background: #ffffff;
+  border-radius: 10px;
+  border: 1px dashed #e5e7eb;
+  padding: 10px;
+  font-size: 0.9rem;
+}
+
+.blood-details-container .offer-message-label {
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: #0f766e;
+}
+
+.blood-details-container .offer-message-body {
+  color: #374151;
 }
 
 /* ========== Responsive ========== */

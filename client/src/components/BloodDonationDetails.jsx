@@ -112,7 +112,7 @@ function isPdfDoc(d) {
   return bag.includes('application/pdf') || /\.pdf($|\?)/i.test(bag);
 }
 
-/* تطبيع الوثائق */
+/* تطبيع وثائق الطلب */
 function normalizeDocuments(req) {
   const buckets = [
     ...(Array.isArray(req?.documents) ? req.documents : []),
@@ -123,18 +123,24 @@ function normalizeDocuments(req) {
 
   return buckets
     .map((d) => {
-      const raw = toForward(typeof d === 'string' ? d : d.path || d.url || d.src || '');
+      const raw = toForward(
+        typeof d === 'string' ? d : d.path || d.url || d.src || '',
+      );
       if (!raw) return null;
 
       const url = assetUrl(raw);
-      const name = (typeof d === 'string' ? d : d.name || raw).split('/').pop() || 'document';
+      const name = (typeof d === 'string' ? d : d.name || raw)
+        .split('/')
+        .pop() || 'document';
 
       const mime =
         typeof d === 'string'
           ? /\.pdf($|\?)/i.test(d)
             ? 'application/pdf'
             : ''
-          : d.mime || d.mimetype || (/\.pdf($|\?)/i.test(raw) ? 'application/pdf' : '');
+          : d.mime ||
+            d.mimetype ||
+            (/\.pdf($|\?)/i.test(raw) ? 'application/pdf' : '');
 
       return {
         url,
@@ -142,6 +148,46 @@ function normalizeDocuments(req) {
         name,
         mime,
       };
+    })
+    .filter(Boolean);
+}
+
+/* تطبيع وثائق عرض المتبرّع */
+function normalizeOfferDocuments(ofr) {
+  if (!ofr) return [];
+  const buckets = [
+    ...(Array.isArray(ofr?.files) ? ofr.files : []),
+    ...(Array.isArray(ofr?.proofFiles) ? ofr.proofFiles : []),
+    ...(Array.isArray(ofr?.documents) ? ofr.documents : []),
+    ...(Array.isArray(ofr?.attachments) ? ofr.attachments : []),
+  ];
+
+  return buckets
+    .map((d) => {
+      const rawPath = toForward(
+        typeof d === 'string' ? d : d.path || d.url || d.src || '',
+      );
+      if (!rawPath) return null;
+
+      const url = assetUrl(rawPath);
+      const name =
+        (typeof d === 'string'
+          ? d
+          : d.name || d.originalName || rawPath
+        )
+          .split('/')
+          .pop() || 'document';
+
+      const mime =
+        typeof d === 'string'
+          ? /\.pdf($|\?)/i.test(rawPath)
+            ? 'application/pdf'
+            : ''
+          : d.mime ||
+            d.mimetype ||
+            (/\.pdf($|\?)/i.test(rawPath) ? 'application/pdf' : '');
+
+      return { url, path: rawPath, name, mime };
     })
     .filter(Boolean);
 }
@@ -203,9 +249,15 @@ export default function BloodDonationDetails() {
   const [rateValue, setRateValue] = useState(0);
   const [ratingLoading, setRatingLoading] = useState(false);
 
+  // 🔹 توسيع/إخفاء تفاصيل عرض معيّن
+  const [expandedOfferId, setExpandedOfferId] = useState(null);
+
   const now = useTicker(1000);
   const navigate = useNavigate();
-  const me = useMemo(() => JSON.parse(localStorage.getItem('user') || '{}'), []);
+  const me = useMemo(
+    () => JSON.parse(localStorage.getItem('user') || '{}'),
+    [],
+  );
 
   /* ---------- جلب البيانات من الـ API ---------- */
 
@@ -214,7 +266,9 @@ export default function BloodDonationDetails() {
       setLoading(true);
       const [reqRes, offRes] = await Promise.all([
         fetchWithInterceptors(`/api/blood-requests/${id}`),
-        fetchWithInterceptors(`/api/donation-confirmations/request/${id}`),
+        fetchWithInterceptors(
+          `/api/donation-confirmations/request/${id}`,
+        ),
       ]);
 
       if (reqRes.ok) {
@@ -222,7 +276,9 @@ export default function BloodDonationDetails() {
       }
 
       if (offRes.ok) {
-        const list = Array.isArray(offRes.body) ? offRes.body : offRes.body?.data || [];
+        const list = Array.isArray(offRes.body)
+          ? offRes.body
+          : offRes.body?.data || [];
         setOffers(list);
       }
     } catch (e) {
@@ -241,25 +297,38 @@ export default function BloodDonationDetails() {
   /* ---------- معلومات الناشر / صاحب الطلب ---------- */
 
   const requester =
-    request?.requester || request?.beneficiary || request?.userId || request?.user || {};
+    request?.requester ||
+    request?.beneficiary ||
+    request?.userId ||
+    request?.user ||
+    {};
 
   const publisher =
-    request?.publisher || request?.publishedBy || request?.createdBy || requester;
+    request?.publisher ||
+    request?.publishedBy ||
+    request?.createdBy ||
+    requester;
 
   const requesterName =
-    [requester.firstName, requester.lastName].filter(Boolean).join(' ') || '—';
+    [requester.firstName, requester.lastName]
+      .filter(Boolean)
+      .join(' ') || '—';
 
   const publisherName =
-    [publisher.firstName, publisher.lastName].filter(Boolean).join(' ') || '—';
+    [publisher.firstName, publisher.lastName]
+      .filter(Boolean)
+      .join(' ') || '—';
 
   const requesterAvatar = resolveAvatar(requester.profileImage);
   const publisherAvatar = resolveAvatar(publisher.profileImage);
 
   const isOwner =
-    requester && String(requester._id || requester) === String(me._id);
+    requester &&
+    String(requester._id || requester) === String(me._id);
 
   const amPublisher =
-    publisher && String(publisher._id || publisher) === String(me._id);
+    publisher &&
+    String(publisher._id || publisher) === String(me._id);
 
   const isSelfContext = isOwner || amPublisher;
 
@@ -272,7 +341,9 @@ export default function BloodDonationDetails() {
   const myOffer = useMemo(() => {
     const uid = String(me?._id || '');
     return (
-      (offers || []).find((o) => String(o?.donor?._id || o?.donor) === uid) || null
+      (offers || []).find(
+        (o) => String(o?.donor?._id || o?.donor) === uid,
+      ) || null
     );
   }, [offers, me]);
 
@@ -301,7 +372,11 @@ export default function BloodDonationDetails() {
       nowTs = Number.isNaN(d.getTime()) ? Date.now() : d.getTime();
     }
 
-    if (Number.isNaN(start) || Number.isNaN(end) || start >= end) {
+    if (
+      Number.isNaN(start) ||
+      Number.isNaN(end) ||
+      start >= end
+    ) {
       return null;
     }
 
@@ -317,7 +392,9 @@ export default function BloodDonationDetails() {
       <div className="blood-details-container" dir="rtl">
         <div className="text-center mt-5">
           <Spinner animation="border" />
-          <div className="mt-2 small text-muted">جارٍ تحميل تفاصيل الطلب…</div>
+          <div className="mt-2 small text-muted">
+            جارٍ تحميل تفاصيل الطلب…
+          </div>
         </div>
       </div>
     );
@@ -438,16 +515,19 @@ export default function BloodDonationDetails() {
       setCreating(true);
       setCreateMsg(null);
 
-      const res = await fetchWithInterceptors('/api/donation-confirmations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          requestId: id,
-          message: msg,
-          proposedTime: proposedTime || undefined,
-          method: 'chat',
-        }),
-      });
+      const res = await fetchWithInterceptors(
+        '/api/donation-confirmations',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            requestId: id,
+            message: msg,
+            proposedTime: proposedTime || undefined,
+            method: 'chat',
+          }),
+        },
+      );
 
       if (res.ok) {
         setCreateMsg({
@@ -492,7 +572,15 @@ export default function BloodDonationDetails() {
 
   const handleReport = () => {
     // eslint-disable-next-line no-alert
-    window.alert('سيتم إضافة نظام تبليغ متكامل لاحقًا، شكرًا لتنبيهك 🙏');
+    window.alert(
+      'سيتم إضافة نظام تبليغ متكامل لاحقًا، شكرًا لتنبيهك 🙏',
+    );
+  };
+
+  const toggleOfferDetails = (offerId) => {
+    setExpandedOfferId((prev) =>
+      prev === offerId ? null : offerId,
+    );
   };
 
   /* ============ JSX ============ */
@@ -500,7 +588,10 @@ export default function BloodDonationDetails() {
   return (
     <div className="blood-details-container" dir="rtl">
       {/* ---------- بطاقة التفاصيل الرئيسية ---------- */}
-      <Card className="details-card w-100 mb-3" style={{ maxWidth: 1200 }}>
+      <Card
+        className="details-card w-100 mb-3"
+        style={{ maxWidth: 1200 }}
+      >
         <Card.Header className="details-header-compact text-white">
           <div className="details-header-layout">
             <Button
@@ -519,8 +610,12 @@ export default function BloodDonationDetails() {
             </Button>
 
             <div className="details-header-title">
-              <div className="title-line">تفاصيل طلب التبرع بالدم</div>
-              <div className="subtitle-line">ساعد في إنقاذ حياة بتبرعك الكريم 💚</div>
+              <div className="title-line">
+                تفاصيل طلب التبرع بالدم
+              </div>
+              <div className="subtitle-line">
+                ساعد في إنقاذ حياة بتبرعك الكريم 💚
+              </div>
             </div>
 
             {request.bloodType && (
@@ -537,21 +632,30 @@ export default function BloodDonationDetails() {
           <div className="section-card publisher-section">
             <div className="publisher-strip">
               {!isSelfContext && (
-                <img className="pub-avatar" src={publisherAvatar} alt="الناشر" />
+                <img
+                  className="pub-avatar"
+                  src={publisherAvatar}
+                  alt="الناشر"
+                />
               )}
 
               <div className="pub-text">
                 <div className="d-flex align-items-center gap-2 mb-1">
-                  <span className="role-chip publisher">الناشر</span>
+                  <span className="role-chip publisher">
+                    الناشر
+                  </span>
                   <div className="pub-name">{publisherName}</div>
                   {isSelfContext && (
-                    <span className="self-chip">أنت صاحب هذا الطلب</span>
+                    <span className="self-chip">
+                      أنت صاحب هذا الطلب
+                    </span>
                   )}
                 </div>
 
                 {twoDifferent && (
                   <div className="small text-muted">
-                    صاحب الطلب: <strong>{requesterName}</strong>
+                    صاحب الطلب:{' '}
+                    <strong>{requesterName}</strong>
                   </div>
                 )}
               </div>
@@ -562,7 +666,9 @@ export default function BloodDonationDetails() {
                     size="sm"
                     variant="outline-light"
                     className="header-mini-btn"
-                    onClick={() => navigate(`/chat/${publisher._id}`)}
+                    onClick={() =>
+                      navigate(`/chat/${publisher._id}`)
+                    }
                   >
                     💬 محادثة
                   </Button>
@@ -570,7 +676,9 @@ export default function BloodDonationDetails() {
                     size="sm"
                     variant="outline-light"
                     className="header-mini-btn"
-                    onClick={() => navigate(`/profile/${publisher._id}`)}
+                    onClick={() =>
+                      navigate(`/profile/${publisher._id}`)
+                    }
                   >
                     👤 الملف الشخصي
                   </Button>
@@ -581,21 +689,23 @@ export default function BloodDonationDetails() {
 
           {/* ---------- تفاصيل الطلب ---------- */}
           <div className="section-card mt-3">
-            <div className="dtbl-section-title">تفاصيل الطلب</div>
+            <div className="dtbl-section-title">
+              تفاصيل الطلب
+            </div>
 
             <div className="meta-row">
               <span className="chip">
                 🩸 الفصيلة:{' '}
-                <strong>
-                  {request.bloodType || '—'}
-                </strong>
+                <strong>{request.bloodType || '—'}</strong>
               </span>
 
               {request.deadline && (
                 <span className="chip">
                   📅 آخر أجل:{' '}
                   <strong>
-                    {new Date(request.deadline).toLocaleDateString('ar-MA')}
+                    {new Date(
+                      request.deadline,
+                    ).toLocaleDateString('ar-MA')}
                   </strong>
                 </span>
               )}
@@ -604,13 +714,15 @@ export default function BloodDonationDetails() {
                 <span className="chip">
                   <span className="icon">📍</span>
                   الموقع:{' '}
-                  <strong>
-                    {request.location}
-                  </strong>
+                  <strong>{request.location}</strong>
                 </span>
               )}
 
-              <span className={`chip ${request.isUrgent ? 'danger' : ''}`}>
+              <span
+                className={`chip ${
+                  request.isUrgent ? 'danger' : ''
+                }`}
+              >
                 {request.isUrgent ? '🚨 مستعجل' : 'عادي'}
               </span>
             </div>
@@ -658,14 +770,21 @@ export default function BloodDonationDetails() {
             reqContacts.length > 0 ||
             requesterContacts.length > 0) && (
             <div className="section-card mt-3">
-              <div className="dtbl-section-title">وسائل التواصل</div>
+              <div className="dtbl-section-title">
+                وسائل التواصل
+              </div>
 
               {publisherContacts.length > 0 && (
                 <>
-                  <div className="subsection-title">الناشر</div>
+                  <div className="subsection-title">
+                    الناشر
+                  </div>
                   <div className="contact-row">
                     {publisherContacts.map((c, i) => (
-                      <span key={`pub-${i}`} className="contact-chip">
+                      <span
+                        key={`pub-${i}`}
+                        className="contact-chip"
+                      >
                         {c.icon} {c.label}: {c.value}
                       </span>
                     ))}
@@ -673,22 +792,30 @@ export default function BloodDonationDetails() {
                 </>
               )}
 
-              {twoDifferent && requesterContacts.length > 0 && (
-                <>
-                  <div className="subsection-title">صاحب الطلب</div>
-                  <div className="contact-row">
-                    {requesterContacts.map((c, i) => (
-                      <span key={`reqr-${i}`} className="contact-chip">
-                        {c.icon} {c.label}: {c.value}
-                      </span>
-                    ))}
-                  </div>
-                </>
-              )}
+              {twoDifferent &&
+                requesterContacts.length > 0 && (
+                  <>
+                    <div className="subsection-title">
+                      صاحب الطلب
+                    </div>
+                    <div className="contact-row">
+                      {requesterContacts.map((c, i) => (
+                        <span
+                          key={`reqr-${i}`}
+                          className="contact-chip"
+                        >
+                          {c.icon} {c.label}: {c.value}
+                        </span>
+                      ))}
+                    </div>
+                  </>
+                )}
 
               {reqContacts.length > 0 && (
                 <>
-                  <div className="subsection-title">الخاصة بالطلب</div>
+                  <div className="subsection-title">
+                    الخاصة بالطلب
+                  </div>
                   <div className="contact-row">
                     {reqContacts.map((c) => (
                       <span
@@ -707,13 +834,19 @@ export default function BloodDonationDetails() {
           {/* ---------- الوثائق ---------- */}
           {documents.length > 0 && (
             <div className="section-card mt-3">
-              <div className="dtbl-section-title">الوثائق الداعمة</div>
+              <div className="dtbl-section-title">
+                الوثائق الداعمة
+              </div>
 
               <div className="docs-grid">
                 {documents.map((d, i) => {
                   const pdf = isPdfDoc(d);
                   const openInNewTab = (url) =>
-                    window.open(url, '_blank', 'noopener,noreferrer');
+                    window.open(
+                      url,
+                      '_blank',
+                      'noopener,noreferrer',
+                    );
 
                   const onTileKey = (e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
@@ -735,14 +868,22 @@ export default function BloodDonationDetails() {
                         {pdf ? (
                           <div className="pdf-thumb">
                             <span className="pdf-emoji">📄</span>
-                            <span className="pdf-text">PDF</span>
+                            <span className="pdf-text">
+                              PDF
+                            </span>
                           </div>
                         ) : (
-                          <img src={d.url} alt={d.name || 'document'} />
+                          <img
+                            src={d.url}
+                            alt={d.name || 'document'}
+                          />
                         )}
                       </div>
 
-                      <div className="doc-name" title={d.name}>
+                      <div
+                        className="doc-name"
+                        title={d.name}
+                      >
                         {d.name || 'ملف'}
                       </div>
 
@@ -781,14 +922,28 @@ export default function BloodDonationDetails() {
             style={{ maxWidth: 1200, gap: 8 }}
           >
             {/* 🔹 فقرة توضيحية لصاحب الطلب */}
-            <Alert variant="info" className="mb-1 small">
-              ➊ عند وصول عروض جديدة، يمكنك <strong>قبول العرض المناسب</strong> أولاً.<br />
-              ➋ بعد تنفيذ التبرع فعليًا، اضغط على <strong>تأكيد الاستلام</strong> لتسجيل التنفيذ.<br />
-              ➌ بعد ذلك يمكنك <strong>إضافة تقييم للمتبرع</strong> لتحسين موثوقية المنصة.
+            <Alert
+              variant="info"
+              className="mb-1 small"
+            >
+              ➊ عند وصول عروض جديدة، يمكنك{' '}
+              <strong>قبول العرض المناسب</strong> أولاً.
+              <br />
+              ➋ بعد تنفيذ التبرع فعليًا، اضغط على{' '}
+              <strong>تأكيد الاستلام</strong> لتسجيل
+              التنفيذ.
+              <br />
+              ➌ بعد ذلك يمكنك{' '}
+              <strong>إضافة تقييم للمتبرع</strong> لتحسين
+              موثوقية المنصة.
             </Alert>
 
             <Button
-              variant={tab === 'offers' ? 'success' : 'outline-success'}
+              variant={
+                tab === 'offers'
+                  ? 'success'
+                  : 'outline-success'
+              }
               size="sm"
               onClick={() => setTab('offers')}
             >
@@ -796,12 +951,23 @@ export default function BloodDonationDetails() {
             </Button>
           </div>
 
-          <Card className="details-card offers-table w-100" style={{ maxWidth: 1200 }}>
-            <Table striped bordered hover responsive className="m-0">
+          <Card
+            className="details-card offers-table w-100"
+            style={{ maxWidth: 1200 }}
+          >
+            <Table
+              striped
+              bordered
+              hover
+              responsive
+              className="m-0"
+            >
               <thead>
                 <tr>
                   <th>المتبرع</th>
-                  <th className="col-sm-hide">تاريخ العرض</th>
+                  <th className="col-sm-hide">
+                    تاريخ العرض
+                  </th>
                   <th>الحالة</th>
                   <th className="actions-col">الإجراءات</th>
                 </tr>
@@ -809,7 +975,10 @@ export default function BloodDonationDetails() {
               <tbody>
                 {offers.length === 0 && (
                   <tr>
-                    <td colSpan="4" className="text-center text-muted">
+                    <td
+                      colSpan="4"
+                      className="text-center text-muted"
+                    >
                       لا توجد عروض حتى الآن.
                     </td>
                   </tr>
@@ -818,100 +987,318 @@ export default function BloodDonationDetails() {
                 {offers.map((ofr) => {
                   const donor = ofr.donor || {};
                   const donorName =
-                    [donor.firstName, donor.lastName].filter(Boolean).join(' ') || '—';
+                    [donor.firstName, donor.lastName]
+                      .filter(Boolean)
+                      .join(' ') || '—';
 
-                  const canManage = !isExpired(request.deadline);
-                  const canAccept = canManage && ofr.status === 'pending';
-                  const canFulfill = canManage && ofr.status === 'accepted';
-                  const canRate = ofr.status === 'fulfilled' || ofr.status === 'rated';
+                  const canManage =
+                    !isExpired(request.deadline);
+                  const canAccept =
+                    canManage && ofr.status === 'pending';
+                  const canFulfill =
+                    canManage &&
+                    ofr.status === 'accepted';
+                  const canRate =
+                    ofr.status === 'fulfilled' ||
+                    ofr.status === 'rated';
+
+                  const isExpanded =
+                    expandedOfferId === ofr._id;
+                  const donorDocs =
+                    normalizeOfferDocuments(ofr);
+                  const donorContacts =
+                    personContacts(donor);
+
+                  const createdLabel = ofr.createdAt
+                    ? new Date(
+                        ofr.createdAt,
+                      ).toLocaleString()
+                    : '—';
+
+                  const donorAvatar =
+                    resolveAvatar(donor.profileImage);
 
                   return (
-                    <tr key={ofr._id}>
-                      <td>{donorName}</td>
-                      <td className="col-sm-hide">
-                        {ofr.createdAt
-                          ? new Date(ofr.createdAt).toLocaleString()
-                          : '—'}
-                      </td>
-                      <td>
-                        <Badge bg={statusVariant(ofr.status)}>
-                          {statusLabel(ofr.status)}
-                        </Badge>
-                      </td>
-                      <td className="actions-col">
-                        <div className="d-flex flex-wrap gap-2">
-                          {donor?._id && (
-                            <Button
-                              size="sm"
-                              variant="outline-primary"
-                              onClick={() => navigate(`/chat/${donor._id}`)}
-                            >
-                              💬 محادثة
-                            </Button>
-                          )}
+                    <React.Fragment key={ofr._id}>
+                      <tr>
+                        <td>{donorName}</td>
+                        <td className="col-sm-hide">
+                          {createdLabel}
+                        </td>
+                        <td>
+                          <Badge
+                            bg={statusVariant(ofr.status)}
+                          >
+                            {statusLabel(ofr.status)}
+                          </Badge>
+                        </td>
+                              <td className="actions-col">
+  <div className="d-flex flex-wrap gap-2">
+    {/* زر تفاصيل العرض */}
+    <Button
+      size="sm"
+      variant={isExpanded ? 'secondary' : 'outline-secondary'}
+      onClick={() => toggleOfferDetails(ofr._id)}
+    >
+      {isExpanded ? 'إخفاء التفاصيل' : 'تفاصيل'}
+    </Button>
 
-                          {/* ✅ زر قبول العرض (صاحب الطلب) */}
-                          {canAccept && (
-                            <Button
-                              size="sm"
-                              variant="outline-success"
-                              onClick={() => handleAccept(ofr._id)}
-                            >
-                              ✔️ قبول العرض
-                            </Button>
-                          )}
+    {/* ✅ زر قبول العرض (صاحب الطلب) */}
+    {canAccept && (
+      <Button
+        size="sm"
+        variant="outline-success"
+        onClick={() => handleAccept(ofr._id)}
+      >
+        ✔️ قبول العرض
+      </Button>
+    )}
 
-                          {/* ✅ تأكيد الاستلام بعد القبول */}
-                          {canFulfill && (
-                            <Button
-                              size="sm"
-                              variant="success"
-                              onClick={() => handleFulfill(ofr._id)}
-                            >
-                              ✅ تأكيد الاستلام
-                            </Button>
-                          )}
+    {/* ✅ تأكيد الاستلام بعد القبول */}
+    {canFulfill && (
+      <Button
+        size="sm"
+        variant="success"
+        onClick={() => handleFulfill(ofr._id)}
+      >
+        ✅ تأكيد الاستلام
+      </Button>
+    )}
 
-                          {/* 🔹 عرض/إضافة تقييم عبر مودال */}
-                          {canRate && (
-                            <div className="d-inline-flex flex-column align-items-start gap-1">
-                              {ofr.ratingByRecipient > 0 ? (
-                                <div className="d-inline-flex align-items-center gap-2">
-                                  <span className="text-muted small">تقييمك:</span>
-                                  <RatingStars
-                                    value={ofr.ratingByRecipient}
-                                    disabled
+    {/* 🔹 عرض/إضافة تقييم عبر مودال */}
+    {canRate && (
+      <div className="d-inline-flex flex-column align-items-start gap-1">
+        {ofr.ratingByRecipient > 0 ? (
+          <div className="d-inline-flex align-items-center gap-2">
+            <span className="text-muted small">تقييمك:</span>
+            <RatingStars
+              value={ofr.ratingByRecipient}
+              disabled
+            />
+            <Button
+              variant="link"
+              size="sm"
+              className="p-0 text-decoration-none"
+              onClick={() => openRateModal(ofr)}
+            >
+              تعديل
+            </Button>
+          </div>
+        ) : (
+          <Button
+            size="sm"
+            variant="outline-success"
+            onClick={() => openRateModal(ofr)}
+          >
+            ⭐ إضافة تقييم للمتبرع
+          </Button>
+        )}
+      </div>
+    )}
+
+    {!canManage && ofr.ratingByRecipient > 0 && (
+      <div className="d-inline-flex align-items-center gap-1">
+        <span className="text-muted small">تقييمك:</span>
+        <RatingStars
+          value={ofr.ratingByRecipient}
+          disabled
+        />
+      </div>
+    )}
+  </div>
+</td>
+
+                      </tr>
+
+                      {isExpanded && (
+                        <tr className="offer-details-row">
+                          <td colSpan={4}>
+                            <div className="offer-details-box">
+                              <div className="offer-details-header">
+                                <div className="d-flex align-items-center gap-3">
+                                  <img
+                                    src={donorAvatar}
+                                    alt="المتبرع"
+                                    className="pub-avatar"
                                   />
-                                  <Button
-                                    variant="link"
-                                    size="sm"
-                                    className="p-0 text-decoration-none"
-                                    onClick={() => openRateModal(ofr)}
-                                  >
-                                    تعديل
-                                  </Button>
+                                  <div>
+                                    <div className="fw-bold">
+                                      {donorName}
+                                    </div>
+                                    <div className="small text-muted">
+                                      تاريخ العرض:{' '}
+                                      {createdLabel}
+                                    </div>
+                                    <div className="small text-muted">
+                                      حالة العرض:{' '}
+                                      <Badge
+                                        bg={statusVariant(
+                                          ofr.status,
+                                        )}
+                                      >
+                                        {statusLabel(
+                                          ofr.status,
+                                        )}
+                                      </Badge>
+                                    </div>
+                                  </div>
                                 </div>
-                              ) : (
+
+                                {donor?._id && (
+                                  <div className="d-flex flex-wrap gap-2">
+                                    <Button
+                                      size="sm"
+                                      variant="outline-primary"
+                                      onClick={() =>
+                                        navigate(
+                                          `/chat/${donor._id}`,
+                                        )
+                                      }
+                                    >
+                                      💬 محادثة
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline-secondary"
+                                      onClick={() =>
+                                        navigate(
+                                          `/profile/${donor._id}`,
+                                        )
+                                      }
+                                    >
+                                      👤 الملف الشخصي
+                                    </Button>
+                                  </div>
+                                )}
+                              </div>
+
+                              {donorContacts.length > 0 && (
+                                <div className="offer-contact-line">
+                                  {donorContacts.map(
+                                    (c, idx) => (
+                                      <span
+                                        key={idx}
+                                        className="contact-chip"
+                                      >
+                                        {c.icon} {c.label}:{' '}
+                                        {c.value}
+                                      </span>
+                                    ),
+                                  )}
+                                </div>
+                              )}
+
+                              {(ofr.message ||
+                                ofr.note ||
+                                ofr.comment ||
+                                ofr.description) && (
+                                <div className="offer-message-box">
+                                  <div className="offer-message-label">
+                                    رسالة المتبرع
+                                  </div>
+                                  <div className="offer-message-body">
+                                    {ofr.message ||
+                                      ofr.note ||
+                                      ofr.comment ||
+                                      ofr.description}
+                                  </div>
+                                </div>
+                              )}
+
+                              {donorDocs.length > 0 && (
+                                <>
+                                  <div className="dtbl-section-title mb-1">
+                                    مرفقات إثبات
+                                    التبرع
+                                  </div>
+                                  <div className="docs-grid mt-2">
+                                    {donorDocs.map(
+                                      (d, i) => {
+                                        const pdf =
+                                          isPdfDoc(d);
+                                        return (
+                                          <div
+                                            className="doc-tile"
+                                            key={i}
+                                          >
+                                            <div className="doc-thumb">
+                                              {pdf ? (
+                                                <div className="pdf-thumb">
+                                                  <span className="pdf-emoji">
+                                                    📄
+                                                  </span>
+                                                  <span className="pdf-text">
+                                                    PDF
+                                                  </span>
+                                                </div>
+                                              ) : (
+                                                <img
+                                                  src={
+                                                    d.url
+                                                  }
+                                                  alt={
+                                                    d.name ||
+                                                    'document'
+                                                  }
+                                                />
+                                              )}
+                                            </div>
+                                            <div
+                                              className="doc-name"
+                                              title={
+                                                d.name
+                                              }
+                                            >
+                                              {d.name ||
+                                                'ملف'}
+                                            </div>
+                                            <div className="doc-actions">
+                                              <a
+                                                className="btn btn-sm btn-outline-primary"
+                                                href={
+                                                  d.url
+                                                }
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                              >
+                                                فتح
+                                              </a>
+                                              <a
+                                                className="btn btn-sm btn-outline-secondary"
+                                                href={
+                                                  d.url
+                                                }
+                                                download
+                                              >
+                                                تنزيل
+                                              </a>
+                                            </div>
+                                          </div>
+                                        );
+                                      },
+                                    )}
+                                  </div>
+                                </>
+                              )}
+
+                              <div className="mt-3 text-end">
                                 <Button
                                   size="sm"
-                                  variant="outline-success"
-                                  onClick={() => openRateModal(ofr)}
+                                  variant="outline-secondary"
+                                  onClick={() =>
+                                    setExpandedOfferId(
+                                      null,
+                                    )
+                                  }
                                 >
-                                  ⭐ إضافة تقييم للمتبرع
+                                  إغلاق
                                 </Button>
-                              )}
+                              </div>
                             </div>
-                          )}
-
-                          {!canManage && ofr.ratingByRecipient > 0 && (
-                            <div className="d-inline-flex align-items-center gap-1">
-                              <span className="text-muted small">تقييمك:</span>
-                              <RatingStars value={ofr.ratingByRecipient} disabled />
-                            </div>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
                   );
                 })}
               </tbody>
@@ -919,17 +1306,26 @@ export default function BloodDonationDetails() {
           </Card>
         </>
       ) : (
-        <Card className="details-card w-100 donate-card" style={{ maxWidth: 1200 }}>
+        <Card
+          className="details-card w-100 donate-card"
+          style={{ maxWidth: 1200 }}
+        >
           <Card.Header className="donate-header">
             <div className="donate-header-main">
-              <div className="donate-title">أريد التبرع</div>
+              <div className="donate-title">
+                أريد التبرع
+              </div>
               <div className="donate-subtitle">
                 خطوة صغيرة منك قد تُنقذ حياة كاملة 💚
               </div>
             </div>
 
             <div className="donate-header-actions">
-              <button type="button" className="icon-pill" onClick={handleShare}>
+              <button
+                type="button"
+                className="icon-pill"
+                onClick={handleShare}
+              >
                 🔗 مشاركة
               </button>
               <button
@@ -943,7 +1339,9 @@ export default function BloodDonationDetails() {
                 <button
                   type="button"
                   className="icon-pill outline"
-                  onClick={() => navigate(`/chat/${requester._id}`)}
+                  onClick={() =>
+                    navigate(`/chat/${requester._id}`)
+                  }
                 >
                   💬 محادثة صاحب الطلب
                 </button>
@@ -952,7 +1350,11 @@ export default function BloodDonationDetails() {
           </Card.Header>
 
           <Card.Body>
-            {createMsg && <Alert variant={createMsg.type}>{createMsg.text}</Alert>}
+            {createMsg && (
+              <Alert variant={createMsg.type}>
+                {createMsg.text}
+              </Alert>
+            )}
 
             {myOffer ? (
               <div className="d-grid gap-2">
@@ -960,25 +1362,38 @@ export default function BloodDonationDetails() {
                 <div className="small text-muted">
                   {myOffer.status === 'pending' && (
                     <>
-                      عرضك في مرحلة <strong>الانتظار</strong>. سيتمكن صاحب الطلب من مراجعة
-                      العروض، وعند قبول عرضك ستصلك إشعارات بالتحديث.
+                      عرضك في مرحلة{' '}
+                      <strong>الانتظار</strong>. سيتمكن
+                      صاحب الطلب من مراجعة العروض،
+                      وعند قبول عرضك ستصلك إشعارات
+                      بالتحديث.
                     </>
                   )}
                   {myOffer.status === 'accepted' && (
                     <>
-                      تم <strong>قبول عرضك</strong> 🎉. يُفضّل التواصل مع صاحب الطلب لتنسيق
-                      موعد ومكان التبرع، وبعد التنفيذ سيتم تأكيد العملية من النظام.
+                      تم{' '}
+                      <strong>قبول عرضك</strong> 🎉. يُفضّل
+                      التواصل مع صاحب الطلب لتنسيق
+                      موعد ومكان التبرع، وبعد التنفيذ
+                      سيتم تأكيد العملية من النظام.
                     </>
                   )}
                   {myOffer.status === 'fulfilled' && (
                     <>
-                      تم <strong>تأكيد تنفيذ التبرع</strong>. يمكنك لاحقاً إضافة تقييمك
-                      للتجربة من صفحة <strong>عروضي على طلبات التبرع بالدم</strong>.
+                      تم{' '}
+                      <strong>تأكيد تنفيذ التبرع</strong>.
+                      يمكنك لاحقاً إضافة تقييمك
+                      للتجربة من صفحة{' '}
+                      <strong>
+                        عروضي على طلبات التبرع بالدم
+                      </strong>
+                      .
                     </>
                   )}
                   {myOffer.status === 'rated' && (
                     <>
-                      اكتملت عملية التبرع والتقييم. شكرًا لمساهمتك في إنقاذ حياة 🙏.
+                      اكتملت عملية التبرع والتقييم.
+                      شكرًا لمساهمتك في إنقاذ حياة 🙏.
                     </>
                   )}
                 </div>
@@ -987,11 +1402,15 @@ export default function BloodDonationDetails() {
                   لقد أعلنت تبرعك لهذا الطلب في{' '}
                   <strong>
                     {myOffer.createdAt
-                      ? new Date(myOffer.createdAt).toLocaleString()
+                      ? new Date(
+                          myOffer.createdAt,
+                        ).toLocaleString()
                       : '—'}
                   </strong>
                   ، وحالة إعلانك الآن:{' '}
-                  <Badge bg={statusVariant(myOffer.status)}>
+                  <Badge
+                    bg={statusVariant(myOffer.status)}
+                  >
                     {statusLabel(myOffer.status)}
                   </Badge>
                   .
@@ -1002,13 +1421,21 @@ export default function BloodDonationDetails() {
                     <>
                       <Button
                         variant="outline-primary"
-                        onClick={() => navigate(`/chat/${requester._id}`)}
+                        onClick={() =>
+                          navigate(
+                            `/chat/${requester._id}`,
+                          )
+                        }
                       >
                         💬 محادثة صاحب الطلب
                       </Button>
                       <Button
                         variant="outline-secondary"
-                        onClick={() => navigate(`/profile/${requester._id}`)}
+                        onClick={() =>
+                          navigate(
+                            `/profile/${requester._id}`,
+                          )
+                        }
                       >
                         👤 الملف الشخصي
                       </Button>
@@ -1016,37 +1443,52 @@ export default function BloodDonationDetails() {
                   )}
 
                   {myOffer.status === 'pending' && (
-                    <Button variant="outline-danger" onClick={handleCancelMine}>
+                    <Button
+                      variant="outline-danger"
+                      onClick={handleCancelMine}
+                    >
                       إلغاء الإعلان
                     </Button>
                   )}
                 </div>
               </div>
             ) : (
-              <Form onSubmit={submitDonation} className="d-grid gap-3">
+              <Form
+                onSubmit={submitDonation}
+                className="d-grid gap-3"
+              >
                 <Form.Group>
                   <Form.Label>رسالتك (اختياري)</Form.Label>
                   <Form.Control
                     as="textarea"
                     rows={3}
                     value={msg}
-                    onChange={(e) => setMsg(e.target.value)}
+                    onChange={(e) =>
+                      setMsg(e.target.value)
+                    }
                   />
                 </Form.Group>
 
                 <Form.Group>
-                  <Form.Label>وقت مقترح (اختياري)</Form.Label>
+                  <Form.Label>
+                    وقت مقترح (اختياري)
+                  </Form.Label>
                   <Form.Control
                     type="datetime-local"
                     value={proposedTime}
-                    onChange={(e) => setProposedTime(e.target.value)}
+                    onChange={(e) =>
+                      setProposedTime(e.target.value)
+                    }
                   />
                 </Form.Group>
 
                 <div className="donate-actions-row">
                   <Button
                     type="submit"
-                    disabled={creating || isExpired(request.deadline)}
+                    disabled={
+                      creating ||
+                      isExpired(request.deadline)
+                    }
                     className="main-donate-btn"
                   >
                     🩸 إرسال إعلان التبرع
@@ -1056,13 +1498,21 @@ export default function BloodDonationDetails() {
                     <div className="secondary-donate-actions">
                       <Button
                         variant="outline-success"
-                        onClick={() => navigate(`/chat/${requester._id}`)}
+                        onClick={() =>
+                          navigate(
+                            `/chat/${requester._id}`,
+                          )
+                        }
                       >
                         💬 محادثة صاحب الطلب
                       </Button>
                       <Button
                         variant="outline-secondary"
-                        onClick={() => navigate(`/profile/${requester._id}`)}
+                        onClick={() =>
+                          navigate(
+                            `/profile/${requester._id}`,
+                          )
+                        }
                       >
                         👤 الملف الشخصي
                       </Button>
@@ -1076,7 +1526,12 @@ export default function BloodDonationDetails() {
       )}
 
       {/* 🔹 مودال التقييم لصاحب الطلب */}
-      <Modal show={showRateModal} onHide={closeRateModal} centered dir="rtl">
+      <Modal
+        show={showRateModal}
+        onHide={closeRateModal}
+        centered
+        dir="rtl"
+      >
         <Modal.Header closeButton>
           <Modal.Title>تقييم المتبرع</Modal.Title>
         </Modal.Header>
@@ -1086,7 +1541,8 @@ export default function BloodDonationDetails() {
               <p className="mb-2">
                 كيف تقيّم تجربتك مع هذا المتبرع؟{' '}
                 <span className="text-muted small d-block">
-                  التقييم يساعد في بناء سمعة موثوقة داخل المنصة.
+                  التقييم يساعد في بناء سمعة موثوقة
+                  داخل المنصة.
                 </span>
               </p>
               <div className="d-flex flex-column gap-2 align-items-start">
@@ -1105,7 +1561,11 @@ export default function BloodDonationDetails() {
           )}
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={closeRateModal} disabled={ratingLoading}>
+          <Button
+            variant="secondary"
+            onClick={closeRateModal}
+            disabled={ratingLoading}
+          >
             إلغاء
           </Button>
           <Button
@@ -1113,7 +1573,9 @@ export default function BloodDonationDetails() {
             onClick={submitRating}
             disabled={ratingLoading || !rateValue}
           >
-            {ratingLoading ? 'جارٍ الحفظ...' : 'حفظ التقييم'}
+            {ratingLoading
+              ? 'جارٍ الحفظ...'
+              : 'حفظ التقييم'}
           </Button>
         </Modal.Footer>
       </Modal>
