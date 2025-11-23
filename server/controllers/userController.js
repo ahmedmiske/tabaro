@@ -1,8 +1,24 @@
 // server/controllers/userController.js
 const bcrypt = require("bcryptjs");
 const User = require("../models/user");
+const Wilaya = require("../models/wilayas");
 const asyncHandler = require("../utils/asyncHandler");
 const { generateToken } = require("../utils/otpUtils");
+
+const isWilayaValid = async (raw) => {
+  const trimmed = typeof raw === "string" ? raw.trim() : "";
+  if (!trimmed) return false;
+
+  const match = await Wilaya.findOne({
+    is_active: true,
+    name_ar: trimmed
+  })
+    .select("code name_ar")
+    .lean();
+
+  if (!match) return false;
+  return true;
+};
 
 // @desc Register a new user (بعد verify-otp)
 // @route POST /api/users
@@ -22,6 +38,7 @@ const registerUser = asyncHandler(async (req, res) => {
     institutionWebsite,
     address,
     phoneNumber,
+    wilaya,
   } = req.body;
 
   if (!phoneNumber) {
@@ -30,6 +47,11 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   const profileImage = req.file?.filename;
+  const isWilayaValidResult = await isWilayaValid(wilaya);
+  if (wilaya?.trim() && !isWilayaValidResult) {
+    res.status(400);
+    throw new Error("الولاية غير معروفة أو غير مفعلة");
+  }
 
   const newUser = new User({
     firstName,
@@ -45,6 +67,7 @@ const registerUser = asyncHandler(async (req, res) => {
     institutionWebsite,
     address,
     phoneNumber,
+    wilaya,
     profileImage,
     status: "verified", // مؤقتًا لحد ما نربط OTP
   });
@@ -55,6 +78,7 @@ const registerUser = asyncHandler(async (req, res) => {
     name: savedUser.firstName + " " + savedUser.lastName,
     phoneNumber: savedUser.phoneNumber,
     email: savedUser.email, // ممكن يرجع null
+    wilaya: savedUser.wilaya || null,
     token: generateToken(savedUser._id),
   });
 });
@@ -81,6 +105,7 @@ const authUser = asyncHandler(async (req, res) => {
         phoneNumber: user.phoneNumber,
         email: user.email || null, // ممكن null
         userType: user.userType,
+        wilaya: user.wilaya || null,
         profileImage: user.profileImage || "",
       },
     });
@@ -136,6 +161,15 @@ const updateUser = asyncHandler(async (req, res) => {
 
   for (const k of allowed) {
     if (k in req.body) user[k] = req.body[k];
+  }
+
+  if ("wilaya" in req.body) {
+    const isWilayaValidResult = await isWilayaValid(req.body.wilaya);
+    if (req.body.wilaya?.trim() && !isWilayaValidResult) {
+      res.status(400);
+      throw new Error("الولاية غير معروفة أو غير مفعلة");
+    }
+    user.wilaya = req.body.wilaya;
   }
 
   if (req.file?.filename) user.profileImage = req.file.filename;
@@ -202,7 +236,7 @@ const getPublicProfile = asyncHandler(async (req, res) => {
   const { userId } = req.params;
 
   const user = await User.findById(userId).select(
-    'firstName lastName profileImage address userType phoneNumber email ratingAsDonor ratingAsRecipient createdAt'
+    'firstName lastName profileImage address wilaya userType phoneNumber email ratingAsDonor ratingAsRecipient createdAt'
   );
 
   if (!user) {
@@ -229,6 +263,7 @@ const getPublicProfile = asyncHandler(async (req, res) => {
     lastName: user.lastName,
     profileImage: user.profileImage || '',
     address: user.address || '',
+    wilaya: user.wilaya || '',
     userType: user.userType || 'individual',
 
     // 👇 المهم هنا

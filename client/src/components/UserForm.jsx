@@ -1,5 +1,5 @@
 // src/components/UserForm.jsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import { Form, Button, Toast, Alert } from 'react-bootstrap';
@@ -27,6 +27,7 @@ function UserForm({
     phoneNumber: '',
     email: '',
     address: '',
+    wilaya: '',
     userType: '',
     username: '',
     password: '',
@@ -37,6 +38,7 @@ function UserForm({
     institutionAddress: '',
   });
   const [profileImage, setProfileImage] = useState(null);
+  const [wilayaOptions, setWilayaOptions] = useState([]);
 
   const step = currentStep;
   const [error, setError] = useState('');
@@ -45,6 +47,34 @@ function UserForm({
   const [fileError, setFileError] = useState('');
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let ignore = false;
+    const fetchWilayas = async () => {
+      try {
+        const response = await fetchWithInterceptors('/api/wilayas');
+        if (!ignore && Array.isArray(response?.body)) {
+          setWilayaOptions(response.body);
+        }
+      } catch (err) {
+        if (!ignore) console.error('Failed to fetch wilayas', err);
+      }
+    };
+
+    fetchWilayas();
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  const isWilayaValueValid = (value) => {
+    const trimmed = value?.trim();
+    if (!trimmed) return true;
+    if (!Array.isArray(wilayaOptions) || wilayaOptions.length === 0) return true;
+    const normalized = trimmed.toLowerCase();
+    return wilayaOptions.some((w) => w?.name_ar.trim().toLowerCase() === normalized);
+  };
+  const wilayaInputInvalid = Boolean(user.wilaya?.trim()) && !isWilayaValueValid(user.wilaya);
 
   const handleChange = (e) => setUser({ ...user, [e.target.name]: e.target.value });
 
@@ -71,7 +101,7 @@ function UserForm({
 
     if (step === 3) {
       if (user.userType === 'individual') {
-        if (!user.firstName?.trim() || !user.lastName?.trim()) valid = false;
+        if (!user.firstName?.trim() || !user.lastName?.trim() || !isWilayaValueValid(user.wilaya)) valid = false;
       } else if (user.userType === 'institutional') {
         if (!user.institutionName?.trim() || !user.institutionLicenseNumber?.trim() || !user.institutionAddress?.trim()) valid = false;
       } else {
@@ -190,6 +220,32 @@ function UserForm({
                   <Form.Group>
                     <Form.Label>البريد الإلكتروني (اختياري)</Form.Label>
                     <Form.Control name="email" value={user.email} onChange={handleChange} />
+                  </Form.Group>
+                  {console.log("Selected wilaya:", user.wilaya)}
+                  <Form.Group>
+                    <Form.Label>الولاية</Form.Label>
+                    <Form.Control
+                      name="wilaya"
+                      value={user.wilaya}
+                      onChange={handleChange}
+                      placeholder="اكتب جزءاً من اسم الولاية لاختيارها"
+                      list="wilayas-options"
+                      autoComplete="off"
+                      isInvalid={wilayaInputInvalid}
+                    />
+                    <datalist id="wilayas-options">
+                      {wilayaOptions.map((w) => {
+                        return (
+                          <option key={w?.code} value={w?.name_ar} label={w?.name_ar} />
+                        );
+                      })}
+                    </datalist>
+                    <Form.Control.Feedback type="invalid">
+                      اختر ولاية من القائمة (أو اترك الحقل فارغاً).
+                    </Form.Control.Feedback>
+                    <Form.Text className="text-muted">
+                      سيتم اقتراح الولايات المتاحة تلقائياً، ويمكن ترك الحقل فارغاً.
+                    </Form.Text>
                   </Form.Group>
                   <Form.Group>
                     <Form.Label>العنوان</Form.Label>
