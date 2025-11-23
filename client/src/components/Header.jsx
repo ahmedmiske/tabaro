@@ -137,11 +137,6 @@ function Header({ notifCount }) {
     );
   }, [pathname]);
 
-  const campaignsActive = useMemo(
-    () => pathname.startsWith('/campaigns'),
-    [pathname],
-  );
-
   // Close on outside click / ESC
   const rootRef = useRef(null);
   const prevFocusRef = useRef(null);
@@ -280,7 +275,7 @@ function Header({ notifCount }) {
   // ARIA ids for groups
   const bloodId = useId();
   const generalId = useId();
-  const campaignsId = useId();
+  // مجتمعنا / الحملات → للنسخة القادمة، لذلك لا نحتاج campaignsId الآن
 
   // ===== Hide on scroll (mobile/tablet) =====
   useEffect(() => {
@@ -381,6 +376,24 @@ function Header({ notifCount }) {
                 </button>
               </div>
 
+              {/* 🎯 لوحة التحكم – نفس تنسيق الأزرار، تظهر فقط للمستخدم المسجّل */}
+              {isAuthed && (
+                <div className="eh-nav-item">
+                  <Link
+                    to="/dashboard"
+                    className={`eh-nav-link ${
+                      pathname.startsWith('/dashboard') ? 'active' : ''
+                    }`}
+                    onClick={() => setOpen(null)}
+                  >
+                    <FiGrid />
+                    <span>لوحة التحكم</span>
+                  </Link>
+                </div>
+              )}
+
+              {/* زر مجتمعنا للنسخة القادمة */}
+              {/*
               <div
                 className={`eh-nav-item ${open === 'campaigns' ? 'open' : ''}`}
               >
@@ -399,6 +412,7 @@ function Header({ notifCount }) {
                   <FiChevronDown className="eh-caret" />
                 </button>
               </div>
+              */}
             </nav>
 
             {/* القائمة اليمنى */}
@@ -576,7 +590,8 @@ function Header({ notifCount }) {
             </div>
           </div>
 
-          {/* الاعلانات الاجتماعية */}
+          {/* الاعلانات الاجتماعية / مجتمعنا → للنسخة القادمة */}
+          {/*
           <div
             id="social-campaigns"
             className={`eh-mega-panel ${open === 'campaigns' ? 'open' : ''}`}
@@ -614,6 +629,7 @@ function Header({ notifCount }) {
               </Link>
             </div>
           </div>
+          */}
         </div>
 
         {/* القائمة الجانبية للجوّال */}
@@ -691,6 +707,18 @@ function Header({ notifCount }) {
                 <span>الرئيسية</span>
               </Link>
 
+              {/* لوحة التحكم في الجوال – نفس التنسيق، فقط للمستخدم المسجّل */}
+              {isAuthed && (
+                <Link
+                  to="/dashboard"
+                  className="eh-drawer-link"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <FiGrid />
+                  <span>لوحة التحكم</span>
+                </Link>
+              )}
+
               <div className="eh-drawer-group">
                 <div className="eh-drawer-group-title">
                   <FiDroplet />
@@ -753,6 +781,8 @@ function Header({ notifCount }) {
                 </Link>
               </div>
 
+              {/* حملات التبرع / مجتمعنا – للنسخة القادمة */}
+              {/*
               <div className="eh-drawer-group">
                 <div className="eh-drawer-group-title">
                   <FiUsers />
@@ -771,6 +801,7 @@ function Header({ notifCount }) {
                   إنشاء حملة
                 </Link>
               </div>
+              */}
 
               <Link
                 to="/about"
