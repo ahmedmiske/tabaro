@@ -28,6 +28,7 @@ function UserForm({
     email: '',
     address: '',
     wilaya: '',
+    moughataa: '',
     userType: '',
     username: '',
     password: '',
@@ -39,6 +40,7 @@ function UserForm({
   });
   const [profileImage, setProfileImage] = useState(null);
   const [wilayaOptions, setWilayaOptions] = useState([]);
+  const [moughataaOptions, setMoughataaOptions] = useState([]);
 
   const step = currentStep;
   const [error, setError] = useState('');
@@ -50,18 +52,20 @@ function UserForm({
 
   useEffect(() => {
     let ignore = false;
-    const fetchWilayas = async () => {
+    const fetchOptions = async (endpoint, setter, label) => {
       try {
-        const response = await fetchWithInterceptors('/api/wilayas');
+        const response = await fetchWithInterceptors(endpoint);
         if (!ignore && Array.isArray(response?.body)) {
-          setWilayaOptions(response.body);
+          setter(response.body);
         }
       } catch (err) {
-        if (!ignore) console.error('Failed to fetch wilayas', err);
+        if (!ignore) console.error(`Failed to fetch ${label}`, err);
       }
     };
 
-    fetchWilayas();
+    fetchOptions('/api/wilayas', setWilayaOptions, 'wilayas');
+    fetchOptions('/api/moughataas', setMoughataaOptions, 'moughataas');
+
     return () => {
       ignore = true;
     };
@@ -72,9 +76,17 @@ function UserForm({
     if (!trimmed) return true;
     if (!Array.isArray(wilayaOptions) || wilayaOptions.length === 0) return true;
     const normalized = trimmed.toLowerCase();
-    return wilayaOptions.some((w) => w?.name_ar.trim().toLowerCase() === normalized);
+    return wilayaOptions.some((w) => w?.name_ar === normalized);
   };
   const wilayaInputInvalid = Boolean(user.wilaya?.trim()) && !isWilayaValueValid(user.wilaya);
+  const isMoughataaValueValid = (value) => {
+    const trimmed = value?.trim();
+    if (!trimmed) return true;
+    if (!Array.isArray(moughataaOptions) || moughataaOptions.length === 0) return true;
+    const normalized = trimmed.toLowerCase();
+    return moughataaOptions.some((m) => m?.name_ar === normalized);
+  };
+  const moughataaInputInvalid = Boolean(user.moughataa?.trim()) && !isMoughataaValueValid(user.moughataa);
 
   const handleChange = (e) => setUser({ ...user, [e.target.name]: e.target.value });
 
@@ -101,7 +113,14 @@ function UserForm({
 
     if (step === 3) {
       if (user.userType === 'individual') {
-        if (!user.firstName?.trim() || !user.lastName?.trim() || !isWilayaValueValid(user.wilaya)) valid = false;
+        if (
+          !user.firstName?.trim() ||
+          !user.lastName?.trim() ||
+          !isWilayaValueValid(user.wilaya) ||
+          !isMoughataaValueValid(user.moughataa)
+        ) {
+          valid = false;
+        }
       } else if (user.userType === 'institutional') {
         if (!user.institutionName?.trim() || !user.institutionLicenseNumber?.trim() || !user.institutionAddress?.trim()) valid = false;
       } else {
@@ -221,7 +240,6 @@ function UserForm({
                     <Form.Label>البريد الإلكتروني (اختياري)</Form.Label>
                     <Form.Control name="email" value={user.email} onChange={handleChange} />
                   </Form.Group>
-                  {console.log("Selected wilaya:", user.wilaya)}
                   <Form.Group>
                     <Form.Label>الولاية</Form.Label>
                     <Form.Control
@@ -245,6 +263,29 @@ function UserForm({
                     </Form.Control.Feedback>
                     <Form.Text className="text-muted">
                       سيتم اقتراح الولايات المتاحة تلقائياً، ويمكن ترك الحقل فارغاً.
+                    </Form.Text>
+                  </Form.Group>
+                  <Form.Group>
+                    <Form.Label>المقاطعة</Form.Label>
+                    <Form.Control
+                      name="moughataa"
+                      value={user.moughataa}
+                      onChange={handleChange}
+                      placeholder="اكتب جزءاً من اسم المقاطعة لاختيارها"
+                      list="moughataas-options"
+                      autoComplete="off"
+                      isInvalid={moughataaInputInvalid}
+                    />
+                    <datalist id="moughataas-options">
+                      {moughataaOptions.map((m) => (
+                        <option key={m?.code} value={m?.name_ar} label={m?.name_ar} />
+                      ))}
+                    </datalist>
+                    <Form.Control.Feedback type="invalid">
+                      اختر مقاطعة من القائمة (أو اترك الحقل فارغاً).
+                    </Form.Control.Feedback>
+                    <Form.Text className="text-muted">
+                      اختيار المقاطعة يساعدنا على تقريب المتبرعين منك، ويمكن ترك الحقل فارغاً.
                     </Form.Text>
                   </Form.Group>
                   <Form.Group>

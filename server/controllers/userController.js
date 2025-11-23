@@ -2,6 +2,7 @@
 const bcrypt = require("bcryptjs");
 const User = require("../models/user");
 const Wilaya = require("../models/wilayas");
+const Moughataa = require("../models/moughataas");
 const asyncHandler = require("../utils/asyncHandler");
 const { generateToken } = require("../utils/otpUtils");
 
@@ -10,6 +11,21 @@ const isWilayaValid = async (raw) => {
   if (!trimmed) return false;
 
   const match = await Wilaya.findOne({
+    is_active: true,
+    name_ar: trimmed
+  })
+    .select("code name_ar")
+    .lean();
+
+  if (!match) return false;
+  return true;
+};
+
+const isMoughataaValid = async (raw) => {
+  const trimmed = typeof raw === "string" ? raw.trim() : "";
+  if (!trimmed) return false;
+
+  const match = await Moughataa.findOne({
     is_active: true,
     name_ar: trimmed
   })
@@ -39,6 +55,7 @@ const registerUser = asyncHandler(async (req, res) => {
     address,
     phoneNumber,
     wilaya,
+    moughataa,
   } = req.body;
 
   if (!phoneNumber) {
@@ -51,6 +68,11 @@ const registerUser = asyncHandler(async (req, res) => {
   if (wilaya?.trim() && !isWilayaValidResult) {
     res.status(400);
     throw new Error("الولاية غير معروفة أو غير مفعلة");
+  }
+  const isMoughataaValidResult = await isMoughataaValid(moughataa);
+  if (moughataa?.trim() && !isMoughataaValidResult) {
+    res.status(400);
+    throw new Error("المقاطعة غير معروفة أو غير مفعلة");
   }
 
   const newUser = new User({
@@ -68,6 +90,7 @@ const registerUser = asyncHandler(async (req, res) => {
     address,
     phoneNumber,
     wilaya,
+    moughataa,
     profileImage,
     status: "verified", // مؤقتًا لحد ما نربط OTP
   });
@@ -79,6 +102,7 @@ const registerUser = asyncHandler(async (req, res) => {
     phoneNumber: savedUser.phoneNumber,
     email: savedUser.email, // ممكن يرجع null
     wilaya: savedUser.wilaya || null,
+    moughataa: savedUser.moughataa || null,
     token: generateToken(savedUser._id),
   });
 });
@@ -106,6 +130,7 @@ const authUser = asyncHandler(async (req, res) => {
         email: user.email || null, // ممكن null
         userType: user.userType,
         wilaya: user.wilaya || null,
+        moughataa: user.moughataa || null,
         profileImage: user.profileImage || "",
       },
     });
@@ -164,12 +189,28 @@ const updateUser = asyncHandler(async (req, res) => {
   }
 
   if ("wilaya" in req.body) {
-    const isWilayaValidResult = await isWilayaValid(req.body.wilaya);
-    if (req.body.wilaya?.trim() && !isWilayaValidResult) {
-      res.status(400);
-      throw new Error("الولاية غير معروفة أو غير مفعلة");
+    const value = req.body.wilaya.trim();
+    if(value){
+      const isWilayaValidResult = await isWilayaValid(value);
+      if (!isWilayaValidResult) {
+        res.status(400);
+        throw new Error("الولاية غير معروفة أو غير مفعلة");
+      }
+      user.wilaya = value;
+
     }
-    user.wilaya = req.body.wilaya;
+  }
+
+  if ("moughataa" in req.body) {
+    const value = req.body.moughataa.trim();
+    if(value){
+      const isMoughataaValidResult = await isMoughataaValid(value);
+      if (!isMoughataaValidResult) {
+        res.status(400);
+        throw new Error("المقاطعة غير معروفة أو غير مفعلة");
+      }
+      user.moughataa = value;
+    }
   }
 
   if (req.file?.filename) user.profileImage = req.file.filename;
@@ -236,7 +277,7 @@ const getPublicProfile = asyncHandler(async (req, res) => {
   const { userId } = req.params;
 
   const user = await User.findById(userId).select(
-    'firstName lastName profileImage address wilaya userType phoneNumber email ratingAsDonor ratingAsRecipient createdAt'
+    'firstName lastName profileImage address wilaya moughataa userType phoneNumber email ratingAsDonor ratingAsRecipient createdAt'
   );
 
   if (!user) {
@@ -264,6 +305,7 @@ const getPublicProfile = asyncHandler(async (req, res) => {
     profileImage: user.profileImage || '',
     address: user.address || '',
     wilaya: user.wilaya || '',
+    moughataa: user.moughataa || '',
     userType: user.userType || 'individual',
 
     // 👇 المهم هنا
