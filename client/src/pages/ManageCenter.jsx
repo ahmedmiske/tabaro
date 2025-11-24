@@ -19,8 +19,9 @@ function BloodSection() {
       <h2 className="mc-panel-title">إدارة طلبات وعروض التبرع بالدم</h2>
       <p className="mc-panel-desc">يمكنك هنا إدارة الطلبات والعروض الخاصة بالتبرع بالدم.</p>
       <div className="mc-placeholder">
-        <MyDonationOffersBlood />
         <MyRequestsWithOffersBlood />
+        <MyDonationOffersBlood />
+     
       </div>
     </div>
   );
@@ -32,8 +33,9 @@ function GeneralSection() {
       <h2 className="mc-panel-title">إدارة التبرعات والعروض</h2>
       <p className="mc-panel-desc">تابع طلباتك وعروضك العامة مثل المساعدات والمستلزمات.</p>
       <div className="mc-placeholder">
-        <MyDonationOffersGeneral />
         <MyRequestsWithOffersGeneral />
+        <MyDonationOffersGeneral />
+    
       </div>
     </div>
   );

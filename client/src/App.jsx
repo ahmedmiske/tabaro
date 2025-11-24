@@ -32,10 +32,14 @@ import UnderConstruction from "./pages/UnderConstruction.jsx";
 import ReadyToDonateBloodPage from "./pages/ReadyToDonateBloodPage.jsx";
 import ReadyToDonateGeneralPage from "./pages/ReadyToDonateGeneralPage.jsx";
 import ReadyDonors from "./pages/ReadyDonors.jsx";
-import DashboardWrapper from "./pages/DashboardWrapper.jsx";
+import Dashboard from "./pages/DashboardPage.jsx";
+import ManageCenter from './pages/ManageCenter.jsx';
+import ManageCenterBlood from './pages/ManageCenterBlood.jsx';
+import ManageCenterGeneral from './pages/ManageCenterGeneral.jsx';
+import ManageCenterCommunity from './pages/ManageCenterCommunity.jsx';
 
 // Manage center
-import ManageCenter from "./pages/ManageCenter.jsx";
+// import ManageCenter from "./pages/ManageCenter.jsx";
 
 // Lists & details
 import DonationRequestPage from "./pages/DonationRequestsPage.jsx";
@@ -272,13 +276,21 @@ function App() {
                   </RequireAuth>
                 }
               />
+                <Route
+                path="/manage/Community"
+                element={
+                  <RequireAuth>
+                    <ManageCenterCommunity />
+                  </RequireAuth>
+                }
+              />
 
               {/* لوحة التحكم وإدارة المركز */}
               <Route
                 path="/dashboard"
                 element={
                   <RequireAuth>
-                    <DashboardWrapper />
+                    <Dashboard />
                   </RequireAuth>
                 }
               />
@@ -287,6 +299,22 @@ function App() {
                 element={
                   <RequireAuth>
                     <ManageCenter />
+                  </RequireAuth>
+                }
+              />
+                <Route
+                path="/manage/blood"
+                element={
+                  <RequireAuth>
+                    <ManageCenterBlood />
+                  </RequireAuth>
+                }
+              />
+                <Route
+                path="/manage/general"
+                element={
+                  <RequireAuth>
+                    <ManageCenterGeneral />
                   </RequireAuth>
                 }
               />

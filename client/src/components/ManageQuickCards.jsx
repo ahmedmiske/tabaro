@@ -5,92 +5,119 @@ import { Link } from 'react-router-dom';
 import './ManageQuickCards.css';
 
 export default function ManageQuickCards({
-  bloodCount = 0,
-  generalCount = 0,
-  communityCount = 0,
+  bloodCount,
+  generalCount,
+  communityCount,
 }) {
-  const items = [
-    {
-      key: 'blood',
-      manageTo: '/manage?tab=blood',
-      listTo: '/blood-donations',
-      icon: '💧',
-      title: 'إدارة طلبات التبرع بالدم',
-      hint: bloodCount > 0 ? `${bloodCount} عناصر بانتظارك` : 'لا توجد طلبات أو عروض بعد',
-      badge: 'دم',
-      desc: 'أنشئ طلب دم جديد، راقب العروض، وأكمل التنفيذ بسهولة.',
-      listLabel: 'عرض طلبات التبرع بالدم',
-    },
-    {
-      key: 'general',
-      manageTo: '/manage?tab=general',
-      listTo: '/donations',
-      icon: '🎁',
-      title: 'إدارة الطلبات العامة',
-      hint: generalCount > 0 ? `${generalCount} عناصر نشطة` : 'لم تضف أو تتفاعل مع طلبات عامة بعد',
-      badge: 'عام',
-      desc: 'طلبات مساعدة متنوعة: إغاثة، تعليم، مبادرات.. ادعم أو اطلب.',
-      listLabel: 'استكشاف الطلبات العامة',
-    },
-    {
-      key: 'community',
-      manageTo: '/manage?tab=community',
-      listTo: '/announcements',
-      icon: '💬',
-      title: 'مشاركاتك مع المجتمع',
-      hint: communityCount > 0 ? `${communityCount} تفاعل حديث` : 'لم تشارك بعد في منشورات المجتمع',
-      badge: 'مجتمعنا',
-      desc: 'شارك فكرة، اقترح مبادرة، وتفاعل مع منشورات المجتمع.',
-      listLabel: 'الذهاب إلى الإعلانات المجتمعية',
-    },
-  ];
-
   return (
-    <section
-      className="mqs-shell"
-      aria-label="الوصول السريع لإدارة الطلبات والمجتمع"
-      dir="rtl"
-    >
-      {items.map((it) => (
-        <article key={it.key} className={`mqs-card is-${it.key}`}>
-          <div className="mqs-glow" aria-hidden />
+    <section className="mqs-section" dir="rtl">
+      <h2 className="mqc-title">الوصول السريع لإدارة طلباتك وعروضك</h2>
+      <p className="mqc-sub">
+        من هنا يمكنك إدارة طلباتك، استكشاف طلبات الآخرين، أو الإعلان عن استعدادك
+        للتبرع في أي وقت.
+      </p>
+
+      {/* شبكة الكروت الثلاثة */}
+      <div className="mqs-shell">
+        {/* بطاقة التبرع بالدم */}
+        <article className="mqs-card is-blood">
+          <div className="mqs-glow" />
+
           <div className="mqs-top">
-            <span className="mqs-icon" aria-hidden>
-              {it.icon}
-            </span>
-            <span className="mqs-badge">{it.badge}</span>
+            <div className="mqs-icon">💧</div>
+            <span className="mqs-badge">{bloodCount} عنصر متعلق بك</span>
           </div>
 
-          <h3 className="mqs-title">{it.title}</h3>
-          <p className="mqs-desc">{it.desc}</p>
+          <h3 className="mqs-title">إدارة التبرع بالدم</h3>
+          <p className="mqs-desc">
+            تابع طلباتك وعروضك الخاصة بالتبرع بالدم، وساهم في إنقاذ حياة من خلال
+            متابعة الحالات المستعجلة.
+          </p>
 
           <div className="mqs-footer">
-            <span className="mqs-hint">{it.hint}</span>
-
+            <span className="mqs-hint">منطقة خاصة بطلبات وعروض الدم.</span>
             <div className="mqs-actions">
-              {/* زر الإدارة (نفس الفكرة السابقة) */}
-              <Link
-                className="mqs-cta mqs-cta--primary"
-                to={it.manageTo}
-                aria-label={`إدارة: ${it.title}`}
-              >
-                إدارة
+              <Link to="/manage/blood" className="mqs-cta mqs-cta--primary">
+                إدارة طلباتي وعروضي
               </Link>
-
-              {/* زر عرض / استكشاف الطلبات في الصفحة المخصصة */}
-              {it.listTo && (
-                <Link
-                  className="mqs-cta mqs-cta--ghost"
-                  to={it.listTo}
-                  aria-label={it.listLabel}
-                >
-                  {it.listLabel}
-                </Link>
-              )}
             </div>
           </div>
         </article>
-      ))}
+
+        {/* بطاقة التبرعات العامة */}
+        <article className="mqs-card is-general">
+          <div className="mqs-glow" />
+
+          <div className="mqs-top">
+            <div className="mqs-icon">🎁</div>
+            <span className="mqs-badge">{generalCount} عنصر متعلق بك</span>
+          </div>
+
+          <h3 className="mqs-title">إدارة التبرعات العامة</h3>
+          <p className="mqs-desc">
+            المساعدات المالية والعينية، السكن، التعليم وغيرها من الطلبات العامة
+            في مكان واحد.
+          </p>
+
+          <div className="mqs-footer">
+            <span className="mqs-hint">منطقة إدارة التبرعات والطلبات العامة.</span>
+            <div className="mqs-actions">
+              <Link to="/manage/general" className="mqs-cta mqs-cta--primary">
+                إدارة طلباتي وعروضي
+              </Link>
+            </div>
+          </div>
+        </article>
+
+        {/* بطاقة المجتمع / الإعلانات الاجتماعية */}
+        <article className="mqs-card is-community">
+          <div className="mqs-glow" />
+
+          <div className="mqs-top">
+            <div className="mqs-icon">💬</div>
+            <span className="mqs-badge">{communityCount} عنصر</span>
+          </div>
+
+          <h3 className="mqs-title">المجتمع والإعلانات الاجتماعية</h3>
+          <p className="mqs-desc">
+            حملات، منشورات، وإعلانات اجتماعية للتطوع أو جمع التبرعات (قيد
+            التطوير).
+          </p>
+
+          <div className="mqs-footer">
+            <span className="mqs-hint">مساحة المجتمع والتطوع.</span>
+            <div className="mqs-actions">
+              <Link to="/manage/community" className="mqs-cta mqs-cta--primary">
+                إدارة منشوراتي وإعلاناتي
+              </Link>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      {/* ✅ صف جديد أسفل الكروت يحتوي الأزرار العامة */}
+      <div className="mqs-global-actions">
+        <Link
+          to="/blood-donations"  // غيّر المسار حسب الراوتر عندك
+          className="mqs-global-btn"
+        >
+          استكشف طلبات التبرع بالدم
+        </Link>
+
+        <Link
+          to="/donations" // غيّر المسار لمسار طلبات التبرعات العامة
+          className="mqs-global-btn mqs-global-btn--secondary"
+        >
+          استكشف طلبات التبرعات العامة
+        </Link>
+
+        <Link
+          to="/ready/blood" // صفحة يعلن فيها المستخدم استعداده للتبرع
+          className="mqs-global-btn mqs-global-btn--accent"
+        >
+          أعلن عن استعدادك للتبرع الآن
+        </Link>
+      </div>
     </section>
   );
 }

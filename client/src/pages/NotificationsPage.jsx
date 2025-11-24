@@ -1,22 +1,46 @@
-import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
+// src/pages/NotificationsPage.jsx
+import React, {
+  useEffect,
+  useMemo,
+  useState,
+  useCallback,
+  useRef,
+} from 'react';
+import {
+  ListGroup,
+  Button,
+  Image,
+  Badge,
+  Spinner,
+} from 'react-bootstrap';
+import {
+  useNavigate,
+  useSearchParams,
+  useLocation,
+} from 'react-router-dom';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
-import { ListGroup, Dropdown, Button, Image, Badge, Spinner } from 'react-bootstrap';
 import './NotificationsPage.css';
-import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 
 const API_BASE =
   process.env.REACT_APP_API_ORIGIN ||
   process.env.REACT_APP_API_URL ||
   'http://localhost:5000';
 
-/* ✅ مسارات التفاصيل — متوافقة مع App.js لديك */
-const BLOOD_REQUEST_ROUTE            = process.env.REACT_APP_BLOOD_DETAILS_ROUTE              || '/blood-donation-details';
-const GENERAL_REQUEST_ROUTE          = process.env.REACT_APP_DONATION_DETAILS_ROUTE           || '/donations';
-const DONATION_CONFIRM_ROUTE         = process.env.REACT_APP_DONATION_CONFIRMATION_ROUTE      || '/donation-confirmations';
-const DONATION_ENTITY_ROUTE          = process.env.REACT_APP_DONATION_ENTITY_ROUTE            || '/donation-details';
-const DONATION_REQUEST_CONFIRM_ROUTE = process.env.REACT_APP_DONATION_REQUEST_CONFIRM_ROUTE   || '/donation-request-confirmations';
+/* ✅ مسارات التفاصيل */
+const BLOOD_REQUEST_ROUTE =
+  process.env.REACT_APP_BLOOD_DETAILS_ROUTE || '/blood-donation-details';
+const GENERAL_REQUEST_ROUTE =
+  process.env.REACT_APP_DONATION_DETAILS_ROUTE || '/donations';
+const DONATION_CONFIRM_ROUTE =
+  process.env.REACT_APP_DONATION_CONFIRMATION_ROUTE ||
+  '/donation-confirmations';
+const DONATION_ENTITY_ROUTE =
+  process.env.REACT_APP_DONATION_ENTITY_ROUTE || '/donation-details';
+const DONATION_REQUEST_CONFIRM_ROUTE =
+  process.env.REACT_APP_DONATION_REQUEST_CONFIRM_ROUTE ||
+  '/donation-request-confirmations';
 
-/* ====== Utils ====== */
+/* --------- Utils --------- */
 const resolveAvatar = (p) => {
   if (!p) return '/default-avatar.png';
   if (/^https?:\/\//i.test(p)) return p;
@@ -27,20 +51,32 @@ const resolveAvatar = (p) => {
 const fmtDateTime = (s) =>
   s
     ? new Date(s).toLocaleString('ar-MA', {
-        day: '2-digit', month: '2-digit', year: 'numeric',
-        hour: '2-digit', minute: '2-digit',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
       })
-    : '' ;
+    : '';
 
-/* ====== تسميات عربية مختصرة ====== */
+/* عنوان عربي حسب نوع الإشعار */
 const typeLabelAr = (n) => {
-  const key = (n?.meta?.event || n?.event || n?.type || n?.meta?.type || 'general').toLowerCase();
+  const key = (
+    n?.meta?.event ||
+    n?.event ||
+    n?.type ||
+    n?.meta?.type ||
+    'general'
+  )
+    .toString()
+    .toLowerCase();
+
   const map = {
     message: 'رسالة جديدة',
     offer: 'عرض تبرع',
     donation: 'تبرع',
-    general: 'إشعار',
     system: 'نظام',
+    general: 'إشعار',
     donation_request_confirmation: 'تأكيد طلب تبرع',
     donation_confirmation: 'تأكيد استلام التبرع',
     donation_offer: 'عرض تبرع',
@@ -53,7 +89,7 @@ const typeLabelAr = (n) => {
   return map[key] || 'إشعار';
 };
 
-/* 🔎 هل الإشعار عن "طلب دم"؟ (صارم) */
+/* هل هو إشعار عن طلب دم؟ */
 const isBloodStrict = (n) => {
   const m = n?.meta || {};
   const kind = String(m.requestType || m.kind || m.category || '').toLowerCase();
@@ -66,16 +102,24 @@ const isBloodStrict = (n) => {
   );
 };
 
-/* شارة الطبيعة */
+/* طبيعة الطلب (تبرع مالي / عيني ..) */
 const categoryLabelAr = (n) => {
   if (isBloodStrict(n)) return 'تبرع بالدم';
   const m = n?.meta || {};
-  const kind = (m.requestType || m.kind || m.category || '').toString().toLowerCase();
-  const map = { money: 'تبرع مالي', financial: 'تبرع مالي', goods: 'تبرع عيني', material: 'تبرع عيني', health: 'الصحة' };
+  const kind = (m.requestType || m.kind || m.category || '')
+    .toString()
+    .toLowerCase();
+  const map = {
+    money: 'تبرع مالي',
+    financial: 'تبرع مالي',
+    goods: 'تبرع عيني',
+    material: 'تبرع عيني',
+    health: 'الصحة',
+  };
   return map[kind] || (m.requestType || m.kind || m.category || '');
 };
 
-/* 📦 استخراج كل المعرّفات المحتملة من الإشعار */
+/* استخراج المعرّفات */
 const extractIds = (n) => {
   const m = n?.meta || {};
 
@@ -87,10 +131,7 @@ const extractIds = (n) => {
     n?.request?._id ||
     null;
 
-  const donationEntityId =
-    m.donationId ||
-    m.donation?._id ||
-    null;
+  const donationEntityId = m.donationId || m.donation?._id || null;
 
   const confirmationId =
     m.confirmationId ||
@@ -109,7 +150,7 @@ const extractIds = (n) => {
   return { requestId, donationEntityId, confirmationId, requestConfId };
 };
 
-/* 🧭 هل الإشعار عن تأكيد/عرض (وليس كيان تبرع عام)؟ */
+/* هل الإشعار عن تأكيد/عرض تبرع؟ */
 const isDonationConfirmation = (n) => {
   const m = n?.meta || {};
   const t = (n?.type || m.type || m.event || '').toLowerCase();
@@ -124,19 +165,62 @@ const isDonationConfirmation = (n) => {
     'donation_rated',
     'rated',
   ];
-  return keys.some(k => t.includes(k) || entity.includes(k));
+  return keys.some((k) => t.includes(k) || entity.includes(k));
 };
 
-/* 🧭 هل الإشعار عن "تأكيد طلب تبرع"؟ */
+/* هل الإشعار عن "تأكيد طلب تبرع"؟ */
 const isDonationRequestConfirmation = (n) => {
   const m = n?.meta || {};
   const t = (n?.type || m.type || m.event || '').toLowerCase();
   return t.includes('donation_request_confirmation');
 };
 
-/* 🧭 تحديد الوجهة */
+/* 👇 تصنيف الإشعارات لأغراض الفلترة */
+const notifKind = (n) => {
+  const m = n?.meta || {};
+  const t = (
+    n?.type ||
+    m.type ||
+    m.event ||
+    ''
+  )
+    .toString()
+    .toLowerCase();
+
+  if ((n.type || '').toLowerCase() === 'message') return 'message';
+  if ((n.type || '').toLowerCase() === 'system' || t.includes('system'))
+    return 'system';
+
+  if (
+    t.includes('offer') ||
+    t.includes('donation_confirmation') ||
+    t.includes('donation_fulfilled') ||
+    t.includes('donation_rated') ||
+    t.includes('offer_accepted') ||
+    t.includes('offer_rejected')
+  ) {
+    return 'offer';
+  }
+
+  if (
+    t.includes('request') ||
+    t.includes('request_created') ||
+    t.includes('donation_request_confirmation')
+  ) {
+    return 'request';
+  }
+
+  // fallback: لو فيه requestId لكن مش مصنف
+  const ids = extractIds(n);
+  if (ids.requestId && !isDonationConfirmation(n)) return 'request';
+
+  return 'other';
+};
+
+/* تحديد وجهة التنقل */
 const buildNavigateTarget = (n) => {
-  const { requestId, donationEntityId, confirmationId, requestConfId } = extractIds(n);
+  const { requestId, donationEntityId, confirmationId, requestConfId } =
+    extractIds(n);
 
   if (requestId) {
     const base = isBloodStrict(n) ? BLOOD_REQUEST_ROUTE : GENERAL_REQUEST_ROUTE;
@@ -156,12 +240,21 @@ const buildNavigateTarget = (n) => {
     return `${DONATION_ENTITY_ROUTE}/${donationEntityId}`;
   }
 
+  // لو ما فيش معرّف، ممكن في المستقبل نرسله لصفحة إدارة عامة
   return null;
 };
 
-/* ====== مفاتيح الكاش ====== */
+/* ====== الكاش ====== */
 const CACHE_KEY = 'notif:list';
 const CACHE_TTL_MS = 20 * 1000; // 20 ثانية
+
+const FILTERS = [
+  { key: 'all', label: 'الكل' },
+  { key: 'offer', label: 'العروض' },
+  { key: 'request', label: 'الطلبات' },
+  { key: 'system', label: 'النظام' },
+  { key: 'message', label: 'المحادثة' },
+];
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState([]);
@@ -170,21 +263,27 @@ export default function NotificationsPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // فلتر محفوظ
-  const initialFilter = searchParams.get('filter') || sessionStorage.getItem('notifFilter') || 'all';
+  const initialFilter =
+    searchParams.get('filter') ||
+    sessionStorage.getItem('notifFilter') ||
+    'all';
   const [filter, setFilter] = useState(initialFilter);
-  const setFilterPersist = useCallback((val) => {
-    setFilter(val);
-    sessionStorage.setItem('notifFilter', val);
-    const next = new URLSearchParams(searchParams);
-    next.set('filter', val);
-    setSearchParams(next, { replace: true });
-  }, [searchParams, setSearchParams]);
 
-  /* ====== جلب مع كاش + Revalidate ====== */
   const aborter = useRef(null);
   const lastFetchAtRef = useRef(0);
 
+  const setFilterPersist = useCallback(
+    (val) => {
+      setFilter(val);
+      sessionStorage.setItem('notifFilter', val);
+      const next = new URLSearchParams(searchParams);
+      next.set('filter', val);
+      setSearchParams(next, { replace: true });
+    },
+    [searchParams, setSearchParams],
+  );
+
+  /* ====== كاش ====== */
   const readCache = () => {
     try {
       const raw = sessionStorage.getItem(CACHE_KEY);
@@ -193,57 +292,68 @@ export default function NotificationsPage() {
       if (!Array.isArray(items)) return null;
       if (Date.now() - at > CACHE_TTL_MS) return null;
       return items;
-    } catch { return null; }
+    } catch {
+      return null;
+    }
   };
 
   const writeCache = (items) => {
     try {
-      sessionStorage.setItem(CACHE_KEY, JSON.stringify({ at: Date.now(), items }));
+      sessionStorage.setItem(
+        CACHE_KEY,
+        JSON.stringify({ at: Date.now(), items }),
+      );
     } catch {}
   };
 
-  const fetchNotifications = useCallback(async (opts = { force: false }) => {
-    // منع الجلب المتكرر جدًا
-    const now = Date.now();
-    if (!opts.force && now - lastFetchAtRef.current < 1500) return;
-    lastFetchAtRef.current = now;
+  const fetchNotifications = useCallback(
+    async (opts = { force: false }) => {
+      const now = Date.now();
+      if (!opts.force && now - lastFetchAtRef.current < 1500) return;
+      lastFetchAtRef.current = now;
 
-    // ألغِ الطلب السابق لو موجود
-    if (aborter.current) aborter.current.abort();
-    aborter.current = new AbortController();
+      if (aborter.current) aborter.current.abort();
+      aborter.current = new AbortController();
 
-    setLoading(true);
-    try {
-      const res = await fetchWithInterceptors('/api/notifications', { signal: aborter.current.signal });
-      if (res.ok) {
-        const list = res.body?.data || res.body || [];
-        setNotifications(list);
-        writeCache(list);
+      setLoading(true);
+      try {
+        const res = await fetchWithInterceptors('/api/notifications', {
+          signal: aborter.current.signal,
+        });
+        if (res.ok) {
+          const list = res.body?.data || res.body || [];
+          setNotifications(list);
+          writeCache(list);
+        }
+      } finally {
+        setLoading(false);
       }
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    [],
+  );
 
-  // عرض كاش سريع ثم إعادة التحقق
+  // عرض الكاش ثم إعادة الجلب
   useEffect(() => {
     const cached = readCache();
     if (cached) {
       setNotifications(cached);
       setLoading(false);
-      fetchNotifications({ force: true }); // revalidate
+      fetchNotifications({ force: true });
     } else {
       fetchNotifications({ force: true });
     }
-    // تنظيف عند التفكيك
     return () => aborter.current && aborter.current.abort();
   }, [fetchNotifications]);
 
-  /* تحديث تلقائي عند الدخول/العودة للصفحة */
+  // تحديث تلقائي عند العودة للصفحة
   useEffect(() => {
     const onFocus = () => fetchNotifications({ force: true });
-    const onVisible = () => { if (document.visibilityState === 'visible') fetchNotifications({ force: true }); };
-    const onPageShow = () => fetchNotifications({ force: true }); // يشمل الرجوع من bfcache
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') {
+        fetchNotifications({ force: true });
+      }
+    };
+    const onPageShow = () => fetchNotifications({ force: true });
 
     window.addEventListener('focus', onFocus);
     document.addEventListener('visibilitychange', onVisible);
@@ -256,21 +366,32 @@ export default function NotificationsPage() {
     };
   }, [fetchNotifications]);
 
-  // أيضًا لو تغيّر مفتاح الموقع (دخول لنفس المسار من رابط داخلي)
   useEffect(() => {
     fetchNotifications({ force: true });
   }, [location.key, fetchNotifications]);
 
-  /* ===== تجميع رسائل المحادثات كـ Threads ===== */
+  /* ====== تجميع رسائل المحادثة ====== */
   const { messageThreads, others } = useMemo(() => {
-    const threadsMap = new Map(); const rest = [];
-    (notifications || []).forEach((n) => {
-      if ((n.type || 'system') !== 'message') { rest.push(n); return; }
+    const threadsMap = new Map();
+    const rest = [];
 
-      const senderId = n.sender?._id || n.senderId || n.meta?.senderId || 'unknown';
-      const entry = threadsMap.get(senderId) || {
-        senderId, sender: n.sender || null, ids: [], unreadCount: 0, lastMessage: '', lastCreatedAt: 0,
-      };
+    (notifications || []).forEach((n) => {
+      if ((n.type || 'system') !== 'message') {
+        rest.push(n);
+        return;
+      }
+
+      const senderId =
+        n.sender?._id || n.senderId || n.meta?.senderId || 'unknown';
+      const entry =
+        threadsMap.get(senderId) || {
+          senderId,
+          sender: n.sender || null,
+          ids: [],
+          unreadCount: 0,
+          lastMessage: '',
+          lastCreatedAt: 0,
+        };
 
       entry.ids.push(n._id);
       if (!n.read) entry.unreadCount += 1;
@@ -284,143 +405,236 @@ export default function NotificationsPage() {
       threadsMap.set(senderId, entry);
     });
 
-    const messageThreadsArr = Array.from(threadsMap.values()).sort((a,b) => b.lastCreatedAt - a.lastCreatedAt);
+    const messageThreadsArr = Array.from(threadsMap.values()).sort(
+      (a, b) => b.lastCreatedAt - a.lastCreatedAt,
+    );
     return { messageThreads: messageThreadsArr, others: rest };
   }, [notifications]);
 
-  /* عدّادات للفلاتر */
+  /* ===== عدّادات ===== */
   const counts = useMemo(() => {
-    const unreadAll = notifications.filter(n => !n.read).length;
-    const msg      = notifications.filter(n => (n.type || 'system') === 'message').length;
-    const offer    = notifications.filter(n => (n.type || 'system') === 'offer').length;
-    const system   = notifications.filter(n => (n.type || 'system') === 'system').length;
-    const donation = notifications.filter(n => (n.type || 'system') === 'donation').length;
-    const general  = notifications.filter(n => (n.type || 'system') === 'general').length;
-    return { unreadAll, msg, offer, system, donation, general, all: notifications.length };
+    const base = {
+      all: notifications.length,
+      offer: 0,
+      request: 0,
+      system: 0,
+      message: 0,
+      unreadAll: notifications.filter((n) => !n.read).length,
+    };
+
+    notifications.forEach((n) => {
+      const k = notifKind(n);
+      if (k === 'offer') base.offer += 1;
+      else if (k === 'request') base.request += 1;
+      else if (k === 'system') base.system += 1;
+      else if (k === 'message') base.message += 1;
+    });
+
+    return base;
   }, [notifications]);
 
-  /* الفيو حسب الفلتر */
+  /* ===== ما الذي نعرضه حسب الفلتر؟ ===== */
   const viewModel = useMemo(() => {
-    if (filter === 'message') return { mode: 'messageOnly', threads: messageThreads, items: [] };
-    if (['offer','system','donation','general'].includes(filter)) {
-      const items = (others || []).filter(n => (n.type || 'system') === filter);
-      return { mode: 'othersOnly', threads: [], items };
+    if (filter === 'message') {
+      return { mode: 'messageOnly', threads: messageThreads, items: [] };
     }
-    return { mode: 'all', threads: messageThreads, items: others };
+
+    let items = others;
+    if (filter === 'offer') {
+      items = others.filter((n) => notifKind(n) === 'offer');
+    } else if (filter === 'request') {
+      items = others.filter((n) => notifKind(n) === 'request');
+    } else if (filter === 'system') {
+      items = others.filter((n) => notifKind(n) === 'system');
+    }
+
+    if (filter === 'all') {
+      return { mode: 'all', threads: messageThreads, items };
+    }
+    return { mode: 'othersOnly', threads: [], items };
   }, [filter, messageThreads, others]);
 
-  /* API: تمييز كمقروء */
+  /* ===== API: تعليم كمقروء ===== */
   const markAsRead = async (id) => {
-    try { await fetchWithInterceptors(`/api/notifications/${id}/read`, { method: 'PATCH' }); } catch {}
+    try {
+      await fetchWithInterceptors(`/api/notifications/${id}/read`, {
+        method: 'PATCH',
+      });
+    } catch {}
   };
 
-  /* فتح محادثة */
   const openChat = async (thread) => {
     if (!thread?.senderId || thread.senderId === 'unknown') return;
-    await Promise.all(thread.ids.map(id => markAsRead(id)));
-    navigate(`/chat/${thread.senderId}`, { state: { from: location.pathname + location.search } });
+    await Promise.all(thread.ids.map((id) => markAsRead(id)));
+    navigate(`/chat/${thread.senderId}`, {
+      state: { from: location.pathname + location.search },
+    });
     fetchNotifications({ force: true });
   };
 
-  /* فتح تفاصيل (طلب/تبرع/تأكيد) */
   const openDetails = async (n) => {
-    if (!n.read) { await markAsRead(n._id); fetchNotifications({ force: true }); }
+    if (!n.read) {
+      await markAsRead(n._id);
+      fetchNotifications({ force: true });
+    }
     const route = buildNavigateTarget(n);
-    if (route) navigate(route, { state: { from: location.pathname + location.search } });
+    if (route) {
+      navigate(route, {
+        state: { from: location.pathname + location.search },
+      });
+    } else {
+      // في حالة خاصة ما عندهش معرّف، ممكن نذهب لاحقاً لصفحة إدارة عامة
+    }
   };
 
-  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-  const scrollToBottom = () => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  const scrollToTop = () =>
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  const scrollToBottom = () =>
+    window.scrollTo({
+      top: document.body.scrollHeight,
+      behavior: 'smooth',
+    });
 
   return (
-    <div className="container-notifications compact">
+    <div className="container-notifications compact" dir="rtl">
+      {/* ===== الشريط العلوي ===== */}
       <div className="notif-header sticky">
-        <h3 className="m-0 fw-bold text-secondary">🔔 جميع الإشعارات</h3>
+        <h3 className="m-0 fw-bold text-secondary">
+          🔔 جميع الإشعارات
+        </h3>
 
         <div className="toolbar">
-          {/* فلتر */}
-          <div className="toolbar-filter">
-            <Dropdown className="filter-notifications-dropdown">
-              <Dropdown.Toggle className="dropdown-toggle-clean" variant="light" id="filter-dropdown">
-                {filter === 'all'
-                  ? `تصفية: الكل (${counts.all})`
-                  : filter === 'message'
-                  ? `تصفية: رسائل (${counts.msg})`
-                  : filter === 'offer'
-                  ? `تصفية: عروض (${counts.offer})`
-                  : filter === 'system'
-                  ? `تصفية: نظام (${counts.system})`
-                  : filter === 'donation'
-                  ? `تصفية: تبرعات (${counts.donation})`
-                  : `تصفية: عام (${counts.general})`}
-                {counts.unreadAll > 0 && <Badge bg="primary" className="ms-2">{counts.unreadAll}</Badge>}
-              </Dropdown.Toggle>
-              <Dropdown.Menu className="dropdown-menu">
-                <Dropdown.Item onClick={() => setFilterPersist('all')}>الكل ({counts.all})</Dropdown.Item>
-                <Dropdown.Item onClick={() => setFilterPersist('message')}>رسائل ({counts.msg})</Dropdown.Item>
-                <Dropdown.Item onClick={() => setFilterPersist('offer')}>عروض ({counts.offer})</Dropdown.Item>
-                <Dropdown.Item onClick={() => setFilterPersist('donation')}>تبرعات ({counts.donation})</Dropdown.Item>
-                <Dropdown.Item onClick={() => setFilterPersist('general')}>عام ({counts.general})</Dropdown.Item>
-                <Dropdown.Divider />
-                <Dropdown.Item onClick={() => setFilterPersist('system')}>نظام ({counts.system})</Dropdown.Item>
-              </Dropdown.Menu>
-            </Dropdown>
+          {/* فلاتر كبسولات */}
+          <div className="notif-filters-pills">
+            {FILTERS.map((f) => (
+              <button
+                key={f.key}
+                type="button"
+                className={`notif-pill ${
+                  filter === f.key ? 'active' : ''
+                }`}
+                onClick={() => setFilterPersist(f.key)}
+              >
+                <span className="notif-pill-label">{f.label}</span>
+                <span className="notif-pill-count">
+                  {f.key === 'all'
+                    ? counts.all
+                    : counts[f.key] || 0}
+                </span>
+                {f.key === 'all' && counts.unreadAll > 0 && (
+                  <span className="notif-pill-unread">
+                    {counts.unreadAll}
+                  </span>
+                )}
+              </button>
+            ))}
           </div>
 
-          {/* زر تحديث */}
+          {/* زر التحديث */}
           <div className="toolbar-actions">
-            <Button className="btn-soft" onClick={() => fetchNotifications({ force: true })} disabled={loading}>
-              <span className="icon">🔄</span> {loading ? 'جارٍ التحديث…' : 'تحديث'}
-            </Button>
+            <button
+              type="button"
+              className="btn-soft"
+              onClick={() => fetchNotifications({ force: true })}
+              disabled={loading}
+            >
+              <span className="icon">🔄</span>
+              {loading ? 'جارٍ التحديث…' : 'تحديث'}
+            </button>
           </div>
         </div>
       </div>
 
       {loading && (
-        <div className="py-4 text-center text-muted">
+        <div className="py-3 text-center text-muted small">
           <Spinner animation="border" size="sm" /> جاري التحميل...
         </div>
       )}
 
       {!loading && (
         <>
-          {/* وضع: الكل */}
+          {/* وضع الكل: رسائل + باقي الإشعارات */}
           {viewModel.mode === 'all' && (
             <>
-              <h6 className="section-heading">الرسائل</h6>
+              <h6 className="section-heading">المحادثات</h6>
               <ListGroup className="notification-list">
                 {viewModel.threads.length === 0 ? (
-                  <div className="text-muted small p-2">لا توجد رسائل.</div>
+                  <div className="text-muted small p-2">
+                    لا توجد رسائل.
+                  </div>
                 ) : (
                   viewModel.threads.map((th) => (
                     <ListGroup.Item
                       key={th.senderId}
-                      className={`notification-item compact thread-item shadow-sm rounded ${th.unreadCount > 0 ? 'unread' : ''}`}
+                      className={`notification-item compact thread-item shadow-sm rounded ${
+                        th.unreadCount > 0 ? 'unread' : ''
+                      }`}
                       onClick={() => openChat(th)}
                     >
                       <div className="item-wrap">
-                        <Image src={resolveAvatar(th.sender?.profileImage)} onError={(e) => (e.currentTarget.src = '/default-avatar.png')} roundedCircle width={40} height={40} alt="sender" />
+                        <Image
+                          src={resolveAvatar(
+                            th.sender?.profileImage,
+                          )}
+                          onError={(e) => {
+                            e.currentTarget.src =
+                              '/default-avatar.png';
+                          }}
+                          roundedCircle
+                          width={40}
+                          height={40}
+                          alt="sender"
+                        />
                         <div className="grow">
                           <div className="row-1">
-                            <div className="title message">💬 {th.sender ? `${th.sender.firstName || ''} ${th.sender.lastName || ''}`.trim() : 'مستخدم'}</div>
-                            {th.unreadCount > 0 && <Badge bg="primary" pill>{th.unreadCount}</Badge>}
+                            <div className="title message">
+                              💬{' '}
+                              {th.sender
+                                ? `${th.sender.firstName || ''} ${
+                                    th.sender.lastName || ''
+                                  }`.trim()
+                                : 'مستخدم'}
+                            </div>
+                            {th.unreadCount > 0 && (
+                              <Badge bg="primary" pill>
+                                {th.unreadCount}
+                              </Badge>
+                            )}
                           </div>
                           <div className="row-2">
-                            <div className="msg text-truncate">{th.lastMessage || '—'}</div>
-                            <div className="date">{fmtDateTime(th.lastCreatedAt)}</div>
+                            <div className="msg text-truncate">
+                              {th.lastMessage || '—'}
+                            </div>
+                            <div className="date">
+                              {fmtDateTime(th.lastCreatedAt)}
+                            </div>
                           </div>
                         </div>
-                        <Button size="sm" variant="outline-primary" onClick={(e) => { e.stopPropagation(); openChat(th); }}>فتح</Button>
+                        <Button
+                          size="sm"
+                          variant="outline-primary"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openChat(th);
+                          }}
+                        >
+                          فتح
+                        </Button>
                       </div>
                     </ListGroup.Item>
                   ))
                 )}
               </ListGroup>
 
-              <h6 className="section-heading mt-3">إشعارات أخرى</h6>
+              <h6 className="section-heading mt-3">إشعارات</h6>
               <ListGroup className="notification-list">
                 {viewModel.items.length === 0 ? (
-                  <div className="text-muted small p-2">لا توجد إشعارات أخرى.</div>
+                  <div className="text-muted small p-2">
+                    لا توجد إشعارات أخرى.
+                  </div>
                 ) : (
                   viewModel.items.map((n) => {
                     const sender = n.sender;
@@ -428,29 +642,63 @@ export default function NotificationsPage() {
                     const typeText = typeLabelAr(n);
                     const catText = categoryLabelAr(n);
                     const ids = extractIds(n);
-                    const canDetail = !!(ids.requestId || ids.donationEntityId || ids.confirmationId || ids.requestConfId);
+                    const canDetail = !!(
+                      ids.requestId ||
+                      ids.donationEntityId ||
+                      ids.confirmationId ||
+                      ids.requestConfId
+                    );
 
                     return (
                       <ListGroup.Item
                         key={n._id}
-                        className={`notification-item compact shadow-sm rounded ${!n.read ? 'unread' : ''}`}
+                        className={`notification-item compact shadow-sm rounded ${
+                          !n.read ? 'unread' : ''
+                        }`}
                         onClick={() => openDetails(n)}
                       >
                         <div className="item-wrap">
-                          <Image src={resolveAvatar(sender?.profileImage)} onError={(e) => (e.currentTarget.src = '/default-avatar.png')} roundedCircle width={38} height={38} alt="sender" />
+                          <Image
+                            src={resolveAvatar(
+                              sender?.profileImage,
+                            )}
+                            onError={(e) => {
+                              e.currentTarget.src =
+                                '/default-avatar.png';
+                            }}
+                            roundedCircle
+                            width={34}
+                            height={34}
+                            alt="sender"
+                          />
                           <div className="grow">
                             <div className="row-1">
                               <div className="title">
-                                <span className="chip-type">{typeText}</span>
-                                {catText && <span className="chip-cat">{catText}</span>}
+                                <span className="chip-type">
+                                  {typeText}
+                                </span>
+                                {catText && (
+                                  <span className="chip-cat">
+                                    {catText}
+                                  </span>
+                                )}
                               </div>
                               <div className="date">{when}</div>
                             </div>
                             <div className="row-2">
-                              <div className="msg line-2">{n.message || n.title || '—'}</div>
+                              <div className="msg line-2">
+                                {n.message || n.title || '—'}
+                              </div>
                               {canDetail && (
-                                <Button variant="outline-secondary" size="sm" className="btn-details"
-                                  onClick={(e) => { e.stopPropagation(); openDetails(n); }}>
+                                <Button
+                                  variant="outline-secondary"
+                                  size="sm"
+                                  className="btn-details"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openDetails(n);
+                                  }}
+                                >
                                   تفاصيل
                                 </Button>
                               )}
@@ -468,30 +716,70 @@ export default function NotificationsPage() {
           {/* وضع: رسائل فقط */}
           {viewModel.mode === 'messageOnly' && (
             <>
-              <h6 className="section-heading">الرسائل</h6>
+              <h6 className="section-heading">المحادثات</h6>
               <ListGroup className="notification-list">
                 {viewModel.threads.length === 0 ? (
-                  <div className="text-muted small p-2">لا توجد رسائل.</div>
+                  <div className="text-muted small p-2">
+                    لا توجد رسائل.
+                  </div>
                 ) : (
                   viewModel.threads.map((th) => (
                     <ListGroup.Item
                       key={th.senderId}
-                      className={`notification-item compact thread-item shadow-sm rounded ${th.unreadCount > 0 ? 'unread' : ''}`}
+                      className={`notification-item compact thread-item shadow-sm rounded ${
+                        th.unreadCount > 0 ? 'unread' : ''
+                      }`}
                       onClick={() => openChat(th)}
                     >
                       <div className="item-wrap">
-                        <Image src={resolveAvatar(th.sender?.profileImage)} onError={(e) => (e.currentTarget.src = '/default-avatar.png')} roundedCircle width={40} height={40} alt="sender" />
+                        <Image
+                          src={resolveAvatar(
+                            th.sender?.profileImage,
+                          )}
+                          onError={(e) => {
+                            e.currentTarget.src =
+                              '/default-avatar.png';
+                          }}
+                          roundedCircle
+                          width={40}
+                          height={40}
+                          alt="sender"
+                        />
                         <div className="grow">
                           <div className="row-1">
-                            <div className="title message">💬 {th.sender ? `${th.sender.firstName || ''} ${th.sender.lastName || ''}`.trim() : 'مستخدم'}</div>
-                            {th.unreadCount > 0 && <Badge bg="primary" pill>{th.unreadCount}</Badge>}
+                            <div className="title message">
+                              💬{' '}
+                              {th.sender
+                                ? `${th.sender.firstName || ''} ${
+                                    th.sender.lastName || ''
+                                  }`.trim()
+                                : 'مستخدم'}
+                            </div>
+                            {th.unreadCount > 0 && (
+                              <Badge bg="primary" pill>
+                                {th.unreadCount}
+                              </Badge>
+                            )}
                           </div>
                           <div className="row-2">
-                            <div className="msg text-truncate">{th.lastMessage || '—'}</div>
-                            <div className="date">{fmtDateTime(th.lastCreatedAt)}</div>
+                            <div className="msg text-truncate">
+                              {th.lastMessage || '—'}
+                            </div>
+                            <div className="date">
+                              {fmtDateTime(th.lastCreatedAt)}
+                            </div>
                           </div>
                         </div>
-                        <Button size="sm" variant="outline-primary" onClick={(e) => { e.stopPropagation(); openChat(th); }}>فتح</Button>
+                        <Button
+                          size="sm"
+                          variant="outline-primary"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openChat(th);
+                          }}
+                        >
+                          فتح
+                        </Button>
                       </div>
                     </ListGroup.Item>
                   ))
@@ -500,13 +788,15 @@ export default function NotificationsPage() {
             </>
           )}
 
-          {/* وضع: إشعارات أخرى فقط */}
+          {/* وضع: إشعارات بدون رسائل (حسب الفلتر) */}
           {viewModel.mode === 'othersOnly' && (
             <>
               <h6 className="section-heading">إشعارات</h6>
               <ListGroup className="notification-list">
                 {viewModel.items.length === 0 ? (
-                  <div className="text-muted small p-2">لا توجد إشعارات.</div>
+                  <div className="text-muted small p-2">
+                    لا توجد إشعارات.
+                  </div>
                 ) : (
                   viewModel.items.map((n) => {
                     const sender = n.sender;
@@ -514,29 +804,63 @@ export default function NotificationsPage() {
                     const typeText = typeLabelAr(n);
                     const catText = categoryLabelAr(n);
                     const ids = extractIds(n);
-                    const canDetail = !!(ids.requestId || ids.donationEntityId || ids.confirmationId || ids.requestConfId);
+                    const canDetail = !!(
+                      ids.requestId ||
+                      ids.donationEntityId ||
+                      ids.confirmationId ||
+                      ids.requestConfId
+                    );
 
                     return (
                       <ListGroup.Item
                         key={n._id}
-                        className={`notification-item compact shadow-sm rounded ${!n.read ? 'unread' : ''}`}
+                        className={`notification-item compact shadow-sm rounded ${
+                          !n.read ? 'unread' : ''
+                        }`}
                         onClick={() => openDetails(n)}
                       >
                         <div className="item-wrap">
-                          <Image src={resolveAvatar(sender?.profileImage)} onError={(e) => (e.currentTarget.src = '/default-avatar.png')} roundedCircle width={38} height={38} alt="sender" />
+                          <Image
+                            src={resolveAvatar(
+                              sender?.profileImage,
+                            )}
+                            onError={(e) => {
+                              e.currentTarget.src =
+                                '/default-avatar.png';
+                            }}
+                            roundedCircle
+                            width={34}
+                            height={34}
+                            alt="sender"
+                          />
                           <div className="grow">
                             <div className="row-1">
                               <div className="title">
-                                <span className="chip-type">{typeText}</span>
-                                {catText && <span className="chip-cat">{catText}</span>}
+                                <span className="chip-type">
+                                  {typeText}
+                                </span>
+                                {catText && (
+                                  <span className="chip-cat">
+                                    {catText}
+                                  </span>
+                                )}
                               </div>
                               <div className="date">{when}</div>
                             </div>
                             <div className="row-2">
-                              <div className="msg line-2">{n.message || n.title || '—'}</div>
+                              <div className="msg line-2">
+                                {n.message || n.title || '—'}
+                              </div>
                               {canDetail && (
-                                <Button variant="outline-secondary" size="sm" className="btn-details"
-                                  onClick={(e) => { e.stopPropagation(); openDetails(n); }}>
+                                <Button
+                                  variant="outline-secondary"
+                                  size="sm"
+                                  className="btn-details"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openDetails(n);
+                                  }}
+                                >
                                   تفاصيل
                                 </Button>
                               )}
@@ -553,10 +877,24 @@ export default function NotificationsPage() {
         </>
       )}
 
-      {/* أسهم الصعود/الهبوط */}
+      {/* أسهم لأعلى/لأسفل */}
       <div className="page-fabs" dir="ltr">
-        <button className="fab-btn" title="للأعلى" onClick={scrollToTop}>▲</button>
-        <button className="fab-btn" title="للأسفل" onClick={scrollToBottom}>▼</button>
+        <button
+          className="fab-btn"
+          title="للأعلى"
+          type="button"
+          onClick={scrollToTop}
+        >
+          ▲
+        </button>
+        <button
+          className="fab-btn"
+          title="للأسفل"
+          type="button"
+          onClick={scrollToBottom}
+        >
+          ▼
+        </button>
       </div>
     </div>
   );

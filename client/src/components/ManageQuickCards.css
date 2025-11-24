@@ -166,4 +166,92 @@
   background: #f9fafb;
   color: var(--color-green-dark);
 }
+
+/* حاوية السكشن كاملة */
+.mqs-section {
+  margin: 2rem 0 2.5rem;
+}
+
+/* عنوان ووصف فوق الكروت (لو ما عندك تنسيقات سابقة لهم) */
+.mqc-title {
+  font-family: "Cairo", system-ui, sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.4rem, 2vw, 1.8rem);
+  text-align: right;
+  margin-bottom: 0.35rem;
+  color: #0f172a;
+}
+
+.mqc-sub {
+  font-family: "Cairo", system-ui, sans-serif;
+  font-size: 0.95rem;
+  color: #64748b;
+  margin-bottom: 1.1rem;
+  text-align: right;
+}
+
+/* ✅ صف الأزرار أسفل الكروت */
+.mqs-global-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-start;
+}
+
+/* زر عام أسفل الكروت */
+.mqs-global-btn {
+  font-family: "Cairo", system-ui, sans-serif;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.mqs-global-btn:hover {
+  background: #0a8a40;
+  color: #ffffff;
+  border-color: #0a8a40;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.15);
+}
+
+/* زر ثانوي (تغيير بسيط في اللون) */
+.mqs-global-btn--secondary:hover {
+  background: #0369a1;
+  border-color: #0369a1;
+}
+
+/* زر مميز للإعلان عن الاستعداد للتبرع */
+.mqs-global-btn--accent {
+  background: linear-gradient(135deg, #f97316, #fb923c);
+  color: #ffffff;
+  border-color: transparent;
+}
+
+.mqs-global-btn--accent:hover {
+  background: linear-gradient(135deg, #ea580c, #f97316);
+  box-shadow: 0 12px 26px rgba(248, 113, 113, 0.25);
+}
+
+/* موبايل: نجعل الأزرار تأخذ عرضًا أكبر قليلاً */
+@media (max-width: 640px) {
+  .mqs-global-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .mqs-global-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
 /* ========= DashboardPage.css snippet for reference ========= */
