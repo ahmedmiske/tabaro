@@ -527,7 +527,6 @@
 .eh-mega-grid {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 30px 24px;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 20px;
@@ -745,7 +744,7 @@
   margin-bottom: 8px;
 }
 
-.eh-drawer-group-title {
+/* .eh-drawer-group-title {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -754,7 +753,7 @@
   color: var(--eh-darker);
   background: var(--eh-lighter);
   max-height: 40px;
-}
+} */
 
 .eh-drawer-group a {
   display: block;
