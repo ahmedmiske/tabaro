@@ -128,6 +128,19 @@ body{
   box-shadow: 0 8px 22px rgba(2, 6, 23, .04);
   outline: none;
 }
+
+.mc-tab[data-variant="blood"] {
+  background: #C02B2A;
+  color: #fff;
+}
+.mc-tab[data-variant="general"] {
+  background: #1D7643;
+  color: #fff;
+}
+.mc-tab[data-variant="community"] {
+  background: #14B8DA;
+  color: #fff;
+}
 .mc-tab__icon{
   width: 28px; height: 28px; flex: 0 0 28px;
   border-radius: 10px;
