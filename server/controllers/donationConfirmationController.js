@@ -42,7 +42,7 @@ async function createDonationConfirmation(req, res) {
       proposedTime: proposedTime ? new Date(proposedTime) : undefined,
     });
 
-    // إشعار لصاحب الطلب بوصول عرض جديد
+      // إشعار لصاحب الطلب بوصول عرض جديد
     try {
       await Notification.create({
         userId: request.userId,
@@ -52,6 +52,11 @@ async function createDonationConfirmation(req, res) {
         read: false,
         type: "donation_offer",
         referenceId: doc._id,
+        meta: {
+          requestId,               // ✅ مهم لزر "عرض تفاصيل الطلب"
+          blood: true,             // يساعد الواجهة تعرف أنه طلب دم
+          kind: "blood",
+        },
       });
     } catch (_) {}
 
@@ -105,12 +110,19 @@ async function acceptDonationConfirmation(req, res) {
         userId: c.donor,
         sender: req.user._id,
         title: "تم قبول عرض التبرع",
-        message: "تم قبول عرضك للتبرع بالدم، الرجاء التنسيق مع صاحب الطلب لإتمام التبرع.",
+        message:
+          "تم قبول عرضك للتبرع بالدم، الرجاء التنسيق مع صاحب الطلب لإتمام التبرع.",
         read: false,
         type: "donation_offer_accepted",
         referenceId: c._id,
+        meta: {
+          requestId: c.requestId,   // ✅ هنا أيضًا
+          blood: true,
+          kind: "blood",
+        },
       });
     } catch (_) {}
+
 
     return res.json({ message: "تم قبول العرض بنجاح", confirmation: c });
   } catch (err) {
@@ -144,7 +156,7 @@ async function markAsFulfilled(req, res) {
     c.fulfilledAt = new Date();
     await c.save();
 
-    // إشعار للطرف الآخر
+        // إشعار للطرف الآخر
     try {
       await Notification.create({
         userId: isDonor ? c.recipientId : c.donor,
@@ -154,8 +166,14 @@ async function markAsFulfilled(req, res) {
         read: false,
         type: "donation_fulfilled",
         referenceId: c._id,
+        meta: {
+          requestId: c.requestId,   // ✅ نفس الفكرة
+          blood: true,
+          kind: "blood",
+        },
       });
     } catch (_) {}
+
 
     res.json({ message: "تم تأكيد التبرع كمنفذ", confirmation: c });
   } catch (err) {

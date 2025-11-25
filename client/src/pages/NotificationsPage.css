@@ -7,7 +7,7 @@
 .container-notifications {
   margin-top: 0 !important;
   width: 60%;
-  max-width: 1200px;           /* ✅ عرض مريح مثل لوحة التحكم */
+  max-width: 1200px;
   margin-inline: auto;
   background-color: #f8fafc;
   padding: 14px;
@@ -19,11 +19,13 @@
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
 }
 
-/* وضع مضغوط بسيط بدون تضييق العرض */
+/* وضع مضغوط بسيط */
 .container-notifications.compact {
-  padding: 12px;
-  border-radius: 12px;
-  /* ❌ لا نستخدم max-width:60vw هنا حتى لا يكون العمود صغيراً */
+  padding: 10px;
+  border-radius: 10px;
+  max-width: 100%;
+  margin: 0 auto;
+  border: 1px solid var(--color-border);
 }
 
 /* ==== الشريط العلوي ==== */
@@ -41,7 +43,7 @@
 
 .notif-header.sticky {
   position: sticky;
-  top: 68px; /* حسب ارتفاع الهيدر عندك */
+  top: 68px; /* حسب ارتفاع الهيدر */
   z-index: 20;
   box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06);
 }
@@ -63,7 +65,6 @@
   gap: 10px;
 }
 
-/* زر تحديث ناعم */
 .btn-soft {
   border: 1px solid var(--color-border);
   border-radius: 999px;
@@ -90,291 +91,7 @@
   box-shadow: none;
 }
 
-/* ==== فلاتر على شكل Pills بدل قائمة ==== */
-.notif-filters-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  justify-content: flex-end;
-}
-
-.notif-pill {
-  border: 1px solid #e5e7eb;
-  background: #ffffff;
-  color: #374151;
-  border-radius: 999px;
-  padding: 4px 10px;
-  font-size: 0.82rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-.notif-pill:hover {
-  background: #f3f4f6;
-}
-.notif-pill.active {
-  background: #0f766e;
-  border-color: #0f766e;
-  color: #ffffff;
-}
-.notif-pill-label {
-  font-weight: 700;
-}
-.notif-pill-count {
-  font-weight: 600;
-  font-size: 0.78rem;
-  opacity: 0.9;
-}
-.notif-pill-unread {
-  background: #ef4444;
-  color: #fff;
-  border-radius: 999px;
-  padding: 0 6px;
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-/* للموبايل: الفلاتر في سطرين أو أكثر */
-@media (max-width: 575.98px) {
-  .notif-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .toolbar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .notif-filters-pills {
-    justify-content: flex-start;
-  }
-}
-
-/* ==== عناوين الأقسام ==== */
-.section-heading {
-  margin: 10px 0 6px;
-  font-weight: 800;
-  color: #0f172a;
-  display: flex;
-  align-items: center;
-  gap: .4rem;
-  font-size: .95rem;
-}
-
-/* ==== قائمة الإشعارات ==== */
-.notification-list {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-/* الكرت */
-.notification-item {
-  width: 100%;
-  border-right: none;
-  transition: background-color .15s ease, border-color .15s ease;
-}
-.notification-item.compact {
-  padding: 9px 10px;
-}
-.notification-item:hover {
-  background-color: #eef2f7;
-  cursor: pointer;
-}
-.notification-item.unread {
-  background-color: #ebf5ff;
-}
-
-/* نقطة زرقاء لغير المقروء */
-.notification-item.unread .title::after {
-  content: '';
-  width: 8px;
-  height: 8px;
-  background: #0d6efd;
-  border-radius: 50%;
-  display: inline-block;
-  margin-inline-start: 6px;
-}
-
-/* ترتيب داخل الكرت */
-.item-wrap {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.item-wrap .grow {
-  flex: 1;
-  min-width: 0;
-}
-
-.row-1 {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-.row-2 {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-top: 4px;
-}
-
-.title {
-  font-size: .96rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.title.message {
-  color: #6f42c1;
-}
-
-.msg {
-  color: #444;
-  font-size: .9rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.msg.line-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  white-space: normal;
-  overflow: hidden;
-}
-.date {
-  font-size: .8rem;
-  color: #198754;
-}
-
-/* شارات النوع/الفئة */
-.chip-type,
-.chip-cat {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: .78rem;
-  line-height: 1;
-  font-weight: 700;
-}
-.chip-type {
-  background: #e9ecef;
-  color: #343a40;
-}
-.chip-cat {
-  background: #e7f5ff;
-  color: #0b7285;
-}
-
-/* زر التفاصيل */
-.btn-details {
-  margin-inline-start: 8px;
-  background-color: var(--color-secondary);
-  color: #fff;
-  border: none;
-  padding: 4px 10px;
-  font-size: .82rem;
-  border-radius: 999px;
-}
-
-/* الصور الرمزية أصغر قليلاً في الوضع المضغوط */
-.container-notifications.compact .thread-item img {
-  width: 34px;
-  height: 34px;
-}
-.container-notifications.compact .notification-item img {
-  width: 30px;
-  height: 30px;
-}
-
-/* ==== أزرار الصعود/الهبوط ==== */
-.page-fabs {
-  position: fixed;
-  inset-block-end: 18px;
-  inset-inline-end: 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  z-index: 2147483647;
-}
-html[dir="rtl"] .page-fabs {
-  inset-inline-end: auto;
-  inset-inline-start: 18px;
-}
-
-.fab-btn {
-  width: 44px;
-  height: 44px;
-  border-radius: 999px;
-  border: 1px solid #e6e9f0;
-  background: #ffffff;
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.16);
-  cursor: pointer;
-  font-weight: 800;
-  font-size: 16px;
-}
-.fab-btn:hover {
-  transform: translateY(-1px);
-}
-
-
-
-@media (max-width: 576px) {
-  .container-notifications {
-    padding: 10px;
-  }
-  .notification-item.compact {
-    padding: 7px 8px;
-  }
-  .title {
-    font-size: .9rem;
-  }
-  .msg {
-    font-size: .86rem;
-  }
-  .date {
-    font-size: .76rem;
-  }
-}
-/* الحاوية المضغوطة على كل العرض تقريباً */
-.container-notifications.compact {
-  padding: 10px;
-  border-radius: 10px;
-  max-width: 100%;        /* 🔁 بدل 60vw */
-  margin: 0 auto;
-  border: 1px solid var(--color-border);
-}
-
-/* زر التفاصيل يكون صغير وما يتمدّد */
-.btn-details {
-  margin-inline-start: 8px;
-  background-color: var(--color-secondary);
-  color: #fff;
-  border: none;
-  padding: 3px 10px;
-  font-size: 0.8rem;
-  border-radius: 8px;
-  flex-shrink: 0;          /* ✅ لا يتمدد مع الـ flex */
-  white-space: nowrap;     /* يبقى على سطر واحد */
-}
-
-/* صف الرسالة + زر التفاصيل */
-.row-2 {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-top: 4px;
-}
-
-/* شريط أزرار الفلترة (pills) */
+/* ==== فلاتر على شكل Pills ==== */
 .notif-filters-pills {
   display: flex;
   flex-wrap: wrap;
@@ -425,13 +142,290 @@ html[dir="rtl"] .page-fabs {
   font-weight: 700;
 }
 
-/* في الموبايل: الفلاتر تأخذ العرض تقريباً */
+/* للموبايل: الفلاتر في سطرين أو أكثر */
 @media (max-width: 575.98px) {
+  .notif-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
   .notif-filters-pills {
     justify-content: flex-start;
   }
   .notif-pill {
     font-size: 0.76rem;
     padding: 3px 8px;
+  }
+}
+
+/* ==== عناوين الأقسام ==== */
+.section-heading {
+  margin: 10px 0 6px;
+  font-weight: 800;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: .95rem;
+}
+
+/* ==== قائمة الإشعارات ==== */
+.notification-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* عنصر الـ ListGroup نفسه بدون تصميم قوي */
+.notification-item {
+  width: 100%;
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+/* نقطة زرقاء لغير المقروء */
+.notification-item.unread .title::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: #0d6efd;
+  border-radius: 50%;
+  display: inline-block;
+  margin-inline-start: 6px;
+}
+
+/* ==== الكارت الداخلي الذي يشبه التصميم في الصورة ==== */
+.notif-card {
+  width: 100%;
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+  transition: box-shadow 0.15s ease, transform 0.1s ease,
+    border-color 0.15s ease, background-color 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  cursor: pointer;
+}
+
+/* تمييز غير المقروء بشريط جانبي فاتح */
+.notification-item.unread .notif-card {
+  border-inline-start: 3px solid #0f766e;
+  background: #ecfeff;
+}
+
+.notif-card:hover {
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+  transform: translateY(-1px);
+}
+
+/* ==== مناطق الكارت: هيدر/بدي/فوتر ==== */
+.notif-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.notif-card-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notif-card-title {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.notif-avatar {
+  flex-shrink: 0;
+}
+
+.notif-subtitle {
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.notif-card-meta {
+  text-align: left;
+}
+
+.date {
+  font-size: .8rem;
+  color: #198754;
+}
+
+/* الجسم */
+.notif-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.notif-message {
+  color: #111827;
+  font-size: 0.9rem;
+}
+
+.notif-ref {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.notif-ref span {
+  font-weight: 700;
+  color: #0f766e;
+}
+
+/* الفوتر */
+.notif-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.notif-footer-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.notif-footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* شارات النوع/الفئة */
+.chip-type,
+.chip-cat {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: .78rem;
+  line-height: 1;
+  font-weight: 700;
+}
+.chip-type {
+  background: #e9ecef;
+  color: #343a40;
+}
+.chip-cat {
+  background: #e7f5ff;
+  color: #0b7285;
+}
+
+/* شارة حالة الإشعار في الفوتر */
+.notif-status-badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+}
+
+.notif-status-offer {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.notif-status-request {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.notif-status-system {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+/* زر التفاصيل */
+.btn-details {
+  margin-inline-start: 8px;
+  background-color: var(--color-secondary);
+  color: #fff;
+  border: none;
+  padding: 3px 10px;
+  font-size: 0.8rem;
+  border-radius: 8px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* زر شفاف للمحادثة */
+.btn-ghost-primary {
+  border-radius: 999px;
+  font-size: 0.8rem;
+}
+
+/* للصفوف الداخلية القديمة */
+.title {
+  font-size: .96rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.title.message {
+  color: #6f42c1;
+}
+
+/* ==== أزرار الصعود/الهبوط ==== */
+.page-fabs {
+  position: fixed;
+  inset-block-end: 18px;
+  inset-inline-end: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 2147483647;
+}
+html[dir="rtl"] .page-fabs {
+  inset-inline-end: auto;
+  inset-inline-start: 18px;
+}
+
+.fab-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid #e6e9f0;
+  background: #ffffff;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.16);
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 16px;
+}
+.fab-btn:hover {
+  transform: translateY(-1px);
+}
+
+/* موبايل */
+@media (max-width: 576px) {
+  .container-notifications {
+    padding: 10px;
+  }
+  .notif-card {
+    padding: 9px 10px;
+  }
+  .notif-message {
+    font-size: 0.86rem;
+  }
+  .date {
+    font-size: 0.76rem;
   }
 }

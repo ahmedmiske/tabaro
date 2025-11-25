@@ -26,19 +26,11 @@ const API_BASE =
   process.env.REACT_APP_API_URL ||
   'http://localhost:5000';
 
-/* ✅ مسارات التفاصيل */
+/* ✅ مسارات تفاصيل الطلب فقط */
 const BLOOD_REQUEST_ROUTE =
   process.env.REACT_APP_BLOOD_DETAILS_ROUTE || '/blood-donation-details';
 const GENERAL_REQUEST_ROUTE =
   process.env.REACT_APP_DONATION_DETAILS_ROUTE || '/donations';
-const DONATION_CONFIRM_ROUTE =
-  process.env.REACT_APP_DONATION_CONFIRMATION_ROUTE ||
-  '/donation-confirmations';
-const DONATION_ENTITY_ROUTE =
-  process.env.REACT_APP_DONATION_ENTITY_ROUTE || '/donation-details';
-const DONATION_REQUEST_CONFIRM_ROUTE =
-  process.env.REACT_APP_DONATION_REQUEST_CONFIRM_ROUTE ||
-  '/donation-request-confirmations';
 
 /* --------- Utils --------- */
 const resolveAvatar = (p) => {
@@ -119,17 +111,54 @@ const categoryLabelAr = (n) => {
   return map[kind] || (m.requestType || m.kind || m.category || '');
 };
 
-/* استخراج المعرّفات */
+/* استخراج المعرّفات — نحاول التقاط requestId من كل مكان محتمل */
 const extractIds = (n) => {
   const m = n?.meta || {};
 
-  const requestId =
+  // 1️⃣ كائنات طلب داخل meta (request / donationRequest / bloodRequest / req)
+  const rawReq =
+    m.request || m.donationRequest || m.bloodRequest || m.req || null;
+
+  let requestFromObj = null;
+  if (rawReq && typeof rawReq === 'object' && rawReq._id) {
+    requestFromObj = rawReq._id;
+  } else if (typeof rawReq === 'string') {
+    requestFromObj = rawReq;
+  }
+
+  // 2️⃣ مفاتيح صريحة معروفة
+  let requestId =
     m.requestId ||
     m.donationRequestId ||
     m.bloodRequestId ||
+    requestFromObj ||
+    (m.request && m.request._id) ||
+    (m.donationRequest && m.donationRequest._id) ||
+    (m.bloodRequest && m.bloodRequest._id) ||
     n?.requestId ||
     n?.request?._id ||
     null;
+
+  // 3️⃣ فحص أي مفتاح في meta يحتوي على "requestid" أو "request_id"
+  if (!requestId) {
+    Object.entries(m).forEach(([key, value]) => {
+      if (requestId) return;
+      if (!value) return;
+      const k = key.toLowerCase();
+      if (
+        k.includes('requestid') ||
+        k.includes('request_id') ||
+        k.includes('donationrequestid') ||
+        k.includes('bloodrequestid')
+      ) {
+        if (typeof value === 'string') {
+          requestId = value;
+        } else if (value && typeof value === 'object' && value._id) {
+          requestId = value._id;
+        }
+      }
+    });
+  }
 
   const donationEntityId = m.donationId || m.donation?._id || null;
 
@@ -148,31 +177,6 @@ const extractIds = (n) => {
     null;
 
   return { requestId, donationEntityId, confirmationId, requestConfId };
-};
-
-/* هل الإشعار عن تأكيد/عرض تبرع؟ */
-const isDonationConfirmation = (n) => {
-  const m = n?.meta || {};
-  const t = (n?.type || m.type || m.event || '').toLowerCase();
-  const entity = (m.entity || '').toLowerCase();
-  const keys = [
-    'donation_confirmation',
-    'confirmation',
-    'offer',
-    'donation_offer',
-    'donation_fulfilled',
-    'fulfilled',
-    'donation_rated',
-    'rated',
-  ];
-  return keys.some((k) => t.includes(k) || entity.includes(k));
-};
-
-/* هل الإشعار عن "تأكيد طلب تبرع"؟ */
-const isDonationRequestConfirmation = (n) => {
-  const m = n?.meta || {};
-  const t = (n?.type || m.type || m.event || '').toLowerCase();
-  return t.includes('donation_request_confirmation');
 };
 
 /* 👇 تصنيف الإشعارات لأغراض الفلترة */
@@ -210,37 +214,25 @@ const notifKind = (n) => {
     return 'request';
   }
 
-  // fallback: لو فيه requestId لكن مش مصنف
   const ids = extractIds(n);
-  if (ids.requestId && !isDonationConfirmation(n)) return 'request';
+  if (ids.requestId) return 'request';
 
   return 'other';
 };
 
-/* تحديد وجهة التنقل */
+/* ✅ تحديد مسار التنقل — دائماً إلى تفاصيل الطلب */
 const buildNavigateTarget = (n) => {
-  const { requestId, donationEntityId, confirmationId, requestConfId } =
-    extractIds(n);
+  const { requestId } = extractIds(n);
 
   if (requestId) {
-    const base = isBloodStrict(n) ? BLOOD_REQUEST_ROUTE : GENERAL_REQUEST_ROUTE;
+    const base = isBloodStrict(n)
+      ? BLOOD_REQUEST_ROUTE
+      : GENERAL_REQUEST_ROUTE;
+
     return `${base}/${requestId}`;
   }
 
-  if (isDonationRequestConfirmation(n) && (requestConfId || confirmationId)) {
-    const id = requestConfId || confirmationId;
-    return `${DONATION_REQUEST_CONFIRM_ROUTE}/${id}`;
-  }
-
-  if (isDonationConfirmation(n) && confirmationId) {
-    return `${DONATION_CONFIRM_ROUTE}/${confirmationId}`;
-  }
-
-  if (donationEntityId) {
-    return `${DONATION_ENTITY_ROUTE}/${donationEntityId}`;
-  }
-
-  // لو ما فيش معرّف، ممكن في المستقبل نرسله لصفحة إدارة عامة
+  console.warn('Notification بدون requestId، meta =', n?.meta);
   return null;
 };
 
@@ -332,7 +324,6 @@ export default function NotificationsPage() {
     [],
   );
 
-  // عرض الكاش ثم إعادة الجلب
   useEffect(() => {
     const cached = readCache();
     if (cached) {
@@ -345,7 +336,6 @@ export default function NotificationsPage() {
     return () => aborter.current && aborter.current.abort();
   }, [fetchNotifications]);
 
-  // تحديث تلقائي عند العودة للصفحة
   useEffect(() => {
     const onFocus = () => fetchNotifications({ force: true });
     const onVisible = () => {
@@ -482,8 +472,6 @@ export default function NotificationsPage() {
       navigate(route, {
         state: { from: location.pathname + location.search },
       });
-    } else {
-      // في حالة خاصة ما عندهش معرّف، ممكن نذهب لاحقاً لصفحة إدارة عامة
     }
   };
 
@@ -520,9 +508,7 @@ export default function NotificationsPage() {
               >
                 <span className="notif-pill-label">{f.label}</span>
                 <span className="notif-pill-count">
-                  {f.key === 'all'
-                    ? counts.all
-                    : counts[f.key] || 0}
+                  {f.key === 'all' ? counts.all : counts[f.key] || 0}
                 </span>
                 {f.key === 'all' && counts.unreadAll > 0 && (
                   <span className="notif-pill-unread">
@@ -569,60 +555,63 @@ export default function NotificationsPage() {
                   viewModel.threads.map((th) => (
                     <ListGroup.Item
                       key={th.senderId}
-                      className={`notification-item compact thread-item shadow-sm rounded ${
+                      className={`notification-item compact thread-item ${
                         th.unreadCount > 0 ? 'unread' : ''
                       }`}
                       onClick={() => openChat(th)}
                     >
-                      <div className="item-wrap">
-                        <Image
-                          src={resolveAvatar(
-                            th.sender?.profileImage,
-                          )}
-                          onError={(e) => {
-                            e.currentTarget.src =
-                              '/default-avatar.png';
-                          }}
-                          roundedCircle
-                          width={40}
-                          height={40}
-                          alt="sender"
-                        />
-                        <div className="grow">
-                          <div className="row-1">
-                            <div className="title message">
-                              💬{' '}
-                              {th.sender
-                                ? `${th.sender.firstName || ''} ${
-                                    th.sender.lastName || ''
-                                  }`.trim()
-                                : 'مستخدم'}
+                      <div className="notif-card">
+                        <div className="notif-card-header">
+                          <div className="notif-card-main">
+                            <Image
+                              src={resolveAvatar(th.sender?.profileImage)}
+                              onError={(e) => {
+                                e.currentTarget.src = '/default-avatar.png';
+                              }}
+                              roundedCircle
+                              width={40}
+                              height={40}
+                              alt="sender"
+                              className="notif-avatar"
+                            />
+                            <div className="notif-card-title">
+                              <div className="title message">
+                                💬{' '}
+                                {th.sender
+                                  ? `${th.sender.firstName || ''} ${
+                                      th.sender.lastName || ''
+                                    }`.trim()
+                                  : 'مستخدم'}
+                              </div>
+                              <div className="notif-subtitle">
+                                آخر رسالة: {th.lastMessage || '—'}
+                              </div>
                             </div>
+                          </div>
+                          <div className="notif-card-meta">
+                            <span className="date">
+                              {fmtDateTime(th.lastCreatedAt)}
+                            </span>
                             {th.unreadCount > 0 && (
                               <Badge bg="primary" pill>
                                 {th.unreadCount}
                               </Badge>
                             )}
                           </div>
-                          <div className="row-2">
-                            <div className="msg text-truncate">
-                              {th.lastMessage || '—'}
-                            </div>
-                            <div className="date">
-                              {fmtDateTime(th.lastCreatedAt)}
-                            </div>
-                          </div>
                         </div>
-                        <Button
-                          size="sm"
-                          variant="outline-primary"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openChat(th);
-                          }}
-                        >
-                          فتح
-                        </Button>
+                        <div className="notif-card-footer">
+                          <Button
+                            size="sm"
+                            variant="outline-primary"
+                            className="btn-ghost-primary"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openChat(th);
+                            }}
+                          >
+                            فتح المحادثة
+                          </Button>
+                        </div>
                       </div>
                     </ListGroup.Item>
                   ))
@@ -642,65 +631,107 @@ export default function NotificationsPage() {
                     const typeText = typeLabelAr(n);
                     const catText = categoryLabelAr(n);
                     const ids = extractIds(n);
-                    const canDetail = !!(
-                      ids.requestId ||
-                      ids.donationEntityId ||
-                      ids.confirmationId ||
-                      ids.requestConfId
-                    );
+                    const kind = notifKind(n);
+                    const targetRoute = buildNavigateTarget(n);
+
+                    const senderName = sender
+                      ? `${sender.firstName || ''} ${
+                          sender.lastName || ''
+                        }`.trim() || 'مستخدم'
+                      : 'منصة تبرع';
 
                     return (
                       <ListGroup.Item
                         key={n._id}
-                        className={`notification-item compact shadow-sm rounded ${
+                        className={`notification-item compact ${
                           !n.read ? 'unread' : ''
                         }`}
                         onClick={() => openDetails(n)}
                       >
-                        <div className="item-wrap">
-                          <Image
-                            src={resolveAvatar(
-                              sender?.profileImage,
-                            )}
-                            onError={(e) => {
-                              e.currentTarget.src =
-                                '/default-avatar.png';
-                            }}
-                            roundedCircle
-                            width={34}
-                            height={34}
-                            alt="sender"
-                          />
-                          <div className="grow">
-                            <div className="row-1">
-                              <div className="title">
-                                <span className="chip-type">
-                                  {typeText}
-                                </span>
-                                {catText && (
-                                  <span className="chip-cat">
-                                    {catText}
+                        <div className="notif-card">
+                          <div className="notif-card-header">
+                            <div className="notif-card-main">
+                              <Image
+                                src={resolveAvatar(sender?.profileImage)}
+                                onError={(e) => {
+                                  e.currentTarget.src = '/default-avatar.png';
+                                }}
+                                roundedCircle
+                                width={34}
+                                height={34}
+                                alt="sender"
+                                className="notif-avatar"
+                              />
+                              <div className="notif-card-title">
+                                <div className="title">
+                                  <span className="chip-type">
+                                    {typeText}
                                   </span>
-                                )}
+                                  {catText && (
+                                    <span className="chip-cat">
+                                      {catText}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="notif-subtitle">
+                                  {senderName}
+                                </div>
                               </div>
-                              <div className="date">{when}</div>
                             </div>
-                            <div className="row-2">
-                              <div className="msg line-2">
-                                {n.message || n.title || '—'}
+                            <div className="notif-card-meta">
+                              <span className="date">{when}</span>
+                            </div>
+                          </div>
+
+                          <div className="notif-card-body">
+                            <div className="notif-message">
+                              {n.message || n.title || '—'}
+                            </div>
+                            {ids.requestId && (
+                              <div className="notif-ref">
+                                رقم الطلب:{' '}
+                                <span>
+                                  #
+                                  {String(ids.requestId).slice(-6)}
+                                </span>
                               </div>
-                              {canDetail && (
-                                <Button
-                                  variant="outline-secondary"
-                                  size="sm"
-                                  className="btn-details"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    openDetails(n);
-                                  }}
-                                >
-                                  تفاصيل
-                                </Button>
+                            )}
+                          </div>
+
+                          <div className="notif-card-footer">
+                            <div className="notif-footer-left">
+                              {kind === 'offer' && (
+                                <span className="notif-status-badge notif-status-offer">
+                                  عرض تبرع
+                                </span>
+                              )}
+                              {kind === 'request' && (
+                                <span className="notif-status-badge notif-status-request">
+                                  طلب تبرع
+                                </span>
+                              )}
+                              {kind === 'system' && (
+                                <span className="notif-status-badge notif-status-system">
+                                  من النظام
+                                </span>
+                              )}
+                            </div>
+                            <div className="notif-footer-actions">
+                              <Button
+                                variant="outline-secondary"
+                                size="sm"
+                                className="btn-details"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openDetails(n);
+                                }}
+                              >
+                                عرض تفاصيل الطلب
+                              </Button>
+                              {!targetRoute && (
+                                <span className="text-muted small">
+                                  (لا يوجد معرّف طلب)
+                                </span>
                               )}
                             </div>
                           </div>
@@ -726,60 +757,63 @@ export default function NotificationsPage() {
                   viewModel.threads.map((th) => (
                     <ListGroup.Item
                       key={th.senderId}
-                      className={`notification-item compact thread-item shadow-sm rounded ${
+                      className={`notification-item compact thread-item ${
                         th.unreadCount > 0 ? 'unread' : ''
                       }`}
                       onClick={() => openChat(th)}
                     >
-                      <div className="item-wrap">
-                        <Image
-                          src={resolveAvatar(
-                            th.sender?.profileImage,
-                          )}
-                          onError={(e) => {
-                            e.currentTarget.src =
-                              '/default-avatar.png';
-                          }}
-                          roundedCircle
-                          width={40}
-                          height={40}
-                          alt="sender"
-                        />
-                        <div className="grow">
-                          <div className="row-1">
-                            <div className="title message">
-                              💬{' '}
-                              {th.sender
-                                ? `${th.sender.firstName || ''} ${
-                                    th.sender.lastName || ''
-                                  }`.trim()
-                                : 'مستخدم'}
+                      <div className="notif-card">
+                        <div className="notif-card-header">
+                          <div className="notif-card-main">
+                            <Image
+                              src={resolveAvatar(th.sender?.profileImage)}
+                              onError={(e) => {
+                                e.currentTarget.src = '/default-avatar.png';
+                              }}
+                              roundedCircle
+                              width={40}
+                              height={40}
+                              alt="sender"
+                              className="notif-avatar"
+                            />
+                            <div className="notif-card-title">
+                              <div className="title message">
+                                💬{' '}
+                                {th.sender
+                                  ? `${th.sender.firstName || ''} ${
+                                      th.sender.lastName || ''
+                                    }`.trim()
+                                  : 'مستخدم'}
+                              </div>
+                              <div className="notif-subtitle">
+                                آخر رسالة: {th.lastMessage || '—'}
+                              </div>
                             </div>
+                          </div>
+                          <div className="notif-card-meta">
+                            <span className="date">
+                              {fmtDateTime(th.lastCreatedAt)}
+                            </span>
                             {th.unreadCount > 0 && (
                               <Badge bg="primary" pill>
                                 {th.unreadCount}
                               </Badge>
                             )}
                           </div>
-                          <div className="row-2">
-                            <div className="msg text-truncate">
-                              {th.lastMessage || '—'}
-                            </div>
-                            <div className="date">
-                              {fmtDateTime(th.lastCreatedAt)}
-                            </div>
-                          </div>
                         </div>
-                        <Button
-                          size="sm"
-                          variant="outline-primary"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openChat(th);
-                          }}
-                        >
-                          فتح
-                        </Button>
+                        <div className="notif-card-footer">
+                          <Button
+                            size="sm"
+                            variant="outline-primary"
+                            className="btn-ghost-primary"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openChat(th);
+                            }}
+                          >
+                            فتح المحادثة
+                          </Button>
+                        </div>
                       </div>
                     </ListGroup.Item>
                   ))
@@ -804,65 +838,107 @@ export default function NotificationsPage() {
                     const typeText = typeLabelAr(n);
                     const catText = categoryLabelAr(n);
                     const ids = extractIds(n);
-                    const canDetail = !!(
-                      ids.requestId ||
-                      ids.donationEntityId ||
-                      ids.confirmationId ||
-                      ids.requestConfId
-                    );
+                    const kind = notifKind(n);
+                    const targetRoute = buildNavigateTarget(n);
+
+                    const senderName = sender
+                      ? `${sender.firstName || ''} ${
+                          sender.lastName || ''
+                        }`.trim() || 'مستخدم'
+                      : 'منصة تبرع';
 
                     return (
                       <ListGroup.Item
                         key={n._id}
-                        className={`notification-item compact shadow-sm rounded ${
+                        className={`notification-item compact ${
                           !n.read ? 'unread' : ''
                         }`}
                         onClick={() => openDetails(n)}
                       >
-                        <div className="item-wrap">
-                          <Image
-                            src={resolveAvatar(
-                              sender?.profileImage,
-                            )}
-                            onError={(e) => {
-                              e.currentTarget.src =
-                                '/default-avatar.png';
-                            }}
-                            roundedCircle
-                            width={34}
-                            height={34}
-                            alt="sender"
-                          />
-                          <div className="grow">
-                            <div className="row-1">
-                              <div className="title">
-                                <span className="chip-type">
-                                  {typeText}
-                                </span>
-                                {catText && (
-                                  <span className="chip-cat">
-                                    {catText}
+                        <div className="notif-card">
+                          <div className="notif-card-header">
+                            <div className="notif-card-main">
+                              <Image
+                                src={resolveAvatar(sender?.profileImage)}
+                                onError={(e) => {
+                                  e.currentTarget.src = '/default-avatar.png';
+                                }}
+                                roundedCircle
+                                width={34}
+                                height={34}
+                                alt="sender"
+                                className="notif-avatar"
+                              />
+                              <div className="notif-card-title">
+                                <div className="title">
+                                  <span className="chip-type">
+                                    {typeText}
                                   </span>
-                                )}
+                                  {catText && (
+                                    <span className="chip-cat">
+                                      {catText}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="notif-subtitle">
+                                  {senderName}
+                                </div>
                               </div>
-                              <div className="date">{when}</div>
                             </div>
-                            <div className="row-2">
-                              <div className="msg line-2">
-                                {n.message || n.title || '—'}
+                            <div className="notif-card-meta">
+                              <span className="date">{when}</span>
+                            </div>
+                          </div>
+
+                          <div className="notif-card-body">
+                            <div className="notif-message">
+                              {n.message || n.title || '—'}
+                            </div>
+                            {ids.requestId && (
+                              <div className="notif-ref">
+                                رقم الطلب:{' '}
+                                <span>
+                                  #
+                                  {String(ids.requestId).slice(-6)}
+                                </span>
                               </div>
-                              {canDetail && (
-                                <Button
-                                  variant="outline-secondary"
-                                  size="sm"
-                                  className="btn-details"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    openDetails(n);
-                                  }}
-                                >
-                                  تفاصيل
-                                </Button>
+                            )}
+                          </div>
+
+                          <div className="notif-card-footer">
+                            <div className="notif-footer-left">
+                              {kind === 'offer' && (
+                                <span className="notif-status-badge notif-status-offer">
+                                  عرض تبرع
+                                </span>
+                              )}
+                              {kind === 'request' && (
+                                <span className="notif-status-badge notif-status-request">
+                                  طلب تبرع
+                                </span>
+                              )}
+                              {kind === 'system' && (
+                                <span className="notif-status-badge notif-status-system">
+                                  من النظام
+                                </span>
+                              )}
+                            </div>
+                            <div className="notif-footer-actions">
+                              <Button
+                                variant="outline-secondary"
+                                size="sm"
+                                className="btn-details"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openDetails(n);
+                                }}
+                              >
+                                عرض تفاصيل الطلب
+                              </Button>
+                              {!targetRoute && (
+                                <span className="text-muted small">
+                                  (لا يوجد معرّف طلب)
+                                </span>
                               )}
                             </div>
                           </div>

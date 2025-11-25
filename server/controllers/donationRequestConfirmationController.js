@@ -45,7 +45,7 @@ exports.createConfirmation = async (req, res) => {
       "userId category type"
     );
 
-    if (request?.userId) {
+         if (request?.userId) {
       await notifyUser({
         app: req.app,
         userId: request.userId,
@@ -59,6 +59,10 @@ exports.createConfirmation = async (req, res) => {
               }${request?.type ? ` (${request.type})` : ""}`,
         type: "donation_request_confirmation",
         referenceId: doc._id,
+        meta: {
+          requestId,                        // ✅ مهم للزر
+          kind: request?.type || request?.category || "general",
+        },
       });
     }
 
@@ -121,7 +125,7 @@ exports.fulfillConfirmation = async (req, res) => {
     await c.save();
 
     // ✅ إشعار المتبرع أن التبرع تم تأكيد استلامه (تحسين UX)
-    try {
+      try {
       await notifyUser({
         app: req.app,
         userId: c.donor,
@@ -130,10 +134,15 @@ exports.fulfillConfirmation = async (req, res) => {
         message: "شكرًا لتبرعك 💚، قام صاحب الطلب بتأكيد الاستلام.",
         type: "donation_request_fulfilled",
         referenceId: c._id,
+        meta: {
+          requestId: c.requestId,          // ✅
+          kind: "general",
+        },
       });
     } catch (notifyErr) {
       console.error("notify on fulfill error:", notifyErr);
     }
+
 
     return res.json({ message: "تم تأكيد الاستلام", data: c });
   } catch (e) {
@@ -193,6 +202,10 @@ exports.rateConfirmation = async (req, res) => {
           message: "قام المتبرع بتقييم تجربته مع طلبك.",
           type: "donation_request_rated",
           referenceId: c._id,
+          meta: {
+            requestId: c.requestId,        // ✅
+            kind: "general",
+          },
         });
       } else if (raterType === "recipient") {
         await notifyUser({
@@ -203,13 +216,18 @@ exports.rateConfirmation = async (req, res) => {
           message: "قام صاحب الطلب بتقييم تجربته مع تبرعك.",
           type: "donation_request_rated",
           referenceId: c._id,
+          meta: {
+            requestId: c.requestId,        // ✅
+            kind: "general",
+          },
         });
       }
     } catch (notifyErr) {
       console.error("notify on rate error:", notifyErr);
     }
+ 
 
-    return res.json({ message: "تم حفظ التقييم", data: c });
+    return res.json({ message: "تم حفظ التقييم", data: c }); 
   } catch (e) {
     console.error("rateConfirmation error:", e);
     return res.status(500).json({ message: "خطأ في السيرفر" });
