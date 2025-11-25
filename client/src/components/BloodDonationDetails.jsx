@@ -252,6 +252,9 @@ export default function BloodDonationDetails() {
   // 🔹 توسيع/إخفاء تفاصيل عرض معيّن
   const [expandedOfferId, setExpandedOfferId] = useState(null);
 
+  // 🔹 إظهار/إخفاء صندوق التبرع داخل نفس الكارت
+  const [showDonateBox, setShowDonateBox] = useState(false);
+
   const now = useTicker(1000);
   const navigate = useNavigate();
   const me = useMemo(
@@ -334,6 +337,11 @@ export default function BloodDonationDetails() {
       null
     );
   }, [offers, me]);
+
+  // إذا لديّ عرض سابق افتح الصندوق تلقائيًا
+  useEffect(() => {
+    if (myOffer) setShowDonateBox(true);
+  }, [myOffer]);
 
   /* هل الطلب منتهي المهلة؟ */
   const isExpired = (deadline) => {
@@ -562,7 +570,7 @@ export default function BloodDonationDetails() {
 
   return (
     <div className="blood-details-container" dir="rtl">
-      {/* ---------- بطاقة التفاصيل الرئيسية ---------- */}
+      {/* ---------- بطاقة التفاصيل الرئيسية + التفاعل ---------- */}
       <Card className="details-card w-100 mb-3" style={{ maxWidth: 1200 }}>
         <Card.Header className="details-header-compact text-white">
           <div className="details-header-layout">
@@ -826,18 +834,225 @@ export default function BloodDonationDetails() {
               </div>
             </div>
           )}
+
+          {/* ---------- التفاعل مع الطلب (للزائر / المتبرع فقط) ---------- */}
+          {!isOwner && (
+            <div className="section-card mt-3">
+              <div className="dtbl-section-title">التفاعل مع الطلب</div>
+
+              <div className="interact-strip">
+                <div className="interact-bubbles">
+                  {/* تبرع */}
+                  <button
+                    type="button"
+                    className={`bubble-btn donate-bubble ${
+                      showDonateBox ? 'active' : ''
+                    }`}
+                    onClick={() => setShowDonateBox((v) => !v)}
+                    disabled={isExpired(request.deadline)}
+                  >
+                    <span className="bubble-icon">💚</span>
+                    <span className="bubble-label">أريد التبرع</span>
+                  </button>
+
+                  {/* محادثة صاحب الطلب */}
+                  {requester?._id && (
+                    <button
+                      type="button"
+                      className="bubble-btn"
+                      onClick={() => navigate(`/chat/${requester._id}`)}
+                    >
+                      <span className="bubble-icon">💬</span>
+                      <span className="bubble-label">محادثة</span>
+                    </button>
+                  )}
+
+                  {/* مشاركة */}
+                  <button
+                    type="button"
+                    className="bubble-btn"
+                    onClick={handleShare}
+                  >
+                    <span className="bubble-icon">🔗</span>
+                    <span className="bubble-label">مشاركة</span>
+                  </button>
+
+                  {/* إبلاغ */}
+                  <button
+                    type="button"
+                    className="bubble-btn danger"
+                    onClick={handleReport}
+                  >
+                    <span className="bubble-icon">🚩</span>
+                    <span className="bubble-label">إبلاغ</span>
+                  </button>
+                </div>
+
+                {showDonateBox && (
+                  <div className="donate-inline-box">
+                    <div className="donate-inline-header">
+                      <div className="donate-inline-title">
+                        أريد تأكيد استعدادي للتبرع
+                      </div>
+                      <div className="donate-inline-sub">
+                        خطوة صغيرة منك قد تُنقذ حياة كاملة 💚
+                      </div>
+                    </div>
+
+                    {createMsg && (
+                      <Alert
+                        variant={createMsg.type}
+                        className="py-2 px-3 small mb-2"
+                      >
+                        {createMsg.text}
+                      </Alert>
+                    )}
+
+                    {myOffer ? (
+                      <div className="donate-inline-content">
+                        <div className="small text-muted mb-2">
+                          لقد أعلنت تبرعك لهذا الطلب في{' '}
+                          <strong>
+                            {myOffer.createdAt
+                              ? new Date(myOffer.createdAt).toLocaleString()
+                              : '—'}
+                          </strong>
+                          ، وحالة إعلانك الآن:{' '}
+                          <Badge bg={statusVariant(myOffer.status)}>
+                            {statusLabel(myOffer.status)}
+                          </Badge>
+                          .
+                        </div>
+
+                        <div className="small text-muted mb-3">
+                          {myOffer.status === 'pending' && (
+                            <>
+                              عرضك في مرحلة <strong>الانتظار</strong>. سيتمكن
+                              صاحب الطلب من مراجعة العروض، وعند قبول عرضك ستصلك
+                              إشعارات بالتحديث.
+                            </>
+                          )}
+                          {myOffer.status === 'accepted' && (
+                            <>
+                              تم <strong>قبول عرضك</strong> 🎉. يُفضّل التواصل
+                              مع صاحب الطلب لتنسيق موعد ومكان التبرع.
+                            </>
+                          )}
+                          {myOffer.status === 'fulfilled' && (
+                            <>
+                              تم <strong>تأكيد تنفيذ التبرع</strong>. شكرًا
+                              لمساهمتك الكريمة.
+                            </>
+                          )}
+                          {myOffer.status === 'rated' && (
+                            <>
+                              اكتملت عملية التبرع والتقييم. شكرًا لك على دعمك
+                              للمجتمع 🙏.
+                            </>
+                          )}
+                        </div>
+
+                        <div className="d-flex flex-wrap gap-2">
+                          {requester?._id && (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="outline-primary"
+                                onClick={() =>
+                                  navigate(`/chat/${requester._id}`)
+                                }
+                              >
+                                💬 محادثة صاحب الطلب
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline-secondary"
+                                onClick={() =>
+                                  navigate(`/profile/${requester._id}`)
+                                }
+                              >
+                                👤 الملف الشخصي
+                              </Button>
+                            </>
+                          )}
+
+                          {myOffer.status === 'pending' && (
+                            <Button
+                              size="sm"
+                              variant="outline-danger"
+                              onClick={handleCancelMine}
+                            >
+                              إلغاء الإعلان
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <Form
+                        onSubmit={submitDonation}
+                        className="donate-inline-content"
+                      >
+                        <Form.Group className="mb-2">
+                          <Form.Label className="mb-1">
+                            رسالتك (اختياري)
+                          </Form.Label>
+                          <Form.Control
+                            as="textarea"
+                            rows={3}
+                            value={msg}
+                            onChange={(e) => setMsg(e.target.value)}
+                          />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
+                          <Form.Label className="mb-1">
+                            وقت مقترح (اختياري)
+                          </Form.Label>
+                          <Form.Control
+                            type="datetime-local"
+                            value={proposedTime}
+                            onChange={(e) => setProposedTime(e.target.value)}
+                          />
+                        </Form.Group>
+
+                        <div className="d-flex flex-wrap gap-2 align-items-center">
+                          <Button
+                            type="submit"
+                            disabled={creating || isExpired(request.deadline)}
+                            className="main-donate-btn"
+                          >
+                            🩸 تأكيد استعدادي للتبرع
+                          </Button>
+
+                          {requester?._id && (
+                            <Button
+                              size="sm"
+                              variant="outline-success"
+                              onClick={() =>
+                                navigate(`/chat/${requester._id}`)
+                              }
+                            >
+                              💬 محادثة صاحب الطلب
+                            </Button>
+                          )}
+                        </div>
+                      </Form>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </Card.Body>
       </Card>
 
-      {/* ---------- أسفل الصفحة: العروض أو نموذج التبرع ---------- */}
-
-      {isOwner ? (
+      {/* ---------- أسفل الصفحة: جدول العروض لصاحب الطلب ---------- */}
+      {isOwner && (
         <>
           <div
             className="d-flex flex-column w-100 mb-3"
             style={{ maxWidth: 1200, gap: 8 }}
           >
-            {/* 🔹 فقرة توضيحية لصاحب الطلب */}
             <Alert variant="info" className="mb-1 small">
               ➊ عند وصول عروض جديدة، يمكنك <strong>قبول العرض المناسب</strong>{' '}
               أولاً.
@@ -858,7 +1073,10 @@ export default function BloodDonationDetails() {
             </Button>
           </div>
 
-          <Card className="details-card offers-table w-100" style={{ maxWidth: 1200 }}>
+          <Card
+            className="details-card offers-table w-100"
+            style={{ maxWidth: 1200 }}
+          >
             <Table striped bordered hover responsive className="m-0">
               <thead>
                 <tr>
@@ -899,10 +1117,8 @@ export default function BloodDonationDetails() {
 
                   const donorAvatar = resolveAvatar(donor.profileImage);
 
-                  // ✅ الأحرف الأولية لاستخدامها في حالة عدم وجود صورة أو فشل التحميل
-                  const donorInitials = `${(donor.firstName?.[0] || 'م').toUpperCase()}${(
-                    donor.lastName?.[0] || ''
-                  ).toUpperCase()}`;
+                  const donorInitials = `${(donor.firstName?.[0] || 'م')
+                    .toUpperCase()}${(donor.lastName?.[0] || '').toUpperCase()}`;
 
                   return (
                     <React.Fragment key={ofr._id}>
@@ -916,7 +1132,6 @@ export default function BloodDonationDetails() {
                         </td>
                         <td className="actions-col">
                           <div className="d-flex flex-wrap gap-2">
-                            {/* زر تفاصيل العرض */}
                             <Button
                               size="sm"
                               variant={isExpanded ? 'secondary' : 'outline-secondary'}
@@ -935,7 +1150,6 @@ export default function BloodDonationDetails() {
                               </Button>
                             )}
 
-                            {/* ✅ زر قبول العرض (صاحب الطلب) */}
                             {canAccept && (
                               <Button
                                 size="sm"
@@ -946,7 +1160,6 @@ export default function BloodDonationDetails() {
                               </Button>
                             )}
 
-                            {/* ✅ تأكيد الاستلام بعد القبول */}
                             {canFulfill && (
                               <Button
                                 size="sm"
@@ -957,7 +1170,6 @@ export default function BloodDonationDetails() {
                               </Button>
                             )}
 
-                            {/* 🔹 عرض/إضافة تقييم عبر مودال */}
                             {canRate && (
                               <div className="d-inline-flex flex-column align-items-start gap-1">
                                 {ofr.ratingByRecipient > 0 ? (
@@ -992,7 +1204,9 @@ export default function BloodDonationDetails() {
 
                             {!canManage && ofr.ratingByRecipient > 0 && (
                               <div className="d-inline-flex align-items-center gap-1">
-                                <span className="text-muted small">تقييمك:</span>
+                                <span className="text-muted small">
+                                  تقييمك:
+                                </span>
                                 <RatingStars
                                   value={ofr.ratingByRecipient}
                                   disabled
@@ -1009,7 +1223,6 @@ export default function BloodDonationDetails() {
                             <div className="offer-details-box">
                               <div className="offer-details-header">
                                 <div className="d-flex align-items-center gap-3">
-                                  {/* ✅ صورة المتبرع مع fallback بحروف الاسم */}
                                   {donorAvatar ? (
                                     <img
                                       src={donorAvatar}
@@ -1173,164 +1386,6 @@ export default function BloodDonationDetails() {
             </Table>
           </Card>
         </>
-      ) : (
-        <Card
-          className="details-card w-100 donate-card"
-          style={{ maxWidth: 1200 }}
-        >
-          <Card.Header className="donate-header">
-            <div className="donate-header-main">
-              <div className="donate-title">أريد التبرع</div>
-              <div className="donate-subtitle">
-                خطوة صغيرة منك قد تُنقذ حياة كاملة 💚
-              </div>
-            </div>
-
-            <div className="donate-header-actions">
-              <button type="button" className="icon-pill" onClick={handleShare}>
-                🔗 مشاركة
-              </button>
-              <button
-                type="button"
-                className="icon-pill danger"
-                onClick={handleReport}
-              >
-                ⚠️ إبلاغ
-              </button>
-              {requester?._id && (
-                <button
-                  type="button"
-                  className="icon-pill outline"
-                  onClick={() => navigate(`/chat/${requester._id}`)}
-                >
-                  💬 محادثة صاحب الطلب
-                </button>
-              )}
-            </div>
-          </Card.Header>
-
-          <Card.Body>
-            {createMsg && <Alert variant={createMsg.type}>{createMsg.text}</Alert>}
-
-            {myOffer ? (
-              <div className="d-grid gap-2">
-                {/* 🔹 نص يوضح المرحلة الحالية للمتبرع */}
-                <div className="small text-muted">
-                  {myOffer.status === 'pending' && (
-                    <>
-                      عرضك في مرحلة <strong>الانتظار</strong>. سيتمكن صاحب الطلب من
-                      مراجعة العروض، وعند قبول عرضك ستصلك إشعارات بالتحديث.
-                    </>
-                  )}
-                  {myOffer.status === 'accepted' && (
-                    <>
-                      تم <strong>قبول عرضك</strong> 🎉. يُفضّل التواصل مع صاحب
-                      الطلب لتنسيق موعد ومكان التبرع، وبعد التنفيذ سيتم تأكيد
-                      العملية من النظام.
-                    </>
-                  )}
-                  {myOffer.status === 'fulfilled' && (
-                    <>
-                      تم <strong>تأكيد تنفيذ التبرع</strong>. يمكنك لاحقاً إضافة
-                      تقييمك للتجربة من صفحة{' '}
-                      <strong>عروضي على طلبات التبرع بالدم</strong>.
-                    </>
-                  )}
-                  {myOffer.status === 'rated' && (
-                    <>اكتملت عملية التبرع والتقييم. شكرًا لمساهمتك في إنقاذ حياة 🙏.</>
-                  )}
-                </div>
-
-                <div>
-                  لقد أعلنت تبرعك لهذا الطلب في{' '}
-                  <strong>
-                    {myOffer.createdAt
-                      ? new Date(myOffer.createdAt).toLocaleString()
-                      : '—'}
-                  </strong>
-                  ، وحالة إعلانك الآن:{' '}
-                  <Badge bg={statusVariant(myOffer.status)}>
-                    {statusLabel(myOffer.status)}
-                  </Badge>
-                  .
-                </div>
-
-                <div className="d-flex flex-wrap gap-2">
-                  {requester?._id && (
-                    <>
-                      <Button
-                        variant="outline-primary"
-                        onClick={() => navigate(`/chat/${requester._id}`)}
-                      >
-                        💬 محادثة صاحب الطلب
-                      </Button>
-                      <Button
-                        variant="outline-secondary"
-                        onClick={() => navigate(`/profile/${requester._id}`)}
-                      >
-                        👤 الملف الشخصي
-                      </Button>
-                    </>
-                  )}
-
-                  {myOffer.status === 'pending' && (
-                    <Button variant="outline-danger" onClick={handleCancelMine}>
-                      إلغاء الإعلان
-                    </Button>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <Form onSubmit={submitDonation} className="d-grid gap-3">
-                <Form.Group>
-                  <Form.Label>رسالتك (اختياري)</Form.Label>
-                  <Form.Control
-                    as="textarea"
-                    rows={3}
-                    value={msg}
-                    onChange={(e) => setMsg(e.target.value)}
-                  />
-                </Form.Group>
-
-                <Form.Group>
-                  <Form.Label>وقت مقترح (اختياري)</Form.Label>
-                  <Form.Control
-                    type="datetime-local"
-                    value={proposedTime}
-                    onChange={(e) => setProposedTime(e.target.value)}
-                  />
-                </Form.Group>
-
-                <div className="donate-actions-row">
-                  <Button
-                    type="submit"
-                    disabled={creating || isExpired(request.deadline)}
-                    className="main-donate-btn"
-                  >
-                    🩸 إرسال إعلان التبرع
-                  </Button>
-
-                  {requester?._id && (
-                    <div className="secondary-donate-actions">
-                      <Button
-                        variant="outline-success"
-                        onClick={() => navigate(`/chat/${requester._id}`)}
-                      >
-                        💬 محادثة صاحب الطلب
-                      </Button>
-                      <Button
-                        variant="outline-secondary"
-                        onClick={() => navigate(`/profile/${requester._id}`)}
-                      >
-                        👤 الملف الشخصي
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </Form>
-            )}
-          </Card.Body>
-        </Card>
       )}
 
       {/* 🔹 مودال التقييم لصاحب الطلب */}
