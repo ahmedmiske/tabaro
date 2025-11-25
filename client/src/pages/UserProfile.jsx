@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { FaStar, FaRegStar, FaStarHalfAlt } from 'react-icons/fa';
+import PropTypes from 'prop-types';
 
 import UserDetails from '../components/UserDetails.jsx';
 import AccountDetails from '../components/AccountDetails.jsx';
@@ -15,6 +16,9 @@ import MyRequestsWithOffersGeneral from '../components/MyRequestsWithOffersGener
 
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import './UserProfile.css';
+
+import Drawer from '../components/Drawer.jsx'; // Importing Drawer for mobile functionality
+
 
 function UserProfile() {
   const location = useLocation();
@@ -155,17 +159,23 @@ function UserProfile() {
     navigate({ pathname: location.pathname, search: q.toString() }, { replace });
   };
 
-  const handleViewChange = (newView) => {
-    // الزائر مسموح له فقط personal
-    if (isVisitorProfile && newView !== 'personal') return;
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
 
+  const handleViewChange = (newView) => {
+    if (isVisitorProfile && newView !== 'personal') return;
     setView(newView);
     pushTabToUrl(newView);
-
+    // Drawer يظهر عند الضغط على أي زر جانبي في الهاتف/تابلت
+    if (isMobile) setDrawerOpen(true);
     if (!isVisitorProfile && newView === 'notifications') {
       setUnreadCount(0);
     }
-
     if (!isVisitorProfile) {
       if (newView.startsWith('offers-')) {
         setExpandOffers(true);
@@ -330,43 +340,65 @@ function UserProfile() {
         </div>
 
         {/* المحتوى الرئيسي */}
-        <div className="main-content">
-          {view === 'personal' && (
-            <UserDetails
-              userDetails={userDetails}
-              // في وضع الزائر لا نمرر setUserDetails لكي لا يستطيع الحفظ
-              setUserDetails={isVisitorProfile ? undefined : setUserDetails}
-              isVisitor={isVisitorProfile}
-            />
-          )}
+        {!isMobile ? (
+          <div className="main-content">
+            {view === 'personal' && (
+              <UserDetails
+                userDetails={userDetails}
+                // في وضع الزائر لا نمرر setUserDetails لكي لا يستطيع الحفظ
+                setUserDetails={isVisitorProfile ? undefined : setUserDetails}
+                isVisitor={isVisitorProfile}
+              />
+            )}
 
-          {/* باقي التبويبات لصاحب الحساب فقط */}
-          {!isVisitorProfile && (
-            <>
-              {view === 'account' && (
-                <AccountDetails userDetails={userDetails} />
-              )}
+            {/* باقي التبويبات لصاحب الحساب فقط */}
+            {!isVisitorProfile && (
+              <>
+                {view === 'account' && (
+                  <AccountDetails userDetails={userDetails} />
+                )}
 
-              {view === 'offers-blood' && (
-                <MyDonationOffersBlood onOpenDetails={openDetails} />
-              )}
-              {view === 'offers-general' && (
-                <MyDonationOffersGeneral onOpenDetails={openDetails} />
-              )}
+                {view === 'offers-blood' && (
+                  <MyDonationOffersBlood onOpenDetails={openDetails} />
+                )}
+                {view === 'offers-general' && (
+                  <MyDonationOffersGeneral onOpenDetails={openDetails} />
+                )}
 
-              {view === 'req-blood' && (
-                <MyRequestsWithOffersBlood onOpenDetails={openDetails} />
-              )}
-              {view === 'req-general' && (
-                <MyRequestsWithOffersGeneral onOpenDetails={openDetails} />
-              )}
+                {view === 'req-blood' && (
+                  <MyRequestsWithOffersBlood onOpenDetails={openDetails} />
+                )}
+                {view === 'req-general' && (
+                  <MyRequestsWithOffersGeneral onOpenDetails={openDetails} />
+                )}
 
-              {view === 'notifications' && (
-                <NotificationsPage onOpenDetails={openDetails} />
-              )}
-            </>
-          )}
-        </div>
+                {view === 'notifications' && (
+                  <NotificationsPage onOpenDetails={openDetails} />
+                )}
+              </>
+            )}
+          </div>
+        ) : (
+          <Drawer open={drawerOpen} onClose={() => setDrawerOpen(false)}>
+            {view === 'personal' && (
+              <UserDetails
+                userDetails={userDetails}
+                setUserDetails={isVisitorProfile ? undefined : setUserDetails}
+                isVisitor={isVisitorProfile}
+              />
+            )}
+            {!isVisitorProfile && (
+              <>
+                {view === 'account' && <AccountDetails userDetails={userDetails} />}
+                {view === 'offers-blood' && <MyDonationOffersBlood onOpenDetails={openDetails} />}
+                {view === 'offers-general' && <MyDonationOffersGeneral onOpenDetails={openDetails} />}
+                {view === 'req-blood' && <MyRequestsWithOffersBlood onOpenDetails={openDetails} />}
+                {view === 'req-general' && <MyRequestsWithOffersGeneral onOpenDetails={openDetails} />}
+                {view === 'notifications' && <NotificationsPage onOpenDetails={openDetails} />}
+              </>
+            )}
+          </Drawer>
+        )}
       </div>
     </div>
   );
