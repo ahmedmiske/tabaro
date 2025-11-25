@@ -38,7 +38,7 @@ const ReadyToDonateSection = () => {
 
               <h4 className="card-title">التبرع بالدم</h4>
               <p className="card-description">
-                كن بطلاً حقيقياً وساهم في إنقاذ حياة المرضى المحتاجين لنقل الدم
+                   ساهم في إنقاذ حياة المرضى المحتاجين لنقل الدم
                 في حالات الطوارئ والعلاج الطويل.
               </p>
 
@@ -124,7 +124,7 @@ const ReadyToDonateSection = () => {
 
               <h4 className="card-title">طلب تبرع بالدم</h4>
               <p className="card-description">
-                هل أنت بحاجة إلى متبرع بالدم؟ أنشئ طلباً وصِل مع المتبرعين المستعدين في منطقتك لمساعدتك.
+                هل أنت بحاجة إلى متبرع بالدم؟ أنشئ طلباً وسنصلك  بالمتبرعين المستعدين في منطقتك لمساعدتك.
               </p>
 
               <div className="card-features">
@@ -148,7 +148,7 @@ const ReadyToDonateSection = () => {
                   إنشاء طلب تبرع بالدم
                 </Link>
                 <span className="btn-note">
-                  سيتم نشر طلبك ليراه المتبرعون المستعدون
+                  سيتم نشر طلبك ليراه الجمبع وخاصة المتبرعون المستعدون
                 </span>
               </div>
             </Card.Body>
