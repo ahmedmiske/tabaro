@@ -16,6 +16,12 @@
   background: linear-gradient(135deg, #00A443 0%, #00C853 50%, #00802F 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+.page-header {
+  background: linear-gradient(135deg, #e3f6fd 0%, #b3e0fc 100%);
+  border-radius: 18px;
+  padding: 32px 18px 24px 18px;
+  box-shadow: 0 4px 24px rgba(20, 184, 218, 0.08);
+}
   background-clip: text;
   margin-bottom: 0.5rem;
 }

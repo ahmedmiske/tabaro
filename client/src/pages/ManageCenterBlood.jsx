@@ -31,18 +31,10 @@ export default function ManageCenterBlood() {
       </header>
         
         <article className="mc-panel-inner mc-panel-inner--blood">
-          <h2 className="mc-panel-title">طلباتي التي استقبلت عروضًا</h2>
-          <p className="mc-panel-desc">
-            متابعة طلباتك للحصول على دم، والعروض الواردة من المتبرعين، وحالة التنفيذ.
-          </p>
           <MyRequestsWithOffersBlood />
         </article>
       <section className="mc-two-columns">
         <article className="mc-panel-inner mc-panel-inner--blood">
-          <h2 className="mc-panel-title">عروضي كمتبرع بالدم</h2>
-          <p className="mc-panel-desc">
-            هنا تظهر كل عروض التبرع بالدم التي قدّمتها على طلبات الآخرين.
-          </p>
           <MyDonationOffersBlood />
         </article>
 

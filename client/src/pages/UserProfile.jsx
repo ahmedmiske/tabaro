@@ -268,72 +268,10 @@ function UserProfile() {
                 </button>
 
                 {/* عروضي للتبرع */}
-                <button
-                  className={`menu-button ${isOffersActive ? 'active' : ''}`}
-                  onClick={() => setExpandOffers((v) => !v)}
-                >
-                  عروضي للتبرع {expandOffers ? '▴' : '▾'}
-                </button>
-                {expandOffers && (
-                  <div className="submenu">
-                    <button
-                      className={`submenu-button ${
-                        view === 'offers-blood' ? 'active' : ''
-                      }`}
-                      onClick={() => handleViewChange('offers-blood')}
-                    >
-                      تبرع بالدم
-                    </button>
-                    <button
-                      className={`submenu-button ${
-                        view === 'offers-general' ? 'active' : ''
-                      }`}
-                      onClick={() => handleViewChange('offers-general')}
-                    >
-                      تبرع عام
-                    </button>
-                  </div>
-                )}
+               
+                
 
-                {/* طلباتي مع العروض */}
-                <button
-                  className={`menu-button ${isRequestsActive ? 'active' : ''}`}
-                  onClick={() => setExpandRequests((v) => !v)}
-                >
-                  طلباتي مع العروض {expandRequests ? '▴' : '▾'}
-                </button>
-                {expandRequests && (
-                  <div className="submenu">
-                    <button
-                      className={`submenu-button ${
-                        view === 'req-blood' ? 'active' : ''
-                      }`}
-                      onClick={() => handleViewChange('req-blood')}
-                    >
-                      تبرع بالدم
-                    </button>
-                    <button
-                      className={`submenu-button ${
-                        view === 'req-general' ? 'active' : ''
-                      }`}
-                      onClick={() => handleViewChange('req-general')}
-                    >
-                      تبرع عام
-                    </button>
-                  </div>
-                )}
-
-                <button
-                  className={`menu-button ${
-                    view === 'notifications' ? 'active' : ''
-                  }`}
-                  onClick={() => handleViewChange('notifications')}
-                >
-                  الإشعارات{' '}
-                  {unreadCount > 0 && (
-                    <span className="notification-badge">{unreadCount}</span>
-                  )}
-                </button>
+                
               </>
             )}
           </div>
