@@ -31,6 +31,16 @@ export default function ManageCenterGeneral() {
       </header>
 
       <section className="mc-two-columns">
+        
+            <article className="mc-panel-inner mc-panel-inner--general">
+          <h2 className="mc-panel-title">طلباتي التي استقبلت عروضًا</h2>
+          <p className="mc-panel-desc">
+            إدارة طلباتك العامة ومتابعة العروض، القبول، التنفيذ، والتقييم.
+          </p>
+          <MyRequestsWithOffersGeneral />
+        </article>
+
+
         <article className="mc-panel-inner mc-panel-inner--general">
           <h2 className="mc-panel-title">عروضي في التبرعات العامة</h2>
           <p className="mc-panel-desc">
@@ -39,13 +49,7 @@ export default function ManageCenterGeneral() {
           <MyDonationOffersGeneral />
         </article>
 
-        <article className="mc-panel-inner mc-panel-inner--general">
-          <h2 className="mc-panel-title">طلباتي التي استقبلت عروضًا</h2>
-          <p className="mc-panel-desc">
-            إدارة طلباتك العامة ومتابعة العروض، القبول، التنفيذ، والتقييم.
-          </p>
-          <MyRequestsWithOffersGeneral />
-        </article>
+    
       </section>
 
       <footer className="mc-footnote">

@@ -29,7 +29,14 @@ export default function ManageCenterBlood() {
           </button>
         </div>
       </header>
-
+        
+        <article className="mc-panel-inner mc-panel-inner--blood">
+          <h2 className="mc-panel-title">طلباتي التي استقبلت عروضًا</h2>
+          <p className="mc-panel-desc">
+            متابعة طلباتك للحصول على دم، والعروض الواردة من المتبرعين، وحالة التنفيذ.
+          </p>
+          <MyRequestsWithOffersBlood />
+        </article>
       <section className="mc-two-columns">
         <article className="mc-panel-inner mc-panel-inner--blood">
           <h2 className="mc-panel-title">عروضي كمتبرع بالدم</h2>
@@ -39,13 +46,6 @@ export default function ManageCenterBlood() {
           <MyDonationOffersBlood />
         </article>
 
-        <article className="mc-panel-inner mc-panel-inner--blood">
-          <h2 className="mc-panel-title">طلباتي التي استقبلت عروضًا</h2>
-          <p className="mc-panel-desc">
-            متابعة طلباتك للحصول على دم، والعروض الواردة من المتبرعين، وحالة التنفيذ.
-          </p>
-          <MyRequestsWithOffersBlood />
-        </article>
       </section>
 
       <footer className="mc-footnote">
