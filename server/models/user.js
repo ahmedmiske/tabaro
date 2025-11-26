@@ -6,34 +6,39 @@ const userSchema = new mongoose.Schema(
     firstName: { type: String, trim: true },
     lastName: { type: String, trim: true },
 
-    // email اختياري (sparse+unique يسمح بوجود null لمستخدمين مختلفين)
+    // ✅ email اختياري ويمكن أن يتكرر
     email: {
       type: String,
-      unique: true,
-      sparse: true,
       lowercase: true,
       trim: true,
+      // لا يوجد unique ولا sparse هنا
     },
 
     // الهاتف إجباري ويجب أن يكون فريدًا
     phoneNumber: { type: String, unique: true, required: true, trim: true },
 
+    // رقم واتساب (اختياري – قد يكون نفس رقم الهاتف أو مختلف)
+    whatsappNumber: {
+      type: String,
+      trim: true,
+      // لا نضع unique حتى نسمح بتكراره عند الحاجة
+    },
+
     userType: { type: String, enum: ["individual", "institutional"] },
 
-    // username اختياري لكن فريد إن وُجد
+    // username فريد (هذا مناسب أن يبقى فريد)
     username: { type: String, unique: true, sparse: true, trim: true },
 
-    // كلمة المرور قد لا تكون موجودة لو كنا نعتمد OTP فقط
     password: { type: String },
 
-    // معلومات المؤسسة (اختيارية)
+    // معلومات المؤسسة
     institutionName: { type: String },
     institutionLicenseNumber: { type: String },
     institutionAddress: { type: String },
     institutionEstablishmentDate: { type: Date },
     institutionWebsite: { type: String },
 
-    // عنوان المستخدم
+    // العنوان والموقع
     address: { type: String },
     wilaya: { type: String, trim: true },
     moughataa: { type: String, trim: true },
@@ -42,13 +47,13 @@ const userSchema = new mongoose.Schema(
     // صورة المستخدم
     profileImage: { type: String, default: "" },
 
-    // ⭐ تقييم المستخدم كمتبرِّع (يُقيّمه أصحاب الطلبات)
+    // ⭐ تقييم المستخدم كمتبرِّع
     ratingAsDonor: {
-      avg: { type: Number, default: 0 },   // متوسط التقييم 1–5
-      count: { type: Number, default: 0 }, // عدد التقييمات
+      avg: { type: Number, default: 0 },
+      count: { type: Number, default: 0 },
     },
 
-    // ⭐ تقييم المستخدم كصاحب طلب (يُقيّمه المتبرعون)
+    // ⭐ تقييم المستخدم كصاحب طلب
     ratingAsRecipient: {
       avg: { type: Number, default: 0 },
       count: { type: Number, default: 0 },
@@ -76,7 +81,7 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// تشفير كلمة المرور قبل الحفظ (إن وُجدت وتغيّرت)
+// تشفير كلمة المرور
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password") || !this.password) return next();
   const salt = await bcrypt.genSalt(10);
@@ -84,13 +89,11 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-// مقارنة كلمة المرور (عند وجودها)
 userSchema.methods.matchPassword = async function (enteredPassword) {
   if (!this.password) return false;
   return bcrypt.compare(enteredPassword, this.password);
 };
 
-// إزالة الحقول الحساسة من الـ JSON
 userSchema.methods.toJSON = function () {
   const obj = this.toObject();
   delete obj.password;

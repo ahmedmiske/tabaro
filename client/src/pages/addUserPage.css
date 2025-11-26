@@ -70,9 +70,12 @@
 */
 .form-container .form-header {
   text-align: center;
-  margin-bottom: 0px;
-
+  margin-bottom: -40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
+
 
 .signup-form-section .form-container {
   width: 100%;
@@ -500,7 +503,7 @@
 
 /* 🚀 أنماط نظام الخطوات المتعددة - Mobile First */
 .steps-progress-container {
-  margin: 0.5rem 0;
+  margin: 0.1rem 0;
   padding: 0.75rem;
   background: linear-gradient(135deg, rgba(255, 255, 255, .95) 0%, rgba(248, 249, 250, .95) 100%);
   border-radius: 16px;
@@ -959,3 +962,142 @@
 /* ============================================ */
 /* 📱 نهاية Media Queries */
 /* ============================================ */
+/* ✅ رسالة نجاح بسيطة وهادئة */
+.success-container.simple-success {
+  background: #f6fffb;
+  border: 1px solid #b7f5d0;
+  border-radius: 16px;
+  padding: 24px 20px;
+  max-width: 520px;
+  margin: 32px auto;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(15, 118, 110, 0.06);
+}
+
+.success-icon-circle {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00a443, #4caf50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 26px;
+  margin: 0 auto 12px;
+}
+
+.success-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #14532d;
+  margin-bottom: 6px;
+}
+
+.success-message {
+  font-size: 0.9rem;
+  color: #374151;
+  margin-bottom: 18px;
+}
+
+/* أزرار النجاح */
+.success-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.btn-success-main,
+.btn-success-secondary {
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  min-width: 180px;
+}
+
+.btn-success-main {
+  background: linear-gradient(135deg, #ff7a45, #ff9a6c);
+  color: #ffffff;
+  box-shadow: 0 6px 18px rgba(255, 122, 69, 0.32);
+}
+
+.btn-success-main:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 26px rgba(255, 122, 69, 0.4);
+}
+
+.btn-success-secondary {
+  background: #ffffff;
+  color: #0f766e;
+  border: 1px solid #a7f3d0;
+}
+
+.btn-success-secondary:hover {
+  background: #ecfdf5;
+  transform: translateY(-2px);
+}
+
+/* زر رابط خفيف */
+.btn-success-link {
+  margin-top: 6px;
+  background: none;
+  border: none;
+  color: #059669;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.btn-success-link:hover {
+  color: #047857;
+}
+
+/* موبايل */
+@media (max-width: 576px) {
+  .success-container.simple-success {
+    margin: 20px auto;
+    padding: 20px 16px;
+  }
+
+  .btn-success-main,
+  .btn-success-secondary {
+    width: 100%;
+    max-width: 260px;
+  }
+}
+
+/* ✅ عندما يكتمل التسجيل: نغيّر تخطيط الصفحة ليصبح الكارت في المنتصف */
+.signup-layout.success-only {
+  display: flex !important;       /* بدل الـ grid */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;        /* توسيط عمودي في الشاشات المتوسطة/الكبيرة */
+  padding: 2rem 1rem;
+}
+
+/* منطقة رسالة النجاح */
+.signup-layout.success-only .signup-form-section {
+  width: 100%;
+  max-width: 720px;               /* عرض معقول للكارت */
+  display: flex;
+  justify-content: center;
+}
+
+.signup-layout.success-only .success-container {
+  max-width: 640px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .signup-layout.success-only {
+    justify-content: flex-start;
+    padding-top: 3rem;
+  }
+}

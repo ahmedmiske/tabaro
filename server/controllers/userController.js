@@ -1,4 +1,3 @@
-// server/controllers/userController.js
 const bcrypt = require("bcryptjs");
 const User = require("../models/user");
 const Wilaya = require("../models/wilayas");
@@ -6,18 +5,18 @@ const Moughataa = require("../models/moughataas");
 const Commune = require("../models/communes");
 const asyncHandler = require("../utils/asyncHandler");
 const { generateToken } = require("../utils/otpUtils");
+
 const normalizeLocationValue = (value) =>
   typeof value === "string" ? value.trim() : "";
 
-const getDisplayName = (doc) =>
-  (doc?.name_ar || "").trim();
+const getDisplayName = (doc) => (doc?.name_ar || "").trim();
 
 const buildLocationResolver = (Model) => async (raw) => {
   const trimmed = normalizeLocationValue(raw);
   if (!trimmed) return null;
   return Model.findOne({
     is_active: true,
-    name_ar: trimmed
+    name_ar: trimmed,
   })
     .select("code name_ar name_fr")
     .lean();
@@ -34,6 +33,10 @@ const resolveWilaya = buildLocationResolver(Wilaya);
 const resolveMoughataa = buildLocationResolver(Moughataa);
 const resolveCommune = buildLocationResolver(Commune);
 
+/**
+ * ✅ تطبيع بيانات الولاية/المقاطعة/البلدية داخل موريتانيا فقط
+ *  - يُستخدم عندما يكون المستخدم داخل موريتانيا
+ */
 const normalizeLocationsOrThrow = async ({ wilaya, moughataa, commune }) => {
   let resolvedWilaya = null;
   let resolvedMoughataa = null;
@@ -118,7 +121,11 @@ const normalizeLocationsOrThrow = async ({ wilaya, moughataa, commune }) => {
   }
 
   return {
-    wilaya: resolvedWilaya ? getDisplayName(resolvedWilaya) : wilayaInput ? wilayaInput : "",
+    wilaya: resolvedWilaya
+      ? getDisplayName(resolvedWilaya)
+      : wilayaInput
+      ? wilayaInput
+      : "",
     moughataa: resolvedMoughataa
       ? getDisplayName(resolvedMoughataa)
       : moughataaInput
@@ -153,6 +160,11 @@ const registerUser = asyncHandler(async (req, res) => {
     wilaya,
     moughataa,
     commune,
+    whatsappNumber,
+    // حقول خاصة بالواجهة:
+    locationMode, // 'mr' | 'abroad'
+    country,
+    city,
   } = req.body;
 
   if (!phoneNumber) {
@@ -161,22 +173,42 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   const profileImage = req.file?.filename;
-  let normalizedLocations;
-  try {
-    normalizedLocations = await normalizeLocationsOrThrow({
-      wilaya,
-      moughataa,
-      commune,
-    });
-  } catch (err) {
-    res.status(400);
-    throw err;
+
+  // 🧭 تحديد الموقع حسب نوع الإقامة
+  const mode = locationMode === "abroad" ? "abroad" : "mr";
+
+  let finalWilaya = "";
+  let finalMoughataa = "";
+  let finalCommune = "";
+
+  if (mode === "abroad") {
+    // 🌍 مستخدم خارج موريتانيا
+    // لا نتحقق من جداول wilayas/moughataas/communes
+    finalWilaya = country?.trim() || "خارج موريتانيا";
+    finalMoughataa = city?.trim() || "";
+    finalCommune = normalizeLocationValue(commune);
+  } else {
+    // 🇲🇷 داخل موريتانيا – نستخدم التطبيع والتحقق القديم
+    let normalizedLocations;
+    try {
+      normalizedLocations = await normalizeLocationsOrThrow({
+        wilaya,
+        moughataa,
+        commune,
+      });
+    } catch (err) {
+      res.status(400);
+      throw err;
+    }
+    finalWilaya = normalizedLocations.wilaya;
+    finalMoughataa = normalizedLocations.moughataa;
+    finalCommune = normalizedLocations.commune;
   }
 
   const newUser = new User({
     firstName,
     lastName,
-    email: email || null, // ✅ نخليه null لو ما جاش
+    email: email || null, // يمكن أن يكون null
     username,
     password,
     userType,
@@ -187,19 +219,21 @@ const registerUser = asyncHandler(async (req, res) => {
     institutionWebsite,
     address,
     phoneNumber,
-    wilaya: normalizedLocations.wilaya,
-    moughataa: normalizedLocations.moughataa,
-    commune: normalizedLocations.commune,
+    whatsappNumber: whatsappNumber || null,
+    wilaya: finalWilaya,
+    moughataa: finalMoughataa,
+    commune: finalCommune,
     profileImage,
-    status: "verified", // مؤقتًا لحد ما نربط OTP
+    status: "verified", // مؤقتًا لحد ما نربط OTP بالكامل
   });
 
   const savedUser = await newUser.save();
   res.status(201).json({
     _id: savedUser._id,
-    name: savedUser.firstName + " " + savedUser.lastName,
+    name: savedUser.firstName + " " + (savedUser.lastName || ""),
     phoneNumber: savedUser.phoneNumber,
-    email: savedUser.email, // ممكن يرجع null
+    whatsappNumber: savedUser.whatsappNumber || null,
+    email: savedUser.email || null,
     wilaya: savedUser.wilaya || null,
     moughataa: savedUser.moughataa || null,
     commune: savedUser.commune || null,
@@ -227,7 +261,8 @@ const authUser = asyncHandler(async (req, res) => {
         lastName: user.lastName,
         username: user.username,
         phoneNumber: user.phoneNumber,
-        email: user.email || null, // ممكن null
+        whatsappNumber: user.whatsappNumber || null,
+        email: user.email || null,
         userType: user.userType,
         wilaya: user.wilaya || null,
         moughataa: user.moughataa || null,
@@ -251,7 +286,11 @@ const getUsers = asyncHandler(async (req, res) => {
 
   const [total, users] = await Promise.all([
     User.countDocuments({}),
-    User.find({}).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+    User.find({})
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
   ]);
 
   res.json({ result: users, page, pages: Math.ceil(total / limit), total });
@@ -283,6 +322,7 @@ const updateUser = asyncHandler(async (req, res) => {
     "institutionEstablishmentDate",
     "institutionWebsite",
     "address",
+    "whatsappNumber",
   ];
 
   for (const k of allowed) {
@@ -294,27 +334,43 @@ const updateUser = asyncHandler(async (req, res) => {
   );
 
   if (locationFieldsTouched) {
-    let normalizedLocations;
-    try {
-      normalizedLocations = await normalizeLocationsOrThrow({
-        wilaya: Object.prototype.hasOwnProperty.call(req.body, "wilaya")
-          ? req.body.wilaya
-          : user.wilaya,
-        moughataa: Object.prototype.hasOwnProperty.call(req.body, "moughataa")
-          ? req.body.moughataa
-          : user.moughataa,
-        commune: Object.prototype.hasOwnProperty.call(req.body, "commune")
-          ? req.body.commune
-          : user.commune,
-      });
-    } catch (err) {
-      res.status(400);
-      throw err;
-    }
+    const locationMode = req.body.locationMode === "abroad" ? "abroad" : "mr";
 
-    user.wilaya = normalizedLocations.wilaya;
-    user.moughataa = normalizedLocations.moughataa;
-    user.commune = normalizedLocations.commune;
+    if (locationMode === "abroad") {
+      // خارج موريتانيا – لا نطبّع مع الجداول
+      if (Object.prototype.hasOwnProperty.call(req.body, "wilaya")) {
+        user.wilaya = req.body.wilaya;
+      }
+      if (Object.prototype.hasOwnProperty.call(req.body, "moughataa")) {
+        user.moughataa = req.body.moughataa;
+      }
+      if (Object.prototype.hasOwnProperty.call(req.body, "commune")) {
+        user.commune = req.body.commune;
+      }
+    } else {
+      // داخل موريتانيا – التطبيع والتحقق
+      let normalizedLocations;
+      try {
+        normalizedLocations = await normalizeLocationsOrThrow({
+          wilaya: Object.prototype.hasOwnProperty.call(req.body, "wilaya")
+            ? req.body.wilaya
+            : user.wilaya,
+          moughataa: Object.prototype.hasOwnProperty.call(req.body, "moughataa")
+            ? req.body.moughataa
+            : user.moughataa,
+          commune: Object.prototype.hasOwnProperty.call(req.body, "commune")
+            ? req.body.commune
+            : user.commune,
+        });
+      } catch (err) {
+        res.status(400);
+        throw err;
+      }
+
+      user.wilaya = normalizedLocations.wilaya;
+      user.moughataa = normalizedLocations.moughataa;
+      user.commune = normalizedLocations.commune;
+    }
   }
 
   if (req.file?.filename) user.profileImage = req.file.filename;
@@ -374,19 +430,19 @@ const deleteUser = asyncHandler(async (req, res) => {
   res.json({ message: "User profile deleted" });
 });
 
-// @desc    Get public user profile (مُتاح للجميع لزيارة بروفايل أي مستخدم)
+// @desc    Get public user profile
 // @route   GET /api/users/:userId/public-profile
 // @access  Public
 const getPublicProfile = asyncHandler(async (req, res) => {
   const { userId } = req.params;
 
   const user = await User.findById(userId).select(
-    'firstName lastName profileImage address wilaya moughataa commune userType phoneNumber email ratingAsDonor ratingAsRecipient createdAt'
+    "firstName lastName profileImage address wilaya moughataa commune userType phoneNumber whatsappNumber email ratingAsDonor ratingAsRecipient createdAt"
   );
 
   if (!user) {
     res.status(404);
-    throw new Error('المستخدم غير موجود');
+    throw new Error("المستخدم غير موجود");
   }
 
   const donor = user.ratingAsDonor || { avg: 0, count: 0 };
@@ -406,17 +462,15 @@ const getPublicProfile = asyncHandler(async (req, res) => {
     _id: user._id,
     firstName: user.firstName,
     lastName: user.lastName,
-    profileImage: user.profileImage || '',
-    address: user.address || '',
-    wilaya: user.wilaya || '',
-    moughataa: user.moughataa || '',
-    commune: user.commune || '',
-    userType: user.userType || 'individual',
-
-    // 👇 المهم هنا
-    phoneNumber: user.phoneNumber || '',
-    email: user.email || '',
-
+    profileImage: user.profileImage || "",
+    address: user.address || "",
+    wilaya: user.wilaya || "",
+    moughataa: user.moughataa || "",
+    commune: user.commune || "",
+    userType: user.userType || "individual",
+    phoneNumber: user.phoneNumber || "",
+    whatsappNumber: user.whatsappNumber || "",
+    email: user.email || "",
     ratingAsDonor: donor,
     ratingAsRecipient: recipient,
     avgRating,
@@ -424,7 +478,6 @@ const getPublicProfile = asyncHandler(async (req, res) => {
     createdAt: user.createdAt,
   });
 });
-
 
 module.exports = {
   registerUser,
@@ -435,5 +488,5 @@ module.exports = {
   changePassword,
   deleteUser,
   resetPassword,
-  getPublicProfile, // ✅ مضاف
+  getPublicProfile,
 };

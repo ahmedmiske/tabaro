@@ -1,5 +1,5 @@
 // src/pages/AddUserPage.jsx
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo , useRef  } from 'react';
 import UserForm from '../components/UserForm.jsx';
 import TitleMain from '../components/TitleMain.jsx';
 import userAddImage from '../images/default-avatar.png';
@@ -17,11 +17,12 @@ const handleResizeObserverError = (e) => {
 };
 
 if (typeof window !== 'undefined') {
-  window.addEventListener('error', (e) => { handleResizeObserverError(e); });
+  window.addEventListener('error', (e) => {
+    handleResizeObserverError(e);
+  });
   window.addEventListener('unhandledrejection', (event) => {
     // لا تمنع باقي الأخطاء حتى لا تختفي مشاكل API
     if (handleResizeObserverError(event)) return;
-    // اترك المتصفح يعرضها أو اطبعها
     // console.error('[Unhandled Rejection]', event.reason);
   });
 }
@@ -36,11 +37,27 @@ function AddUserPage() {
 
   const totalSteps = 5;
 
-  useEffect(() => () => {
-    if (typeof window !== 'undefined') {
-      window.removeEventListener('error', handleResizeObserverError);
+  const formSectionRef = useRef(null);
+
+  const scrollToFormTop = useCallback(() => {
+    if (formSectionRef.current) {
+      formSectionRef.current.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
+    } else if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, []);
+
+  useEffect(
+    () => () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('error', handleResizeObserverError);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     setAnimationClass('fade-in-entrance');
@@ -48,78 +65,138 @@ function AddUserPage() {
     return () => clearTimeout(t);
   }, []);
 
-  const stepInfo = useMemo(() => ({
-    1: { title: 'نوع الحساب',            description: 'اختر نوع الحساب المناسب لك',      icon: '👤' },
-    2: { title: 'التحقق من رقم الهاتف',   description: 'أدخل رقم الهاتف وتأكد من صحته',    icon: '📞' },
-    3: { title: 'المعلومات الشخصية',     description: 'أدخل بياناتك الشخصية الأساسية',    icon: '📝' },
-    4: { title: 'معلومات الحساب',        description: 'كلمة المرور والإعدادات الأمنية',   icon: '🔐' },
-    5: { title: 'اكتمل التسجيل',         description: 'تم إنشاء حسابك بنجاح',            icon: '🎉' },
-  }), []);
+  // ✅ عناوين الخطوات متطابقة مع محتوى UserForm
+  const stepInfo = useMemo(
+    () => ({
+      1: {
+        title: 'اختيار نوع الحساب',
+        description: 'اختر هل ستسجل كفرد أم كمؤسسة.',
+        icon: '👤',
+      },
+      2: {
+        title: 'بيانات التواصل',
+        description: 'أدخل رقم الهاتف، ورقم واتساب (اختياري)، والبريد الإلكتروني إن وجد.',
+        icon: '📞',
+      },
+      3: {
+        title: 'البيانات الأساسية',
+        description: 'أضف اسمك وبياناتك الشخصية أو بيانات المؤسسة وصورتك إن رغبت.',
+        icon: '📝',
+      },
+      4: {
+        title: 'الموقع الجغرافي',
+        description: 'حدّد إن كنت داخل موريتانيا أو خارجها وأدخل معلومات مكان إقامتك.',
+        icon: '📍',
+      },
+      5: {
+        title: 'بيانات الدخول إلى الحساب',
+        description: 'اختر اسم مستخدم وكلمة مرور بدرجة أمان متوسطة ثم اضغط على زر تسجيل.',
+        icon: '🔐',
+      },
+    }),
+    [],
+  );
 
-  const nextStep = useCallback(() => {
+      const nextStep = useCallback(() => {
     if (currentStep < totalSteps) {
       setCurrentStep((p) => p + 1);
+      scrollToFormTop();
       setTimeout(() => setAnimationClass('step-forward'), 0);
     }
-  }, [currentStep, totalSteps]);
+  }, [currentStep, totalSteps, scrollToFormTop]);
 
   const previousStep = useCallback(() => {
     if (currentStep > 1) {
       setCurrentStep((p) => p - 1);
+      scrollToFormTop();
       setTimeout(() => setAnimationClass('step-backward'), 0);
     }
-  }, [currentStep]);
+  }, [currentStep, scrollToFormTop]);
 
-  const goToStep = useCallback((step) => {
-    if (step >= 1 && step <= totalSteps) {
-      setCurrentStep(step);
-      setTimeout(() => setAnimationClass('step-jump'), 0);
+
+  const goToStep = useCallback(
+    (step) => {
+      if (step >= 1 && step <= totalSteps) {
+        setCurrentStep(step);
+        setTimeout(() => setAnimationClass('step-jump'), 0);
+      }
+    },
+    [totalSteps],
+  );
+       const mapBackendErrorToFriendly = (backendMessage) => {
+    const msg = String(backendMessage || '').toLowerCase();
+
+    if (msg.includes('e11000') && msg.includes('username')) {
+      return 'اسم المستخدم مستعمَل من قبل. من فضلك اختر اسم مستخدم آخر.';
     }
-  }, [totalSteps]);
+    if (msg.includes('e11000') && msg.includes('phonenumber')) {
+      return 'رقم الهاتف هذا مسجَّل مسبقاً. إذا كان رقمك، فجرّب تسجيل الدخول بدلاً من إنشاء حساب جديد.';
+    }
+    if (msg.includes('e11000') && msg.includes('email')) {
+      return 'هذا البريد الإلكتروني مسجَّل مسبقاً. استخدم بريدًا آخر أو جرّب تسجيل الدخول.';
+    }
+
+    if (backendMessage) return String(backendMessage);
+    return 'حدث خطأ أثناء إنشاء الحساب. تحقق من البيانات وحاول مرة أخرى.';
+  };
+
 
   /**
-   * ✅ إرسال فعلي إلى الخادم (multipart/form-data) بدلاً من المحاكاة
+   * ✅ إرسال فعلي إلى الخادم (multipart/form-data)
    */
-  const addUser = useCallback(async (user) => {
-    setIsLoading(true);
-    setErrorMessage('');
-    setAnimationClass('processing');
+      const addUser = useCallback(
+    async (user) => {
+      setIsLoading(true);
+      setErrorMessage('');
+      setAnimationClass('processing');
 
-    try {
-      // ابنِ FormData من كائن المستخدم القادم من UserForm
-      const fd = new FormData();
-      Object.entries(user).forEach(([k, v]) => {
-        if (v === undefined || v === null) return;
-        if (k === 'confirmPassword') return; // لا حاجة لإرساله
-        fd.append(k, v);
-      });
+      try {
+        const fd = new FormData();
+        Object.entries(user).forEach(([k, v]) => {
+          if (v === undefined || v === null) return;
+          if (k === 'confirmPassword') return;
+          fd.append(k, v);
+        });
 
-      // Debug مفيد أثناء التطوير
-      // console.log('[AddUser] sending keys:', [...fd.keys()]);
+        const res = await fetchWithInterceptors('/api/users', {
+          method: 'POST',
+          body: fd,
+        });
 
-      const res = await fetchWithInterceptors('/api/users', {
-        method: 'POST',
-        body: fd,
-      });
+        if (!res?.ok) {
+          const raw =
+            res?.body?.message ||
+            res?.body?.error ||
+            res?.message ||
+            'فشل إنشاء الحساب';
+          throw new Error(raw);
+        }
 
-      if (!res?.ok) {
-        const msg = res?.body?.message || res?.body?.error || 'فشل إنشاء الحساب';
-        throw new Error(msg);
+        setSuccessMessage(
+          'تم إنشاء حسابك بنجاح. يمكنك الآن تسجيل الدخول باستخدام اسم المستخدم وكلمة المرور التي اخترتها.',
+        );
+        setFormSubmitted(true);
+        setAnimationClass('success-celebration');
+        setCurrentStep(totalSteps);
+
+        // 🔽 بعد النجاح نرجع لأعلى الصفحة
+        if (typeof window !== 'undefined') {
+          setTimeout(() => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }, 50);
+        }
+      } catch (err) {
+        console.error('💥 خطأ في إنشاء المستخدم:', err);
+        setErrorMessage(mapBackendErrorToFriendly(err?.message));
+        setAnimationClass('error-shake');
+        setTimeout(() => setAnimationClass(''), 2000);
+      } finally {
+        setIsLoading(false);
       }
+    },
+    [totalSteps, mapBackendErrorToFriendly],
+  );
 
-      setSuccessMessage('🎉 تم إنشاء الحساب بنجاح!');
-      setFormSubmitted(true);
-      setAnimationClass('success-celebration');
-      setCurrentStep(totalSteps);
-    } catch (err) {
-      console.error('💥 خطأ في إنشاء المستخدم:', err);
-      setErrorMessage(err?.message || 'حدث خطأ غير متوقع أثناء إنشاء الحساب');
-      setAnimationClass('error-shake');
-      setTimeout(() => setAnimationClass(''), 2000);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [totalSteps]);
 
   const handleResetForm = useCallback(() => {
     requestAnimationFrame(() => {
@@ -134,30 +211,51 @@ function AddUserPage() {
 
   const handleDismissError = useCallback(() => {
     setAnimationClass('error-dismiss');
-    setTimeout(() => { setErrorMessage(''); setAnimationClass(''); }, 300);
+    setTimeout(() => {
+      setErrorMessage('');
+      setAnimationClass('');
+    }, 300);
   }, []);
 
   return (
-    <div className={`signup-layout ${animationClass}`} role="main" aria-label="صفحة التسجيل">
-      {/* القسم البصري */}
-      <section className="signup-image-section fullscreen-image" aria-label="منطقة الترحيب البصرية">
-        
-      </section>
+    <div
+      className={`signup-layout ${animationClass} ${
+        formSubmitted ? 'success-only' : ''
+      }`}
+      role="main"
+      aria-label="صفحة التسجيل"
+    >
+        {!formSubmitted && (
+        <section
+          className="signup-image-section fullscreen-image"
+          aria-label="منطقة الترحيب البصرية"
+        />
+      )}
 
       {/* منطقة النموذج */}
       <section className="signup-form-section" aria-label="نموذج إنشاء الحساب">
-       
-
         {errorMessage && (
-          <div className="alert alert-error sophisticated-alert" role="alert" aria-live="assertive">
+          <div
+            className="alert alert-error sophisticated-alert"
+            role="alert"
+            aria-live="assertive"
+          >
             <div className="alert-icon">⚠️</div>
             <div className="alert-content">
               <p className="alert-message">{errorMessage}</p>
-              <button className="alert-dismiss-btn" onClick={handleDismissError} aria-label="إغلاق رسالة الخطأ">
+              <button
+                className="alert-dismiss-btn"
+                onClick={handleDismissError}
+                aria-label="إغلاق رسالة الخطأ"
+              >
                 <span>✕</span>
               </button>
             </div>
-            <button className="retry-btn elegant-btn" onClick={handleDismissError} disabled={isLoading}>
+            <button
+              className="retry-btn elegant-btn"
+              onClick={handleDismissError}
+              disabled={isLoading}
+            >
               <span className="btn-text">حاول مرة أخرى</span>
               <span className="btn-icon">🔄</span>
             </button>
@@ -165,69 +263,102 @@ function AddUserPage() {
         )}
 
         {formSubmitted ? (
-          <div className="success-container celebration-mode" role="status" aria-live="polite">
-            <div className="success-animation">
-              <div className="success-checkmark">
-                <div className="checkmark-circle"><div className="checkmark-stem" /><div className="checkmark-kick" /></div>
-              </div>
-            </div>
-            <div className="success-content">
-              <h3 className="success-title">🎉 مرحباً بك!</h3>
-              <p className="success-message">{successMessage}</p>
-              <div className="success-stats">
-                <div className="stat-item"><span className="stat-number">+1</span><span className="stat-label">عضو جديد</span></div>
-                <div className="stat-item"><span className="stat-number">🩸</span><span className="stat-label">جاهز للتبرع</span></div>
-              </div>
-            </div>
-            <div className="success-actions">
-              <button className="btn btn-primary premium-btn" onClick={() => (window.location.href = '/')} disabled={isLoading}>
-                <span className="btn-text">الانتقال للرئيسية</span><span className="btn-icon">→</span>
+          // ✅ واجهة ما بعد النجاح
+          <div className="success-container simple-success" role="status" aria-live="polite">
+            <div className="success-icon-circle">✅</div>
+            <h3 className="success-title">تم إنشاء حسابك بنجاح</h3>
+            <p className="success-message">
+              يمكنك الآن تسجيل الدخول باستخدام اسم المستخدم وكلمة المرور التي اخترتها.
+            </p>
+
+            <div className="success-actions-row">
+              {/* الزر الأساسي: تسجيل الدخول */}
+              <button
+                className="btn btn-success-main"
+                onClick={() => {
+                  window.location.href = '/login';
+                }}
+                disabled={isLoading}
+              >
+                <span className="btn-text">الانتقال إلى تسجيل الدخول</span>
               </button>
-              <button className="btn btn-secondary elegant-btn" onClick={handleResetForm} disabled={isLoading}>
-                <span className="btn-text">إنشاء حساب آخر</span><span className="btn-icon">👥</span>
+
+              {/* زر ثانوي: العودة للرئيسية */}
+              <button
+                className="btn btn-success-secondary"
+                onClick={() => {
+                  window.location.href = '/';
+                }}
+                disabled={isLoading}
+              >
+                <span className="btn-text">الذهاب إلى الرئيسية</span>
               </button>
             </div>
+
+            {/* خيار خفيف لإنشاء حساب آخر */}
+            <button
+              type="button"
+              className="btn btn-success-link"
+              onClick={handleResetForm}
+              disabled={isLoading}
+            >
+              إنشاء حساب آخر
+            </button>
           </div>
         ) : (
           <div className="form-container">
-             <header className="form-header">
-             <TitleMain title="إنشاء حساب جديد" />
+            <header className="form-header">
+              <TitleMain title="إنشاء حساب جديد" />
 
-             <div className="steps-progress-container" role="progressbar"
-               aria-valuenow={currentStep} aria-valuemin="1" aria-valuemax={totalSteps}>
-              <div className="steps-info">
-                 <div className="current-step-info">
-                   <span className="step-icon">{stepInfo[currentStep]?.icon}</span>
-                   <div className="step-details">
-                     <h3 className="step-title">{stepInfo[currentStep]?.title}</h3>
-                     <p className="step-description">{stepInfo[currentStep]?.description}</p>
-                   </div>
-                 </div>
+              <div
+                className="steps-progress-container"
+                role="progressbar"
+                aria-valuenow={currentStep}
+                aria-valuemin="1"
+                aria-valuemax={totalSteps}
+              >
+                <div className="steps-info">
+                  <div className="current-step-info">
+                    <span className="step-icon">{stepInfo[currentStep]?.icon}</span>
+                    <div className="step-details">
+                      <h3 className="step-title">{stepInfo[currentStep]?.title}</h3>
+                      <p className="step-description">
+                        {stepInfo[currentStep]?.description}
+                      </p>
+                    </div>
+                  </div>
+
                   <div className="steps-dots-header">
-                {Array.from({ length: totalSteps }, (_, i) => (
-                  <div
-                    key={i + 1}
-                    className={`step-dot-header ${currentStep >= i + 1 ? 'completed' : ''} ${currentStep === i + 1 ? 'active' : ''}`}
-                    aria-label={`الخطوة ${i + 1}: ${stepInfo[i + 1]?.title}`}
-                    onClick={() => goToStep(i + 1)}
-                    role="button"
-                    tabIndex={0}
-                  >
-                    {currentStep > i + 1 ? '✓' : i + 1}
+                    {Array.from({ length: totalSteps }, (_, i) => (
+                      <div
+                        key={i + 1}
+                        className={`step-dot-header ${
+                          currentStep >= i + 1 ? 'completed' : ''
+                        } ${currentStep === i + 1 ? 'active' : ''}`}
+                        aria-label={`الخطوة ${i + 1}: ${stepInfo[i + 1]?.title}`}
+                        onClick={() => goToStep(i + 1)}
+                        role="button"
+                        tabIndex={0}
+                      >
+                        {currentStep > i + 1 ? '✓' : i + 1}
+                      </div>
+                    ))}
                   </div>
-                ))}
-                  </div>
-              </div>
+                </div>
 
-              <div className="progress-indicator">
-                <div className={`progress-bar ${formSubmitted ? 'complete' : isLoading ? 'processing' : ''}`}
-                  style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+                <div className="progress-indicator">
+                  <div
+                    className={`progress-bar ${
+                      formSubmitted ? 'complete' : isLoading ? 'processing' : ''
+                    }`}
+                    style={{ width: `${(currentStep / totalSteps) * 100}%` }}
                   />
                 </div>
-             </div>
-             </header>
+              </div>
+            </header>
+
             <UserForm
-              addUser={addUser}         
+              addUser={addUser}
               isLoading={isLoading}
               className="premium-form"
               currentStep={currentStep}
@@ -237,15 +368,22 @@ function AddUserPage() {
             />
 
             <footer className="form-footer">
-              <div className="security-badge"><span className="badge-icon">🔒</span><span className="badge-text">بياناتك محمية</span></div>
+              <div className="security-badge">
+                <span className="badge-icon">🔒</span>
+                <span className="badge-text">بياناتك محمية</span>
+              </div>
               <div className="support-info">
-                <p className="support-text">تحتاج مساعدة؟
-                  <a href="/support" className="support-link">تواصل معنا</a>
+                <p className="support-text">
+                  تحتاج مساعدة؟
+                  <a href="/support" className="support-link">
+                    تواصل معنا
+                  </a>
                 </p>
               </div>
             </footer>
           </div>
         )}
+        
       </section>
     </div>
   );
