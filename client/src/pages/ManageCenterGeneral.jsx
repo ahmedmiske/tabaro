@@ -33,19 +33,13 @@ export default function ManageCenterGeneral() {
       <section className="mc-two-columns">
         
             <article className="mc-panel-inner mc-panel-inner--general">
-          <h2 className="mc-panel-title">طلباتي التي استقبلت عروضًا</h2>
-          <p className="mc-panel-desc">
-            إدارة طلباتك العامة ومتابعة العروض، القبول، التنفيذ، والتقييم.
-          </p>
+          {/* Eliminado el bloque de título y descripción según solicitud */}
           <MyRequestsWithOffersGeneral />
         </article>
 
 
         <article className="mc-panel-inner mc-panel-inner--general">
-          <h2 className="mc-panel-title">عروضي في التبرعات العامة</h2>
-          <p className="mc-panel-desc">
-            التبرعات المالية، المساعدات، المستلزمات، وأي عروض قدّمتها للآخرين.
-          </p>
+          {/* Eliminado el bloque de título y descripción según solicitud */}
           <MyDonationOffersGeneral />
         </article>
 

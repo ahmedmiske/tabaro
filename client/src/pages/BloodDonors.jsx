@@ -1,11 +1,14 @@
 // src/pages/BloodDonors.js
 import React, { useState, useEffect, useMemo } from 'react';
 import { Container, Row, Col, Card, Badge, Button, Form, InputGroup, Alert, Spinner } from 'react-bootstrap';
+import { FaComments } from 'react-icons/fa';
 import { FiSearch, FiMapPin, FiPhone, FiUser, FiDroplet, FiCalendar, FiFilter } from 'react-icons/fi';
 import { useAuth } from '../AuthContext.jsx';
 import { Navigate, Link, useLocation } from 'react-router-dom';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import './BloodDonors.css';
+import QuranVerse from "../components/QuranVerse.jsx";
+
 
 const BloodDonors = () => {
   const { user } = useAuth();
@@ -124,7 +127,7 @@ const BloodDonors = () => {
   }
 
   return (
-    <Container className="donors-page py-5" dir="rtl">
+    <Container className="donors-page" dir="rtl">
       {/* العنوان */}
       <div className="page-header text-center mb-5">
         <h1 className="page-title">
@@ -132,6 +135,8 @@ const BloodDonors = () => {
           المتبرعون بالدم
         </h1>
         <p className="page-subtitle">شبكة المتبرعين المسجلين في المنصة الوطنية للتبرع</p>
+         <QuranVerse verse="﴿وَمَا تُقَدِّمُوا لِأَنفُسِكُم مِّنْ خَيْرٍ تَجِدُوهُ عِندَ اللَّهِ هُوَ خَيْرًا وَأَعْظَمَ أَجْرًا﴾" />
+        
         <div className="title-divider"></div>
       </div>
 
@@ -181,10 +186,24 @@ const BloodDonors = () => {
 
       {/* إحصائيات */}
       <Row className="stats-row mb-4">
-        <Col md={3} sm={6}><div className="stat-card"><div className="stat-number">{donors.length}</div><div className="stat-label">إجمالي المتبرعين</div></div></Col>
-        <Col md={3} sm={6}><div className="stat-card"><div className="stat-number">{filteredDonors.length}</div><div className="stat-label">النتائج المعروضة</div></div></Col>
-        <Col md={3} sm={6}><div className="stat-card"><div className="stat-number">{donors.filter(d => d.isAvailable).length}</div><div className="stat-label">متاحون للتبرع</div></div></Col>
-        <Col md={3} sm={6}><div className="stat-card"><div className="stat-number">{new Set(donors.map(d => d.location)).size}</div><div className="stat-label">مدينة</div></div></Col>
+        <div className="stats-row mb-4">
+          <div className="stat-card">
+            <div className="stat-number">{donors.length}</div>
+            <div className="stat-label">إجمالي المتبرعين</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-number">{filteredDonors.length}</div>
+            <div className="stat-label">النتائج المعروضة</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-number">{donors.filter(d => d.isAvailable).length}</div>
+            <div className="stat-label">متاحون للتبرع</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-number">{new Set(donors.map(d => d.location)).size}</div>
+            <div className="stat-label">مدينة</div>
+          </div>
+        </div>
       </Row>
 
       {/* قائمة المتبرعين */}
@@ -255,6 +274,9 @@ const BloodDonors = () => {
                     <Link to={`/users/${donor._id}`} className="btn btn-outline-primary btn-sm me-2">
                       عرض الملف الشخصي
                     </Link>
+                    <Link to={`/chat/${donor._id}`} className="chat-icon-link me-2" title="دردشة مع المتبرع">
+                      <FaComments size={26} color="#0dcaf0" />
+                    </Link>
                     {donor.phone && (
                       <Button variant="success" size="sm" href={`tel:${donor.phone}`}>
                         <FiPhone className="me-1" /> اتصال
@@ -268,15 +290,7 @@ const BloodDonors = () => {
         </Row>
       )}
 
-      {/* دعوة للتبرع */}
-      <Card className="call-to-action-card mt-5">
-        <Card.Body className="text-center">
-          <FiDroplet size={50} className="text-primary mb-3" />
-          <h4>هل تريد أن تصبح متبرعاً؟</h4>
-          <p className="text-muted mb-4">انضم إلى شبكة المتبرعين وساهم في إنقاذ الأرواح</p>
-          <Link to="/blood-donation" className="btn btn-primary btn-lg">سجل كمتبرع</Link>
-        </Card.Body>
-      </Card>
+     
     </Container>
   );
 };
