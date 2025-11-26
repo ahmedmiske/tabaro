@@ -8,11 +8,13 @@ import {
   FiSearch, FiMapPin, FiPhone, FiUser, FiHeart,
   FiCalendar, FiFilter, FiDollarSign
 } from 'react-icons/fi';
+import { FaComments } from 'react-icons/fa';
 import { useAuth } from '../AuthContext.jsx';
 import { Navigate, Link } from 'react-router-dom';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import './GeneralDonors.css';
 import { GENERAL_CATEGORY_META, codeToLabel, labelToCode } from '../constants/donationCategories';
+import QuranVerse from "../components/QuranVerse.jsx";
 
 // يلتقط مصفوفة البيانات من عدة أشكال شائعة للاستجابة
 const pickArray = (body) => {
@@ -205,7 +207,7 @@ const GeneralDonors = () => {
   }
 
   return (
-    <Container className="donors-page py-5" dir="rtl">
+    <Container className="donors-page" dir="rtl">
       {/* العنوان */}
       <div className="page-header text-center mb-5">
         <h1 className="page-title">
@@ -213,6 +215,8 @@ const GeneralDonors = () => {
           المتبرعون العامون
         </h1>
         <p className="page-subtitle">شبكة المتبرعين في المجالات العامة والخيرية</p>
+                <QuranVerse verse="﴿وَيُؤْثِرُونَ عَلَى أَنفُسِهِمْ وَلَوْ كَانَ بِهِمْ خَصَاصَةٌ﴾" />
+       
         <div className="title-divider"></div>
       </div>
 
@@ -271,34 +275,24 @@ const GeneralDonors = () => {
 
       {/* إحصائيات */}
       <Row className="stats-row mb-4">
-        <Col md={3} sm={6}>
+        <div className="stats-row mb-4">
           <div className="stat-card">
             <div className="stat-number">{donors.length}</div>
             <div className="stat-label">إجمالي المتبرعين</div>
           </div>
-        </Col>
-        <Col md={3} sm={6}>
           <div className="stat-card">
             <div className="stat-number">{filteredDonors.length}</div>
             <div className="stat-label">النتائج المعروضة</div>
           </div>
-        </Col>
-        <Col md={3} sm={6}>
           <div className="stat-card">
-            <div className="stat-number">
-              {donors.filter(d => d.isActive).length}
-            </div>
+            <div className="stat-number">{donors.filter(d => d.isActive).length}</div>
             <div className="stat-label">نشطون</div>
           </div>
-        </Col>
-        <Col md={3} sm={6}>
           <div className="stat-card">
-            <div className="stat-number">
-              {new Set(donors.map(d => d.location)).size}
-            </div>
+            <div className="stat-number">{new Set(donors.map(d => d.location)).size}</div>
             <div className="stat-label">مدينة</div>
           </div>
-        </Col>
+        </div>
       </Row>
 
       {/* قائمة المتبرعين */}
@@ -389,6 +383,9 @@ const GeneralDonors = () => {
                     <Link to={`/users/${donor._id}`} className="btn btn-outline-primary btn-sm me-2">
                       عرض الملف الشخصي
                     </Link>
+                    <Link to={`/chat/${donor._id}`} className="chat-icon-link me-2" title="دردشة مع المتبرع">
+                      <FaComments size={26} color="#0dcaf0" />
+                    </Link>
                     {donor.phone && (
                       <Button variant="success" size="sm" href={`tel:${donor.phone}`}>
                         <FiPhone className="me-1" /> اتصال
@@ -401,18 +398,7 @@ const GeneralDonors = () => {
           ))}
         </Row>
       )}
-
-      {/* دعوة للتطوع */}
-      <Card className="call-to-action-card mt-5">
-        <Card.Body className="text-center">
-          <FiHeart size={50} className="text-primary mb-3" />
-          <h4>هل تريد أن تصبح متبرعاً؟</h4>
-          <p className="text-muted mb-4">انضم إلى شبكة المتبرعين العامين وساهم في مساعدة المحتاجين</p>
-          <Link to="/donation-requests" className="btn btn-primary btn-lg">
-            سجل كمتبرع عام
-          </Link>
-        </Card.Body>
-      </Card>
+ 
     </Container>
   );
 };
