@@ -147,7 +147,7 @@ const GeneralDonors = () => {
         donor.fullName?.toLowerCase().includes(q) ||
         donor.location?.toLowerCase().includes(q) ||
         (Array.isArray(donor.specialties) &&
-         donor.specialties.some(spec => spec.toLowerCase().includes(q)))
+          donor.specialties.some(spec => spec.toLowerCase().includes(q)))
       );
     }
 
@@ -212,11 +212,10 @@ const GeneralDonors = () => {
       <div className="page-header text-center mb-5">
         <h1 className="page-title">
           <FiHeart className="me-2" />
-          المتبرعون العامون
+          المانحون في مختلف المجالات
         </h1>
         <p className="page-subtitle">شبكة المتبرعين في المجالات العامة والخيرية</p>
-                <QuranVerse verse="﴿وَيُؤْثِرُونَ عَلَى أَنفُسِهِمْ وَلَوْ كَانَ بِهِمْ خَصَاصَةٌ﴾" />
-       
+        <QuranVerse verse="﴿وَيُؤْثِرُونَ عَلَى أَنفُسِهِمْ وَلَوْ كَانَ بِهِمْ خَصَاصَةٌ﴾" />
         <div className="title-divider"></div>
       </div>
 
@@ -384,7 +383,8 @@ const GeneralDonors = () => {
                       عرض الملف الشخصي
                     </Link>
                     <Link to={`/chat/${donor._id}`} className="chat-icon-link me-2" title="دردشة مع المتبرع">
-                      <FaComments size={26} color="#0dcaf0" />
+                      <FaComments size={26} color={donor.isActive ? "#00C853" : "#BDBDBD"} />
+                      <span className="chat-tooltip">دردشة</span>
                     </Link>
                     {donor.phone && (
                       <Button variant="success" size="sm" href={`tel:${donor.phone}`}>
@@ -398,7 +398,7 @@ const GeneralDonors = () => {
           ))}
         </Row>
       )}
- 
+
     </Container>
   );
 };
