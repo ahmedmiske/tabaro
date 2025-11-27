@@ -75,7 +75,9 @@ const MyRequestsWithOffersBlood = () => {
       <tr key={req._id} className={`clickable-row ${muted ? 'row-muted' : ''}`} onClick={() => openDetails(req._id)} style={{ cursor: 'pointer' }}>
         <td className="text-start">{req.description || '—'}</td>
         <td>
-          {req.bloodType || '—'}{' '}
+          {req.bloodType ? (
+            <span className="bloodtype-highlight-table">{req.bloodType}</span>
+          ) : '—'}{' '}
           <Badge bg={req.isUrgent ? 'danger' : 'secondary'}>{req.isUrgent ? 'مستعجل' : 'عادي'}</Badge>
         </td>
         <td>{req.location || '—'}</td>
@@ -85,7 +87,13 @@ const MyRequestsWithOffersBlood = () => {
             {chip.bottom && <span className="b">{chip.bottom}</span>}
           </span>
         </td>
-        <td>{offersCount > 0 ? <Badge bg="info">{offersCount} عرض</Badge> : <span className="text-muted">لا توجد عروض</span>}</td>
+        <td>
+          {offersCount > 0 ? (
+            <span className="offers-highlight">{offersCount} <i className="fas fa-gift"></i> عرض</span>
+          ) : (
+            <span className="no-offers-highlight"><i className="fas fa-ban"></i> لا توجد عروض</span>
+          )}
+        </td>
         <td onClick={(e) => e.stopPropagation()}>
           <Button size="sm" variant="primary" onClick={() => openDetails(req._id)}>إدارة الطلب / عرض العروض</Button>
         </td>
@@ -106,9 +114,15 @@ const MyRequestsWithOffersBlood = () => {
           </span>
         </div>
         <div className="rc-meta">
-          <span className="badge bg-success">دم: {req.bloodType || '—'}</span>
+          {req.bloodType ? (
+            <span className="bloodtype-highlight-card">{req.bloodType}</span>
+          ) : <span className="badge bg-success">دم: —</span>}
           <span className={`badge ${req.isUrgent ? 'bg-danger' : 'bg-secondary'}`}>{req.isUrgent ? 'مستعجل' : 'عادي'}</span>
-          <span className="badge bg-info text-dark">{offersCount} عرض</span>
+          {offersCount > 0 ? (
+            <span className="offers-highlight">{offersCount} <i className="fas fa-gift"></i> عرض</span>
+          ) : (
+            <span className="no-offers-highlight"><i className="fas fa-ban"></i> لا توجد عروض</span>
+          )}
           <span className="badge bg-light text-dark border">{req.location || '—'}</span>
         </div>
         <div className="rc-actions">
