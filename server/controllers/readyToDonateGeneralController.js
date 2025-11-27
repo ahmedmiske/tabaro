@@ -1,58 +1,106 @@
 // server/controllers/readyToDonateGeneralController.js
 const ReadyToDonateGeneral = require('../models/ReadyToDonateGeneral');
-const isEight = (v='') => /^\d{8}$/.test(v);
 
-const ALLOWED_GENERAL_CATEGORIES = [
-  'sadaqa','zakat','kafara','orphans','awqaf','livestock',
-  'money','goods','time','mosque_services','mahadir_services','other'
-];
+const isPhone = (v = '') => /^[0-9]{6,15}$/.test(String(v).trim());
 
 exports.create = async (req, res) => {
   try {
-    const { city, note = '', extra = {}, contactMethods = [] } = req.body || {};
-    if (!city) return res.status(400).json({ error: 'city is required' });
+    const body = req.body || {};
+    const {
+      locationMode = 'none',
+      location = '',
+      city = '',
+      country = '',
+      availableUntil,
+      note = '',
+      extra = {},
+      contactMethods = [],
+    } = body;
 
+    // فحص نوع التبرع
+    if (!extra?.category) {
+      return res
+        .status(400)
+        .json({ error: 'category is required in extra.category' });
+    }
+
+    // تاريخ انتهاء العرض
+    if (!availableUntil) {
+      return res.status(400).json({ error: 'availableUntil is required' });
+    }
+    const untilDate = new Date(availableUntil);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (Number.isNaN(untilDate.getTime()) || untilDate < today) {
+      return res
+        .status(400)
+        .json({ error: 'availableUntil must be today or a future date' });
+    }
+
+    // وسائل التواصل: يجب أن يكون هناك واحد على الأقل صالح
     if (!Array.isArray(contactMethods) || contactMethods.length === 0) {
-      return res.status(400).json({ error: 'At least one contact method is required' });
-    }
-    for (const c of contactMethods) {
-      if (!c?.method || !c?.number) return res.status(400).json({ error: 'Invalid contact method' });
-      if (!isEight(c.number)) return res.status(400).json({ error: 'Contact numbers must be 8 digits' });
+      return res
+        .status(400)
+        .json({ error: 'At least one contact method is required' });
     }
 
-    const category = extra?.category || 'money';
-    if (!ALLOWED_GENERAL_CATEGORIES.includes(category)) {
-      return res.status(400).json({ error: 'Invalid category' });
+    for (const c of contactMethods) {
+      if (!c?.method || !c?.number) {
+        return res.status(400).json({ error: 'Invalid contact method' });
+      }
+      if (!isPhone(c.number)) {
+        return res
+          .status(400)
+          .json({ error: 'Contact numbers must be 6–15 digits' });
+      }
     }
 
     const doc = await ReadyToDonateGeneral.create({
-      city, note, extra: { category }, contactMethods, createdBy: req.user?._id || null
+      locationMode,
+      location,
+      city,
+      country,
+      availableUntil: untilDate,
+      note,
+      extra,
+      contactMethods,
+      createdBy: req.user?._id || null,
     });
 
-    res.status(201).json({ ok: true, data: doc });
+    return res.status(201).json({ ok: true, data: doc });
   } catch (err) {
-    console.error('General.create', err);
-    res.status(500).json({ error: 'Internal server error' });
+    // eslint-disable-next-line no-console
+    console.error('ReadyToDonateGeneral.create', err);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 };
 
 exports.list = async (req, res) => {
   try {
-    const { q = '', city, category } = req.query || {};
+    const { category, q = '' } = req.query || {};
     const filter = {};
-    if (city) filter.city = city;
-    if (category) filter['extra.category'] = category;
-    if (q) filter.$text = { $search: q };
 
-    const data = await ReadyToDonateGeneral
-      .find(filter)
+    if (category) {
+      filter['extra.category'] = category;
+    }
+
+    // إظهار العروض التي لم تنتهِ بعد فقط
+    const now = new Date();
+    filter.availableUntil = { $gte: now };
+
+    if (q) {
+      filter.$text = { $search: q };
+    }
+
+    const data = await ReadyToDonateGeneral.find(filter)
       .sort({ createdAt: -1 })
       .limit(200)
       .populate('createdBy', 'firstName lastName profileImage');
 
-    res.json({ ok: true, data });
+    return res.json({ ok: true, data });
   } catch (err) {
-    console.error('General.list', err);
-    res.status(500).json({ error: 'Internal server error' });
+    // eslint-disable-next-line no-console
+    console.error('ReadyToDonateGeneral.list', err);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 };

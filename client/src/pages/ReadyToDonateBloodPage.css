@@ -1,22 +1,22 @@
 /* الحاوية الأساسية: صورة يسار + فورم يمين */
 .ready-blood-row {
   display: flex;
-  flex-direction: row;         /* الصورة يسار، الفورم يمين */
+  flex-direction: row;
   align-items: stretch;
-  max-width: 1200px;
-  margin: 2rem auto;
+  max-width: 1100px;
+  margin: 1.5rem auto;
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.12);
   background: #f7fafc;
 }
 
 /* البانر/الصورة */
 .general-hero {
-  width: 50%;
+  width: 40%;
   background-size: cover;
   background-position: center;
-  min-height: 420px;
+  min-height: 360px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -37,82 +37,71 @@
 .hero-content {
   color: white;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-  padding: 2rem;
+  padding: 1.5rem;
   border-radius: 16px;
-  max-width: 380px;
+  max-width: 320px;
   position: relative;
   z-index: 2;
 }
 .hero-content .fw-blood {
-  font-size: 2rem;
+  font-size: 1.8rem;
   font-weight: 800;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
   color: #e05a2e;
 }
 .hero-content .pBlood {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: #f0f0f0;
   font-weight: 500;
-  max-width: 600px;
-  margin: 0 auto;
 }
 
 /* جانب الفورم */
 .form-side {
-  width: 50%;
+  width: 60%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
+  padding: 1.5rem;
 }
 
 /* كرت الفورم */
 .form-container {
   background: #ffffff;
-  padding: 2rem;
+  padding: 1.5rem 1.75rem;
   border-radius: 16px;
   width: 100%;
-  max-width: 430px;
+  max-width: 520px;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
 }
 
 /* عناوين الفورم */
 .form-title {
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   font-weight: 800;
   color: #e05a2e;
   text-align: center;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.3rem;
 }
 
 .form-header {
   text-align: center;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: #555;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
-/* شبكة الحقول */
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.2rem;
-}
-
+/* الحقول في عمود واحد */
 .form-field {
   display: flex;
   flex-direction: column;
-}
-
-.form-field.full-width {
-  grid-column: 1 / -1;
+  margin-bottom: 0.8rem;
 }
 
 /* الحقول */
 .form-label {
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   font-weight: 600;
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.25rem;
   color: #333;
   display: flex;
   align-items: center;
@@ -123,8 +112,8 @@
 .form-textarea {
   border: 2px solid #e2e8f0;
   border-radius: 10px;
-  padding: 0.75rem 0.9rem;
-  font-size: 0.95rem;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.9rem;
   transition: all 0.25s ease;
 }
 
@@ -132,36 +121,60 @@
 .form-textarea:focus {
   outline: none;
   border-color: #e05a2e;
-  box-shadow: 0 0 0 3px rgba(224, 90, 46, 0.2);
+  box-shadow: 0 0 0 3px rgba(224, 90, 46, 0.18);
 }
 
 .form-textarea {
   resize: vertical;
-  min-height: 90px;
+  min-height: 70px;
+}
+
+/* ملاحظة حقل المكان */
+.location-note {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-bottom: 0.2rem;
+}
+
+/* عرض الولاية والمقاطعة تحت حقل البلدية بشكل خفيف وناعم */
+.location-preview-box {
+  margin-top: 5px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: #4b5563;
+}
+
+.location-chip {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
 }
 
 /* رسائل الخطأ */
 .error-message {
-  margin-top: 0.25rem;
+  margin-top: 0.2rem;
   color: #e53e3e;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
 }
 
 /* زر الإرسال */
 .form-buttons {
   display: flex;
   justify-content: center;
-  margin-top: 1.2rem;
+  margin-top: 0.9rem;
 }
 
 .submit-btn {
   background: linear-gradient(135deg, #e05a2e, #d13d14);
   color: white;
-  padding: 0.85rem 2.2rem;
+  padding: 0.7rem 2rem;
   border-radius: 12px;
   border: none;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 0.95rem;
   cursor: pointer;
   transition: all 0.25s ease;
   display: inline-flex;
@@ -171,7 +184,7 @@
 
 .submit-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(224, 90, 46, 0.4);
+  box-shadow: 0 8px 20px rgba(224, 90, 46, 0.4);
 }
 
 /* بعد النجاح */
@@ -182,12 +195,12 @@
 
 .next-btn {
   display: block;
-  margin-top: 0.75rem;
-  padding: 0.75rem 1rem;
+  margin-top: 0.6rem;
+  padding: 0.7rem 1rem;
   border-radius: 10px;
   text-decoration: none;
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   transition: 0.25s ease;
   background: #e05a2e;
   color: white;
@@ -201,12 +214,13 @@
   filter: brightness(1.05);
   transform: translateY(-1px);
 }
+
 /* =======================
    تجاوب للموبايل
 ======================= */
 @media (max-width: 900px) {
   .ready-blood-row {
-    flex-direction: column;      /* 👈 الصورة أولاً، بعدها الفورم */
+    flex-direction: column;
     max-width: 100%;
     border-radius: 0;
     box-shadow: none;
@@ -219,27 +233,39 @@
 
   .form-side {
     width: 100%;
-    padding: 1.5rem 1rem 2.5rem;
+    padding: 1.25rem 1rem 2rem;
   }
 
   .form-container {
-    max-width: 500px;
+    max-width: 550px;
     margin: 0 auto;
   }
-
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
 }
-
 
 @media (max-width: 480px) {
   .form-container {
-    padding: 1.5rem 1.25rem;
+    padding: 1.25rem 1.25rem;
   }
 
   .hero-content {
-    padding: 1.25rem;
-    max-width: 320px;
+    padding: 1.1rem;
+    max-width: 300px;
   }
 }
+
+.icon-blood {
+  color: #e11d48; /* أحمر خفيف لفصيلة الدم */
+}
+
+.icon-phone {
+  color: #4b5563; /* رصاصي داكن للهاتف */
+}
+
+.icon-whatsapp {
+  color: #25d366; /* لون واتساب تقريبي */
+}
+
+.icon-date {
+  color: #0ea5e9; /* أزرق فاتح للتاريخ */
+}
+

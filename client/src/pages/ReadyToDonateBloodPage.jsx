@@ -1,5 +1,5 @@
 // src/pages/ReadyToDonateBloodPage.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Form, Alert } from "react-bootstrap";
 import {
   FiDroplet,
@@ -8,33 +8,26 @@ import {
   FiMessageCircle,
   FiFileText,
   FiCheck,
+  FiCalendar,
 } from "react-icons/fi";
-import { Link } from "react-router-dom";           // 👈 جديد
+import { Link } from "react-router-dom";
 import fetchWithInterceptors from "../services/fetchWithInterceptors";
 import "./ReadyToDonateBloodPage.css";
-
-const placesList = [
-  "ألاك","أمباني","امبود","آمرج","انتيكان","أوجفت","أطار","باسكنو","بابابي","باركيول",
-  "بير أم أكرين","بوكي","بومديد","بوتلميت","تفرغ زينة","تجكجة","تمبدغة","توجنين","تيارت",
-  "تيشيت","جلوار (بوغور)","جكني","دار النعيم","روصو","الرياض","الزويرات","السبخة","الشامي",
-  "شنقيط","الطويل","الطينطان","عرفات","عدل بكرو","فديرك","كرمسين","كرو","كنكوصة","كوبني",
-  "كيهيدي","كيفة","لكصر","لكصيبة","لعيون","مال","مقامة","مقطع لحجار","المذرذرة","المجرية",
-  "الميناء","مونكل","نواذيبو","نواكشوط","النعمة","وادان","واد الناقة","ولد ينج","ولاتة",
-  "ومبو","سيليبابي","تامشكط","أكجوجت",
-];
 
 const bloodTypes = ["A+","A-","B+","B-","AB+","AB-","O+","O-","غير معروف"];
 const validatePhone = (v) => /^(2|3|4)\d{7}$/.test((v || "").trim());
 
 export default function ReadyToDonateBloodPage() {
   const bgUrl = "/images/tabar5.jpg";
+  const todayStr = new Date().toISOString().slice(0, 10); // yyyy-mm-dd
 
   const [form, setForm] = useState({
-    location: "",
+    location: "",        // بلدية / مكان التوفر داخل موريتانيا (إجباري)
     bloodType: "",
-    note: "",
     phone: "",
     whatsapp: "",
+    availableUntil: "",  // آخر أجل لمهلة التبرع (إجباري)
+    note: "",            // وصف مختصر للتبرع
   });
 
   const [touched, setTouched] = useState({
@@ -42,17 +35,85 @@ export default function ReadyToDonateBloodPage() {
     bloodType: false,
     phone: false,
     whatsapp: false,
+    availableUntil: false,
+    note: false,
   });
 
   const [errors, setErrors] = useState({});
   const [msg, setMsg] = useState("");
   const [success, setSuccess] = useState(false);
 
+  // ========= تحميل الولايات/المقاطعات/البلديات من الباكند =========
+  const [wilayaOptions, setWilayaOptions] = useState([]);
+  const [moughataaOptions, setMoughataaOptions] = useState([]);
+  const [communeOptions, setCommuneOptions] = useState([]);
+
+  useEffect(() => {
+    const extractArray = (response) => {
+      if (!response) return [];
+      if (Array.isArray(response)) return response;
+      if (Array.isArray(response.body)) return response.body;
+      if (Array.isArray(response.data)) return response.data;
+      if (response.body && Array.isArray(response.body.items)) return response.body.items;
+      return [];
+    };
+
+    const fetchOptions = async (endpoint, setter) => {
+      try {
+        const response = await fetchWithInterceptors(endpoint);
+        const list = extractArray(response);
+        setter(list);
+      } catch (err) {
+        console.error("خطأ في تحميل", endpoint, err);
+        setter([]);
+      }
+    };
+
+    fetchOptions("/api/wilayas", setWilayaOptions);
+    fetchOptions("/api/moughataas", setMoughataaOptions);
+    fetchOptions("/api/communes", setCommuneOptions);
+  }, []);
+
+  const normalize = (value) =>
+    typeof value === "string" ? value.trim() : "";
+
+  const findCommuneByName = (name) =>
+    communeOptions.find((c) => normalize(c?.name_ar) === normalize(name));
+
+  const selectedCommune = findCommuneByName(form.location);
+
+  const selectedMoughataa = selectedCommune
+    ? moughataaOptions.find(
+        (m) => m.code === selectedCommune.code.slice(0, 4)
+      )
+    : null;
+
+  const selectedWilaya = selectedCommune
+    ? wilayaOptions.find(
+        (w) => w.code === selectedCommune.code.slice(0, 2)
+      )
+    : null;
+
+  // ===================== التحقق من الأخطاء =====================
   const computeErrors = (values) => {
     const e = {};
 
-    if (!values.location.trim()) e.location = "هذا الحقل مطلوب";
+    // ✅ المكان إلزامي ومربوط ببلدية حقيقية
+    if (!values.location || !values.location.trim()) {
+      e.location = "الرجاء إدخال اسم البلدية.";
+    } else if (!findCommuneByName(values.location)) {
+      e.location = "الرجاء اختيار بلدية من القائمة المقترحة.";
+    }
+
+    // فصيلة الدم إلزامية
     if (!values.bloodType) e.bloodType = "الرجاء اختيار فصيلة الدم";
+
+    // آخر أجل للتبرع إلزامي ويجب أن يكون من اليوم فصاعدًا
+    if (!values.availableUntil) {
+      e.availableUntil = "الرجاء اختيار آخر أجل لتوفر التبرع.";
+    } else if (values.availableUntil < todayStr) {
+      e.availableUntil = "يجب اختيار تاريخ اليوم أو تاريخًا لاحقًا.";
+    }
 
     const phoneValid = validatePhone(values.phone);
     const whatsappValid = validatePhone(values.whatsapp);
@@ -62,6 +123,7 @@ export default function ReadyToDonateBloodPage() {
     if (values.whatsapp && !whatsappValid)
       e.whatsapp = "رقم غير صالح (8 أرقام ويبدأ بـ 2 أو 3 أو 4)";
 
+    // يجب وجود وسيلة تواصل واحدة صحيحة على الأقل
     if (!phoneValid && !whatsappValid)
       e.contact = "يجب إدخال رقم هاتف أو واتساب واحد على الأقل بشكل صحيح.";
 
@@ -70,9 +132,10 @@ export default function ReadyToDonateBloodPage() {
 
   const onChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    const next = { ...form, [name]: value };
+    setForm(next);
     setTouched((prev) => ({ ...prev, [name]: true }));
-    setErrors(computeErrors({ ...form, [name]: value }));
+    setErrors(computeErrors(next));
   };
 
   const validateForm = () => {
@@ -82,6 +145,8 @@ export default function ReadyToDonateBloodPage() {
       bloodType: true,
       phone: true,
       whatsapp: true,
+      availableUntil: true,
+      note: true,
     });
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -93,8 +158,9 @@ export default function ReadyToDonateBloodPage() {
 
     const payload = {
       type: "blood",
-      location: form.location,
+      location: form.location,               // بلدية حقيقية
       bloodType: form.bloodType,
+      availableUntil: form.availableUntil,   // يُرسل للباكند
       note: form.note,
       contactMethods: [
         { method: "phone", number: form.phone },
@@ -112,9 +178,23 @@ export default function ReadyToDonateBloodPage() {
       setMsg("✅ تم تسجيل استعدادك للتبرع بالدم بنجاح.");
       setSuccess(true);
 
-      setForm({ location: "", bloodType: "", note: "", phone: "", whatsapp: "" });
+      setForm({
+        location: "",
+        bloodType: "",
+        phone: "",
+        whatsapp: "",
+        availableUntil: "",
+        note: "",
+      });
       setErrors({});
-      setTouched({ location: false, bloodType: false, phone: false, whatsapp: false });
+      setTouched({
+        location: false,
+        bloodType: false,
+        phone: false,
+        whatsapp: false,
+        availableUntil: false,
+        note: false,
+      });
     } catch (err) {
       setMsg("❌ حدث خطأ أثناء الإرسال. حاول لاحقًا.");
     }
@@ -149,124 +229,161 @@ export default function ReadyToDonateBloodPage() {
 
           {!success && (
             <Form onSubmit={submit} className="donation-form">
-              <div className="form-grid">
-                {/* الموقع */}
-                <div className="form-field">
-                  <label className="form-label">
-                    <FiMapPin className="me-2" /> الموقع
-                  </label>
-                  <input
-                    list="locations"
-                    name="location"
-                    value={form.location}
-                    onChange={onChange}
-                    className="form-input"
-                    style={
-                      touched.location && errors.location
-                        ? { borderColor: "#e53e3e" }
-                        : {}
-                    }
-                  />
-                  <datalist id="locations">
-                    {placesList.map((p) => (
-                      <option key={p} value={p} />
-                    ))}
-                  </datalist>
-                  {touched.location && errors.location && (
-                    <span className="error-message">{errors.location}</span>
-                  )}
-                </div>
+              {/* 1. المكان (البلدية) */}
+              <div className="form-field">
+                <label className="form-label">
+                  <FiMapPin className="me-2" /> البلدية داخل موريتانيا (إجباري)
+                </label>
+                <input
+                  list="communesList"
+                  name="location"
+                  value={form.location}
+                  onChange={onChange}
+                  className="form-input"
+                  placeholder="اكتب أو اختر اسم البلدية (مثال: عرفات، تفرغ زينة...)"
+                  style={
+                    touched.location && errors.location
+                      ? { borderColor: "#e53e3e" }
+                      : {}
+                  }
+                />
+                <datalist id="communesList">
+                  {communeOptions.map((c) => (
+                    <option key={c.code} value={c.name_ar} />
+                  ))}
+                </datalist>
 
-                {/* فصيلة الدم */}
-                <div className="form-field">
-                  <label className="form-label">
-                    <FiDroplet className="me-2" /> فصيلة الدم
-                  </label>
-                  <select
-                    name="bloodType"
-                    value={form.bloodType}
-                    onChange={onChange}
-                    className="form-input"
-                    style={
-                      touched.bloodType && errors.bloodType
-                        ? { borderColor: "#e53e3e" }
-                        : {}
-                    }
-                  >
-                    <option value="">-- اختر الفصيلة --</option>
-                    {bloodTypes.map((b) => (
-                      <option key={b} value={b}>
-                        {b}
-                      </option>
-                    ))}
-                  </select>
-                  {touched.bloodType && errors.bloodType && (
-                    <span className="error-message">{errors.bloodType}</span>
-                  )}
-                </div>
-
-                {/* الهاتف */}
-                <div className="form-field">
-                  <label className="form-label">
-                    <FiPhone className="me-2" /> الهاتف
-                  </label>
-                  <input
-                    name="phone"
-                    value={form.phone}
-                    onChange={onChange}
-                    className="form-input"
-                    style={
-                      touched.phone && errors.phone
-                        ? { borderColor: "#e53e3e" }
-                        : {}
-                    }
-                  />
-                  {touched.phone && errors.phone && (
-                    <span className="error-message">{errors.phone}</span>
-                  )}
-                </div>
-
-                {/* واتساب */}
-                <div className="form-field">
-                  <label className="form-label">
-                    <FiMessageCircle className="me-2" /> واتساب
-                  </label>
-                  <input
-                    name="whatsapp"
-                    value={form.whatsapp}
-                    onChange={onChange}
-                    className="form-input"
-                    style=
-                    {
-                      touched.whatsapp && errors.whatsapp
-                        ? { borderColor: "#e53e3e" }
-                        : {}
-                    }
-                  />
-                  {touched.whatsapp && errors.whatsapp && (
-                    <span className="error-message">{errors.whatsapp}</span>
-                  )}
-                </div>
-
-                {errors.contact && (
-                  <div className="form-field full-width">
-                    <span className="error-message">{errors.contact}</span>
-                  </div>
+                {touched.location && errors.location && (
+                  <span className="error-message">{errors.location}</span>
                 )}
 
-                {/* الملاحظة */}
-                <div className="form-field full-width">
-                  <label className="form-label">
-                    <FiFileText className="me-2" /> ملاحظة (اختياري)
-                  </label>
-                  <textarea
-                    name="note"
-                    value={form.note}
-                    onChange={onChange}
-                    className="form-textarea"
-                    rows={4}
-                  />
+                {normalize(form.location) && selectedCommune && (
+                  <div className="location-preview-box">
+                    <span className="location-chip">
+                      الولاية:&nbsp;
+                      <strong>{selectedWilaya?.name_ar || "—"}</strong>
+                    </span>
+                    <span className="location-chip">
+                      المقاطعة:&nbsp;
+                      <strong>{selectedMoughataa?.name_ar || "—"}</strong>
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* 2. فصيلة الدم */}
+              <div className="form-field">
+                <label className="form-label">
+                  <FiDroplet className="me-2 icon-blood" /> فصيلة الدم
+                </label>
+                <select
+                  name="bloodType"
+                  value={form.bloodType}
+                  onChange={onChange}
+                  className="form-input"
+                  style={
+                    touched.bloodType && errors.bloodType
+                      ? { borderColor: "#e53e3e" }
+                      : {}
+                  }
+                >
+                  <option value="">-- اختر الفصيلة --</option>
+                  {bloodTypes.map((b) => (
+                    <option key={b} value={b}>
+                      {b}
+                    </option>
+                  ))}
+                </select>
+                {touched.bloodType && errors.bloodType && (
+                  <span className="error-message">{errors.bloodType}</span>
+                )}
+              </div>
+
+              {/* 3. الهاتف */}
+              <div className="form-field">
+                <label className="form-label">
+                  <FiPhone className="me-2 icon-phone" /> الهاتف
+                </label>
+                <input
+                  name="phone"
+                  value={form.phone}
+                  onChange={onChange}
+                  className="form-input"
+                  style={
+                    touched.phone && errors.phone
+                      ? { borderColor: "#e53e3e" }
+                      : {}
+                  }
+                />
+                {touched.phone && errors.phone && (
+                  <span className="error-message">{errors.phone}</span>
+                )}
+              </div>
+
+              {/* 4. واتساب */}
+              <div className="form-field">
+                <label className="form-label">
+                  <FiMessageCircle className="me-2 icon-whatsapp" /> واتساب
+                </label>
+                <input
+                  name="whatsapp"
+                  value={form.whatsapp}
+                  onChange={onChange}
+                  className="form-input"
+                  style={
+                    touched.whatsapp && errors.whatsapp
+                      ? { borderColor: "#e53e3e" }
+                      : {}
+                  }
+                />
+                {touched.whatsapp && errors.whatsapp && (
+                  <span className="error-message">{errors.whatsapp}</span>
+                )}
+              </div>
+
+              {/* رسالة خطأ لوسيلة التواصل */}
+              {errors.contact && (
+                <div className="form-field">
+                  <span className="error-message">{errors.contact}</span>
                 </div>
+              )}
+
+              {/* 5. آخر أجل لمهلة التبرع */}
+              <div className="form-field">
+                <label className="form-label">
+                  <FiCalendar className="me-2 icon-date" /> آخر أجل لمهلة التبرع
+                </label>
+                <input
+                  type="date"
+                  name="availableUntil"
+                  value={form.availableUntil}
+                  onChange={onChange}
+                  min={todayStr}
+                  className="form-input"
+                  style={
+                    touched.availableUntil && errors.availableUntil
+                      ? { borderColor: "#e53e3e" }
+                      : {}
+                  }
+                />
+                {touched.availableUntil && errors.availableUntil && (
+                  <span className="error-message">{errors.availableUntil}</span>
+                )}
+              </div>
+
+              {/* 6. وصف مختصر للتبرع */}
+              <div className="form-field">
+                <label className="form-label">
+                  <FiFileText className="me-2" /> وصف مختصر للتبرع (اختياري)
+                </label>
+                <textarea
+                  name="note"
+                  value={form.note}
+                  onChange={onChange}
+                  className="form-textarea"
+                  rows={3}
+                  placeholder="مثال: متوفر في الفترة المسائية، أقبل الاتصال الهاتفي فقط..."
+                />
               </div>
 
               <div className="form-buttons">

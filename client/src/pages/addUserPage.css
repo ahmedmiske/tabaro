@@ -68,7 +68,7 @@
 /* إ
 .signup-form-section::-webkit-scrollbar { display: none; }
 */
-.form-container .form-header {
+.form-container .ad-user-form-header {
   text-align: center;
   margin-bottom: -40px;
   display: flex;

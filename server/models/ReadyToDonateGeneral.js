@@ -1,41 +1,102 @@
 // server/models/ReadyToDonateGeneral.js
 const mongoose = require('mongoose');
 
-const ContactMethodSchema = new mongoose.Schema({
-  method: { type: String, enum: ['phone', 'whatsapp'], required: true },
-  number: { type: String, required: true }
-}, { _id: false });
-
-const ReadyToDonateGeneralSchema = new mongoose.Schema({
-  city: { type: String, required: true },
-  extra: {
-    category: {
+const ContactMethodSchema = new mongoose.Schema(
+  {
+    method: {
       type: String,
-      enum: [
-        'sadaqa',          // صدقة
-        'zakat',           // زكاة
-        'kafara',          // كفارة
-        'orphans',         // الأيتام
-        'awqaf',           // الأوقاف
-        'livestock',       // الأنعام/أضاحي
-        'money',           // مساعدات مالية
-        'goods',           // مواد/أغراض
-        'time',            // تطوع بالوقت/الجهد
-        'mosque_services', // خدمات المسجد  ✅
-        'mahadir_services',// خدمات المحاظر ✅
-        'other'            // أخرى
-      ],
-      default: 'money'
-    }
+      enum: ['phone', 'whatsapp'],
+      required: true,
+    },
+    number: {
+      type: String,
+      required: true,
+    },
   },
-  note: { type: String, default: '' },
-  contactMethods: {
-    type: [ContactMethodSchema],
-    validate: v => Array.isArray(v) && v.length > 0
+  { _id: false },
+);
+
+// نفس الفئات الموجودة في GENERAL_CATEGORY_META
+const GENERAL_CATEGORY_ENUM = [
+  'medical_support',      // الإغاثة والدعم الطبي
+  'water',                // سقيا الماء
+  'orphans',              // كفالة ورعاية الأيتام
+  'food',                 // إطعام الفقراء والمساكين
+  'education',            // دعم التعليم والمعرفة
+  'mahadir_quran',        // دعم المحاظر والقرآن الكريم
+  'mosques',              // عمارة بيوت الله
+  'housing',              // إسكان وإيواء المحتاجين
+  'disability_support',   // تمكين ذوي الإعاقة
+  'relief',               // جبر الخواطر وتفريج الكرب
+  'debt_repayment',       // قضاء الديون
+  'clothes_furniture',    // توزيع الملابس والأثاث
+  'udhiyah',              // الأضحية
+  'general_sadaqah',      // الصدقة العامة
+  'zakat',                // زكاة المال
+  'financial_aid',        // المساعدات المالية
+  'other',                // مجالات خير أخرى
+];
+
+const ReadyToDonateGeneralSchema = new mongoose.Schema(
+  {
+    type: {
+      type: String,
+      default: 'general',
+      immutable: true,
+    },
+
+    // الموقع (اختياري)
+    locationMode: {
+      type: String,
+      enum: ['none', 'mr', 'abroad'],
+      default: 'none',
+    },
+    location: { type: String, default: '' }, // نص عام يجمع المدينة/الدولة
+    city: { type: String, default: '' },
+    country: { type: String, default: '' },
+
+    // نوع التبرع
+    extra: {
+      category: {
+        type: String,
+        enum: GENERAL_CATEGORY_ENUM,
+        required: true,
+      },
+    },
+
+    note: { type: String, default: '' },
+
+    availableUntil: {
+      type: Date,
+      required: true,
+    },
+
+    contactMethods: {
+      type: [ContactMethodSchema],
+      validate: (v) => Array.isArray(v) && v.length > 0,
+    },
+
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
   },
-  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null }
-}, { timestamps: true, collection: 'ready_to_donate_general' });
+  {
+    timestamps: true,
+    collection: 'ready_to_donate_general',
+  },
+);
 
-ReadyToDonateGeneralSchema.index({ city: 'text', note: 'text' });
+ReadyToDonateGeneralSchema.index({
+  location: 'text',
+  city: 'text',
+  country: 'text',
+  note: 'text',
+  'extra.category': 'text',
+});
 
-module.exports = mongoose.model('ReadyToDonateGeneral', ReadyToDonateGeneralSchema);
+module.exports = mongoose.model(
+  'ReadyToDonateGeneral',
+  ReadyToDonateGeneralSchema,
+);

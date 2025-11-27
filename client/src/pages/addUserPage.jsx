@@ -307,7 +307,7 @@ function AddUserPage() {
           </div>
         ) : (
           <div className="form-container">
-            <header className="form-header">
+            <header className="ad-user-form-header">
               <TitleMain title="إنشاء حساب جديد" />
 
               <div
