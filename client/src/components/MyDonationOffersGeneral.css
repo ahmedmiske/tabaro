@@ -6,7 +6,7 @@
 .my-donation-offers .status-filter{ max-width:220px; min-width:180px; }
 .form-select{ font-size:14px; padding:6px 12px; border:1px solid #d1d5db; border-radius:8px; background:#fff; text-align:center; }
 
-.section-card{ background:#fff; border-radius:10px; border:1px solid #e5e7eb; padding:.75rem; margin-bottom:1rem; }
+.section-card{ background:#fff; border-radius:10px; border:2.5px solid #22c55e !important; box-shadow:0 4px 18px 0px #22c55e33, 0 1.5px 8px #22c55e22; padding:.75rem; margin-bottom:1rem; }
 .section-head{ display:flex; align-items:center; justify-content:space-between; }
 
 table{ border:none;background:#fff;border-radius:8px;overflow:hidden; }

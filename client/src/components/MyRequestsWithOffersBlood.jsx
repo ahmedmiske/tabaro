@@ -136,7 +136,7 @@ const MyRequestsWithOffersBlood = () => {
         </div>
       </div>
 
-      <div className="section-card mb-3">
+      <div className="section-card section-card-active mb-3">
         <div className="section-head">
           <h6 className="m-0">الطلبات النشطة <Badge bg="success" className="ms-1">{activeRequests.length}</Badge></h6>
           <Button size="sm" variant="outline-secondary" onClick={() => setOpenActive((v) => !v)}>{openActive ? 'إخفاء' : 'عرض'}</Button>
@@ -166,7 +166,7 @@ const MyRequestsWithOffersBlood = () => {
         </Collapse>
       </div>
 
-      <div className="section-card mb-3">
+      <div className="section-card section-card-active mb-3">
         <div className="section-head">
           <h6 className="m-0">الطلبات المنتهية <Badge bg="secondary" className="ms-1">{expiredRequests.length}</Badge></h6>
           <Button size="sm" variant="outline-secondary" onClick={() => setOpenExpired((v) => !v)}>{openExpired ? 'إخفاء' : 'عرض'}</Button>

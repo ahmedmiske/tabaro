@@ -69,6 +69,11 @@ h4 {
     margin-bottom: 1rem;
 }
 
+.section-card.section-card-active {
+    border: 2.5px solid #22c55e !important;
+    box-shadow: 0 4px 18px 0px #22c55e33, 0 1.5px 8px #22c55e22;
+}
+
 .section-head {
     display: flex;
     align-items: center;
