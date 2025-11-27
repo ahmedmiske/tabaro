@@ -576,7 +576,7 @@ const MyDonationOffersBlood = () => {
             <i className="fas fa-hand-holding-heart" />
           </span>
           <div>
-            <h4 className="m-0 fw-bold">عروضي على طلبات التبرع بالدم</h4>
+            <h3 className="main-green-title">عروضي على طلبات التبرع بالدم</h3>
             <div className="header-subtitle">
               من هنا يمكنك متابعة حالة كل عرض وإدارة التنفيذ والتقييم بسهولة.
             </div>

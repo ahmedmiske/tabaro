@@ -125,7 +125,7 @@ const MyRequestsWithOffersBlood = () => {
       <div className="header-bar mb-3">
         <div className="title-wrap">
           <span className="title-icon"><i className="fas fa-clipboard-list" /></span>
-          <h4 className="m-0 fw-bold">طلباتي (الدم) والعروض عليها</h4>
+          <h3 className="main-green-title">طلبات الدم الخاصة بي والعروض عليها </h3>
         </div>
         <div className="status-filter">
           <Form.Select value={urgencyFilter} onChange={(e) => setUrgencyFilter(e.target.value)}>
