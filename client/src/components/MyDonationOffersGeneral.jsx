@@ -203,7 +203,7 @@ const MyDonationOffersGeneral = () => {
       <div className="header-bar mb-3">
         <div className="dg-title-wrap">
           <span className="title-icon"><i className="fas fa-hand-holding-heart" /></span>
-          <h4 className="m-0 fw-bold">عروضي على طلبات التبرع العامة</h4>
+          <h3 className="main-green-title">عروضي على طلبات التبرع العامة</h3>
         </div>
         <div className="status-filter">
           <Form.Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} aria-label="فلترة بالحالة">

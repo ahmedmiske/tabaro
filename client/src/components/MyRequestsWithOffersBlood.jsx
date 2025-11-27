@@ -75,7 +75,9 @@ const MyRequestsWithOffersBlood = () => {
       <tr key={req._id} className={`clickable-row ${muted ? 'row-muted' : ''}`} onClick={() => openDetails(req._id)} style={{ cursor: 'pointer' }}>
         <td className="text-start">{req.description || '—'}</td>
         <td>
-          {req.bloodType || '—'}{' '}
+          {req.bloodType ? (
+            <span className="bloodtype-highlight-table">{req.bloodType}</span>
+          ) : '—'}{' '}
           <Badge bg={req.isUrgent ? 'danger' : 'secondary'}>{req.isUrgent ? 'مستعجل' : 'عادي'}</Badge>
         </td>
         <td>{req.location || '—'}</td>
@@ -85,7 +87,13 @@ const MyRequestsWithOffersBlood = () => {
             {chip.bottom && <span className="b">{chip.bottom}</span>}
           </span>
         </td>
-        <td>{offersCount > 0 ? <Badge bg="info">{offersCount} عرض</Badge> : <span className="text-muted">لا توجد عروض</span>}</td>
+        <td>
+          {offersCount > 0 ? (
+            <span className="offers-highlight">{offersCount} <i className="fas fa-gift"></i> عرض</span>
+          ) : (
+            <span className="no-offers-highlight"><i className="fas fa-ban"></i> لا توجد عروض</span>
+          )}
+        </td>
         <td onClick={(e) => e.stopPropagation()}>
           <Button size="sm" variant="primary" onClick={() => openDetails(req._id)}>إدارة الطلب / عرض العروض</Button>
         </td>
@@ -106,9 +114,15 @@ const MyRequestsWithOffersBlood = () => {
           </span>
         </div>
         <div className="rc-meta">
-          <span className="badge bg-success">دم: {req.bloodType || '—'}</span>
+          {req.bloodType ? (
+            <span className="bloodtype-highlight-card">{req.bloodType}</span>
+          ) : <span className="badge bg-success">دم: —</span>}
           <span className={`badge ${req.isUrgent ? 'bg-danger' : 'bg-secondary'}`}>{req.isUrgent ? 'مستعجل' : 'عادي'}</span>
-          <span className="badge bg-info text-dark">{offersCount} عرض</span>
+          {offersCount > 0 ? (
+            <span className="offers-highlight">{offersCount} <i className="fas fa-gift"></i> عرض</span>
+          ) : (
+            <span className="no-offers-highlight"><i className="fas fa-ban"></i> لا توجد عروض</span>
+          )}
           <span className="badge bg-light text-dark border">{req.location || '—'}</span>
         </div>
         <div className="rc-actions">
@@ -125,7 +139,7 @@ const MyRequestsWithOffersBlood = () => {
       <div className="header-bar mb-3">
         <div className="title-wrap">
           <span className="title-icon"><i className="fas fa-clipboard-list" /></span>
-          <h4 className="m-0 fw-bold">طلباتي (الدم) والعروض عليها</h4>
+          <h3 className="main-green-title">طلبات الدم الخاصة بي والعروض عليها </h3>
         </div>
         <div className="status-filter">
           <Form.Select value={urgencyFilter} onChange={(e) => setUrgencyFilter(e.target.value)}>
@@ -136,7 +150,7 @@ const MyRequestsWithOffersBlood = () => {
         </div>
       </div>
 
-      <div className="section-card mb-3">
+      <div className="section-card section-card-active mb-3">
         <div className="section-head">
           <h6 className="m-0">الطلبات النشطة <Badge bg="success" className="ms-1">{activeRequests.length}</Badge></h6>
           <Button size="sm" variant="outline-secondary" onClick={() => setOpenActive((v) => !v)}>{openActive ? 'إخفاء' : 'عرض'}</Button>
@@ -166,7 +180,7 @@ const MyRequestsWithOffersBlood = () => {
         </Collapse>
       </div>
 
-      <div className="section-card mb-3">
+      <div className="section-card section-card-active mb-3">
         <div className="section-head">
           <h6 className="m-0">الطلبات المنتهية <Badge bg="secondary" className="ms-1">{expiredRequests.length}</Badge></h6>
           <Button size="sm" variant="outline-secondary" onClick={() => setOpenExpired((v) => !v)}>{openExpired ? 'إخفاء' : 'عرض'}</Button>

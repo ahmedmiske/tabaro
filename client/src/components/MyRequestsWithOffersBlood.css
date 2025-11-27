@@ -1,3 +1,68 @@
+/* تمييز العروض وعدمه */
+.offers-highlight {
+    display: inline-block;
+    background: #e0f7fa;
+    color: #0e7490;
+    font-weight: bold;
+    border-radius: 16px;
+    padding: 2px 14px;
+    font-size: 1.05rem;
+    box-shadow: 0 1px 6px #0e749022;
+    margin-right: 2px;
+}
+.offers-highlight i {
+    margin-left: 6px;
+    color: #22c55e;
+}
+.no-offers-highlight {
+    display: inline-block;
+    background: #fff0f0;
+    color: #c02626;
+    font-weight: bold;
+    border-radius: 16px;
+    padding: 2px 14px;
+    font-size: 1.05rem;
+    box-shadow: 0 1px 6px #c0262622;
+    margin-right: 2px;
+}
+.no-offers-highlight i {
+    margin-left: 6px;
+    color: #c02626;
+}
+/* فصيلة الدم - تمييز بسيط */
+.bloodtype-highlight-table {
+    display: inline-block;
+    margin-right: 6px;
+    padding: 2px 10px;
+    background: #e6f9ed;
+    color: #178a4c;
+    font-weight: bold;
+    border-radius: 16px;
+    font-size: 1rem;
+    border: 1.5px solid #22c55e33;
+    box-shadow: 0 1px 6px #22c55e22;
+}
+.bloodtype-highlight-card {
+    display: inline-block;
+    margin-right: 7px;
+    padding: 2px 12px;
+    background: #e6f9ed;
+    color: #178a4c;
+    font-weight: bold;
+    border-radius: 16px;
+    font-size: 1.08rem;
+    border: 1.5px solid #22c55e33;
+    box-shadow: 0 1px 6px #22c55e22;
+}
+.main-green-title {
+    color: #22c55e;
+    font-size: 2rem;
+    font-weight: 900;
+    margin-bottom: 1.2rem;
+    letter-spacing: 1px;
+    text-align: center;
+    font-family: inherit;
+}
 .my-requests-with-offers {
     direction: rtl;
     padding: 1.5rem;
@@ -58,6 +123,11 @@ h4 {
     border: 1px solid #e5e7eb;
     padding: .75rem;
     margin-bottom: 1rem;
+}
+
+.section-card.section-card-active {
+    border: 2.5px solid #22c55e !important;
+    box-shadow: 0 4px 18px 0px #22c55e33, 0 1.5px 8px #22c55e22;
 }
 
 .section-head {

@@ -316,7 +316,11 @@ const MyDonationOffersBlood = () => {
               )}
             </div>
           </td>
-          <td>{req?.bloodType || '—'}</td>
+          <td>
+            {req?.bloodType ? (
+              <span className="bloodtype-highlight-table">{req.bloodType}</span>
+            ) : '—'}
+          </td>
           <td>
             <span className={`time-chip ${chip.cls}`} title={chip.title}>
               <span className="t">{chip.top}</span>
@@ -434,7 +438,9 @@ const MyDonationOffersBlood = () => {
 
         <div className="ci-meta">
           <span className="badge bg-light text-dark border">صاحب الطلب: {ownerName}</span>
-          <span className="badge bg-success">فصيلة: {req?.bloodType || '—'}</span>
+          {req?.bloodType ? (
+            <span className="bloodtype-highlight-card">{req.bloodType}</span>
+          ) : <span className="badge bg-success">فصيلة: —</span>}
           {city && <span className="badge bg-light text-dark border">{city}</span>}
           <span className={`badge bg-${statusColor(offer.status)}`}>
             {statusLabel(offer.status)}
@@ -576,7 +582,7 @@ const MyDonationOffersBlood = () => {
             <i className="fas fa-hand-holding-heart" />
           </span>
           <div>
-            <h4 className="m-0 fw-bold">عروضي على طلبات التبرع بالدم</h4>
+            <h3 className="main-green-title">عروضي على طلبات التبرع بالدم</h3>
             <div className="header-subtitle">
               من هنا يمكنك متابعة حالة كل عرض وإدارة التنفيذ والتقييم بسهولة.
             </div>
