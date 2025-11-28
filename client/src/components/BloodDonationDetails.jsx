@@ -1,4 +1,3 @@
-// src/components/BloodDonationDetails.jsx
 import React, { useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -255,6 +254,12 @@ export default function BloodDonationDetails() {
   // 🔹 إظهار/إخفاء صندوق التبرع داخل نفس الكارت
   const [showDonateBox, setShowDonateBox] = useState(false);
 
+  // 🔹 إيقاف نشر الطلب
+  const [showStopBox, setShowStopBox] = useState(false);
+  const [stopReason, setStopReason] = useState('');
+  const [stopLoading, setStopLoading] = useState(false);
+  const [stopAlert, setStopAlert] = useState(null);
+
   const now = useTicker(1000);
   const navigate = useNavigate();
   const me = useMemo(
@@ -399,6 +404,10 @@ export default function BloodDonationDetails() {
   }
 
   /* ---------- بيانات مشتقة لا تحتاج Hooks ---------- */
+
+  const isActive = request.isActive !== false;
+  const closedReason = request.closedReason || '';
+  const closedAt = request.closedAt ? new Date(request.closedAt) : null;
 
   const documents = normalizeDocuments(request);
   const reqContacts = normalizeRequestContacts(request);
@@ -566,6 +575,52 @@ export default function BloodDonationDetails() {
     setExpandedOfferId((prev) => (prev === offerId ? null : offerId));
   };
 
+  // ✅ إيقاف نشر الطلب من طرف صاحبه
+  const handleStopPublish = async (e) => {
+    if (e) e.preventDefault();
+
+    // eslint-disable-next-line no-alert
+    const ok = window.confirm(
+      'هل أنت متأكد من رغبتك في إيقاف نشر هذا الطلب؟ سيتم نقله إلى قائمة الطلبات غير النشطة.'
+    );
+    if (!ok) return;
+
+    try {
+      setStopLoading(true);
+      setStopAlert(null);
+
+      const res = await fetchWithInterceptors(`/api/blood-requests/${id}/stop`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: stopReason }),
+      });
+
+      if (res.ok) {
+        const updated = res.body?.data || res.body || null;
+        if (updated) setRequest(updated);
+
+        setStopAlert({
+          type: 'success',
+          text: 'تم إيقاف نشر هذا الطلب، وسيُنقل إلى قائمة الطلبات غير النشطة.',
+        });
+        setShowStopBox(false);
+      } else {
+        setStopAlert({
+          type: 'danger',
+          text: res.body?.message || 'تعذّر إيقاف نشر الطلب.',
+        });
+      }
+    } catch (err) {
+      console.error('stop publish error:', err);
+      setStopAlert({
+        type: 'danger',
+        text: 'حدث خطأ أثناء إيقاف نشر الطلب.',
+      });
+    } finally {
+      setStopLoading(false);
+    }
+  };
+
   /* ============ JSX ============ */
 
   return (
@@ -594,6 +649,11 @@ export default function BloodDonationDetails() {
               <div className="subtitle-line">
                 ساعد في إنقاذ حياة بتبرعك الكريم 💚
               </div>
+              {!isActive && (
+                <div className="mt-2">
+                  <Badge bg="secondary">هذا الطلب موقوف عن النشر</Badge>
+                </div>
+              )}
             </div>
 
             {request.bloodType && (
@@ -606,6 +666,36 @@ export default function BloodDonationDetails() {
         </Card.Header>
 
         <Card.Body className="p-3">
+          {/* تنبيهات حالة الطلب */}
+          {!isActive && (
+            <Alert variant="warning" className="mb-3 small">
+              هذا الطلب تم إيقاف نشره من طرف صاحبه.
+              {closedReason && (
+                <>
+                  <br />
+                  <strong>سبب الإيقاف:</strong> {closedReason}
+                </>
+              )}
+              {closedAt && (
+                <div className="mt-1 text-muted">
+                  تم الإيقاف بتاريخ:{' '}
+                  {closedAt.toLocaleString('ar-MA')}
+                </div>
+              )}
+            </Alert>
+          )}
+
+          {stopAlert && (
+            <Alert
+              variant={stopAlert.type}
+              className="mb-3 small"
+              onClose={() => setStopAlert(null)}
+              dismissible
+            >
+              {stopAlert.text}
+            </Alert>
+          )}
+
           {/* ---------- الناشر ---------- */}
           <div className="section-card publisher-section">
             <div className="publisher-strip">
@@ -835,8 +925,88 @@ export default function BloodDonationDetails() {
             </div>
           )}
 
+          {/* ---------- إدارة حالة الطلب (لصاحب الطلب فقط) ---------- */}
+          {isOwner && (
+            <div className="section-card mt-3">
+              <div className="dtbl-section-title">إدارة حالة الطلب</div>
+
+              {isActive ? (
+                <>
+                  <p className="small text-muted mb-2">
+                    يمكنك إيقاف نشر هذا الطلب في أي وقت، وسيتم نقله إلى قائمة الطلبات غير النشطة ولن يظهر للمتبرعين في القوائم العامة.
+                  </p>
+
+                  {!showStopBox && (
+                    <Button
+                      size="sm"
+                      variant="outline-danger"
+                      onClick={() => setShowStopBox(true)}
+                    >
+                      ⛔ إيقاف نشر الطلب
+                    </Button>
+                  )}
+
+                  {showStopBox && (
+                    <Form onSubmit={handleStopPublish} className="mt-3">
+                      <Form.Group className="mb-2">
+                        <Form.Label className="small fw-bold">
+                          سبب إيقاف الطلب (اختياري ولكن مُستحسَن)
+                        </Form.Label>
+                        <Form.Control
+                          as="textarea"
+                          rows={3}
+                          value={stopReason}
+                          onChange={(e) => setStopReason(e.target.value)}
+                          placeholder="مثال: تم العثور على متبرع، أو تحسّن حالة المريض، أو أي سبب آخر..."
+                        />
+                      </Form.Group>
+
+                      <div className="d-flex flex-wrap gap-2 mt-2">
+                        <Button
+                          type="submit"
+                          variant="danger"
+                          size="sm"
+                          disabled={stopLoading}
+                        >
+                          {stopLoading ? 'جارٍ الإيقاف...' : 'تأكيد إيقاف الطلب'}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline-secondary"
+                          size="sm"
+                          onClick={() => {
+                            setShowStopBox(false);
+                            setStopReason('');
+                          }}
+                        >
+                          إلغاء
+                        </Button>
+                      </div>
+                    </Form>
+                  )}
+                </>
+              ) : (
+                <>
+                  <p className="small text-muted mb-1">
+                    هذا الطلب موقوف حاليًا ولن يظهر في قائمة الطلبات النشطة.
+                  </p>
+                  {closedReason && (
+                    <p className="small mb-1">
+                      <strong>سبب الإيقاف:</strong> {closedReason}
+                    </p>
+                  )}
+                  {closedAt && (
+                    <p className="small text-muted mb-0">
+                      تم الإيقاف بتاريخ: {closedAt.toLocaleString('ar-MA')}
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+
           {/* ---------- التفاعل مع الطلب (للزائر / المتبرع فقط) ---------- */}
-          {!isOwner && (
+          {!isOwner && isActive && (
             <div className="section-card mt-3">
               <div className="dtbl-section-title">التفاعل مع الطلب</div>
 

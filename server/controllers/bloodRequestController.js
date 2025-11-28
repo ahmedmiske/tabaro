@@ -1,4 +1,3 @@
-// server/controllers/bloodRequestController.js
 const fs = require('fs');
 const path = require('path');
 const mongoose = require('mongoose');
@@ -121,13 +120,19 @@ exports.createBloodRequest = async (req, res) => {
 /* ========= LIST ========= */
 exports.getBloodRequests = async (req, res) => {
   try {
-    const { page = '1', limit = '12' } = req.query;
+    const { page = '1', limit = '12', includeInactive } = req.query;
     const p = Math.max(parseInt(page, 10) || 1, 1);
     const l = Math.min(Math.max(parseInt(limit, 10) || 12, 1), 100);
     const extra = req._extraFilter || {};
 
-    const total = await BloodRequest.countDocuments(extra);
-    const data = await BloodRequest.find(extra)
+    // ✅ افتراضياً نعرض الطلبات النشطة فقط
+    const baseFilter = { ...extra };
+    if (!includeInactive) {
+      baseFilter.isActive = true;
+    }
+
+    const total = await BloodRequest.countDocuments(baseFilter);
+    const data = await BloodRequest.find(baseFilter)
       .sort({ createdAt: -1 })
       .skip((p - 1) * l)
       .limit(l)
@@ -264,5 +269,44 @@ exports.getMyBloodRequests = async (req, res) => {
   } catch (err) {
     console.error('❌ getMyBloodRequests:', err);
     res.status(500).json({ message: 'خطأ في السيرفر' });
+  }
+};
+
+/* ========= STOP (DEACTIVATE) ========= */
+exports.stopBloodRequest = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!isObjectId(id)) {
+      return res.status(400).json({ message: 'معرّف غير صالح' });
+    }
+
+    const doc = await BloodRequest.findById(id);
+    if (!doc) {
+      return res.status(404).json({ message: 'طلب التبرع غير موجود' });
+    }
+
+    // ✅ فقط صاحب الطلب يملك صلاحية إيقافه
+    if (String(doc.userId) !== String(req.user?._id)) {
+      return res.status(403).json({ message: 'غير مصرح' });
+    }
+
+    const { reason } = req.body;
+
+    doc.isActive = false;
+    doc.closedReason = (reason || '').trim();
+    doc.closedAt = new Date();
+    doc.closedBy = req.user._id;
+
+    await doc.save();
+
+    const populated = await BloodRequest.findById(doc._id).populate({
+      path: 'userId',
+      select: 'firstName lastName profileImage phoneNumber email',
+    });
+
+    return res.json({ data: populated });
+  } catch (err) {
+    console.error('❌ stopBloodRequest:', err);
+    return res.status(500).json({ message: 'خطأ في السيرفر', error: err.message });
   }
 };

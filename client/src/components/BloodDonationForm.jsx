@@ -1,8 +1,8 @@
 // src/components/BloodDonationForm.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
 import { FaCheck, FaWhatsapp } from 'react-icons/fa';
-import { FiPhone } from 'react-icons/fi';
+import { FiPhone, FiMapPin } from 'react-icons/fi';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import TitleMain from './TitleMain.jsx';
 
@@ -51,12 +51,24 @@ const formatDateTimeHuman = (value) => {
   return `${day}/${month}/${year} ${hour}:${min}`;
 };
 
+/** 🔤 دالّة مساعدة لقراءة الاسم بالعربية */
+const getNameAr = (obj) =>
+  (obj &&
+    (obj.name_ar ||
+      obj.nameAr ||
+      obj.arabicName ||
+      obj.labelAr ||
+      obj.label ||
+      obj.name ||
+      obj.nomAr)) ||
+  '';
+
 const BloodDonationForm = () => {
   // ====== STATE الرئيسي ======
   const [bloodDonation, setBloodDonation] = useState({
     bloodType: '',
-    location: '',
-    hospital: '',        // المستشفى (اختياري)
+    location: '', // المدينة / البلدية (نص)
+    hospital: '', // المستشفى (اختياري)
     description: '',
     deadline: '',
     isUrgent: false,
@@ -74,7 +86,52 @@ const BloodDonationForm = () => {
   const [deadlineWarning, setDeadlineWarning] = useState('');
   const [newRequestId, setNewRequestId] = useState(null);
 
-  // ✅ دالة تمرير لأعلى النموذج / الصفحة
+  // ====== بيانات الموقع: ولايات / مقاطعات / بلديات (مثل فورم الاستعداد) ======
+  const [wilayaOptions, setWilayaOptions] = useState([]);
+  const [moughataaOptions, setMoughataaOptions] = useState([]);
+  const [communeOptions, setCommuneOptions] = useState([]);
+
+  const normalize = (value) =>
+    typeof value === 'string' ? value.trim() : '';
+
+  const findCommuneByName = (name) =>
+    communeOptions.find(
+      (c) => normalize(c?.name_ar) === normalize(name),
+    );
+
+  const selectedCommune = useMemo(
+    () => findCommuneByName(bloodDonation.location),
+    [bloodDonation.location, communeOptions],
+  );
+
+  const selectedMoughataa = useMemo(() => {
+    if (!selectedCommune) return null;
+    // أول 4 أرقام من كود البلدية → كود المقاطعة
+    return moughataaOptions.find(
+      (m) => m.code === selectedCommune.code?.slice(0, 4),
+    );
+  }, [selectedCommune, moughataaOptions]);
+
+  const selectedWilaya = useMemo(() => {
+    if (!selectedCommune) return null;
+    // أول رقمين من كود البلدية → كود الولاية
+    return wilayaOptions.find(
+      (w) => w.code === selectedCommune.code?.slice(0, 2),
+    );
+  }, [selectedCommune, wilayaOptions]);
+
+  const locationLabel = useMemo(() => {
+    if (!selectedCommune)
+      return bloodDonation.location || '';
+    const parts = [
+      getNameAr(selectedCommune),
+      selectedMoughataa ? getNameAr(selectedMoughataa) : '',
+      selectedWilaya ? getNameAr(selectedWilaya) : '',
+    ].filter(Boolean);
+    return parts.join(' - ');
+  }, [selectedCommune, selectedMoughataa, selectedWilaya, bloodDonation.location]);
+
+  // ✅ تمرير لأعلى
   const scrollToTop = () => {
     const wrapper = document.querySelector('.page-wrapper');
     if (wrapper) {
@@ -85,33 +142,50 @@ const BloodDonationForm = () => {
     document.body.scrollTop = 0;
   };
 
-  // ====== إعدادات عامة ======
-  // useEffect(() => {
-  //   document.title = 'طلب تبرع بالدم - تبارو';
-  //   return () => {
-  //     document.title = 'تبارو - منصة التبرعات';
-  //   };
-  // }, []);
-
   useEffect(() => {
-    if (formSubmitted) {
-      scrollToTop();
-    }
+    if (formSubmitted) scrollToTop();
   }, [formSubmitted]);
 
   // أنواع الدم
-  const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'غير معروف'];
-
-  // قائمة الأماكن
-  const placesList = [
-    'اترارزة', 'أدرار', 'آسابا', 'أكجوجت', 'ألاك', 'أم التونسي',
-    'أمورج', 'أوجفت', 'بئر أم اݕرين', 'بوتلميت', 'بنشاب', 'تيجكة',
-    'تيشيت', 'تمبدغة', 'جعوار', 'حاسي الشيخ', 'رأس البئر', 'الرشيد',
-    'روصو', 'زمال', 'سيليبابي', 'صنقرقة', 'طارة', 'فم لعبرة',
-    'قيدي مقة', 'كوبني', 'كرار', 'كنكوصة', 'كيفة', 'لبديا',
-    'لعصابة', 'لكصر', 'نواكشوط', 'نواذيبو', 'وألة', 'ولاتة',
-    'واد الناگة', 'وسو', 'يورلي',
+  const bloodTypes = [
+    'A+',
+    'A-',
+    'B+',
+    'B-',
+    'AB+',
+    'AB-',
+    'O+',
+    'O-',
+    'غير معروف',
   ];
+
+  // ====== تحميل خيارات الموقع من الباكند (نفس الفورم READY) ======
+  useEffect(() => {
+    const extractArray = (response) => {
+      if (!response) return [];
+      if (Array.isArray(response)) return response;
+      if (Array.isArray(response.body)) return response.body;
+      if (Array.isArray(response.data)) return response.data;
+      if (response.body && Array.isArray(response.body.items))
+        return response.body.items;
+      return [];
+    };
+
+    const fetchOptions = async (endpoint, setter) => {
+      try {
+        const response = await fetchWithInterceptors(endpoint);
+        const list = extractArray(response);
+        setter(list);
+      } catch (err) {
+        console.error('خطأ في تحميل', endpoint, err);
+        setter([]);
+      }
+    };
+
+    fetchOptions('/api/wilayas', setWilayaOptions);
+    fetchOptions('/api/moughataas', setMoughataaOptions);
+    fetchOptions('/api/communes', setCommuneOptions);
+  }, []);
 
   /**
    * ✅ التحقق لكل خطوة
@@ -120,16 +194,25 @@ const BloodDonationForm = () => {
     const newErrors = {};
 
     if (stepNumber === 1) {
-      if (!bloodDonation.bloodType) newErrors.bloodType = 'نوع الدم مطلوب';
-      if (!bloodDonation.location) newErrors.location = 'المكان مطلوب';
+      if (!bloodDonation.bloodType)
+        newErrors.bloodType = 'نوع الدم مطلوب';
+
+      if (!bloodDonation.location || !bloodDonation.location.trim()) {
+        newErrors.location = 'الرجاء إدخال اسم المدينة / البلدية.';
+      } else if (!selectedCommune) {
+        newErrors.location =
+          'الرجاء اختيار مدينة/بلدية من القائمة المقترحة.';
+      }
     }
 
     if (stepNumber === 2) {
-      if (!bloodDonation.description) newErrors.description = 'الوصف مطلوب';
+      if (!bloodDonation.description)
+        newErrors.description = 'الوصف مطلوب';
     }
 
     if (stepNumber === 3) {
-      if (!bloodDonation.deadline) newErrors.deadline = 'الموعد النهائي مطلوب';
+      if (!bloodDonation.deadline)
+        newErrors.deadline = 'الموعد النهائي مطلوب';
     }
 
     if (stepNumber === 4) {
@@ -137,14 +220,17 @@ const BloodDonationForm = () => {
       const whatsappValid = validatePhoneNumberMR(bloodDonation.whatsapp);
 
       if (bloodDonation.phone && !phoneValid) {
-        newErrors.phone = 'الرقم يجب أن يكون 8 أرقام ويبدأ بـ 2 أو 3 أو 4.';
+        newErrors.phone =
+          'الرقم يجب أن يكون 8 أرقام ويبدأ بـ 2 أو 3 أو 4.';
       }
       if (bloodDonation.whatsapp && !whatsappValid) {
-        newErrors.whatsapp = 'الرقم يجب أن يكون 8 أرقام ويبدأ بـ 2 أو 3 أو 4.';
+        newErrors.whatsapp =
+          'الرقم يجب أن يكون 8 أرقام ويبدأ بـ 2 أو 3 أو 4.';
       }
 
       if (!phoneValid && !whatsappValid) {
-        newErrors.contact = 'يجب إدخال رقم واحد صحيح على الأقل (هاتف أو واتساب).';
+        newErrors.contact =
+          'يجب إدخال رقم واحد صحيح على الأقل (هاتف أو واتساب).';
       }
     }
 
@@ -203,7 +289,7 @@ const BloodDonationForm = () => {
           field === 'phone' ? value : next.phone,
         );
         const whatsappValid = validatePhoneNumberMR(
-         field === 'whatsapp' ? value : next.whatsapp,
+          field === 'whatsapp' ? value : next.whatsapp,
         );
 
         if (next.phone && !validatePhoneNumberMR(next.phone)) {
@@ -253,7 +339,12 @@ const BloodDonationForm = () => {
     }
 
     const validFiles = files.filter((file) => {
-      const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+      const validTypes = [
+        'image/jpeg',
+        'image/png',
+        'image/jpg',
+        'application/pdf',
+      ];
       const maxSize = 5 * 1024 * 1024; // 5MB
       return validTypes.includes(file.type) && file.size <= maxSize;
     });
@@ -282,9 +373,26 @@ const BloodDonationForm = () => {
     }
 
     try {
+      const finalLocation = locationLabel || bloodDonation.location || '';
+
       const formData = new FormData();
       formData.append('bloodType', bloodDonation.bloodType);
-      formData.append('location', bloodDonation.location);
+      formData.append('location', finalLocation);
+
+      // نرسل كذلك معلومات إضافية لو أردت استغلالها في الباكند
+      if (selectedCommune) {
+        formData.append('communeCode', selectedCommune.code || '');
+        formData.append('communeNameAr', getNameAr(selectedCommune));
+      }
+      if (selectedMoughataa) {
+        formData.append('moughataaCode', selectedMoughataa.code || '');
+        formData.append('moughataaNameAr', getNameAr(selectedMoughataa));
+      }
+      if (selectedWilaya) {
+        formData.append('wilayaCode', selectedWilaya.code || '');
+        formData.append('wilayaNameAr', getNameAr(selectedWilaya));
+      }
+
       if (bloodDonation.hospital) {
         formData.append('hospital', bloodDonation.hospital);
       }
@@ -294,7 +402,10 @@ const BloodDonationForm = () => {
 
       const contactMethods = [];
       if (bloodDonation.phone) {
-        contactMethods.push({ method: 'phone', number: bloodDonation.phone.trim() });
+        contactMethods.push({
+          method: 'phone',
+          number: bloodDonation.phone.trim(),
+        });
       }
       if (bloodDonation.whatsapp) {
         contactMethods.push({
@@ -322,7 +433,8 @@ const BloodDonationForm = () => {
         setFormSubmitted(true);
       } else {
         setErrors({
-          general: response?.body?.message || 'حدث خطأ أثناء إرسال الطلب',
+          general:
+            response?.body?.message || 'حدث خطأ أثناء إرسال الطلب',
         });
         scrollToTop();
       }
@@ -362,7 +474,7 @@ const BloodDonationForm = () => {
    * معلومات واجهة الخطوات (UI فقط) – مختصرة
    */
   const stepInfo = {
-    1: { title: 'نوع الدم والمكان', icon: '🩸' },
+    1: { title: 'نوع الدم والموقع', icon: '🩸' },
     2: { title: 'وصف الحالة', icon: '📝' },
     3: { title: 'الموعد النهائي', icon: '⏰' },
     4: { title: 'معلومات التواصل', icon: '📞' },
@@ -380,7 +492,8 @@ const BloodDonationForm = () => {
           <div className="success-icon">🎉</div>
           <h2 className="success-title">تم استلام طلبك بنجاح</h2>
           <p className="success-desc">
-            سيتم عرض هذا الطلب للمتبرعين في المنصة للتواصل عبر الأرقام المرفقة.
+            سيتم عرض هذا الطلب للمتبرعين في المنصة للتواصل عبر الأرقام
+            المرفقة.
           </p>
 
           <div className="success-actions">
@@ -424,14 +537,14 @@ const BloodDonationForm = () => {
       <header className="form-header">
         <TitleMain title="طلب تبرع بالدم 🩸" />
 
-        {/* ✅ الفقرة التوضيحية الوحيدة (كما اتفقنا) */}
         <Alert variant="light" className="small mb-3 border">
           يمكنك استخدام هذا النموذج لطلب التبرع <strong>لنفسك</strong> أو{' '}
           <strong>لأي شخص محتاج</strong>، فقط تأكد من إدخال{' '}
-          <strong>وسائل تواصل صحيحة</strong> حتى يتمكن المتبرعون من الوصول إليكم.
+          <strong>وسائل تواصل صحيحة</strong> حتى يتمكن المتبرعون من
+          الوصول إليكم.
         </Alert>
 
-        {/* شريط التقدم متعدد الخطوات */}
+        {/* شريط التقدم */}
         <div
           className="steps-progress-container"
           role="progressbar"
@@ -478,14 +591,16 @@ const BloodDonationForm = () => {
       )}
 
       <Form onSubmit={handleSubmit}>
-        {/* الخطوة 1: نوع الدم + المكان + المستشفى (اختياري) */}
+        {/* الخطوة 1: نوع الدم + المدينة + المستشفى */}
         {step === 1 && (
           <div className="step-content">
             <Form.Group className="mb-3">
               <Form.Label>نوع الدم المطلوب *</Form.Label>
               <Form.Select
                 value={bloodDonation.bloodType}
-                onChange={(e) => handleInputChange('bloodType', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange('bloodType', e.target.value)
+                }
                 isInvalid={!!errors.bloodType}
               >
                 <option value="">اختر نوع الدم</option>
@@ -502,24 +617,43 @@ const BloodDonationForm = () => {
               )}
             </Form.Group>
 
+            {/* ✅ المكان = المدينة/البلدية مربوطة بالمقاطعة والولاية */}
             <Form.Group className="mb-3">
-              <Form.Label>المكان (مدينة / ولاية) *</Form.Label>
-              <Form.Select
+              <Form.Label className="d-flex align-items-center gap-2">
+                <FiMapPin />
+                <span>المدينة / البلدية داخل موريتانيا *</span>
+              </Form.Label>
+              <Form.Control
+                list="blood-communes-list"
                 value={bloodDonation.location}
-                onChange={(e) => handleInputChange('location', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange('location', e.target.value)
+                }
+                placeholder="اكتب أو اختر اسم المدينة / البلدية (مثال: عرفات، تفرغ زينة...)"
                 isInvalid={!!errors.location}
-              >
-                <option value="">اختر المكان</option>
-                {placesList.map((place) => (
-                  <option key={place} value={place}>
-                    {place}
-                  </option>
+              />
+              <datalist id="blood-communes-list">
+                {communeOptions.map((c) => (
+                  <option key={c.code} value={c.name_ar} />
                 ))}
-              </Form.Select>
+              </datalist>
               {errors.location && (
                 <Form.Control.Feedback type="invalid">
                   {errors.location}
                 </Form.Control.Feedback>
+              )}
+
+              {normalize(bloodDonation.location) && selectedCommune && (
+                <div className="location-preview-box mt-2">
+                  <span className="location-chip">
+                    الولاية:&nbsp;
+                    <strong>{getNameAr(selectedWilaya) || '—'}</strong>
+                  </span>
+                  <span className="location-chip">
+                    المقاطعة:&nbsp;
+                    <strong>{getNameAr(selectedMoughataa) || '—'}</strong>
+                  </span>
+                </div>
               )}
             </Form.Group>
 
@@ -528,7 +662,9 @@ const BloodDonationForm = () => {
               <Form.Control
                 type="text"
                 value={bloodDonation.hospital}
-                onChange={(e) => handleInputChange('hospital', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange('hospital', e.target.value)
+                }
                 placeholder="مثال: مستشفى الصداقة - نواكشوط"
               />
             </Form.Group>
@@ -544,7 +680,9 @@ const BloodDonationForm = () => {
                 as="textarea"
                 rows={4}
                 value={bloodDonation.description}
-                onChange={(e) => handleInputChange('description', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange('description', e.target.value)
+                }
                 placeholder="اكتب وصفاً مختصراً عن الحالة والحاجة للدم..."
                 isInvalid={!!errors.description}
               />
@@ -566,7 +704,9 @@ const BloodDonationForm = () => {
               <Form.Text className="text-muted">
                 حتى 5 ملفات (صور أو PDF، حجم أقصى 5MB لكل ملف)
               </Form.Text>
-              {fileError && <div className="text-danger mt-2">{fileError}</div>}
+              {fileError && (
+                <div className="text-danger mt-2">{fileError}</div>
+              )}
               {supportDocs.length > 0 && (
                 <div className="mt-2">
                   <small className="text-success">
@@ -586,39 +726,51 @@ const BloodDonationForm = () => {
               <Form.Control
                 type="datetime-local"
                 value={bloodDonation.deadline}
-                onChange={(e) => handleInputChange('deadline', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange('deadline', e.target.value)
+                }
                 isInvalid={!!errors.deadline}
               />
-              {errors.deadline && (
-                <Form.Control.Feedback type="invalid">
-                  {errors.deadline}
-                </Form.Control.Feedback>
-              )}
-              <Form.Text className="text-muted d-block mt-1">
-                سيتم العرض بهذا الشكل:{' '}
-                <strong>{formatDateTimeHuman(bloodDonation.deadline)}</strong>
-              </Form.Text>
+            {errors.deadline && (
+              <Form.Control.Feedback type="invalid">
+                {errors.deadline}
+              </Form.Control.Feedback>
+            )}
+            <Form.Text className="text-muted d-block mt-1">
+              سيتم العرض بهذا الشكل:{' '}
+              <strong>{formatDateTimeHuman(bloodDonation.deadline)}</strong>
+            </Form.Text>
 
-              {deadlineWarning && (
-                <div className="text-warning small mt-2">{deadlineWarning}</div>
-              )}
-            </Form.Group>
+            {deadlineWarning && (
+              <div className="text-warning small mt-2">
+                {deadlineWarning}
+              </div>
+            )}
+          </Form.Group>
 
-            <Form.Group className="mb-3">
-              <Form.Check
-                type="checkbox"
-                id="urgent-check"
-                checked={bloodDonation.isUrgent}
-                onChange={(e) => handleInputChange('isUrgent', e.target.checked)}
-                label={(
-                  <span style={{ color: '#e05a2e', fontWeight: 600, margin: '20px' }}>
-                    حالة طارئة
-                  </span>
-                )}
-                className="d-flex align-items-center gap-2"
-              />
-            </Form.Group>
-          </div>
+          <Form.Group className="mb-3">
+            <Form.Check
+              type="checkbox"
+              id="urgent-check"
+              checked={bloodDonation.isUrgent}
+              onChange={(e) =>
+                handleInputChange('isUrgent', e.target.checked)
+              }
+              label={
+                <span
+                  style={{
+                    color: '#e05a2e',
+                    fontWeight: 600,
+                    margin: '20px',
+                  }}
+                >
+                  حالة طارئة
+                </span>
+              }
+              className="d-flex align-items-center gap-2"
+            />
+          </Form.Group>
+        </div>
         )}
 
         {/* الخطوة 4: وسائل التواصل + الملخص */}
@@ -633,7 +785,9 @@ const BloodDonationForm = () => {
               <Form.Control
                 type="text"
                 value={bloodDonation.phone}
-                onChange={(e) => handleInputChange('phone', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange('phone', e.target.value)
+                }
                 isInvalid={!!errors.phone}
                 placeholder="مثال: 22000000"
               />
@@ -653,7 +807,9 @@ const BloodDonationForm = () => {
               <Form.Control
                 type="text"
                 value={bloodDonation.whatsapp}
-                onChange={(e) => handleInputChange('whatsapp', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange('whatsapp', e.target.value)
+                }
                 isInvalid={!!errors.whatsapp}
                 placeholder="مثال: 32000000"
               />
@@ -665,7 +821,9 @@ const BloodDonationForm = () => {
             </Form.Group>
 
             {errors.contact && (
-              <div className="text-danger small mb-2">{errors.contact}</div>
+              <div className="text-danger small mb-2">
+                {errors.contact}
+              </div>
             )}
 
             {/* ملخص الطلب قبل الإرسال */}
@@ -687,9 +845,9 @@ const BloodDonationForm = () => {
                 </div>
 
                 <div className="summary-item">
-                  <div className="summary-label">المكان</div>
+                  <div className="summary-label">الموقع</div>
                   <div className="summary-value">
-                    {bloodDonation.location || '—'}
+                    {locationLabel || '—'}
                   </div>
                 </div>
 

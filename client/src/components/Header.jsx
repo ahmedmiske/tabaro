@@ -137,6 +137,15 @@ function Header({ notifCount }) {
     );
   }, [pathname]);
 
+  // ✅ إذا كان المستخدم مسجّل دخول وحاول فتح /login نعيد توجيهه
+  useEffect(() => {
+    if (!isAuthed) return;
+    if (pathname === '/login' || pathname === '/register') {
+      // يمكنك تغيير الوجهة إلى '/' إذا فضّلت الصفحة الرئيسية
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isAuthed, pathname, navigate]);
+
   // Close on outside click / ESC
   const rootRef = useRef(null);
   const prevFocusRef = useRef(null);
@@ -391,28 +400,6 @@ function Header({ notifCount }) {
                   </Link>
                 </div>
               )}
-
-              {/* زر مجتمعنا للنسخة القادمة */}
-              {/*
-              <div
-                className={`eh-nav-item ${open === 'campaigns' ? 'open' : ''}`}
-              >
-                <button
-                  className={`eh-nav-link ${campaignsActive ? 'active' : ''}`}
-                  onClick={() =>
-                    setOpen(open === 'campaigns' ? null : 'campaigns')
-                  }
-                  onMouseEnter={() => setOpen('campaigns')}
-                  aria-expanded={open === 'campaigns'}
-                  aria-controls="mega-campaigns"
-                  id={campaignsId}
-                >
-                  <FiUsers />
-                  <span> مجتمعنا</span>
-                  <FiChevronDown className="eh-caret" />
-                </button>
-              </div>
-              */}
             </nav>
 
             {/* القائمة اليمنى */}
@@ -589,47 +576,6 @@ function Header({ notifCount }) {
               </Link>
             </div>
           </div>
-
-          {/* الاعلانات الاجتماعية / مجتمعنا → للنسخة القادمة */}
-          {/*
-          <div
-            id="social-campaigns"
-            className={`eh-mega-panel ${open === 'campaigns' ? 'open' : ''}`}
-            onMouseEnter={() => setOpen('campaigns')}
-            onMouseLeave={() => setOpen(null)}
-            role="region"
-            aria-labelledby={campaignsId}
-          >
-            <div className="eh-mega-grid">
-              <Link
-                to="/social"
-                className="eh-mega-card"
-                onClick={() => setOpen(null)}
-              >
-                <div className="eh-mega-icon">
-                  <FiGrid />
-                </div>
-                <div className="eh-mega-content">
-                  <h4>قائمة الاعلانات</h4>
-                  <p>استكشف المجتمع من حولك</p>
-                </div>
-              </Link>
-              <Link
-                to="/social/new"
-                className="eh-mega-card"
-                onClick={() => setOpen(null)}
-              >
-                <div className="eh-mega-icon">
-                  <FiHeart />
-                </div>
-                <div className="eh-mega-content">
-                  <h4>إنشاء اعلان</h4>
-                  <p>أطلق اعلانك الآن</p>
-                </div>
-              </Link>
-            </div>
-          </div>
-          */}
         </div>
 
         {/* القائمة الجانبية للجوّال */}
@@ -781,28 +727,6 @@ function Header({ notifCount }) {
                 </Link>
               </div>
 
-              {/* حملات التبرع / مجتمعنا – للنسخة القادمة */}
-              {/*
-              <div className="eh-drawer-group">
-                <div className="eh-drawer-group-title">
-                  <FiUsers />
-                  <span>حملات التبرع</span>
-                </div>
-                <Link
-                  to="/campaigns"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  قائمة الحملات
-                </Link>
-                <Link
-                  to="/campaigns/create"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  إنشاء حملة
-                </Link>
-              </div>
-              */}
-
               <Link
                 to="/about"
                 className="eh-drawer-link"
@@ -820,7 +744,7 @@ function Header({ notifCount }) {
       <CartDropdown
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
-      />
+      /> 
     </header>
   );
 }

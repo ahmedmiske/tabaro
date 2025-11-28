@@ -36,7 +36,7 @@ const donationRequestSchema = new mongoose.Schema(
     // مالية (اختياري)
     amount: { type: Number, default: 0 },
 
-    // ✅ اجعلها دائمًا مصفوفة — لا ترجع null
+    // دائمًا مصفوفة
     paymentMethods: {
       type: [paymentMethodSchema],
       default: [],
@@ -61,7 +61,7 @@ const donationRequestSchema = new mongoose.Schema(
       default: [],
     },
 
-    // وقت الإنشاء
+    // وقت الإنشاء (قديم)
     date: { type: Date, default: Date.now },
 
     status: {
@@ -69,6 +69,10 @@ const donationRequestSchema = new mongoose.Schema(
       enum: ["active", "paused", "completed", "cancelled"],
       default: "active",
     },
+
+    // ⬇️ جديد: معلومات إيقاف النشر
+    closedReason: { type: String, trim: true },
+    closedAt: { type: Date },
   },
   { timestamps: true }
 );

@@ -249,6 +249,12 @@ export default function DonationRequestDetails() {
 
   const [expandedId, setExpandedId] = useState(null);
 
+  // ⬇️ جديد: إدارة إيقاف النشر
+  const [showStopBox, setShowStopBox] = useState(false);
+  const [stopReason, setStopReason] = useState('');
+  const [stopLoading, setStopLoading] = useState(false);
+  const [stopAlert, setStopAlert] = useState(null);
+
   const currentUserId = useMemo(getCurrentUserId, []);
   const currentUser = useMemo(getCurrentUser, []);
   const currentToken = useMemo(
@@ -545,6 +551,7 @@ export default function DonationRequestDetails() {
       setEvidenceFiles([]);
       setActiveSection(null);
     } catch (e2) {
+      // eslint-disable-next-line no-alert
       alert(e2.message || 'حدث خطأ أثناء الإرسال');
     } finally {
       setSubmittingConfirm(false);
@@ -576,9 +583,64 @@ export default function DonationRequestDetails() {
       setReportSuccess('✅ تم إرسال البلاغ للمراجعة.');
       setReportReason('');
     } catch (e2) {
+      // eslint-disable-next-line no-alert
       alert(e2.message || 'حدث خطأ أثناء الإبلاغ');
     } finally {
       setSubmittingReport(false);
+    }
+  };
+
+  // ⬇️ حالة الطلب العام (نشط/موقوف/منتهي...)
+  const status = req?.status || 'active';
+  const isActive = status === 'active';
+  const closedReason = req?.closedReason || '';
+  const closedAt = req?.closedAt ? new Date(req.closedAt) : null;
+
+  const handleStopPublish = async (e) => {
+    if (e) e.preventDefault();
+    // eslint-disable-next-line no-alert
+    const ok = window.confirm(
+      'هل أنت متأكد من رغبتك في إيقاف نشر هذا الطلب؟ سيتم نقله إلى قائمة الطلبات غير النشطة.',
+    );
+    if (!ok) return;
+
+    try {
+      setStopLoading(true);
+      setStopAlert(null);
+
+      const res = await fetchWithInterceptors(
+        `/api/donationRequests/${id}/stop`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reason: stopReason }),
+        },
+      );
+
+      if (res.ok) {
+        const updated = res.body?.data || res.body || null;
+        if (updated) setReq(updated);
+
+        setStopAlert({
+          type: 'success',
+          text: 'تم إيقاف نشر هذا الطلب، ولن يظهر في القوائم العامة.',
+        });
+        setShowStopBox(false);
+      } else {
+        setStopAlert({
+          type: 'danger',
+          text: res.body?.message || 'تعذر إيقاف نشر الطلب.',
+        });
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('stop general request error:', err);
+      setStopAlert({
+        type: 'danger',
+        text: 'حدث خطأ أثناء إيقاف نشر الطلب.',
+      });
+    } finally {
+      setStopLoading(false);
     }
   };
 
@@ -650,6 +712,42 @@ export default function DonationRequestDetails() {
         </Card.Header>
 
         <Card.Body>
+          {/* تنبيه حالة الطلب (موقوف / مكتمل / ملغى) */}
+          {status !== 'active' && (
+            <Alert variant="warning" className="mb-3 small">
+              هذا الطلب غير نشط حاليًا ({status === 'paused'
+                ? 'موقوف عن النشر'
+                : status === 'completed'
+                ? 'مكتمل'
+                : status === 'cancelled'
+                ? 'ملغى'
+                : status}
+              ).
+              {closedReason && (
+                <>
+                  <br />
+                  <strong>سبب الإيقاف:</strong> {closedReason}
+                </>
+              )}
+              {closedAt && (
+                <div className="mt-1 text-muted">
+                  تم التحديث بتاريخ: {closedAt.toLocaleString('ar-MA')}
+                </div>
+              )}
+            </Alert>
+          )}
+
+          {stopAlert && (
+            <Alert
+              variant={stopAlert.type}
+              className="mb-3 small"
+              onClose={() => setStopAlert(null)}
+              dismissible
+            >
+              {stopAlert.text}
+            </Alert>
+          )}
+
           {/* الناشر */}
           <div
             className={`publisher-card mb-3 ${
@@ -899,6 +997,86 @@ export default function DonationRequestDetails() {
             <Alert variant="warning" className="mt-2">
               انتهت مهلة هذا الطلب.
             </Alert>
+          )}
+
+          {/* إدارة حالة الطلب لصاحب الطلب */}
+          {isOwner && (
+            <div className="section-card mt-3">
+              <div className="dtg-section-title">إدارة حالة الطلب</div>
+
+              {isActive ? (
+                <>
+                  <p className="small text-muted mb-2">
+                    يمكنك إيقاف نشر هذا الطلب في أي وقت، وسيتم نقله إلى قائمة الطلبات غير النشطة ولن يظهر للمتبرعين في القوائم العامة.
+                  </p>
+
+                  {!showStopBox && (
+                    <Button
+                      size="sm"
+                      variant="outline-danger"
+                      onClick={() => setShowStopBox(true)}
+                    >
+                      ⛔ إيقاف نشر الطلب
+                    </Button>
+                  )}
+
+                  {showStopBox && (
+                    <Form onSubmit={handleStopPublish} className="mt-3">
+                      <Form.Group className="mb-2">
+                        <Form.Label className="small fw-bold">
+                          سبب إيقاف الطلب (اختياري ولكن مُستحسَن)
+                        </Form.Label>
+                        <Form.Control
+                          as="textarea"
+                          rows={3}
+                          value={stopReason}
+                          onChange={(e) => setStopReason(e.target.value)}
+                          placeholder="مثال: تم جمع المبلغ المطلوب، تم حل المشكلة، إلخ..."
+                        />
+                      </Form.Group>
+
+                      <div className="d-flex flex-wrap gap-2 mt-2">
+                        <Button
+                          type="submit"
+                          variant="danger"
+                          size="sm"
+                          disabled={stopLoading}
+                        >
+                          {stopLoading ? 'جارٍ الإيقاف...' : 'تأكيد إيقاف الطلب'}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline-secondary"
+                          size="sm"
+                          onClick={() => {
+                            setShowStopBox(false);
+                            setStopReason('');
+                          }}
+                        >
+                          إلغاء
+                        </Button>
+                      </div>
+                    </Form>
+                  )}
+                </>
+              ) : (
+                <>
+                  <p className="small text-muted mb-1">
+                    هذا الطلب غير نشط حاليًا ولن يظهر في قائمة الطلبات النشطة.
+                  </p>
+                  {closedReason && (
+                    <p className="small mb-1">
+                      <strong>سبب الإيقاف:</strong> {closedReason}
+                    </p>
+                  )}
+                  {closedAt && (
+                    <p className="small text-muted mb-0">
+                      تم التحديث بتاريخ: {closedAt.toLocaleString('ar-MA')}
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
           )}
 
           {/* المالك: عرض العروض */}
@@ -1220,6 +1398,7 @@ export default function DonationRequestDetails() {
                                       </div>
                                     )}
 
+
                                     <div className="mb-0">
                                       <div className="dtg-section-title mb-1">
                                         المرفقات
@@ -1355,7 +1534,7 @@ export default function DonationRequestDetails() {
           )}
 
           {/* المستخدم العادي (ليس صاحب الطلب) */}
-          {!isOwner && (
+          {!isOwner && isActive && (
             <>
               {/* تبرعاتي السابقة لهذا الطلب */}
               {myOffers.length > 0 && (

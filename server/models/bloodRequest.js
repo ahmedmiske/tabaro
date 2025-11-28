@@ -1,4 +1,3 @@
-// server/models/bloodRequest.js
 const mongoose = require("mongoose");
 
 const DocumentSchema = new mongoose.Schema(
@@ -17,6 +16,18 @@ const BloodRequestSchema = new mongoose.Schema(
     bloodType: { type: String, required: true },
 
     isUrgent: { type: Boolean, default: false },
+
+    // ✅ حالة الطلب: نشِط / موقوف عن النشر
+    isActive: { type: Boolean, default: true },
+
+    // ✅ معلومات إيقاف الطلب
+    closedReason: { type: String, default: "" },
+    closedAt: { type: Date, default: null },
+    closedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
 
     // ✅ مدينة / منطقة (اختياري)
     city: { type: String, default: "" },

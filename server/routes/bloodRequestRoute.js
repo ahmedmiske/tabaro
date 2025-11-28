@@ -8,9 +8,9 @@ const {
   getBloodRequestById,
   updateBloodRequest,
   deleteBloodRequest,
-  // ⬇️ دوال جديدة/مطلوبة
   getMineWithOffers,
   getMyBloodRequests,
+  stopBloodRequest,   // ⬅️ تمت إضافتها هنا
 } = require("../controllers/bloodRequestController");
 
 const { protect } = require("../middlewares/authMiddleware");
@@ -83,7 +83,18 @@ router.get("/", async (req, res, next) => {
    ========================= */
 router.post("/", protect, uploadDocs, createBloodRequest);
 
-/* ✅ قيّد :id ليطابق ObjectId فقط لمنع ابتلاع المسارات الثابتة */
+/* ================================
+   🛑 مسار إيقاف نشر الطلب (جديد)
+   ================================ */
+router.patch(
+  "/:id([0-9a-fA-F]{24})/stop",
+  protect,
+  stopBloodRequest
+);
+
+/* ================================
+   🔍 تفاصيل وتحديث وحذف الطلب
+   ================================ */
 router.get("/:id([0-9a-fA-F]{24})", getBloodRequestById);
 router.put("/:id([0-9a-fA-F]{24})", protect, uploadDocs, updateBloodRequest);
 router.delete("/:id([0-9a-fA-F]{24})", protect, deleteBloodRequest);

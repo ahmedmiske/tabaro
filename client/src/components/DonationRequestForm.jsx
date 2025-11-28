@@ -16,7 +16,7 @@ import iconMasrivi from '../images/icon_masrivi.avif';
 import iconSadad from '../images/icon_sedad.png';
 
 /**
- * ✅ التحقق من رقم موريتاني محلي:
+ * ✅ التحقق من رقم موريتاني محلي (لخدمات الدفع):
  * - 8 أرقام بالضبط
  * - يبدأ بـ 2 أو 3 أو 4
  */
@@ -24,6 +24,17 @@ const validatePhoneNumberMR = (v) => {
   if (!v) return false;
   const trimmed = v.trim();
   return /^(2|3|4)\d{7}$/.test(trimmed);
+};
+
+/**
+ * ✅ رقم دولي عام للتواصل (هاتف / واتساب)
+ * - يسمح بـ + في البداية
+ * - من 6 إلى 15 رقم
+ */
+const validatePhoneInternational = (v) => {
+  if (!v) return false;
+  const trimmed = v.trim();
+  return /^\+?\d{6,15}$/.test(trimmed);
 };
 
 const ALLOWED_FILE_TYPES = [
@@ -42,6 +53,21 @@ const isAllowed = (f) =>
   ALLOWED_FILE_TYPES.includes(f.type) &&
   f.size <= MAX_FILE_MB * 1024 * 1024;
 
+// ✅ طبيعة التبرع (نفس ReadyToDonateGeneral)
+const donationNatureOptions = [
+  { value: 'money', label: 'مالي' },
+  { value: 'goods', label: 'مواد / أغراض' },
+  { value: 'time', label: 'الوقت / الجهد' },
+  { value: 'other', label: 'أخرى' },
+];
+
+const donationNatureLabels = {
+  money: 'مالي',
+  goods: 'مواد / أغراض',
+  time: 'الوقت / الجهد',
+  other: 'أخرى',
+};
+
 const DonationRequestForm = () => {
   const navigate = useNavigate();
 
@@ -56,22 +82,18 @@ const DonationRequestForm = () => {
     document.body.scrollTop = 0;
   };
 
-  // تحديث الـ <title>
-  // useEffect(() => {
-  //   document.title = 'طلب تبرع عام - تبارو';
-  //   return () => {
-  //     document.title = 'تبارو - منصة التبرعات';
-  //   };
-  // }, []);
-
   // الحالة الرئيسية للنموذج
   const [donation, setDonation] = useState({
     category: '',
     type: '',
+    donationNature: 'money', // طبيعة التبرع (مالي / مواد / وقت / أخرى)
     description: '',
-    place: '',
+    place: '',              // المدينة داخل موريتانيا أو المدينة خارجها
+    locationMode: 'mr',     // 'mr' داخل موريتانيا | 'intl' خارج موريتانيا
+    foreignCity: '',
+    foreignCountry: '',
     amount: '',
-    paymentMethods: [], // [{ method, phone }]
+    paymentMethods: [],     // [{ method, phone }]
     contactMethods: {
       phone: '',
       whatsapp: '',
@@ -101,17 +123,13 @@ const DonationRequestForm = () => {
   // رسالة خطأ رفع الملفات (غير حاسمة)
   const [fileError, setFileError] = useState('');
 
-  // تصنيفات وأنواع التبرع
+  // تصنيفات وأنواع التبرع (مجال الطلب)
   const categories = {
     الصحة: ['أدوية', 'معدات طبية'],
     التعليم: ['لوازم مدرسية', 'منح دراسية', 'دروس خصوصية'],
     السكن: ['إيجار عاجل', 'إعادة بناء', 'أثاث'],
     'الكوارث الطبيعية': ['إغاثة عاجلة', 'مساعدة متضررين'],
-    'الإعلانات الاجتماعية': [
-      'البحث عن مفقود',
-      'إيجاد ممتلكات ضائعة',
-      'إعلانات تبادل المساعدات',
-    ],
+    
   };
 
   // ✅ خيارات وسائل الدفع (مع الأيقونات)
@@ -122,7 +140,7 @@ const DonationRequestForm = () => {
     { method: 'bim-bank', label: 'bim-bank', icon: iconBimBank },
   ];
 
-  // قائمة الأماكن/المدن
+  // قائمة الأماكن/المدن داخل موريتانيا
   const placesList = [
     'ألاك',
     'أمباني',
@@ -193,22 +211,41 @@ const DonationRequestForm = () => {
     [donation.amount]
   );
 
-  // التحقق: الخطوة 1 تحتاج category و type
+  // التحقق: الخطوة 1 تحتاج category و type (طبيعة التبرع لها قيمة افتراضية)
   const isStep1Valid = useMemo(
     () => !!donation.category && !!donation.type,
     [donation.category, donation.type]
   );
 
-  // ✅ التحقق: لازم على الأقل هاتف أو واتساب صحيح
+  // ✅ التحقق: الموقع
+  const isLocationValid = useMemo(() => {
+    if (donation.locationMode === 'intl') {
+      return (
+        donation.foreignCity.trim().length > 0 &&
+        donation.foreignCountry.trim().length > 0
+      );
+    }
+    // داخل موريتانيا → مدينة واحدة على الأقل
+    return donation.place.trim().length > 0;
+  }, [
+    donation.locationMode,
+    donation.place,
+    donation.foreignCity,
+    donation.foreignCountry,
+  ]);
+
+  // ✅ التحقق: لازم على الأقل هاتف أو واتساب صحيح (دولي)
   const contactsValid = useMemo(() => {
-    const phoneOk = validatePhoneNumberMR(donation.contactMethods?.phone);
-    const whatsappOk = validatePhoneNumberMR(
+    const phoneOk = validatePhoneInternational(
+      donation.contactMethods?.phone
+    );
+    const whatsappOk = validatePhoneInternational(
       donation.contactMethods?.whatsapp
     );
     return phoneOk || whatsappOk;
   }, [donation.contactMethods]);
 
-  // ✅ التحقق: وسائل الدفع فقط إذا كان المبلغ > 0
+  // ✅ التحقق: وسائل الدفع فقط إذا كان المبلغ > 0 (محلي MR)
   const paymentsValid = useMemo(() => {
     if (!hasAmount) return true; // لا مبلغ → لا تحقق
     if (!donation.paymentMethods.length) return false;
@@ -224,12 +261,12 @@ const DonationRequestForm = () => {
   const stepInfo = {
     1: {
       title: 'نوع التبرع والوصف',
-      description: 'اختر المجال ونوع التبرع واكتب الوصف',
+      description: 'اختر المجال، طبيعة التبرع، ونوع التبرع ثم اكتب الوصف',
       icon: '📋',
     },
     2: {
       title: 'الموقع والتواصل',
-      description: 'حدد المكان وأرقام التواصل',
+      description: 'حدد مكان وجود المستفيد وأرقام التواصل',
       icon: '📍',
     },
     3: {
@@ -255,6 +292,23 @@ const DonationRequestForm = () => {
     return d.toISOString().slice(0, 10);
   }, []);
 
+  // ✅ نص المكان النهائي للعرض في الملخص
+  const summaryPlace = useMemo(() => {
+    if (donation.locationMode === 'intl') {
+      if (!donation.foreignCity && !donation.foreignCountry) return '—';
+      return [donation.foreignCity, donation.foreignCountry]
+        .filter(Boolean)
+        .join(' - ');
+    }
+    if (!donation.place) return '—';
+    return `${donation.place} - موريتانيا`;
+  }, [
+    donation.locationMode,
+    donation.place,
+    donation.foreignCity,
+    donation.foreignCountry,
+  ]);
+
   // 📝 استرجاع المسودة من localStorage
   useEffect(() => {
     const saved = localStorage.getItem('donationRequestDraft');
@@ -276,6 +330,10 @@ const DonationRequestForm = () => {
         setDonation((prev) => ({
           ...prev,
           ...parsed,
+          donationNature: parsed.donationNature || 'money',
+          locationMode: parsed.locationMode || 'mr',
+          foreignCity: parsed.foreignCity || '',
+          foreignCountry: parsed.foreignCountry || '',
           contactMethods: contactMethods || { phone: '', whatsapp: '' },
           proofDocuments: [],
         }));
@@ -363,7 +421,7 @@ const DonationRequestForm = () => {
       scrollToTop();
       return;
     }
-    if (step === 2 && (!donation.place || !contactsValid)) {
+    if (step === 2 && (!isLocationValid || !contactsValid)) {
       scrollToTop();
       return;
     }
@@ -389,8 +447,12 @@ const DonationRequestForm = () => {
     setDonation({
       category: '',
       type: '',
+      donationNature: 'money',
       description: '',
       place: '',
+      locationMode: 'mr',
+      foreignCity: '',
+      foreignCountry: '',
       amount: '',
       paymentMethods: [],
       contactMethods: { phone: '', whatsapp: '' },
@@ -418,10 +480,20 @@ const DonationRequestForm = () => {
     const newPaymentErrors = {};
     const newContactErrors = {};
 
-    // ✅ تحقق من وسائل التواصل (هاتف + واتساب)
+    // ✅ تحقق من الموقع
+    if (!isLocationValid) {
+      if (donation.locationMode === 'intl') {
+        alert('الرجاء إدخال المدينة والدولة إذا كان المستفيد خارج موريتانيا.');
+      } else {
+        alert('الرجاء إدخال اسم المدينة داخل موريتانيا.');
+      }
+      hasErrorFlag = true;
+    }
+
+    // ✅ تحقق من وسائل التواصل (هاتف + واتساب) بصيغة دولية
     ['phone', 'whatsapp'].forEach((method) => {
       const number = donation.contactMethods?.[method] || '';
-      if (number && !validatePhoneNumberMR(number)) {
+      if (number && !validatePhoneInternational(number)) {
         newContactErrors[method] = true;
         hasErrorFlag = true;
       }
@@ -429,14 +501,9 @@ const DonationRequestForm = () => {
 
     if (!contactsValid) {
       alert(
-        'أضف رقم تواصل واحد على الأقل (هاتف أو واتساب) برقم صحيح (8 أرقام ويبدأ بـ2 أو 3 أو 4).'
+        'أضف رقم تواصل واحد على الأقل (هاتف أو واتساب) بصيغة صحيحة. مثال: +22222000000 أو 0034666000000.'
       );
       hasErrorFlag = true;
-    }
-
-    if (!donation.place) {
-      hasErrorFlag = true;
-      alert('الرجاء كتابة المكان.');
     }
 
     // ✅ تحقق من البيانات المالية فقط إذا كان هناك مبلغ
@@ -464,11 +531,25 @@ const DonationRequestForm = () => {
       return;
     }
 
+    // 🔗 تكوين نص المكان النهائي
+    const finalPlace =
+      donation.locationMode === 'intl'
+        ? [donation.foreignCity, donation.foreignCountry]
+            .filter(Boolean)
+            .join(' - ')
+        : donation.place
+        ? `${donation.place} - موريتانيا`
+        : '';
+
     const fd = new FormData();
     fd.append('category', donation.category);
     fd.append('type', donation.type);
+    fd.append('donationNature', donation.donationNature || '');
     fd.append('description', donation.description || '');
-    fd.append('place', donation.place || '');
+    fd.append('place', finalPlace || '');
+    fd.append('locationMode', donation.locationMode || 'mr');
+    fd.append('foreignCity', donation.foreignCity || '');
+    fd.append('foreignCountry', donation.foreignCountry || '');
     fd.append('deadline', donation.deadline || '');
     fd.append('isUrgent', donation.isUrgent ? 'true' : 'false');
     fd.append('amount', donation.amount || '');
@@ -634,11 +715,11 @@ const DonationRequestForm = () => {
       {fileError && <Alert variant="warning">{fileError}</Alert>}
 
       <Form onSubmit={handleSubmit}>
-        {/* الخطوة ١: المجال / النوع / الوصف */}
+        {/* الخطوة ١: المجال / طبيعة التبرع / النوع / الوصف */}
         {displayedStep === 1 && (
           <div className="step-content">
             <Form.Group>
-              <Form.Label>اختر المجال</Form.Label>
+              <Form.Label>المجال (قطاع المساعدة)</Form.Label>
               <Form.Control
                 as="select"
                 name="category"
@@ -655,9 +736,25 @@ const DonationRequestForm = () => {
               </Form.Control>
             </Form.Group>
 
+            {/* طبيعة التبرع */}
+            <Form.Group className="mt-3">
+              <Form.Label>طبيعة التبرع</Form.Label>
+              <Form.Select
+                name="donationNature"
+                value={donation.donationNature}
+                onChange={handleChange}
+              >
+                {donationNatureOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+
             {donation.category && (
-              <Form.Group className="mt-2">
-                <Form.Label>اختر نوع التبرع</Form.Label>
+              <Form.Group className="mt-3">
+                <Form.Label>نوع التبرع داخل هذا المجال</Form.Label>
                 <Form.Control
                   as="select"
                   name="type"
@@ -675,7 +772,7 @@ const DonationRequestForm = () => {
               </Form.Group>
             )}
 
-            <Form.Group className="mt-2">
+            <Form.Group className="mt-3">
               <Form.Label>وصف الحالة</Form.Label>
               <Form.Control
                 as="textarea"
@@ -688,27 +785,78 @@ const DonationRequestForm = () => {
           </div>
         )}
 
-        {/* الخطوة ٢: المكان + وسائل التواصل */}
+        {/* الخطوة ٢: الموقع + وسائل التواصل (دولية) */}
         {displayedStep === 2 && (
           <div className="step-content">
-            <Form.Group>
-              <Form.Label>الموقع (اسم المكان)</Form.Label>
-              <Form.Control
-                list="places"
-                name="place"
-                value={donation.place}
-                onChange={handleChange}
-                placeholder="اكتب أو اختر اسم المكان"
-                required
-              />
-              <datalist id="places">
-                {placesList.map((p) => (
-                  <option key={p} value={p} />
-                ))}
-              </datalist>
+            {/* داخل / خارج موريتانيا */}
+            <Form.Group className="mb-3">
+              <Form.Label>مكان وجود المستفيد</Form.Label>
+              <Form.Select
+                name="locationMode"
+                value={donation.locationMode}
+                onChange={(e) =>
+                  setDonation((prev) => ({
+                    ...prev,
+                    locationMode: e.target.value,
+                  }))
+                }
+              >
+                <option value="mr">داخل موريتانيا</option>
+                <option value="intl">خارج موريتانيا</option>
+              </Form.Select>
             </Form.Group>
 
-            {/* ✅ وسائل التواصل ثابتة */}
+            {donation.locationMode === 'mr' ? (
+              <Form.Group>
+                <Form.Label>المدينة داخل موريتانيا</Form.Label>
+                <Form.Control
+                  list="places"
+                  name="place"
+                  value={donation.place}
+                  onChange={handleChange}
+                  placeholder="اكتب أو اختر اسم المدينة داخل موريتانيا"
+                  required
+                />
+                <datalist id="places">
+                  {placesList.map((p) => (
+                    <option key={p} value={p} />
+                  ))}
+                </datalist>
+                {!isLocationValid && (
+                  <div className="text-danger small mt-1">
+                    الرجاء إدخال اسم المدينة داخل موريتانيا.
+                  </div>
+                )}
+              </Form.Group>
+            ) : (
+              <>
+                <Form.Group className="mb-3">
+                  <Form.Label>الدولة</Form.Label>
+                  <Form.Control
+                    name="foreignCountry"
+                    value={donation.foreignCountry}
+                    onChange={handleChange}
+                    placeholder="مثال: España, France, Sénégal..."
+                  />
+                </Form.Group>
+                <Form.Group>
+                  <Form.Label>المدينة</Form.Label>
+                  <Form.Control
+                    name="foreignCity"
+                    value={donation.foreignCity}
+                    onChange={handleChange}
+                    placeholder="مثال: Sevilla, París..."
+                  />
+                </Form.Group>
+                {!isLocationValid && (
+                  <div className="text-danger small mt-1">
+                    الرجاء إدخال المدينة والدولة إذا كان المستفيد خارج موريتانيا.
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* ✅ وسائل التواصل ثابتة (دولية) */}
             <Form.Group className="mt-3">
               <Form.Label>وسائل التواصل</Form.Label>
 
@@ -734,15 +882,18 @@ const DonationRequestForm = () => {
                       ...prev,
                       contactNumbers: {
                         ...prev.contactNumbers,
-                        phone: number && !validatePhoneNumberMR(number),
+                        phone:
+                          number &&
+                          !validatePhoneInternational(number),
                       },
                     }));
                   }}
+                  placeholder="مثال: +22222000000 أو 0034666000000"
                   isInvalid={!!errors.contactNumbers?.phone}
                 />
                 {errors.contactNumbers?.phone && (
                   <div className="invalid-feedback d-block">
-                    رقم غير صالح — يجب أن يكون 8 أرقام ويبدأ بـ 2 أو 3 أو 4.
+                    رقم غير صالح — أدخل رقمًا دوليًا صحيحًا.
                   </div>
                 )}
               </div>
@@ -769,15 +920,18 @@ const DonationRequestForm = () => {
                       ...prev,
                       contactNumbers: {
                         ...prev.contactNumbers,
-                        whatsapp: number && !validatePhoneNumberMR(number),
+                        whatsapp:
+                          number &&
+                          !validatePhoneInternational(number),
                       },
                     }));
                   }}
+                  placeholder="مثال: +22222000000 أو 0034666000000"
                   isInvalid={!!errors.contactNumbers?.whatsapp}
                 />
                 {errors.contactNumbers?.whatsapp && (
                   <div className="invalid-feedback d-block">
-                    رقم غير صالح — يجب أن يكون 8 أرقام ويبدأ بـ 2 أو 3 أو 4.
+                    رقم غير صالح — أدخل رقمًا دوليًا صحيحًا.
                   </div>
                 )}
               </div>
@@ -811,7 +965,7 @@ const DonationRequestForm = () => {
             {/* تظهر وسائل الدفع فقط إذا يوجد مبلغ */}
             {hasAmount && (
               <Form.Group className="mt-3">
-                <Form.Label>وسائل الدفع (تظهر فقط عند إدخال مبلغ)</Form.Label>
+                <Form.Label>وسائل الدفع (تستعمل في موريتانيا فقط)</Form.Label>
 
                 {paymentOptions.map(({ method, label, icon }) => {
                   const selected = donation.paymentMethods.find(
@@ -843,7 +997,7 @@ const DonationRequestForm = () => {
                         <>
                           <Form.Control
                             type="text"
-                            placeholder={`رقم ${label}`}
+                            placeholder={`رقم ${label} (8 أرقام موريتانية)`}
                             value={selected.phone}
                             isInvalid={!!errors.paymentPhones?.[method]}
                             onChange={(e) => {
@@ -867,7 +1021,7 @@ const DonationRequestForm = () => {
 
                           {errors.paymentPhones?.[method] && (
                             <div className="invalid-feedback d-block">
-                              أدخل رقم صالح (8 أرقام ويبدأ بـ 2 أو 3 أو 4).
+                              أدخل رقم موريتاني صالح (8 أرقام ويبدأ بـ 2 أو 3 أو 4).
                             </div>
                           )}
                         </>
@@ -967,6 +1121,13 @@ const DonationRequestForm = () => {
                 </div>
 
                 <div className="summary-item">
+                  <div className="summary-label">طبيعة التبرع</div>
+                  <div className="summary-value">
+                    {donationNatureLabels[donation.donationNature] || '—'}
+                  </div>
+                </div>
+
+                <div className="summary-item">
                   <div className="summary-label">نوع التبرع</div>
                   <div className="summary-value">
                     {donation.type || '—'}
@@ -975,9 +1136,7 @@ const DonationRequestForm = () => {
 
                 <div className="summary-item">
                   <div className="summary-label">الموقع</div>
-                  <div className="summary-value">
-                    {donation.place || '—'}
-                  </div>
+                  <div className="summary-value">{summaryPlace}</div>
                 </div>
 
                 <div className="summary-item">
@@ -1064,7 +1223,7 @@ const DonationRequestForm = () => {
                 submitting ||
                 (displayedStep === 1 && !isStep1Valid) ||
                 (displayedStep === 2 &&
-                  (!donation.place || !contactsValid)) ||
+                  (!isLocationValid || !contactsValid)) ||
                 (displayedStep === 3 && hasAmount && !paymentsValid)
               }
               type="button"
