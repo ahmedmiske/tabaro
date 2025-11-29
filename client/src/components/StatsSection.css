@@ -1,0 +1,65 @@
+/* قسم الإنجازات العصري */
+.stats-modern-section {
+	padding: 3rem 0 2rem 0;
+	background: linear-gradient(135deg, #f8fafc 0%, #e0f7fa 100%);
+	text-align: center;
+}
+.stats-modern-title {
+	font-size: 2.3rem;
+	font-weight: 900;
+	margin-bottom: 2.5rem;
+	color: #1976d2;
+	letter-spacing: 1px;
+}
+.stats-modern-grid {
+	display: flex;
+	justify-content: center;
+	gap: 2.5rem;
+	flex-wrap: wrap;
+}
+.stat-modern-card {
+	min-width: 260px;
+	max-width: 320px;
+	background: #fff;
+	border-radius: 1.7rem;
+	box-shadow: 0 8px 32px rgba(25, 118, 210, 0.10);
+	padding: 2.2rem 1.5rem 1.7rem 1.5rem;
+	text-align: center;
+	border: 2.5px solid transparent;
+	transition: box-shadow 0.3s, transform 0.3s;
+	position: relative;
+	overflow: hidden;
+}
+.stat-modern-card:hover {
+	box-shadow: 0 16px 48px rgba(25, 118, 210, 0.18);
+	transform: translateY(-7px) scale(1.04);
+}
+.stat-modern-icon {
+	font-size: 3.5rem;
+	margin-bottom: 1.1rem;
+	border-radius: 50%;
+	padding: 0.6rem 1.1rem;
+	background: #f8fafc;
+	display: inline-block;
+	box-shadow: 0 2px 12px rgba(25, 118, 210, 0.10);
+}
+.stat-modern-value {
+	font-size: 2.7rem;
+	font-weight: 900;
+	margin-bottom: 0.7rem;
+	letter-spacing: 1px;
+	text-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
+}
+.stat-modern-label {
+	font-size: 1.15rem;
+	font-weight: 700;
+	margin-bottom: 0.4rem;
+	letter-spacing: 0.5px;
+}
+.stat-modern-desc {
+	font-size: 1rem;
+	color: #6B7280;
+	opacity: 0.92;
+	margin-bottom: 0.2rem;
+}
+ 

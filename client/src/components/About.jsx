@@ -4,6 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 import SectionHeader from "./SectionHeader.jsx";
 import IconsSection from "./IconsSection.jsx";
 import ReadyToDonateSection from "./ReadyToDonateSection.jsx";
+import StatsSection from "./StatsSection.jsx";
 import AboutHero from "./AboutHero.jsx";
 import ServicesSection from "./ServicesSection.jsx";
 import ContactForm from "./ContactForm.jsx";
@@ -80,26 +81,6 @@ function About() {
     return () => observer.disconnect();
   }, []);
 
-  const stats = [
-    {
-      icon: "❤️",
-      value: "1240",
-      label: "تبرع ناجح",
-      description: "ساهمنا في إنقاذ الأرواح",
-    },
-    {
-      icon: "🚀",
-      value: "85",
-      label: "حملة فعالة",
-      description: "لجمع التبرعات والمبادرات",
-    },
-    {
-      icon: "✓",
-      value: "530",
-      label: "متبرع موثّق",
-      description: "في مجتمعنا المتنامي",
-    },
-  ];
 
   return (
     <section className="about-container" aria-labelledby="about-title" ref={sectionRef}>
@@ -146,20 +127,10 @@ function About() {
           />
         </div>
       </section>
-       
-      <section className="stats-section" aria-label="إحصائيات المنصة">
-
-        <div className="stats-grid">
-          {stats.map((stat, index) => (
-            <div key={index} className="stat-card reveal" data-animate="up">
-              <div className="stat-icon">{stat.icon}</div>
-              <div className="stat-value" data-target={stat.value}>0</div>
-              <div className="stat-label">{stat.label}</div>
-              <div className="stat-description">{stat.description}</div>
-            </div>
-          ))}
-        </div>
+      <section>
+      <StatsSection />
       </section>
+       
 
       {/* ===== تواصل معنا ===== */}
      

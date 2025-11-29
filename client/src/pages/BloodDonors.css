@@ -146,21 +146,22 @@
 
 /* بطاقة المتبرع (حجم مريح ومتماسك) */
 .donor-card {
-  border: none;
-  border-radius: 16px;
-  overflow: hidden;
+  display: grid;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  padding: 1.5rem 1.2rem;
+  grid-template-columns: 3fr;
+  align-items: center;
+  transition: box-shadow 0.2s, transform 0.2s;
   position: relative;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, .08);
-  transition: .3s;
-  animation: fadeInUp .6s ease-out;
-  min-height: 340px;
-  /* 👈 اجعل الكارد كبيرًا بما يكفي */
-
+  overflow: hidden;
 }
 
-@media (max-width: 576px) {
+@media (max-width: 900px) {
   .donor-card {
-    min-height: 300px;
+    grid-template-columns: 1fr;
+    padding: 1.2rem 0.7rem;
   }
 }
 
@@ -335,6 +336,19 @@
 
 .badge.bg-success {
   background-color: #00A443 !important;
+}
+
+/* شبكة بطاقات المتبرعين بالدم */
+.donors-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+@media (max-width: 900px) {
+  .donors-grid {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+  }
 }
 
 /* Responsive */
