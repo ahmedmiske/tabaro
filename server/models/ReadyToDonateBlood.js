@@ -1,41 +1,62 @@
 // server/models/ReadyToDonateBlood.js
 const mongoose = require('mongoose');
 
-const ContactMethodSchema = new mongoose.Schema({
-  method: { type: String, enum: ['phone', 'whatsapp'], required: true },
-  number: { type: String, required: true }
-}, { _id: false });
-
-const ReadyToDonateBloodSchema = new mongoose.Schema({
-  // 👈 الموقع إلزامي
-  location: { type: String, required: true },
-
-  bloodType: {
-    type: String,
-    required: true,
-    enum: ['A+','A-','B+','B-','AB+','AB-','O+','O-','غير معروف']
+const ContactMethodSchema = new mongoose.Schema(
+  {
+    method: {
+      type: String,
+      enum: ['phone', 'whatsapp'],
+      required: true,
+    },
+    number: { type: String, required: true },
   },
+  { _id: false }
+);
 
-  // 👈 آخر أجل لمهلة التبرع
-  availableUntil: {
-    type: Date,
-    required: true,
+const ReadyToDonateBloodSchema = new mongoose.Schema(
+  {
+    // 👈 الموقع إلزامي (اسم البلدية / الحي)
+    location: { type: String, required: true, trim: true },
+
+    bloodType: {
+      type: String,
+      required: true,
+      enum: ['A+','A-','B+','B-','AB+','AB-','O+','O-','غير معروف'],
+    },
+
+    // 👈 آخر أجل لمهلة التبرع
+    availableUntil: {
+      type: Date,
+      required: true,
+    },
+
+    note: { type: String, default: '' },
+
+    contactMethods: {
+      type: [ContactMethodSchema],
+      default: [],
+      validate: {
+        validator: (v) => Array.isArray(v) && v.length > 0,
+        message: 'At least one contact method is required',
+      },
+    },
+
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
   },
+  { timestamps: true, collection: 'ready_to_donate_blood' }
+);
 
-  note: { type: String, default: '' },
+ReadyToDonateBloodSchema.index({
+  location: 'text',
+  bloodType: 'text',
+  note: 'text',
+});
 
-  contactMethods: {
-    type: [ContactMethodSchema],
-    validate: v => Array.isArray(v) && v.length > 0
-  },
-
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    default: null
-  }
-}, { timestamps: true, collection: 'ready_to_donate_blood' });
-
-ReadyToDonateBloodSchema.index({ location: 'text', bloodType: 'text', note: 'text' });
-
-module.exports = mongoose.model('ReadyToDonateBlood', ReadyToDonateBloodSchema);
+module.exports = mongoose.model(
+  'ReadyToDonateBlood',
+  ReadyToDonateBloodSchema
+);

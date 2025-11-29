@@ -22,7 +22,7 @@ export default function ManageCenterBlood() {
           <button
             type="button"
             className="mc-back"
-            onClick={() => navigate('/manage')}
+             onClick={() => navigate(-1)}
           >
             <span className="mc-back__icon" aria-hidden>↩</span>
             <span className="mc-back__label">رجوع للمركز</span>

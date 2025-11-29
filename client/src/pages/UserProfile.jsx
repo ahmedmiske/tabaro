@@ -289,7 +289,7 @@ function UserProfile() {
                 {view === 'account' && (
                   <AccountDetails userDetails={userDetails} />
                 )}
-
+{/* 
                 {view === 'offers-blood' && (
                   <MyDonationOffersBlood onOpenDetails={openDetails} />
                 )}
@@ -302,11 +302,11 @@ function UserProfile() {
                 )}
                 {view === 'req-general' && (
                   <MyRequestsWithOffersGeneral onOpenDetails={openDetails} />
-                )}
+                )} */}
 
-                {view === 'notifications' && (
+                {/* {view === 'notifications' && (
                   <NotificationsPage onOpenDetails={openDetails} />
-                )}
+                )} */}
               </>
             )}
           </div>
@@ -322,11 +322,11 @@ function UserProfile() {
             {!isVisitorProfile && (
               <>
                 {view === 'account' && <AccountDetails userDetails={userDetails} />}
-                {view === 'offers-blood' && <MyDonationOffersBlood onOpenDetails={openDetails} />}
+                {/* {view === 'offers-blood' && <MyDonationOffersBlood onOpenDetails={openDetails} />}
                 {view === 'offers-general' && <MyDonationOffersGeneral onOpenDetails={openDetails} />}
                 {view === 'req-blood' && <MyRequestsWithOffersBlood onOpenDetails={openDetails} />}
                 {view === 'req-general' && <MyRequestsWithOffersGeneral onOpenDetails={openDetails} />}
-                {view === 'notifications' && <NotificationsPage onOpenDetails={openDetails} />}
+                {view === 'notifications' && <NotificationsPage onOpenDetails={openDetails} />} */}
               </>
             )}
           </Drawer>

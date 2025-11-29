@@ -694,12 +694,7 @@ export default function DonationRequestDetails() {
             <Button
               variant="outline-light"
               size="sm"
-              onClick={() => {
-                if (location.state?.from && window.history.length > 1) {
-                  navigate(-1);
-                } else {
-                  navigate(backTarget, { replace: true });
-                }
+              onClick={() => {navigate(-1);
               }}
               className="rounded-pill px-3"
               title="رجوع"

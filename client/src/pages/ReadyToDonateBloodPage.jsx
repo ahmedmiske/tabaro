@@ -1,5 +1,5 @@
 // src/pages/ReadyToDonateBloodPage.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Form, Alert } from "react-bootstrap";
 import {
   FiDroplet,
@@ -21,13 +21,16 @@ export default function ReadyToDonateBloodPage() {
   const bgUrl = "/images/tabar5.jpg";
   const todayStr = new Date().toISOString().slice(0, 10); // yyyy-mm-dd
 
+  // مرجع لأعلى الكومبوننت
+  const topRef = useRef(null);
+
   const [form, setForm] = useState({
-    location: "",        // بلدية / مكان التوفر داخل موريتانيا (إجباري)
+    location: "",
     bloodType: "",
     phone: "",
     whatsapp: "",
-    availableUntil: "",  // آخر أجل لمهلة التبرع (إجباري)
-    note: "",            // وصف مختصر للتبرع
+    availableUntil: "",
+    note: "",
   });
 
   const [touched, setTouched] = useState({
@@ -98,17 +101,14 @@ export default function ReadyToDonateBloodPage() {
   const computeErrors = (values) => {
     const e = {};
 
-    // ✅ المكان إلزامي ومربوط ببلدية حقيقية
     if (!values.location || !values.location.trim()) {
       e.location = "الرجاء إدخال اسم البلدية.";
     } else if (!findCommuneByName(values.location)) {
       e.location = "الرجاء اختيار بلدية من القائمة المقترحة.";
     }
 
-    // فصيلة الدم إلزامية
     if (!values.bloodType) e.bloodType = "الرجاء اختيار فصيلة الدم";
 
-    // آخر أجل للتبرع إلزامي ويجب أن يكون من اليوم فصاعدًا
     if (!values.availableUntil) {
       e.availableUntil = "الرجاء اختيار آخر أجل لتوفر التبرع.";
     } else if (values.availableUntil < todayStr) {
@@ -123,7 +123,6 @@ export default function ReadyToDonateBloodPage() {
     if (values.whatsapp && !whatsappValid)
       e.whatsapp = "رقم غير صالح (8 أرقام ويبدأ بـ 2 أو 3 أو 4)";
 
-    // يجب وجود وسيلة تواصل واحدة صحيحة على الأقل
     if (!phoneValid && !whatsappValid)
       e.contact = "يجب إدخال رقم هاتف أو واتساب واحد على الأقل بشكل صحيح.";
 
@@ -136,6 +135,8 @@ export default function ReadyToDonateBloodPage() {
     setForm(next);
     setTouched((prev) => ({ ...prev, [name]: true }));
     setErrors(computeErrors(next));
+    setMsg("");
+    setSuccess(false);
   };
 
   const validateForm = () => {
@@ -152,28 +153,61 @@ export default function ReadyToDonateBloodPage() {
     return Object.keys(e).length === 0;
   };
 
+  // 🔼 عندما ينجح التسجيل نمرّر الحاوية لأعلى الشاشة
+  useEffect(() => {
+    if (success && topRef.current) {
+      topRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [success]);
+
   const submit = async (ev) => {
     ev.preventDefault();
+    setMsg("");
+    setSuccess(false);
+
     if (!validateForm()) return;
+
+    const contactMethods = [];
+    if (validatePhone(form.phone)) {
+      contactMethods.push({ method: "phone", number: form.phone.trim() });
+    }
+    if (validatePhone(form.whatsapp)) {
+      contactMethods.push({ method: "whatsapp", number: form.whatsapp.trim() });
+    }
 
     const payload = {
       type: "blood",
-      location: form.location,               // بلدية حقيقية
+      place: selectedCommune?.name_ar || form.location,
+      location: {
+        communeCode: selectedCommune?.code || null,
+        communeName: selectedCommune?.name_ar || form.location || "",
+        moughataaCode: selectedMoughataa?.code || null,
+        moughataaName: selectedMoughataa?.name_ar || "",
+        wilayaCode: selectedWilaya?.code || null,
+        wilayaName: selectedWilaya?.name_ar || "",
+      },
       bloodType: form.bloodType,
-      availableUntil: form.availableUntil,   // يُرسل للباكند
+      availableUntil: form.availableUntil,
       note: form.note,
-      contactMethods: [
-        { method: "phone", number: form.phone },
-        { method: "whatsapp", number: form.whatsapp },
-      ],
+      contactMethods,
     };
 
     try {
-      await fetchWithInterceptors("/api/ready-to-donate", {
+      const res = await fetchWithInterceptors("/api/ready-to-donate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+
+      if (!res.ok) {
+        const msgText =
+          res.body?.message ||
+          res.message ||
+          "❌ حدث خطأ أثناء الإرسال. حاول لاحقًا.";
+        setMsg(msgText);
+        setSuccess(false);
+        return;
+      }
 
       setMsg("✅ تم تسجيل استعدادك للتبرع بالدم بنجاح.");
       setSuccess(true);
@@ -196,30 +230,43 @@ export default function ReadyToDonateBloodPage() {
         note: false,
       });
     } catch (err) {
+      console.error("POST /api/ready-to-donate error:", err);
       setMsg("❌ حدث خطأ أثناء الإرسال. حاول لاحقًا.");
+      setSuccess(false);
     }
   };
 
-  return (
-    <div className="ready-blood-row">
-      {/* الصورة */}
-      <section
-        className="general-hero"
-        style={{ backgroundImage: `url(${bgUrl})` }}
-      >
-        <div className="hero-content">
-          <h1 className="fw-blood mb-2">
-            <FiDroplet className="me-2" /> مستعد للتبرع بالدم
-          </h1>
-          <p className="pBlood">تبرعك قد ينقذ حياة أحدهم.</p>
-        </div>
-      </section>
+  // 👈 هنا نحدّد الكلاسات حسب حالة النجاح
+  const rowClassName = `ready-blood-row ${
+    success ? "ready-blood-row--success" : "ready-blood-row--normal"
+  }`;
 
-      {/* الفورم */}
+  return (
+    <div className={rowClassName} ref={topRef}>
+      {/* الصورة: تختفي بعد النجاح */}
+      {!success && (
+        <section
+          className="general-hero"
+          style={{ backgroundImage: `url(${bgUrl})` }}
+        >
+          <div className="hero-content">
+            <h1 className="fw-blood mb-2">
+              <FiDroplet className="me-2" /> مستعد للتبرع بالدم
+            </h1>
+            <p className="pBlood">تبرعك قد ينقذ حياة أحدهم.</p>
+          </div>
+        </section>
+      )}
+
+      {/* الفورم / أو رسالة النجاح */}
       <div className="form-side">
         <div className="form-container">
-          <div className="form-title">سجّل استعدادك للتبرع</div>
-          <div className="form-header">املأ البيانات التالية</div>
+          {!success && (
+            <>
+              <div className="form-title">سجّل استعدادك للتبرع</div>
+              <div className="form-header">املأ البيانات التالية</div>
+            </>
+          )}
 
           {msg && (
             <Alert variant={msg.startsWith("✅") ? "success" : "danger"}>
@@ -395,10 +442,10 @@ export default function ReadyToDonateBloodPage() {
           )}
 
           {success && (
-            <div className="success-next">
+            <div className="success-next-container">
               <h4 className="mt-3">🎉 تم التسجيل بنجاح</h4>
 
-              <Link to="/blood-requests" className="next-btn">
+              <Link to="/blood-donations" className="next-btn">
                 عرض طلبات تبرع الدم
               </Link>
 

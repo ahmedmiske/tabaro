@@ -634,12 +634,10 @@ export default function BloodDonationDetails() {
               size="sm"
               className="back-btn-strong"
               onClick={() => {
-                if (window.history.length > 1) {
+                
                   navigate(-1);
-                } else {
-                  navigate('/profile?view=req-blood');
                 }
-              }}
+              }
             >
               ← رجوع
             </Button>

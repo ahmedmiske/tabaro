@@ -1,28 +1,31 @@
-// server/controllers/readyToDonateGeneralController.js
-const ReadyToDonateGeneral = require('../models/ReadyToDonateGeneral');
+// server/controllers/readyToDonateBloodController.js
+const ReadyToDonateBlood = require('../models/ReadyToDonateBlood');
 
-const isGenericPhone = (v = '') => /^[0-9]{6,15}$/.test(String(v).trim());
+// رقم موريتاني: 8 أرقام ويبدأ بـ 2 أو 3 أو 4
+const isMRPhone = (v = '') => /^(2|3|4)\d{7}$/.test(String(v).trim());
 
 exports.create = async (req, res) => {
   try {
     const {
-      type,              // يمكن تجاهله، الموديل يضع 'general'
-      locationMode = 'none',
       location = '',
-      city = '',
-      country = '',
+      bloodType = '',
       availableUntil,
       note = '',
-      extra = {},
       contactMethods = [],
+      // type موجود في الفورم لكن لا نحتاجه هنا
     } = req.body || {};
 
-    // نوع التبرع
-    if (!extra || !extra.category) {
-      return res.status(400).json({ error: 'category is required' });
+    // ✅ الموقع (اسم البلدية) إلزامي
+    if (!location || !String(location).trim()) {
+      return res.status(400).json({ error: 'location is required' });
     }
 
-    // تاريخ الانتهاء
+    // ✅ فصيلة الدم إلزامية
+    if (!bloodType) {
+      return res.status(400).json({ error: 'bloodType is required' });
+    }
+
+    // ✅ تاريخ الانتهاء
     if (!availableUntil) {
       return res.status(400).json({ error: 'availableUntil is required' });
     }
@@ -31,64 +34,72 @@ exports.create = async (req, res) => {
       return res.status(400).json({ error: 'availableUntil is invalid date' });
     }
 
-    // وسائل التواصل
-    if (!Array.isArray(contactMethods) || contactMethods.length === 0) {
+    // ✅ وسائل التواصل من الفورم: contactMethods: [{method, number}, ...]
+    if (!Array.isArray(contactMethods)) {
       return res
         .status(400)
-        .json({ error: 'At least one contact method is required' });
+        .json({ error: 'contactMethods must be an array' });
     }
 
-    for (const c of contactMethods) {
-      if (!c?.method || !c?.number) {
-        return res.status(400).json({ error: 'Invalid contact method' });
-      }
-      if (!['phone', 'whatsapp'].includes(c.method)) {
-        return res.status(400).json({ error: 'Invalid contact method type' });
-      }
-      if (!isGenericPhone(c.number)) {
-        return res.status(400).json({
-          error: 'Contact numbers must be digits only (6–15 chars).',
-        });
-      }
+    // نزيل العناصر الفارغة، ونقبل phone / whatsapp فقط، ورقم موريتاني صحيح
+    const cleaned = contactMethods
+      .map((c) => ({
+        method: (c?.method || '').trim(),
+        number: (c?.number || '').trim(),
+      }))
+      .filter(
+        (c) =>
+          c.method &&
+          ['phone', 'whatsapp'].includes(c.method) &&
+          isMRPhone(c.number),
+      );
+
+    if (!cleaned.length) {
+      return res.status(400).json({
+        error:
+          'At least one valid contact (phone or whatsapp Mauritanian number) is required',
+      });
     }
 
-    const doc = await ReadyToDonateGeneral.create({
-      locationMode,
-      location: (location || '').trim(),
-      city: (city || '').trim(),
-      country: (country || '').trim(),
+    const createdBy = req.user?._id || null;
+
+    const doc = await ReadyToDonateBlood.create({
+      location: String(location).trim(),
+      bloodType,
       availableUntil: availableDate,
       note,
-      extra,
-      contactMethods,
-      createdBy: req.user?._id || null,
+      contactMethods: cleaned,
+      createdBy,
     });
 
     return res.status(201).json({ ok: true, data: doc });
   } catch (err) {
-    console.error('ReadyToDonateGeneral.create', err);
+    console.error('ReadyToDonateBlood.create', err);
     return res.status(500).json({ error: 'Internal server error' });
   }
 };
 
 exports.list = async (req, res) => {
   try {
-    const { q = '', city, country, category } = req.query || {};
-    const filter = { type: 'general' };
+    const { q = '', bloodType, location } = req.query || {};
+    const filter = {};
 
-    if (city) filter.city = city;
-    if (country) filter.country = country;
-    if (category) filter['extra.category'] = category;
-    if (q) filter.$text = { $search: q };
+    if (bloodType) filter.bloodType = bloodType;
+    if (location) filter.location = location;
 
-    const data = await ReadyToDonateGeneral.find(filter)
+    // بحث نصي بسيط
+    if (q) {
+      filter.$text = { $search: q };
+    }
+
+    const data = await ReadyToDonateBlood.find(filter)
       .sort({ createdAt: -1 })
       .limit(200)
       .populate('createdBy', 'firstName lastName profileImage');
 
     return res.json({ ok: true, data });
   } catch (err) {
-    console.error('ReadyToDonateGeneral.list', err);
+    console.error('ReadyToDonateBlood.list', err);
     return res.status(500).json({ error: 'Internal server error' });
   }
 };

@@ -174,7 +174,7 @@ export default function DashboardPage({
           </p>
 
           {/* ✅ زر الصفحة الشخصية – المكان الصحيح UXيًا */}
-          <Link to="/profile" className="dash-profile-link">
+          <Link to="/profile?tab=personal" className="dash-profile-link">
             الانتقال إلى صفحتي الشخصية
           </Link>
         </div>
