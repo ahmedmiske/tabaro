@@ -1,20 +1,5 @@
-.stats-section {
-  background: url('../images/fundo-about.png') center/cover no-repeat;
-  position: relative;
-  z-index: 1;
-  padding-top: 3rem;
-  padding-bottom: 3rem;
-}
-
-.stats-section::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.85);
-  /* طبقة شفافة لزيادة وضوح النص */
-  z-index: 2;
-}
-
+ 
+ 
  
 
 /* ====== Contact Info List Design ====== */

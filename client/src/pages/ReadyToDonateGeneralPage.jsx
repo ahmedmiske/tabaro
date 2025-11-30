@@ -3,6 +3,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import { Form, Alert } from "react-bootstrap";
 import {
   FiHeart,
+  FiDroplet,
   FiCheck,
   FiMapPin,
   FiPhone,
@@ -271,16 +272,14 @@ export default function ReadyToDonateGeneralPage() {
       {!success && (
         <section
           className="general-hero"
-          style={{
-            backgroundImage: `url(${bgUrl})`,
-          }}
         >
           <div className="hero-content">
-            <h1 className="fw-bold mb-2">
-              <FiHeart className="me-2" /> مستعد للتبرع العام
+            <h1 className="hero-title-general">
+              <FiDroplet className="me-2 icon-blood" /> مستعد للتبرع العام
             </h1>
-            <p className="mb-3">مساهمتك تحدث فرقًا حقيقيًا في حياة الناس.</p>
+            <p className="hero-desc-blood">مساهمتك تحدث فرقًا حقيقيًا في حياة الناس.</p>
           </div>
+
         </section>
       )}
 

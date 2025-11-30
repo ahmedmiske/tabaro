@@ -1,82 +1,89 @@
-/* 🟢 وضع النجاح: جعل الحاوية في الوسط */
-.ready-blood-row.ready-blood-row--success {
-  display: flex;              /* بدل الجريد أو أي شيء موجود */
-  flex-direction: column;
-  align-items: center;        /* وسط أفقياً */
-  justify-content: center;    /* وسط عمودياً */
-  min-height: calc(100vh - 140px); /* ارتفاع مناسب بعد الهيدر */
-  padding: 2rem 1rem;
-}
-
-/* تضييق عرض الكارت في وضع النجاح */
-.ready-blood-row.ready-blood-row--success .form-side {
-  width: 100%;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-/* لو بقيت أي general-hero موجودة داخل نفس الروت هتختفي احتياطاً */
-.ready-blood-row.ready-blood-row--success .general-hero {
-  display: none;
-}
-
-/* تنسيق بسيط لمحتوى النجاخ نفسه */
-.success-next-container {
-  text-align: center;
-}
-
-.success-next-container .next-btn {
-  display: block;
-  width: 100%;
-  max-width: 380px;
-  margin: 0.75rem auto;
-}
-
-/* 🟢 قبل النجاح: صورة + فورم جنب بعض (ديسكتوب) */
-.ready-blood-row.ready-blood-row--normal {
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-  gap: 2rem;
-  align-items: stretch;
-}
-
-/* موبايل/شاشات صغيرة: الصورة فوق والفورم تحت */
-@media (max-width: 992px) {
-  .ready-blood-row.ready-blood-row--normal {
-    display: block;
-  }
-}
-
-/* 🟢 بعد النجاح: نتحول إلى flex في الوسط */
-.ready-blood-row.ready-blood-row--success {
+/* Hero mejorado para sección de donación de sangre */
+.general-hero-bold {
+  position: relative;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: calc(100vh - 140px);
-  padding: 2rem 1rem;
-}
-
-/* تضييق عرض الكارت في وضع النجاح */
-.ready-blood-row.ready-blood-row--success .form-side {
   width: 100%;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-/* احتياطاً لو ظهرت general-hero داخل success */
-.ready-blood-row.ready-blood-row--success .general-hero {
-  display: none;
-}
-
-/* تنسيق بسيط لمحتوى النجاح */
-.success-next-container {
+  background-image:
+    url('../../public/images/tabar5.jpg');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
   text-align: center;
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow: 0 8px 32px rgba(46, 125, 50, 0.12);
+  border-radius: 1.5rem;
+}
+ 
+.general-hero-bold p {
+  margin: 0;
+  font-size: 1.25rem;
+  color:forestgreen ;
+  font-weight: 500;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
 }
 
-.success-next-container .next-btn {
-  display: block;
-  width: 100%;
-  max-width: 380px;
-  margin: 0.75rem auto;
+
+.form-side {
+  margin: auto;
+  max-width: 60rem;
+  min-width: 40rem;
+  margin-bottom: 2rem;
+}
+
+.form-container {
+  background: #14862b37;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  width: 80%;
+  min-width: 100%;
+  -webkit-border-radius: 16px;
+  -moz-border-radius: 16px;
+  -ms-border-radius: 16px;
+  -o-border-radius: 16px;
+}
+
+.general-hero-bold {
+   font-weight: 900;
+  font-size: 2.7rem;
+  letter-spacing: 1.5px;
+  margin-bottom: 1rem;
+  color: #00C853;
+  text-shadow: 0 4px 16px rgba(46, 125, 50, 0.25), 0 1px 0 #fff;
+  padding: 0.25em 0.5em;
+  border-radius: 12px;
+  display: inline-block;
+}
+
+.general-hero-bold p {
+  margin: 0;
+  font-size: 1.05rem;
+  color: white;
+  font-weight: 500;
+}
+
+.general-hero-bold .hero-content {
+  padding: 64px 16px;
+}
+@media (max-width: 600px) {
+  .general-hero-bold {
+    min-height: 28vh;
+    border-radius: 0.5rem;
+  }
+
+  .general-hero-bold .hero-content {
+    padding: 2rem 0.5rem;
+    max-width: 95vw;
+  }
+
+  .general-hero-bold h1 {
+    font-size: 1.5rem;
+  }
+
+  .general-hero-bold p {
+    font-size: 1rem;
+  }
 }

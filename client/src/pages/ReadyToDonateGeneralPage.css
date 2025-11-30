@@ -2,25 +2,92 @@
 
 /* ===== Ready To Donate - GENERAL HERO & INFO BOX ===== *
 /* ===== صف الهيرو والفورم جنباً إلى جنب ===== */
-.ready-general-row {
-  display: flex;
-  gap: 10px;
-  align-items: stretch;
-  padding: 2rem;
-}
+ 
 
-.general-hero {
-  flex: 1 0 45%;
-  min-width: 320px;
+/* Hero mejorado para sección general */
+.ready-general-row {
+  background-color: ;
+} 
+
+.general-hero{
+  position: relative;
   display: flex;
-  flex-direction: column;
+  align-items: center;
   justify-content: center;
+  max-height: 40vh;
+  min-height: 20vh;
+  width: 100%;
+  background: linear-gradient(120deg, #00C853 0%, #b2ff59 100%);
+  background-image: url('../../public/images/tabar6.jpg');
+  background-blend-mode: multiply;
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
+  text-align: center;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 1rem 0;
 }
 
-.form-side {
+ 
+
+.hero-title-general {
+  font-weight: 900;
+  font-size: 2.7rem;
+  letter-spacing: 1.5px;
+  margin-bottom: 1rem;
+  color: #00C853;
+  text-shadow: 0 4px 16px rgba(46, 125, 50, 0.25), 0 1px 0 #fff;
+  padding: 0.25em 0.5em;
+  border-radius: 12px;
+  display: inline-block;
+}
+
+.hero-icon-wrapper {
+  display: inline-block;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.18);
+  padding: 0.15em 0.35em 0.15em 0.15em;
+  margin-right: 0.5em;
+  vertical-align: middle;
+}
+
+.hero-desc-general {
+  font-size: 1.35rem;
+  color: #fff;
+  font-weight: 600;
+  text-shadow: 0 2px 8px rgba(46, 125, 50, 0.25);
+  margin-bottom: 1.5rem;
+}
+
+.general-hero p {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #00C853;
+  font-weight: 500;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.18);
+}
+.hero-content {
+  padding: 64px 16px;
+}
+@media (max-width: 600px) {
+  .general-hero-global {
+    min-height: 28vh;
+    border-radius: 0.5rem;
+  }
+  .general-hero .hero-content {
+    padding: 2rem 0.5rem;
+    max-width: 95vw;
+  }
+  .general-hero h1 {
+    font-size: 1.5rem;
+  }
+  .general-hero p {
+    font-size: 1rem;
+  }
+}
+
+/* .form-side {
   min-width: 400px;
   max-width: 600px;
   display: flex;
@@ -29,7 +96,7 @@
   padding: 0px;
  
 }
-
+ */
 .form-container {
   background: #ffffff;
   padding: 2rem;
@@ -42,32 +109,19 @@
   -ms-border-radius:  16px;
   -o-border-radius: 16px;
 }
-
-
 .donation-form {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
   width: 100%;
-  
 }
-
-
-
 @media (max-width: 900px) {
   .ready-general-row {
     flex-direction: column;
   }
-
   .form-side,
   .general-hero {
     min-width: 0;
-  }
-
-  .general-hero {
-    max-height: 18vh;
-
-
   }
 }
 
@@ -77,24 +131,19 @@
   text-align: center;
   overflow: clip;
   isolation: isolate;
-
   backdrop-filter: blur(var(--blur));
 }
 
-
-.general-hero .hero-content {
-  padding: 48px 12px;
-}
-
+ 
 /* لون العنوان والنص الرئيسي بالبرتقالي */
-.general-hero h1 {
+.general-hero-global h1 {
   font-weight: 800;
   letter-spacing: .5px;
   margin-bottom: .35rem;
-  color: #e05a2e;
+  color: #2E7D32;
 }
 
-.general-hero p {
+.general-hero-global p {
   margin: 0;
   font-size: 1.05rem;
   color: white;
@@ -130,19 +179,17 @@
 
 
 @media (min-width:768px) {
-  .general-hero {
+  .general-hero-global {
     min-height: 380px;
   }
 
-  .general-hero .hero-content {
-    padding: 64px 16px;
-  }
+  
 
-  .general-hero h1 {
+  .general-hero-global h1 {
     font-size: 2.25rem;
   }
 
-  .general-hero p {
+  .general-hero-global p {
     font-size: 1.1rem;
   }
 }
@@ -153,7 +200,7 @@
     padding: 0.25rem;
     gap: 0.25rem;
   }
-
+/* 
   .form-side,
   .general-hero {
     min-width: 0;
@@ -162,39 +209,27 @@
     padding: 0;
     box-sizing: border-box;
   }
+  */
 
-  .general-hero .hero-content {
-    padding: 8px 1px;
-  }
-
-  .general-hero img {
+  /* .general-hero img {
     max-width: 100%;
     height: auto;
     display: block;
     margin: 0;
-  }
+  } */
 
-  .general-hero h1 {
+  .general-hero-global h1 {
     font-size: 1.3rem;
   }
 
-  .general-hero p {
+  .general-hero-global p {
     font-size: 0.95rem;
   }
 }
 
 @media (max-width: 600px) {
-  .ready-general-row {
-    padding: 0.1rem;
-    gap: 0.1rem;
-  }
-  .general-hero{
-    max-height: 18vh;
-}
-
-
   .form-side,
-  .general-hero {
+  .general-hero-global {
     padding: 0;
     min-width: 0;
     width: 100%;
@@ -202,22 +237,17 @@
     box-sizing: border-box;
   }
 
-  .general-hero .hero-content {
+  .general-hero-global .hero-content {
     padding: 4px 0px;
   }
 
-  .general-hero img {
-    max-width: 100%;
-    height: auto;
-    display: block;
-    margin: 0;
-  }
+   
 
-  .general-hero h1 {
+  .general-hero-global h1 {
     font-size: 2.05rem;
   }
 
-  .general-hero p {
+  .general-hero-global p {
     font-size: 1.05rem;
   }
 

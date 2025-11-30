@@ -246,14 +246,14 @@ export default function ReadyToDonateBloodPage() {
       {/* الصورة: تختفي بعد النجاح */}
       {!success && (
         <section
-          className="general-hero"
+          className="general-hero-bold"
           style={{ backgroundImage: `url(${bgUrl})` }}
         >
           <div className="hero-content">
-            <h1 className="fw-blood mb-2">
-              <FiDroplet className="me-2" /> مستعد للتبرع بالدم
+            <h1 className="hero-title-blood">
+              <FiDroplet className="me-2 icon-blood" /> مستعد للتبرع بالدم
             </h1>
-            <p className="pBlood">تبرعك قد ينقذ حياة أحدهم.</p>
+            <p className="hero-desc-blood">تبرعك قد ينقذ حياة أحدهم.</p>
           </div>
         </section>
       )}

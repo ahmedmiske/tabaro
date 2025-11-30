@@ -127,7 +127,7 @@ function About() {
           />
         </div>
       </section>
-      <section>
+      <section className="stats-section">
       <StatsSection />
       </section>
        

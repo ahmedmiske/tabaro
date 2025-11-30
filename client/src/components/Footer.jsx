@@ -54,19 +54,6 @@ const Footer = () => {
               </div>
             </Col>
 
-            {/* Ministries */}
-            <Col md={3} sm={6} className="mb-4">
-              <div className="f-section">
-                <h4 className="f-section-title">الوزارات الشريكة</h4>
-                <ul className="f-list small">
-                  {ministries.map((m, idx) => (
-                    <li key={idx}>
-                      <a href={m.url} target="_blank" rel="noopener noreferrer">{m.name}</a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </Col>
 
             {/* Contact */}
             <Col md={2} sm={12} className="mb-4">
