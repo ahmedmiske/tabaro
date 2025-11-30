@@ -1,5 +1,5 @@
 /* Hero mejorado para sección de donación de sangre */
-  
+
 .general-hero-bold {
   position: relative;
   display: flex;
@@ -17,11 +17,11 @@
   box-shadow: 0 8px 32px rgba(46, 125, 50, 0.12);
   border-radius: 1.5rem;
 }
- 
+
 .hero-desc-blood {
   margin: 0;
   font-size: 1.25rem;
-  color:forestgreen ;
+  color: forestgreen;
   font-weight: 500;
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
 }
@@ -29,7 +29,7 @@
 
 .form-side {
   margin: auto;
-  max-width: 60rem;
+  max-width: 600px;
   min-width: 40rem;
   margin-bottom: 2rem;
 }
@@ -48,7 +48,7 @@
 }
 
 .general-hero-bold {
-   font-weight: 900;
+  font-weight: 900;
   font-size: 2.7rem;
   letter-spacing: 1.5px;
   margin-bottom: 1rem;
@@ -59,11 +59,12 @@
   display: inline-block;
 }
 
- 
+
 
 .general-hero-bold .hero-content {
   padding: 64px 16px;
 }
+
 @media (max-width: 600px) {
   .general-hero-bold {
     min-height: 28vh;
