@@ -13,6 +13,7 @@ import {
 import { Link } from "react-router-dom";
 import fetchWithInterceptors from "../services/fetchWithInterceptors";
 import "./ReadyToDonateBloodPage.css";
+import TitleMain from "../components/TitleMain.jsx";
 
 const bloodTypes = ["A+","A-","B+","B-","AB+","AB-","O+","O-","غير معروف"];
 const validatePhone = (v) => /^(2|3|4)\d{7}$/.test((v || "").trim());
@@ -244,7 +245,7 @@ export default function ReadyToDonateBloodPage() {
   return (
     <div className= {rowClassName} ref={topRef}>
       {/* الصورة: تختفي بعد النجاح */}
-      {!success && (
+      {/* {!success && (
         <section
           className="general-hero-bold"
           style={{ backgroundImage: `url(${bgUrl})` }}
@@ -256,15 +257,21 @@ export default function ReadyToDonateBloodPage() {
             <p className="hero-desc-blood">تبرعك قد ينقذ حياة أحدهم.</p>
           </div>
         </section>
-      )}
+      )} */}
 
       {/* الفورم / أو رسالة النجاح */}
       <div className="form-side">
         <div className="form-container">
           {!success && (
             <>
-              <div className="form-title">سجّل استعدادك للتبرع</div>
+              {/* <div className="form-title">سجّل استعدادك للتبرع</div>
               <div className="form-header">املأ البيانات التالية</div>
+               */}
+               <TitleMain 
+               title="مستعد للتبرع بالدم  🩸" 
+               subtitle = "املأ البيانات التالية مع التأكد منها قبل الارسال"  
+               size="md"
+                 />
             </>
           )}
 

@@ -1,4 +1,133 @@
 /* Hero mejorado para sección de donación de sangre */
+.ready-blood-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  gap: 2rem;
+  background-color: #f9f9f9;
+  background-image: url('../images/bg-formulario-ready.png');
+  background-repeat: no-repeat;
+  background-position: top center;   
+  background-size: contain;
+  z-index: -1000;
+}
+
+.form-container{
+  padding: 0.5rem;
+  border-radius: 16px;
+  max-height: 100%;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  -webkit-border-radius: 16px;
+  -moz-border-radius: 16px;
+  -ms-border-radius: 16px;
+  -o-border-radius: 16px;
+}
+.form-container .donation-form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border: #00C853 1.5px solid;
+  padding: 1rem;
+  border-radius: 12px;
+  -webkit-border-radius:;
+  -moz-border-radius:;
+  -ms-border-radius:;
+  -o-border-radius:;
+}
+
+.form-container .donation-form label {
+  display: block;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #333;
+}
+
+
+.form-container .donation-form input, .donation-form select, .donation-form textarea {
+  width: 100%;
+  padding: 0.3rem;
+  margin: 0.1rem auto;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+}
+
+.location-chip {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  margin: 0.25rem;
+  background-color: #e0f7e9;
+  color: #007a3d;
+  border-radius: 16px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+  -webkit-transition: background-color 0.3s, color 0.3s;
+  -moz-transition: background-color 0.3s, color 0.3s;
+  -ms-transition: background-color 0.3s, color 0.3s;
+  -o-transition: background-color 0.3s, color 0.3s;
+  -webkit-border-radius: 16px;
+  -moz-border-radius: 16px;
+  -ms-border-radius: 16px;
+  -o-border-radius: 16px;
+}
+.location-chip:hover {
+  background-color: #00C853;
+  color: #fff;
+}
+.form-container .donation-form button {
+  background-color: #00C853;
+  color: white;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  -webkit-transition: background-color 0.3s;
+  -moz-transition: background-color 0.3s;
+  -ms-transition: background-color 0.3s;
+  -o-transition: background-color 0.3s;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  -ms-border-radius: 8px;
+  -o-border-radius: 8px;
+}
+.form-container .donation-form button:hover {
+  background-color: #d96b2b;
+}
+
+
+.icon-phone {
+  color: #00C853;
+  font-size: 1.5rem;
+  vertical-align: middle;
+  margin-right: 0.5rem;
+}
+.icon-blood {
+  color: #d32f2f;
+  font-size: 1.5rem;
+  vertical-align: middle;
+  margin-right: 0.5rem;
+}
+.icon-whatsapp {
+  color: #25D366;
+  font-size: 1.5rem;
+  vertical-align: middle;
+  margin-right: 0.5rem;
+}
+/* 
+
+
+
 
 .general-hero-bold {
   position: relative;
@@ -6,8 +135,7 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  background-image:
-    url('../../public/images/tabar5.jpg');
+  background-image:   url('../../public/images/tabar5.jpg');
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
@@ -16,7 +144,11 @@
   isolation: isolate;
   box-shadow: 0 8px 32px rgba(46, 125, 50, 0.12);
   border-radius: 1.5rem;
-}
+  -webkit-border-radius: 1.5rem;
+  -moz-border-radius: 1.5rem;
+  -ms-border-radius: 1.5rem;
+  -o-border-radius: 1.5rem;
+} */
 
 .hero-desc-blood {
   margin: 0;
@@ -57,6 +189,10 @@
   padding: 0.25em 0.5em;
   border-radius: 12px;
   display: inline-block;
+  -webkit-border-radius: 12px;
+  -moz-border-radius: 12px;
+  -ms-border-radius: 12px;
+  -o-border-radius: 12px;
 }
 
 
@@ -69,7 +205,11 @@
   .general-hero-bold {
     min-height: 28vh;
     border-radius: 0.5rem;
-  }
+    -webkit-border-radius:;
+    -moz-border-radius:;
+    -ms-border-radius:;
+    -o-border-radius:;
+}
 
   .general-hero-bold .hero-content {
     padding: 2rem 0.5rem;
