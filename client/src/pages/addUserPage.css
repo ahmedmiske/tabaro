@@ -151,11 +151,8 @@
   }
 
   .signup-image-section.fullscreen-image {
-    background-image: url(../images/useradd.png);
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center bottom;
-    padding: 0;
+    background: none !important;
+    background-image: none !important;
   }
 
   .signup-form-section {

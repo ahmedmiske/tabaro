@@ -242,7 +242,7 @@ export default function ReadyToDonateBloodPage() {
   }`;
 
   return (
-    <div className={rowClassName} ref={topRef}>
+    <div className= {rowClassName} ref={topRef}>
       {/* الصورة: تختفي بعد النجاح */}
       {!success && (
         <section
