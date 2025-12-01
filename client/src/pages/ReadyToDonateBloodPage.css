@@ -134,7 +134,8 @@
   align-items: center;
   justify-content: center;
   width: 100%;
-  background-image:   url('../../public/images/tabar5.jpg');
+  background-image:
+    url('../../public/images/tabar8.png');
   background-repeat: no-repeat;
   background-position: center;
   background-size: cover;
@@ -162,6 +163,7 @@
   margin: auto;
   max-width: 600px;
   min-width: 40rem;
+  margin-top: 2rem;
   margin-bottom: 2rem;
 }
 
@@ -192,6 +194,16 @@
   -moz-border-radius: 12px;
   -ms-border-radius: 12px;
   -o-border-radius: 12px;
+}
+
+.form-title {
+  text-align: center;
+  color: #00C853;
+  font-size: 2rem;
+  font-weight: 900;
+  margin-bottom: 1.5rem;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 8px rgba(46, 125, 50, 0.18), 0 1px 0 #fff;
 }
 
 
