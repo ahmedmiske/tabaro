@@ -1,42 +1,71 @@
 // src/AuthContext.js
 import PropTypes from "prop-types";
 import { createContext, useState, useEffect, useContext } from "react";
-import { connectSocket, getSocket } from "./socket"; // ⬅️ فقط التصديرات المسماة
+import { connectSocket, getSocket } from "./socket";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
 
+  // تحميل الحالة المحفوظة من localStorage عند بداية التطبيق
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    const token = localStorage.getItem("token");
+    try {
+      const storedUser = localStorage.getItem("user");
+      const storedToken = localStorage.getItem("token");
 
-    if (storedUser && token) {
-      const parsedUser = JSON.parse(storedUser);
-      setUser(parsedUser);
-      connectSocket(token);
+      if (storedUser && storedToken) {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+        setToken(storedToken);
+        connectSocket(storedToken);
+      }
+    } catch (e) {
+      console.error("Failed to load auth from localStorage", e);
     }
   }, []);
 
+  // 🟢 تُستدعى من صفحة Login
+  // نتوقع كائنًا مثل: { ...userFromBackend, token }
   const login = (userData) => {
-    setUser(userData);
-    localStorage.setItem("user", JSON.stringify(userData));
-    if (userData?.token) localStorage.setItem("token", userData.token);
-    if (userData?.token) connectSocket(userData.token);
+    if (!userData) return;
+
+    const { token: newToken, ...userInfo } = userData;
+
+    setUser(userInfo);
+    setToken(newToken || null);
+
+    // نخزن اليوزر بدون التوكن
+    localStorage.setItem("user", JSON.stringify(userInfo));
+
+    if (newToken) {
+      localStorage.setItem("token", newToken);
+      connectSocket(newToken);
+    }
   };
 
   const logout = () => {
     setUser(null);
+    setToken(null);
     localStorage.removeItem("user");
     localStorage.removeItem("token");
     try {
-      getSocket()?.disconnect(); // ⬅️ استعمل getSocket
+      getSocket()?.disconnect();
     } catch {}
   };
 
+  const value = {
+    user,
+    token,
+    isLoggedIn: !!token,
+    isAdmin: user?.role === "admin",
+    login,
+    logout,
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

@@ -37,7 +37,7 @@ import ManageCenter from './pages/ManageCenter.jsx';
 import ManageCenterBlood from './pages/ManageCenterBlood.jsx';
 import ManageCenterGeneral from './pages/ManageCenterGeneral.jsx';
 import ManageCenterCommunity from './pages/ManageCenterCommunity.jsx';
-
+import AdminDashboardPage from './pages/AdminDashboardPage.jsx';
 // Manage center
 // import ManageCenter from "./pages/ManageCenter.jsx";
 
@@ -132,8 +132,7 @@ function App() {
 
           <div className="page-wrapper">
             <Routes>
-              <Route path="/privacy" element={<PrivacyPolicy />} />
-
+            <Route path="/privacy" element={<PrivacyPolicy />} />
             {/* عامة */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/add-user" element={<AddUserserPage />} />
@@ -155,6 +154,14 @@ function App() {
               <Route path="/cart" element={<CartPage />} />
 
               {/* صفحات الاستعداد للتبرع (محميّة) */}
+              <Route
+                path="/admin-dashboard"
+                element={ 
+                  <RequireAuth>
+                    <AdminDashboardPage />
+                  </RequireAuth>
+                }
+              />
               <Route
                 path="/ready/blood"
                 element={

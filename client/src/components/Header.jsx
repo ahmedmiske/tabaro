@@ -53,6 +53,7 @@ function Header({ notifCount }) {
     }
   });
   const isAuthed = !!user;
+  const isAdmin = isAuthed && user.role === 'admin'; // ⭐️ أدمن؟
 
   const syncUser = useCallback(() => {
     if (typeof window === 'undefined') return;
@@ -141,7 +142,6 @@ function Header({ notifCount }) {
   useEffect(() => {
     if (!isAuthed) return;
     if (pathname === '/login' || pathname === '/register') {
-      // يمكنك تغيير الوجهة إلى '/' إذا فضّلت الصفحة الرئيسية
       navigate('/dashboard', { replace: true });
     }
   }, [isAuthed, pathname, navigate]);
@@ -216,7 +216,7 @@ function Header({ notifCount }) {
     };
   }, [mobileOpen, isCartOpen]);
 
-  // Fetch notifications count (unread) — ONLY if authenticated
+  // Fetch notifications count (unread)
   useEffect(() => {
     let stop = false;
     let timer;
@@ -284,7 +284,6 @@ function Header({ notifCount }) {
   // ARIA ids for groups
   const bloodId = useId();
   const generalId = useId();
-  // مجتمعنا / الحملات → للنسخة القادمة، لذلك لا نحتاج campaignsId الآن
 
   // ===== Hide on scroll (mobile/tablet) =====
   useEffect(() => {
@@ -321,7 +320,7 @@ function Header({ notifCount }) {
       ref={rootRef}
       data-authed={isAuthed ? 'true' : 'false'}
     >
-      {/* ✅ TopBar */}
+      {/* TopBar */}
       <TopBar
         isAuthed={isAuthed}
         displayName={displayName}
@@ -385,7 +384,7 @@ function Header({ notifCount }) {
                 </button>
               </div>
 
-              {/* 🎯 لوحة التحكم – نفس تنسيق الأزرار، تظهر فقط للمستخدم المسجّل */}
+              {/* لوحة التحكم – تظهر للمستخدم المسجّل */}
               {isAuthed && (
                 <div className="eh-nav-item">
                   <Link
@@ -400,11 +399,27 @@ function Header({ notifCount }) {
                   </Link>
                 </div>
               )}
+
+              {/* ⭐ زر لوحة تحكم الإدارة – يظهر للأدمن فقط */}
+              {isAdmin && (
+                <div className="eh-nav-item">
+                  <Link
+                    to="/admin-dashboard"
+                    className={`eh-nav-link ${
+                      pathname.startsWith('/admin-dashboard') ? 'active' : ''
+                    }`}
+                    onClick={() => setOpen(null)}
+                  >
+                    <FiGrid />
+                    <span>لوحة تحكم الإدارة</span>
+                  </Link>
+                </div>
+              )}
             </nav>
 
             {/* القائمة اليمنى */}
             <nav className="eh-nav-right">
-              {/* 🔍 حقل البحث في الراسية */}
+              {/* البحث */}
               <HeaderSearch />
 
               <div className="eh-nav-actions">
@@ -653,7 +668,7 @@ function Header({ notifCount }) {
                 <span>الرئيسية</span>
               </Link>
 
-              {/* لوحة التحكم في الجوال – نفس التنسيق، فقط للمستخدم المسجّل */}
+              {/* لوحة التحكم – للمستخدم المسجّل */}
               {isAuthed && (
                 <Link
                   to="/dashboard"
@@ -662,6 +677,18 @@ function Header({ notifCount }) {
                 >
                   <FiGrid />
                   <span>لوحة التحكم</span>
+                </Link>
+              )}
+
+              {/* ⭐ لوحة تحكم الإدارة – للأدمن فقط في الموبايل */}
+              {isAdmin && (
+                <Link
+                  to="/admin-dashboard"
+                  className="eh-drawer-link"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <FiGrid />
+                  <span>لوحة تحكم الإدارة</span>
                 </Link>
               )}
 
@@ -740,11 +767,11 @@ function Header({ notifCount }) {
         </div>
       </div>
 
-      {/* 🔽 Drawer السلة (يظهر فوق الصفحة مثل أمازون) */}
+      {/* Drawer السلة */}
       <CartDropdown
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
-      /> 
+      />
     </header>
   );
 }

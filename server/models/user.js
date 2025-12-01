@@ -100,4 +100,8 @@ userSchema.methods.toJSON = function () {
   return obj;
 };
 
-module.exports = mongoose.model("User", userSchema);
+// ✅ الحل لعدم إعادة تعريف الموديل أكثر من مرة
+const User =
+  mongoose.models.User || mongoose.model("User", userSchema);
+
+module.exports = User;

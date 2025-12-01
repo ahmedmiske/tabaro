@@ -267,6 +267,8 @@ const authUser = asyncHandler(async (req, res) => {
         wilaya: user.wilaya || null,
         moughataa: user.moughataa || null,
         commune: user.commune || null,
+        role: user.role || "user",
+        status: user.status || "pending",
         profileImage: user.profileImage || "",
       },
     });

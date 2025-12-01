@@ -27,7 +27,7 @@ const moughataaRoutes = require("./routes/moughataaRoutes");
 const setupSocket = require("./socket");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const searchRoute = require( "./routes/searchRoute.js");
-
+const adminRoutes = require('./routes/adminRoute');
 
 dotenv.config();
 ensureUploadTree();
@@ -52,6 +52,7 @@ app.use(cors());
 app.use(express.json({ limit: "30mb" }));
 app.use(express.urlencoded({ extended: true, limit: "30mb" }));
 app.use(logger);
+
 
 /* alias قديم للتوافق */
 app.use("/donations", (req, res, next) => {
@@ -97,6 +98,9 @@ app.use('/api/social-ads', socialAdRoutes);
 app.use("/api/communes", communeRoutes);
 app.use("/api/wilayas", wilayaRoutes);
 app.use("/api/moughataas", moughataaRoutes);
+
+
+app.use("/api/admin", adminRoutes);
 /* Swagger dev-only */
 if (!process.env.NODE_ENV || process.env.NODE_ENV !== "production") {
   require("./swagger")(app);
