@@ -60,6 +60,16 @@
   display: inline-block;
 }
 
+.form-title {
+  text-align: center;
+  color: #00C853;
+  font-size: 2rem;
+  font-weight: 900;
+  margin-bottom: 1.5rem;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 8px rgba(46, 125, 50, 0.18), 0 1px 0 #fff;
+}
+
 
 
 .general-hero-bold .hero-content {
