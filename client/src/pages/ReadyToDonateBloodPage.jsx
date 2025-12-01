@@ -18,7 +18,7 @@ const bloodTypes = ["A+","A-","B+","B-","AB+","AB-","O+","O-","غير معروف
 const validatePhone = (v) => /^(2|3|4)\d{7}$/.test((v || "").trim());
 
 export default function ReadyToDonateBloodPage() {
-  const bgUrl = "/images/tabar5.jpg";
+  const bgUrl = "/images/tabar8.png";
   const todayStr = new Date().toISOString().slice(0, 10); // yyyy-mm-dd
 
   // مرجع لأعلى الكومبوننت
