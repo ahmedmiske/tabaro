@@ -482,6 +482,21 @@ export default function ReadyToDonateGeneralPage() {
                 )}
               </div>
 
+                {/* حقل رفع ملف أو صورة */}
+                <div className="form-field">
+                  <label className="form-label" htmlFor="attachment">
+                    📎 أرفق ملف أو صورة (اختياري)
+                  </label>
+                  <input
+                    type="file"
+                    id="attachment"
+                    name="attachment"
+                    accept="image/*,application/pdf"
+                    capture="environment"
+                    className="form-input"
+                  />
+                </div>
+
               {/* خطأ عام لوسائل التواصل */}
               {errors.contact && (
                 <div className="form-field">

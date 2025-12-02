@@ -151,6 +151,7 @@
 @media (max-width: 480px) {
   .carousel-hero-img {
     min-height: 280px;
+    object-position: right center;
   }
 
   .carousel-hero-control {
