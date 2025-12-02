@@ -1187,3 +1187,8 @@
 .eh-header-modern[data-authed="true"] .eh-top-left .eh-register-btn {
   display: none !important;
 }
+@media (max-width:768px) {
+  .about-top{
+display: none ;
+}
+}

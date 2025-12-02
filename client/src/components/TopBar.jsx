@@ -40,7 +40,7 @@ function TopBar({ isAuthed, displayName, avatarUrl, badgeCount, onLogout }) {
       <div className="eh-top-container">
         <div className="eh-top-left">
           <Link to="/" className="eh-top-link"><FiHome /><span>الرئيسية</span></Link>
-          <Link to="/about" className="eh-top-link"><span>عن المنصة</span></Link>
+          <Link to="/about" className="eh-top-link about-top"><span>عن المنصة</span></Link>
         </div>
 
         <div className="eh-top-right">
