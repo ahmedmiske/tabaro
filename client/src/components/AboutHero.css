@@ -1,5 +1,4 @@
  /* ===== Modern About Hero - Framer/Webflow Style ===== */
-
 * {
   margin: 0;
   padding: 0;
@@ -822,11 +821,6 @@
   .circles-grid {
     gap: 3rem;
     flex-wrap: wrap;
-  }
-
-  .circle-card {
-    width: 260px;
-    height: 260px;
   }
 }
 
