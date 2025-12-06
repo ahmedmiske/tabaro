@@ -1,4 +1,3 @@
-// server/models/ReadyToDonateGeneral.js
 const mongoose = require('mongoose');
 
 const ContactMethodSchema = new mongoose.Schema(
@@ -37,6 +36,16 @@ const GENERAL_CATEGORY_ENUM = [
   'other',                // مجالات خير أخرى
 ];
 
+const AttachmentSchema = new mongoose.Schema(
+  {
+    url: { type: String, required: true },          // رابط الوصول للملف
+    originalName: { type: String },                 // الاسم الأصلي
+    mimeType: { type: String },                     // نوع الملف
+    size: { type: Number },                         // الحجم بالبايت
+  },
+  { _id: false },
+);
+
 const ReadyToDonateGeneralSchema = new mongoose.Schema(
   {
     type: {
@@ -55,12 +64,29 @@ const ReadyToDonateGeneralSchema = new mongoose.Schema(
     city: { type: String, default: '' },
     country: { type: String, default: '' },
 
-    // نوع التبرع
+    // نوع التبرع وطبيعته
     extra: {
+      donationType: {
+        // مادي / عيني
+        type: String,
+        enum: ['financial', 'inkind'],
+        required: true,
+      },
       category: {
+        // مجال التبرع من GENERAL_CATEGORY_ENUM
         type: String,
         enum: GENERAL_CATEGORY_ENUM,
         required: true,
+      },
+      amount: {
+        // مبلغ التبرع (إن كان ماديًا)
+        type: Number,
+        min: 0,
+      },
+      attachments: {
+        // مرفقات (صور/وثائق) في حالة التبرع العيني
+        type: [AttachmentSchema],
+        default: [],
       },
     },
 

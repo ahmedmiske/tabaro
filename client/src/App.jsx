@@ -59,6 +59,7 @@ import BloodDonationForm from "./components/BloodDonationForm.jsx";
 // Donors pages
 import BloodDonors from "./pages/BloodDonors.jsx";
 import GeneralDonors from "./pages/GeneralDonors.jsx";
+import ReadyGeneralDetails from './pages/ReadyGeneralDetails.jsx';
 
 // Chat / notifications
 import ChatPage from "./pages/ChatPage.jsx";
@@ -360,6 +361,14 @@ function App() {
                 element={
                   <RequireAuth>
                     <GeneralDonors />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/ready-general/:id"
+                element={ 
+                  <RequireAuth>
+                    <ReadyGeneralDetails />
                   </RequireAuth>
                 }
               />

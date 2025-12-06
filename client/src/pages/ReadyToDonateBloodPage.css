@@ -42,6 +42,7 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
   width: 80%;
   min-width: 100%;
+  margin-top: 5rem;
   -webkit-border-radius: 16px;
   -moz-border-radius: 16px;
   -ms-border-radius: 16px;
@@ -76,6 +77,10 @@
   padding: 64px 16px;
 }
 
+.form-side .success-next-container {
+  margin-top: 10px;
+  text-align: center;
+}
 @media (max-width: 600px) {
   .general-hero-bold {
     min-height: 28vh;

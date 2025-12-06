@@ -12,6 +12,7 @@ import {
 } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import fetchWithInterceptors from "../services/fetchWithInterceptors";
+import { scrollToTop} from '../utils/scrollHelpers.js';
 import "./ReadyToDonateBloodPage.css";
 
 const bloodTypes = ["A+","A-","B+","B-","AB+","AB-","O+","O-","غير معروف"];
@@ -229,6 +230,7 @@ export default function ReadyToDonateBloodPage() {
         availableUntil: false,
         note: false,
       });
+      scrollToTop();
     } catch (err) {
       console.error("POST /api/ready-to-donate error:", err);
       setMsg("❌ حدث خطأ أثناء الإرسال. حاول لاحقًا.");
@@ -268,11 +270,7 @@ export default function ReadyToDonateBloodPage() {
             </>
           )}
 
-          {msg && (
-            <Alert variant={msg.startsWith("✅") ? "success" : "danger"}>
-              {msg}
-            </Alert>
-          )}
+        
 
           {!success && (
             <Form onSubmit={submit} className="donation-form">
@@ -435,7 +433,7 @@ export default function ReadyToDonateBloodPage() {
 
               <div className="form-buttons">
                 <button type="submit" className="submit-btn">
-                  <FiCheck className="me-2" /> تأكيد التسجيل
+                  <FiCheck className="me-2" /> تأكيد عرض التبرع
                 </button>
               </div>
             </Form>
@@ -444,7 +442,11 @@ export default function ReadyToDonateBloodPage() {
           {success && (
             <div className="success-next-container">
               <h4 className="mt-3">🎉 تم التسجيل بنجاح</h4>
-
+                 {msg && (
+                  <Alert variant={msg.startsWith("✅") ? "success" : "danger"}>
+                       {msg}
+                 </Alert>
+                 )}
               <Link to="/blood-donations" className="next-btn">
                 عرض طلبات تبرع الدم
               </Link>

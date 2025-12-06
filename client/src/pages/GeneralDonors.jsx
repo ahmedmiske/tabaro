@@ -1,20 +1,39 @@
 // src/pages/GeneralDonors.js
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  Container, Row, Col, Card, Badge, Button,
-  Form, InputGroup, Alert, Spinner
+  Container,
+  Row,
+  Col,
+  Card,
+  Badge,
+  Button,
+  Form,
+  InputGroup,
+  Alert,
+  Spinner,
 } from 'react-bootstrap';
 import {
-  FiSearch, FiMapPin, FiPhone, FiUser, FiHeart,
-  FiCalendar, FiFilter, FiDollarSign
+  FiSearch,
+  FiMapPin,
+  FiPhone,
+  FiHeart,
+  FiCalendar,
+  FiFilter,
+  FiDollarSign,
+  FiFileText,
+  FiMessageCircle 
 } from 'react-icons/fi';
 import { FaComments } from 'react-icons/fa';
 import { useAuth } from '../AuthContext.jsx';
 import { Navigate, Link } from 'react-router-dom';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import './GeneralDonors.css';
-import { GENERAL_CATEGORY_META, codeToLabel, labelToCode } from '../constants/donationCategories';
-import QuranVerse from "../components/QuranVerse.jsx";
+import {
+  GENERAL_CATEGORY_META,
+  codeToLabel,
+  labelToCode,
+} from '../constants/donationCategories';
+import QuranVerse from '../components/QuranVerse.jsx';
 
 // يلتقط مصفوفة البيانات من عدة أشكال شائعة للاستجابة
 const pickArray = (body) => {
@@ -29,27 +48,38 @@ const pickArray = (body) => {
   return [];
 };
 
+const formatDate = (v) => {
+  if (!v) return '';
+  const d = new Date(v);
+  if (Number.isNaN(d.getTime())) return '';
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const yy = d.getFullYear();
+  return `${dd}/${mm}/${yy}`; // أرقام عادية
+};
+
 const GeneralDonors = () => {
   const { user } = useAuth();
 
-  const [donors, setDonors] = useState([]);
-  const [filteredDonors, setFilteredDonors] = useState([]);
+  const [offers, setOffers] = useState([]);
+  const [filteredOffers, setFilteredOffers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   // فلاتر الواجهة
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterCategory, setFilterCategory] = useState(''); // اسم عربي (وليس الكود)
+  const [filterCategory, setFilterCategory] = useState('');
   const [filterLocation, setFilterLocation] = useState('');
 
   // نستخدم هذا العلم لمعرفة إن كانت الفئة اختيرت يدويًا
   const categoryChosenManually = useRef(false);
 
-  const categories = Object.values(GENERAL_CATEGORY_META).map(v => v.label);
+  const categories = Object.values(GENERAL_CATEGORY_META).map((v) => v.label);
 
   const getCategoryColor = (categoryAr) => {
-    const entry = Object.entries(GENERAL_CATEGORY_META)
-      .find(([, v]) => v.label === categoryAr);
+    const entry = Object.entries(GENERAL_CATEGORY_META).find(
+      ([, v]) => v.label === categoryAr
+    );
     return entry ? entry[1].color : 'secondary';
   };
 
@@ -62,14 +92,13 @@ const GeneralDonors = () => {
     }
   };
 
-  const fetchDonors = async () => {
+  const fetchOffers = async () => {
     try {
       setLoading(true);
       setError('');
 
       const qs = new URLSearchParams();
 
-      // ❗️أضف category فقط إذا اختارها المستخدم يدويًا
       if (categoryChosenManually.current && filterCategory) {
         const categoryCode = labelToCode(filterCategory) || '';
         if (categoryCode) qs.set('category', categoryCode);
@@ -85,100 +114,113 @@ const GeneralDonors = () => {
       let body = r1.body;
       let usedUrl = url1;
 
-      // مسار احتياطي
+      // مسار احتياطي قديم
       if (!ok) {
         const qs2 = new URLSearchParams(qs);
         if (!qs2.get('type')) qs2.set('type', 'general');
         const url2 = `/api/ready-to-donate?${qs2.toString()}`;
         const r2 = await fetchOnce(url2);
-        ok = r2.ok; body = r2.body; usedUrl = url2;
+        ok = r2.ok;
+        body = r2.body;
+        usedUrl = url2;
       }
 
-      if (!ok) throw new Error('تعذّر جلب المتبرعين. تحقق من مسار الـ API.');
+      if (!ok) throw new Error('تعذّر جلب العروض. تحقق من مسار الـ API.');
 
       const arr = pickArray(body);
-      console.info('[GENERAL DONORS] URL:', usedUrl, 'count:', arr.length, 'raw:', body);
+      console.info(
+        '[GENERAL OFFERS] URL:',
+        usedUrl,
+        'count:',
+        arr.length,
+        'raw:',
+        body
+      );
 
-      const mapped = arr.map(d => {
-        const phone = (d.contactMethods || []).find(m => m.method === 'phone')?.number;
-        const fullName = d?.createdBy?.firstName
-          ? `${d.createdBy.firstName} ${d.createdBy.lastName || ''}`.trim()
-          : (d.fullName || d.name || 'متبرع');
-
-        const profilePicture = d?.createdBy?.profileImage
-          ? `/uploads/profileImages/${d.createdBy.profileImage}`
-          : null;
+      const mapped = arr.map((d) => {
+        const phone =
+          (d.contactMethods || []).find((m) => m.method === 'phone')?.number ||
+          '';
+        const whatsapp =
+          (d.contactMethods || []).find((m) => m.method === 'whatsapp')
+            ?.number || '';
 
         const catCode = d?.extra?.category || d?.category || d?.extraCategory;
         const catAr = codeToLabel(catCode);
 
+        const attachmentsArr = d.extra.attachments || d.files || [];
+        const attachmentsCount = Array.isArray(attachmentsArr)
+          ? attachmentsArr.length
+          : 0;
+
         return {
           _id: d._id || d.id,
-          fullName,
-          categories: [catAr].filter(Boolean),
+          // لا نظهر اسم المتبرع في الكارت – نستخدم عنوانًا عامًا
+          title: 'عرض استعداد للتبرع',
+          category: catAr,
+          donationType:
+            d?.extra?.donationType === 'inkind' ? 'تبرع عيني' : 'تبرع مالي',
           location: d.city || d.location || '',
-          phone,
-          specialties: Array.isArray(d.specialties) ? d.specialties : [],
-          totalDonations: d.totalDonations,
-          isActive: d.isActive !== false,
+          availableUntil: d.availableUntil || d.until || null,
+          attachmentsCount,
           description: d.note || d.description || '',
-          joinDate: d.createdAt || d.joinDate,
-          profilePicture
+          whatsapp,
+          phone,
+          isActive: d.isActive !== false,
+          createdAt: d.createdAt,
         };
       });
 
-      setDonors(mapped);
+      setOffers(mapped);
     } catch (err) {
-      console.error('Error fetching donors (general):', err);
-      const msg = err?.body?.error || err?.message || 'حدث خطأ في تحميل البيانات';
+      console.error('Error fetching general offers:', err);
+      const msg =
+        err?.body?.error || err?.message || 'حدث خطأ في تحميل البيانات';
       setError(msg);
-      setDonors([]);
+      setOffers([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const filterDonors = () => {
-    let filtered = donors;
+  const filterOffers = () => {
+    let filtered = offers;
 
     if (searchTerm) {
       const q = searchTerm.toLowerCase();
-      filtered = filtered.filter(donor =>
-        donor.fullName?.toLowerCase().includes(q) ||
-        donor.location?.toLowerCase().includes(q) ||
-        (Array.isArray(donor.specialties) &&
-          donor.specialties.some(spec => spec.toLowerCase().includes(q)))
+      filtered = filtered.filter(
+        (o) =>
+          o.location?.toLowerCase().includes(q) ||
+          o.category?.toLowerCase().includes(q) ||
+          o.description?.toLowerCase().includes(q)
       );
     }
 
     if (filterCategory) {
-      filtered = filtered.filter(donor =>
-        Array.isArray(donor.categories) && donor.categories.includes(filterCategory)
-      );
+      filtered = filtered.filter((o) => o.category === filterCategory);
     }
 
     if (filterLocation) {
       const q = filterLocation.toLowerCase();
-      filtered = filtered.filter(donor =>
-        donor.location?.toLowerCase().includes(q)
+      filtered = filtered.filter((o) =>
+        o.location?.toLowerCase().includes(q)
       );
     }
 
-    setFilteredDonors(filtered);
+    setFilteredOffers(filtered);
   };
 
   const clearFilters = () => {
     setSearchTerm('');
     setFilterCategory('');
     setFilterLocation('');
-    categoryChosenManually.current = false; // أعد ضبط العلم
-    // نظّف شريط العنوان (لو بقيت بارامترات قديمة)
+    categoryChosenManually.current = false;
     if (window && window.history && window.location) {
       window.history.replaceState({}, '', window.location.pathname);
     }
   };
 
-  // عند أول تحميل: ابدأ بدون أي بارامترات
+  // عند أول تحميل
   useEffect(() => {
     if (window && window.history && window.location) {
       window.history.replaceState({}, '', window.location.pathname);
@@ -190,8 +232,15 @@ const GeneralDonors = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => { if (user) fetchDonors(); /* eslint-disable-next-line */ }, [user, filterLocation, filterCategory, searchTerm]);
-  useEffect(() => { filterDonors(); /* eslint-disable-next-line */ }, [donors, searchTerm, filterCategory, filterLocation]);
+  useEffect(() => {
+    if (user) fetchOffers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, filterLocation, filterCategory, searchTerm]);
+
+  useEffect(() => {
+    filterOffers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [offers, searchTerm, filterCategory, filterLocation]);
 
   if (!user) return <Navigate to="/login?next=/donors/general" replace />;
 
@@ -200,7 +249,7 @@ const GeneralDonors = () => {
       <Container className="donors-page py-5">
         <div className="text-center">
           <Spinner animation="border" variant="primary" size="lg" />
-          <h4 className="mt-3">جاري تحميل قائمة المتبرعين...</h4>
+          <h4 className="mt-3">جاري تحميل قائمة العروض...</h4>
         </div>
       </Container>
     );
@@ -212,12 +261,39 @@ const GeneralDonors = () => {
       <div className="page-header text-center mb-5">
         <h1 className="page-title">
           <FiHeart className="me-2" />
-          المانحون في مختلف المجالات
+          تبرعات عامة
         </h1>
-        <p className="page-subtitle">شبكة المتبرعين في المجالات العامة والخيرية</p>
+        <p className="page-subtitle">
+          عروض الاستعداد للتبرع المالي أو العيني في مختلف المجالات
+        </p>
         <QuranVerse verse="﴿وَيُؤْثِرُونَ عَلَى أَنفُسِهِمْ وَلَوْ كَانَ بِهِمْ خَصَاصَةٌ﴾" />
         <div className="title-divider"></div>
       </div>
+      
+        {/* إحصاءات بسيطة */}
+      <Row className="stats-row mb-2">
+        <div className="stat-card">
+          <div className="stat-number">{offers.length}</div>
+          <div className="stat-label">إجمالي العروض</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-number">{filteredOffers.length}</div>
+          <div className="stat-label">النتائج المعروضة</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-number">
+            {offers.filter((o) => o.isActive).length}
+          </div>
+          <div className="stat-label">عروض نشطة</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-number">
+            {new Set(offers.map((o) => o.location).filter(Boolean)).size}
+          </div>
+          <div className="stat-label">مدن مختلفة</div>
+        </div>
+      </Row>
+
 
       {error && (
         <Alert variant="danger" className="mb-4">
@@ -231,10 +307,12 @@ const GeneralDonors = () => {
           <Row className="g-3">
             <Col md={4}>
               <InputGroup>
-                <InputGroup.Text><FiSearch /></InputGroup.Text>
+                <InputGroup.Text>
+                  <FiSearch />
+                </InputGroup.Text>
                 <Form.Control
                   type="text"
-                  placeholder="البحث بالاسم أو المدينة أو التخصص..."
+                  placeholder="البحث عن عرض بالموقع أو المجال أو الوصف..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -245,12 +323,14 @@ const GeneralDonors = () => {
                 value={filterCategory}
                 onChange={(e) => {
                   setFilterCategory(e.target.value);
-                  categoryChosenManually.current = true; // ✅ المستخدم اختار بنفسه
+                  categoryChosenManually.current = true;
                 }}
               >
-                <option value="">جميع الفئات</option>
-                {categories.map(category => (
-                  <option key={category} value={category}>{category}</option>
+                <option value="">جميع المجالات</option>
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
                 ))}
               </Form.Select>
             </Col>
@@ -263,7 +343,11 @@ const GeneralDonors = () => {
               />
             </Col>
             <Col md={2}>
-              <Button variant="outline-secondary" onClick={clearFilters} className="w-100">
+              <Button
+                variant="outline-secondary"
+                onClick={clearFilters}
+                className="w-100"
+              >
                 <FiFilter className="me-1" />
                 إعادة تعيين
               </Button>
@@ -272,133 +356,165 @@ const GeneralDonors = () => {
         </Card.Body>
       </Card>
 
-      {/* إحصائيات */}
-      <Row className="stats-row mb-4">
-        <div className="stats-row mb-4">
-          <div className="stat-card">
-            <div className="stat-number">{donors.length}</div>
-            <div className="stat-label">إجمالي المتبرعين</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-number">{filteredDonors.length}</div>
-            <div className="stat-label">النتائج المعروضة</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-number">{donors.filter(d => d.isActive).length}</div>
-            <div className="stat-label">نشطون</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-number">{new Set(donors.map(d => d.location)).size}</div>
-            <div className="stat-label">مدينة</div>
-          </div>
-        </div>
-      </Row>
-
-      {/* قائمة المتبرعين */}
-      {filteredDonors.length === 0 ? (
-        <Card className="text-center py-5">
+    
+      {/* قائمة العروض */}
+      {filteredOffers.length === 0 ? (
+        <Card className="text-center  py-5">
           <Card.Body>
-            <FiUser size={60} className="text-muted mb-3" />
             <h4>لا توجد نتائج</h4>
             <p className="text-muted">
               {searchTerm || filterCategory || filterLocation
-                ? 'لم يتم العثور على متبرعين يطابقون معايير البحث'
-                : 'لا توجد متبرعون مسجلون حالياً'}
+                ? 'لم يتم العثور على عروض تطابق معايير البحث.'
+                : 'لا توجد عروض استعداد للتبرع مسجلة حالياً.'}
             </p>
             {(searchTerm || filterCategory || filterLocation) && (
               <Button variant="primary" onClick={clearFilters}>
-                عرض جميع المتبرعين
+                عرض جميع العروض
               </Button>
             )}
           </Card.Body>
         </Card>
       ) : (
         <Row className="g-4 align-items-stretch">
-          {filteredDonors.map((donor, index) => (
-            <Col lg={6} xl={4} key={donor._id || index}>
-              <Card className="donor-card h-100">
-                <Card.Body>
-                  {/* رأس البطاقة */}
-                  <div className="donor-header d-flex align-items-center mb-3">
-                    <div className="donor-avatar">
-                      {donor.profilePicture ? (
-                        <img src={donor.profilePicture} alt={donor.fullName} className="avatar-img" />
-                      ) : (
-                        <div className="avatar-placeholder">
-                          {donor.fullName?.charAt(0)?.toUpperCase() || 'م'}
+          {filteredOffers.map((offer) => {
+            const dateLabel = offer.availableUntil
+              ? formatDate(offer.availableUntil)
+              : '';
+            const isStillValid = offer.availableUntil
+              ? new Date(offer.availableUntil) >=
+                new Date(new Date().setHours(0, 0, 0, 0))
+              : true;
+
+            return (
+              <Col lg={8} xl={4} key={offer._id}>
+                <Card className="general-offer-card h-100">
+                  <Card.Body>
+                    {/* رأس البطاقة */}
+                    <div className="donor-header d-flex align-items-center mb-3 justify-content-between">
+                      <div className="d-flex align-items-center">
+                        <div className="donor-avatar">
+                          {/* <div className="avatar-placeholder">م</div> */}
+                        </div>
+                        <div className="donor-info">
+                          <h5 className="donor-name">{offer.title}</h5>
+                          <div className="donor-badges">
+                            {offer.category && (
+                              <Badge
+                                bg={getCategoryColor(offer.category)}
+                                className="category-badge"
+                              >
+                                {offer.category}
+                              </Badge>
+                            )}
+                            <Badge
+                              bg={
+                                offer.donationType === 'تبرع عيني'
+                                  ? 'info'
+                                  : 'success'
+                              }
+                              className="ms-1"
+                            >
+                              {offer.donationType}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* تفاصيل العرض */}
+                    <div className="donor-details">
+                      {offer.location && (
+                        <div className="detail-item">
+                          <FiMapPin className="detail-icon" />
+                          <span>{offer.location}</span>
                         </div>
                       )}
-                    </div>
-                    <div className="donor-info">
-                      <h5 className="donor-name">{donor.fullName || 'متبرع'}</h5>
-                      <div className="donor-badges">
-                        {donor.categories?.slice(0, 2).map((category, idx) => (
-                          <Badge key={idx} bg={getCategoryColor(category)} className="category-badge">
-                            {category}
-                          </Badge>
-                        ))}
-                        {donor.isActive && (
-                          <Badge bg="success" className="ms-2">نشط</Badge>
-                        )}
-                      </div>
-                    </div>
-                  </div>
 
-                  {/* تفاصيل */}
-                  <div className="donor-details">
-                    {donor.location && (
-                      <div className="detail-item">
-                        <FiMapPin className="detail-icon" />
-                        <span>{donor.location}</span>
-                      </div>
-                    )}
-                    {donor.totalDonations && (
-                      <div className="detail-item">
-                        <FiDollarSign className="detail-icon" />
-                        <span>{donor.totalDonations} تبرع</span>
-                      </div>
-                    )}
-                    {donor.joinDate && (
-                      <div className="detail-item">
-                        <FiCalendar className="detail-icon" />
-                        <span>انضم: {new Date(donor.joinDate).toLocaleDateString('ar-SA')}</span>
-                      </div>
-                    )}
-                  </div>
+                      {dateLabel && (
+                        <div className="detail-item">
+                          <FiCalendar className="detail-icon" />
+                          <span>متاح حتى: {dateLabel}</span>
+                        </div>
+                      )}
 
-                  {/* وصف قصير */}
-                  {donor.description && (
-                    <div className="donor-description">
-                      <p>
-                        {donor.description.length > 100
-                          ? `${donor.description.substring(0, 100)}...`
-                          : donor.description}
-                      </p>
+                      <div className="detail-item">
+                        <FiFileText className="detail-icon" />
+                        <span>
+                          مرفقات:{' '}
+                          {offer.attachmentsCount
+                            ? `${offer.attachmentsCount} ملف`
+                            : 'لا توجد مرفقات'}
+                        </span>
+                      </div>
                     </div>
-                  )}
 
-                  {/* إجراءات */}
-                  <div className="donor-actions mt-3">
-                    <Link to={`/users/${donor._id}`} className="btn btn-outline-primary btn-sm me-2">
-                      عرض الملف الشخصي
-                    </Link>
-                    <Link to={`/chat/${donor._id}`} className="chat-icon-link me-2" title="دردشة مع المتبرع">
-                      <FaComments size={26} color={donor.isActive ? "#00C853" : "#BDBDBD"} />
-                      <span className="chat-tooltip">دردشة</span>
-                    </Link>
-                    {donor.phone && (
-                      <Button variant="success" size="sm" href={`tel:${donor.phone}`}>
-                        <FiPhone className="me-1" /> اتصال
-                      </Button>
+                    {/* حالة العرض */}
+                    <div
+                      className={`offer-status-chip ${
+                        isStillValid ? 'active' : 'expired'
+                      }`}
+                    >
+                      {isStillValid
+                        ? 'العرض ساري المفعول إلى تاريخ الانتهاء.'
+                        : 'انتهت مدة هذا العرض.'}
+                    </div>
+
+                    {/* وصف قصير */}
+                    {offer.description && (
+                      <div className="donor-description">
+                        <p>
+                          {offer.description.length > 110
+                            ? `${offer.description.substring(0, 110)}...`
+                            : offer.description}
+                        </p>
+                      </div>
                     )}
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))}
+
+                    {/* أزرار الإجراءات */}
+                    <div className="donor-actions mt-3 d-flex flex-wrap gap-2">
+                      <Link
+                        to={`/ready-general/${offer._id}`}
+                        className="btn btn-outline-primary flex-grow-1"
+                      >
+                        عرض تفاصيل العرض
+                      </Link>
+
+                      {offer.whatsapp && (
+                        <Button
+                          variant="success"
+                          as="a"
+                          href={`https://wa.me/${offer.whatsapp.replace(
+                            /[^\d]/g,
+                            ''
+                          )}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-grow-1"
+                        >
+                          <FiMessageCircle className="me-1" />
+                          واتساب
+                        </Button>
+                      )}
+
+                      {!offer.whatsapp && offer.phone && (
+                        <Button
+                          variant="success"
+                          as="a"
+                          href={`tel:${offer.phone}`}
+                          className="flex-grow-1"
+                        >
+                          <FiPhone className="me-1" />
+                          اتصال
+                        </Button>
+                      )}
+                    </div>
+                  </Card.Body>
+                </Card>
+              </Col>
+            );
+          })}
         </Row>
       )}
-
     </Container>
   );
 };

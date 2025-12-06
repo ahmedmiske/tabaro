@@ -12,19 +12,21 @@
   position: relative;
   cursor: pointer;
 }
-  /* إزالة القوس الزائدة */
+
 .chat-icon-link svg {
   color: #388e3c !important;
   width: 24px;
   height: 24px;
   transition: color 0.2s;
 }
+
 .chat-icon-link:hover {
-  background: #00C853;
+  background: #00c853;
   box-shadow: 0 4px 16px rgba(0, 200, 83, 0.18);
   transform: scale(1.08);
   animation: chatPulse 0.4s;
 }
+
 .chat-tooltip {
   visibility: hidden;
   opacity: 0;
@@ -32,7 +34,7 @@
   bottom: -32px;
   left: 50%;
   transform: translateX(-50%);
-  background: #00C853;
+  background: #00c853;
   color: #fff;
   padding: 3px 12px;
   border-radius: 8px;
@@ -43,23 +45,36 @@
   transition: opacity 0.18s, visibility 0.18s;
   z-index: 10;
 }
+
 .chat-icon-link:hover .chat-tooltip {
   visibility: visible;
   opacity: 1;
 }
+
 @keyframes chatPulse {
-  0% { box-shadow: 0 0 0 0 rgba(0,200,83,0.3); }
-  70% { box-shadow: 0 0 0 10px rgba(0,200,83,0.08); }
-  100% { box-shadow: 0 0 0 0 rgba(0,200,83,0.0); }
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 200, 83, 0.3);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(0, 200, 83, 0.08);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 200, 83, 0);
+  }
 }
-  /* إزالة القوس الزائدة */
+
 .chat-icon-link:hover svg {
   color: #fff !important;
 }
-/* صفحة المتبرعين العامين */
+
+/* صفحة المتبرعين العامين / عروض التبرع */
 .donors-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, rgba(0, 164, 67, 0.02) 0%, rgba(0, 200, 83, 0.05) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(0, 164, 67, 0.02) 0%,
+    rgba(0, 200, 83, 0.05) 100%
+  );
   font-family: 'Cairo', sans-serif;
 }
 
@@ -71,274 +86,222 @@
 .page-title {
   font-size: 2.5rem;
   font-weight: 900;
-  background: linear-gradient(135deg, #00A443 0%, #00C853 50%, #00802F 100%);
+  background: linear-gradient(
+    135deg,
+    #00a443 0%,
+    #00c853 50%,
+    #00802f 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
- 
   background-clip: text;
   margin-bottom: 0.5rem;
 }
 
 .page-subtitle {
   font-size: 1.1rem;
-  color: #6B7280;
+  color: #6b7280;
   margin-bottom: 1.5rem;
 }
 
 .title-divider {
   width: 80px;
   height: 4px;
-  background: linear-gradient(90deg, #00A443 0%, #00C853 100%);
+  background: linear-gradient(90deg, #00a443 0%, #00c853 100%);
   margin: 0 auto;
   border-radius: 2px;
 }
 
-/* بطاقة التصفية */
 /* بطاقات الإحصائيات المصغرة */
 .stats-row {
   display: flex;
-  flex-wrap: wrap;
-  gap: 18px;
-  justify-content: flex-start;
+  flex-direction: row;
+  gap: 10px;
+  justify-content: center;
+  padding: 12px 0;
+  margin-bottom: 3rem;
 }
-.stat-card {
+
+.stats-row  .stat-card {
   background: #fff;
   border-radius: 14px;
   box-shadow: 0 1px 6px rgba(0, 164, 67, 0.07);
   padding: 16px 10px 12px 10px;
-  min-width: 120px;
-  max-width: 140px;
+  max-width: 100px;
   text-align: center;
   margin-bottom: 0;
   position: relative;
   transition: box-shadow 0.18s, transform 0.18s;
-  border-top: 4px solid #00A443;
+  border-top: 4px solid #00a443;
   font-family: inherit;
 }
+
 .stat-card:hover {
   box-shadow: 0 4px 16px rgba(0, 164, 67, 0.13);
   transform: translateY(-2px) scale(1.04);
 }
+
 .stat-number {
   font-size: 1.7rem;
   font-weight: 800;
-  color: #00A443;
+  color: #00a443;
   margin-bottom: 0.2rem;
   letter-spacing: 0.5px;
 }
+
 .stat-label {
   font-size: 0.95rem;
-  color: #6B7280;
+  color: #6b7280;
   font-weight: 500;
   letter-spacing: 0.2px;
 }
 
+/* بطاقة التصفية */
 .filters-card .input-group-text {
-  background: #00A443;
+  background: #00a443;
   color: white;
   border: none;
   border-radius: 8px 0 0 8px;
 }
 
-/* إحصائيات */
-.stats-row .stat-card {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 16px;
-  text-align: center;
-  box-shadow: 0 4px 15px rgba(0, 164, 67, 0.1);
-  border-top: 3px solid #00A443;
-  transition: transform 0.3s ease;
+/* ========= كارت عروض التبرع العام ========= */
+
+.general-offer-card {
+  position: relative;
+  border: 2px solid #d23f05;
+  border-radius: 22px;
+  background: #ffffff;
+  padding: 1.3rem 1.2rem 1.4rem;
+  box-shadow: 0 10px 30px rgba(15, 118, 110, 0.1);
+  overflow: hidden;
+  animation: fadeInUp 0.45s ease-out;
 }
 
-.stats-row .stat-card:hover {
-  transform: translateY(-5px);
-}
-
-.stat-number {
-  font-size: 2.5rem;
-  font-weight: 900;
-  color: #00A443;
-  margin-bottom: 0.5rem;
-}
-
-.stat-label {
-  font-size: 0.9rem;
-  color: #6B7280;
-  font-weight: 600;
-}
-
-/* بطاقة المتبرع */
-.donor-card {
-  display: grid;
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-  padding: 1.5rem 1.2rem;
-  grid-template-columns: 3fr;
-  align-items: center;
-  transition: box-shadow 0.2s, transform 0.2s;
-}
-
-.donor-card::before {
+.general-offer-card::before {
   content: '';
   position: absolute;
   top: 0;
-  left: 0;
   right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #00A443 0%, #00C853 100%);
+  left: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #00a443 0%, #00c853 100%);
 }
 
-.donor-card:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 16px 40px rgba(0, 164, 67, 0.18), 0 2px 8px rgba(0,0,0,0.06);
+.general-offer-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px rgba(0, 164, 67, 0.16);
 }
 
-/* رأس بطاقة المتبرع */
-.donor-header {
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #F3F4F6;
+/* رأس الكارت */
+.offer-header {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 0.9rem;
+  margin-bottom: 0.9rem;
 }
 
-.donor-avatar {
-  width: 60px;
-  height: 60px;
+.offer-avatar {
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
-  overflow: hidden;
-  margin-left: 1rem;
-  position: relative;
-}
-
-.avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.avatar-placeholder {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #00A443 0%, #00C853 100%);
+  background: #00a443;
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-
-.donor-name {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #1F2937;
-  margin-bottom: 0.5rem;
-}
-
-.donor-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.category-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-/* تفاصيل المتبرع */
-.donor-details {
-  margin: 1rem 0;
-}
-
-.detail-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
-  color: #4B5563;
-}
-
-.detail-icon {
-  margin-left: 0.5rem;
-  color: #00A443;
+  font-weight: 800;
+  font-size: 1.4rem;
   flex-shrink: 0;
 }
 
-/* وصف المتبرع */
-.donor-description {
-  margin: 1rem 0;
-  padding: 0.75rem;
-  background: rgba(0, 164, 67, 0.05);
-  border-radius: 8px;
-  border-right: 3px solid #00A443;
+.offer-head-info {
+  flex: 1;
+  text-align: right;
 }
 
-.donor-description p {
-  margin: 0;
-  font-size: 0.9rem;
-  color: #4B5563;
-  line-height: 1.5;
+.offer-name {
+  margin: 0 0 0.2rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #111827;
 }
 
-/* أزرار الإجراءات */
-.donor-actions {
-  padding-top: 1rem;
-  border-top: 1px solid #F3F4F6;
+.offer-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  justify-content: flex-end;
 }
 
-.donor-actions .btn {
-  border-radius: 8px;
-  font-weight: 600;
-  padding: 0.5rem 1rem;
-  transition: all 0.3s ease;
-}
-
-.donor-actions .btn-outline-primary {
-  border-color: #00A443;
-  color: #00A443;
-}
-
-.donor-actions .btn-outline-primary:hover {
-  background-color: #00A443;
-  border-color: #00A443;
-}
-
-.donor-actions .btn-success {
-  background-color: #00C853;
-  border-color: #00C853;
-}
-
-.donor-actions .btn-success:hover {
-  background-color: #00A443;
-  border-color: #00A443;
-}
-
-/* بطاقة الدعوة للتبرع */
-.call-to-action-card {
-  background: linear-gradient(135deg, rgba(0, 164, 67, 0.05) 0%, rgba(0, 200, 83, 0.1) 100%);
-  border: 2px solid rgba(0, 164, 67, 0.1);
-  border-radius: 20px;
-  box-shadow: 0 8px 30px rgba(0, 164, 67, 0.1);
-}
-
-.call-to-action-card .btn-primary {
-  background: linear-gradient(135deg, #00A443 0%, #00C853 100%);
-  border: none;
-  padding: 0.75rem 2rem;
-  border-radius: 25px;
+.offer-tag {
+  border-radius: 999px;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  font-size: 1.1rem;
-  transition: all 0.3s ease;
 }
 
-.call-to-action-card .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 164, 67, 0.3);
+/* جسم الكارت */
+.offer-body {
+  margin-top: 0.35rem;
+}
+
+.offer-line {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  font-size: 0.88rem;
+  color: #4b5563;
+  margin-bottom: 0.35rem;
+}
+
+.offer-icon {
+  margin-left: 0.4rem;
+  color: #00a443;
+  flex-shrink: 0;
+}
+
+/* حالة العرض */
+.offer-status-box {
+  margin-top: 0.6rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.83rem;
+  line-height: 1.4;
+  border-right: 3px solid #059669;
+}
+
+.offer-status-active {
+  background: #ecfdf5;
+  color: #065f46;
+  border-right-color: #059669;
+}
+
+.offer-status-expired {
+  background: #fef2f2;
+  color: #b91c1c;
+  border-right-color: #dc2626;
+}
+
+/* وصف مختصر أسفل الكارت */
+.offer-note-preview {
+  margin-top: 0.6rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 10px;
+  background: rgba(0, 164, 67, 0.04);
+  font-size: 0.86rem;
+  color: #374151;
+}
+
+/* أزرار أسفل الكارت */
+.offer-footer {
+  border-top: 1px solid #f3f4f6;
+  padding-top: 0.8rem;
+}
+
+.offer-btn {
+  border-radius: 999px;
+  font-weight: 700;
 }
 
 /* شبكة بطاقات المتبرعين */
@@ -347,6 +310,7 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
 }
+
 @media (max-width: 900px) {
   .donors-grid {
     grid-template-columns: 1fr;
@@ -359,29 +323,25 @@
   .page-title {
     font-size: 2rem;
   }
-  
+
   .stats-row {
     margin-bottom: 2rem;
   }
-  
+
   .stat-card {
     margin-bottom: 1rem;
   }
-  
-  .donor-header {
+
+  .offer-header {
     flex-direction: column;
     text-align: center;
   }
-  
-  .donor-avatar {
+
+  .offer-avatar {
     margin: 0 0 1rem 0;
   }
-  
-  .donor-actions {
-    text-align: center;
-  }
-  
-  .donor-actions .btn {
+
+  .offer-footer .btn {
     margin-bottom: 0.5rem;
     width: 100%;
   }
@@ -391,63 +351,54 @@
   .filters-card .row {
     gap: 1rem;
   }
-  
+
   .filters-card .col-md-4,
   .filters-card .col-md-3,
   .filters-card .col-md-2 {
     width: 100%;
   }
-  
+
   .page-header {
     padding: 1rem 0;
   }
-  
+
   .page-title {
     font-size: 1.8rem;
-  }
-  
-  .call-to-action-card .btn-primary {
-    width: 100%;
-    max-width: 300px;
   }
 }
 
 /* تأثيرات التحميل */
 .donors-page .spinner-border {
-  color: #00A443;
+  color: #00a443;
 }
 
-/* تحسين ألوان الشارات */
+/* تحسين ألوان الشارات الافتراضية من Bootstrap */
 .badge.bg-danger {
-  background-color: #DC2626 !important;
+  background-color: #dc2626 !important;
 }
 
 .badge.bg-primary {
-  background-color: #2563EB !important;
+  background-color: #2563eb !important;
 }
 
 .badge.bg-warning {
-  background-color: #D97706 !important;
+  background-color: #d97706 !important;
   color: white !important;
 }
 
 .badge.bg-info {
-  background-color: #0891B2 !important;
+  background-color: #0891b2 !important;
 }
 
 .badge.bg-success {
-  background-color: #00A443 !important;
+  background-color: #00a443 !important;
 }
 
 .badge.bg-secondary {
-  background-color: #6B7280 !important;
+  background-color: #6b7280 !important;
 }
 
-/* تأثير الانيميشن عند التحميل */
-.donor-card {
-  animation: fadeInUp 0.6s ease-out;
-}
-
+/* انيميشن دخول الكارت */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -459,23 +410,411 @@
   }
 }
 
-/* تخصيص إضافي للشارات */
+/* تدرجات إضافية للشارات */
 .category-badge.bg-danger {
-  background: linear-gradient(135deg, #DC2626 0%, #EF4444 100%) !important;
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%) !important;
 }
 
 .category-badge.bg-primary {
-  background: linear-gradient(135deg, #2563EB 0%, #3B82F6 100%) !important;
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%) !important;
 }
 
 .category-badge.bg-warning {
-  background: linear-gradient(135deg, #D97706 0%, #F59E0B 100%) !important;
+  background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%) !important;
 }
 
 .category-badge.bg-info {
-  background: linear-gradient(135deg, #0891B2 0%, #06B6D4 100%) !important;
+  background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%) !important;
 }
 
 .category-badge.bg-success {
-  background: linear-gradient(135deg, #00A443 0%, #00C853 100%) !important;
+  background: linear-gradient(135deg, #00a443 0%, #00c853 100%) !important;
 }
+
+/* شريحة حالة العرض داخل الكارت */
+.offer-status-chip {
+  margin: 0.75rem 0;
+  padding: 0.6rem 0.9rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.offer-status-chip.active {
+  background: rgba(0, 164, 67, 0.06);
+  color: #0f9d58;
+  border-right: 4px solid #0f9d58;
+}
+
+.offer-status-chip.expired {
+  background: #fef2f2;
+  color: #b91c1c;
+  border-right: 4px solid #b91c1c;
+}
+
+/* صفحة تفاصيل العرض العام */
+.ready-general-details-page {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 164, 67, 0.02),
+    rgba(0, 200, 83, 0.05)
+  );
+  min-height: 100vh;
+}
+
+.details-card {
+  max-width: 900px;
+  margin: 0 auto;
+  border-radius: 18px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  border: none;
+  position: relative;
+}
+
+.details-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #00a443, #00c853);
+}
+
+.details-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.details-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00a443, #00c853);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+.details-title {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #111827;
+}
+
+.details-badges .badge {
+  margin-left: 0.25rem;
+}
+
+.details-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  font-size: 0.95rem;
+}
+
+.details-icon {
+  color: #00a443;
+  margin-top: 0.15rem;
+}
+
+.details-info-item .label {
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.details-info-item .value {
+  color: #111827;
+}
+
+.offer-status-box {
+  border-radius: 12px;
+  padding: 0.7rem 1rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.offer-status-box.active {
+  background: rgba(0, 164, 67, 0.06);
+  color: #0f9d58;
+}
+
+.offer-status-box.expired {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.details-section .section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+}
+
+.details-section .section-text {
+  font-size: 0.95rem;
+  color: #4b5563;
+  line-height: 1.7;
+}
+
+.attachments-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.attachments-list li + li {
+  margin-top: 0.3rem;
+}
+
+.attachments-list a {
+  text-decoration: none;
+  color: #0f766e;
+}
+
+.attachments-list a:hover {
+  text-decoration: underline;
+}
+.rgd-footer .goTo-general-offers-btn {
+  border: #00802f 1px solid !important;
+  color: #00802f;
+  text-decoration: none;
+  background-color: transparent;
+}
+.rgd-footer .goTo-general-offers-btn:hover {
+  background-color: #00a443;
+  color: #fff;
+  text-decoration: none;
+}
+/* .rgd-footer .btn-link {
+  color: #0f766e;
+  text-decoration: none;
+  font-weight: 600;
+  border: #00802f 1px solid;
+} */
+/* صفحة تفاصيل الاستعداد للتبرع العام */
+.ready-general-details-page {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 164, 67, 0.02) 0%,
+    rgba(0, 200, 83, 0.06) 100%
+  );
+}
+
+/* كارت التفاصيل */
+.details-card {
+  border-radius: 20px;
+  box-shadow: 0 10px 35px rgba(0, 164, 67, 0.12);
+  border: none;
+}
+
+/* رأس التفاصيل */
+.details-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid #eef2f7;
+  padding-bottom: 1rem;
+}
+
+.details-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00a443 0%, #00c853 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  font-weight: 800;
+}
+
+.details-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin-bottom: 0.25rem;
+}
+
+.details-badges .badge {
+  border-radius: 999px;
+}
+
+/* عناصر المعلومات */
+.details-info-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  background: #f9fafb;
+  border-radius: 12px;
+}
+
+.details-icon {
+  font-size: 1.4rem;
+  color: #00a443;
+}
+
+.details-info-item .label {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.details-info-item .value {
+  font-size: 0.95rem;
+  color: #111827;
+}
+
+/* حالة العرض */
+.offer-status-box {
+  padding: 0.9rem 1rem;
+  border-radius: 14px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.offer-status-box.active {
+  background: #e8f5e9;
+  color: #1b5e20;
+  border-right: 4px solid #00a443;
+}
+
+.offer-status-box.expired {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-right: 4px solid #ef4444;
+}
+
+/* أقسام التفاصيل */
+.details-section {
+  border-top: 1px dashed #e5e7eb;
+  padding-top: 1.2rem;
+}
+
+.section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.section-text {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #4b5563;
+  line-height: 1.7;
+}
+
+/* جاليري المرفقات (الصور) */
+.attachments-gallery {
+  margin-top: 0.5rem;
+}
+
+.attachment-thumb {
+  width: 100%;
+  border-radius: 14px;
+  overflow: hidden;
+  border: none;
+  padding: 0;
+  background: #f3f4f6;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.attachment-thumb img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  display: block;
+}
+
+.attachment-thumb:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 10px 25px rgba(0, 164, 67, 0.18);
+}
+
+/* قائمة المرفقات الأخرى */
+.attachments-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.attachments-list li + li {
+  margin-top: 0.4rem;
+}
+
+.attachments-list a {
+  text-decoration: none;
+  color: #0369a1;
+  font-size: 0.95rem;
+}
+
+.attachments-list a:hover {
+  text-decoration: underline;
+}
+
+/* مودال معاينة الصور */
+.preview-modal {
+  background: rgba(0, 0, 0, 0.85);
+  border-radius: 20px;
+}
+
+.preview-modal-body {
+  position: relative;
+  padding: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-image {
+  max-width: 100%;
+  max-height: 80vh;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+.preview-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: rgba(15, 23, 42, 0.7);
+  color: #fff;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  font-size: 1.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.preview-nav.prev {
+  left: 12px;
+}
+
+.preview-nav.next {
+  right: 12px;
+}
+
+.preview-nav:hover {
+  background: rgba(34, 197, 94, 0.9);
+}
+
+/* فوتر التفاصيل */
+.details-footer .btn-link {
+  font-weight: 600;
+  color: #059669;
+}
+.details-footer .btn-link:hover {
+  color: #047857;
+  text-decoration: underline;
+}
+

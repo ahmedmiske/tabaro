@@ -475,7 +475,7 @@ function Header({ notifCount }) {
                   <FiDroplet />
                 </div>
                 <div className="eh-mega-content">
-                  <h4>اعلان تبرع بالدم</h4>
+                  <h4> عرض التبرع بالدم </h4>
                   <p>سجّل رغبتك بالتبرع الآن</p>
                 </div>
               </Link>
@@ -489,7 +489,7 @@ function Header({ notifCount }) {
                   <FiList />
                 </div>
                 <div className="eh-mega-content">
-                  <h4>طلب التبرع</h4>
+                  <h4> طلب التبرع بالدم</h4>
                   <p>إضافة طلب جديد</p>
                 </div>
               </Link>
@@ -517,7 +517,7 @@ function Header({ notifCount }) {
                   <FiUsers />
                 </div>
                 <div className="eh-mega-content">
-                  <h4>المتبرعون</h4>
+                  <h4>المتبرعون بالدم</h4>
                   <p>المتبرعون المسجّلون</p>
                 </div>
               </Link>
@@ -585,8 +585,8 @@ function Header({ notifCount }) {
                   <FiUsers />
                 </div>
                 <div className="eh-mega-content">
-                  <h4>المتبرعون</h4>
-                  <p>المتبرعون العامّون</p>
+                  <h4>عروض التبرع</h4>
+                  <p> لائحة عروض التبرعات </p>
                 </div>
               </Link>
             </div>

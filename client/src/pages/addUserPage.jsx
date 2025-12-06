@@ -1,9 +1,11 @@
 // src/pages/AddUserPage.jsx
-import React, { useState, useEffect, useCallback, useMemo , useRef  } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import UserForm from '../components/UserForm.jsx';
 import TitleMain from '../components/TitleMain.jsx';
 import userAddImage from '../images/default-avatar.png';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
+import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
 import './addUserPage.css';
 
 // 🛠️ فلتر ResizeObserver فقط (لا نخفي بقية الأخطاء)
@@ -65,28 +67,33 @@ function AddUserPage() {
     return () => clearTimeout(t);
   }, []);
 
-  // ✅ عناوين الخطوات متطابقة مع محتوى UserForm
+  // ✅ الترتيب الجديد:
+  // 1: نوع الحساب
+  // 2: الموقع الجغرافي
+  // 3: بيانات التواصل + OTP
+  // 4: البيانات الأساسية
+  // 5: بيانات الدخول
   const stepInfo = useMemo(
     () => ({
       1: {
         title: 'اختيار نوع الحساب',
-        description: 'اختر هل ستسجل كفرد أم كمؤسسة.',
+        description: 'اختر هل ستسجل كفرد أم كمؤسسة (المؤسسات ستكون متاحة في النسخة القادمة).',
         icon: '👤',
       },
       2: {
-        title: 'بيانات التواصل',
-        description: 'أدخل رقم الهاتف، ورقم واتساب (اختياري)، والبريد الإلكتروني إن وجد.',
-        icon: '📞',
-      },
-      3: {
-        title: 'البيانات الأساسية',
-        description: 'أضف اسمك وبياناتك الشخصية أو بيانات المؤسسة وصورتك إن رغبت.',
-        icon: '📝',
-      },
-      4: {
         title: 'الموقع الجغرافي',
         description: 'حدّد إن كنت داخل موريتانيا أو خارجها وأدخل معلومات مكان إقامتك.',
         icon: '📍',
+      },
+      3: {
+        title: 'بيانات التواصل وتأكيد الهاتف',
+        description: 'أدخل رقم الهاتف (مع مفتاح الدولة إذا كنت خارج موريتانيا)، ثم أكّد رمز التحقق.',
+        icon: '📞',
+      },
+      4: {
+        title: 'البيانات الأساسية',
+        description: 'أضف اسمك وبياناتك الشخصية أو بيانات المؤسسة وصورتك إن رغبت.',
+        icon: '📝',
       },
       5: {
         title: 'بيانات الدخول إلى الحساب',
@@ -97,7 +104,7 @@ function AddUserPage() {
     [],
   );
 
-      const nextStep = useCallback(() => {
+  const nextStep = useCallback(() => {
     if (currentStep < totalSteps) {
       setCurrentStep((p) => p + 1);
       scrollToFormTop();
@@ -113,7 +120,6 @@ function AddUserPage() {
     }
   }, [currentStep, scrollToFormTop]);
 
-
   const goToStep = useCallback(
     (step) => {
       if (step >= 1 && step <= totalSteps) {
@@ -123,7 +129,8 @@ function AddUserPage() {
     },
     [totalSteps],
   );
-       const mapBackendErrorToFriendly = (backendMessage) => {
+
+  const mapBackendErrorToFriendly = (backendMessage) => {
     const msg = String(backendMessage || '').toLowerCase();
 
     if (msg.includes('e11000') && msg.includes('username')) {
@@ -140,11 +147,10 @@ function AddUserPage() {
     return 'حدث خطأ أثناء إنشاء الحساب. تحقق من البيانات وحاول مرة أخرى.';
   };
 
-
   /**
    * ✅ إرسال فعلي إلى الخادم (multipart/form-data)
    */
-      const addUser = useCallback(
+  const addUser = useCallback(
     async (user) => {
       setIsLoading(true);
       setErrorMessage('');
@@ -194,9 +200,8 @@ function AddUserPage() {
         setIsLoading(false);
       }
     },
-    [totalSteps, mapBackendErrorToFriendly],
+    [totalSteps],
   );
-
 
   const handleResetForm = useCallback(() => {
     requestAnimationFrame(() => {
@@ -225,7 +230,7 @@ function AddUserPage() {
       role="main"
       aria-label="صفحة التسجيل"
     >
-        {!formSubmitted && (
+      {!formSubmitted && (
         <section
           className="signup-image-section fullscreen-image"
           aria-label="منطقة الترحيب البصرية"
@@ -233,7 +238,7 @@ function AddUserPage() {
       )}
 
       {/* منطقة النموذج */}
-      <section className="signup-form-section" aria-label="نموذج إنشاء الحساب">
+      <section className="signup-form-section" aria-label="نموذج إنشاء الحساب" ref={formSectionRef}>
         {errorMessage && (
           <div
             className="alert alert-error sophisticated-alert"
@@ -383,7 +388,6 @@ function AddUserPage() {
             </footer>
           </div>
         )}
-        
       </section>
     </div>
   );

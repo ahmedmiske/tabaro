@@ -30,8 +30,7 @@ export default function ManageQuickCards({
 
           <h3 className="mqs-title">إدارة التبرع بالدم</h3>
           <p className="mqs-desc">
-            تابع طلباتك وعروضك الخاصة بالتبرع بالدم، وساهم في إنقاذ حياة من خلال
-            متابعة الحالات المستعجلة.
+            تابع طلباتك وعروضك الخاصة بالتبرع بالدم
           </p>
 
           <div className="mqs-footer">
@@ -55,8 +54,7 @@ export default function ManageQuickCards({
 
           <h3 className="mqs-title">إدارة التبرعات العامة</h3>
           <p className="mqs-desc">
-            المساعدات المالية والعينية، السكن، التعليم وغيرها من الطلبات العامة
-            في مكان واحد.
+            المساعدات المالية والعينية، السكن، التعليم وغيرها من الطلبات والعروض.
           </p>
 
           <div className="mqs-footer">
