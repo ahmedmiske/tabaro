@@ -234,7 +234,7 @@ const ReadyToDonateGeneralDetails = () => {
     <Container className="ready-general-details-page py-5" dir="rtl">
 
       <Card className="rgd-card">
-        <div className="rgd-card-header d-flex justify-content-between align-items-center px-4 pt-3">
+        <div className="rgd-card-header d-flex justify-content-between align-items-center ">
           <h2 className="rgd-title">عرض استعداد المتبرع</h2>
           <Button variant="outline-secondary" onClick={() => navigate(-1)}>
             <FiArrowRight className="ms-1" />
