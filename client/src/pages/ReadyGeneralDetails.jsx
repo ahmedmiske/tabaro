@@ -115,8 +115,8 @@ const ReadyToDonateGeneralDetails = () => {
         console.error('details ready-general error:', e);
         setError(
           e?.body?.message ||
-            e?.message ||
-            'تعذر تحميل تفاصيل العرض، حاول لاحقًا.'
+          e?.message ||
+          'تعذر تحميل تفاصيل العرض، حاول لاحقًا.'
         );
       } finally {
         setLoading(false);
@@ -232,19 +232,27 @@ const ReadyToDonateGeneralDetails = () => {
 
   return (
     <Container className="ready-general-details-page py-5" dir="rtl">
-      <TitleMain title="تفاصيل عرض استعداد المتبرع" />
-      <Button variant="outline-secondary" onClick={() => navigate(-1)}>
-              <FiArrowRight className="ms-1" />
-              رجوع 
-       </Button>
+
       <Card className="rgd-card">
+        <div className="rgd-card-header d-flex justify-content-between align-items-center px-4 pt-3">
+          <h2 className="rgd-title">عرض استعداد المتبرع</h2>
+          <Button variant="outline-secondary" onClick={() => navigate(-1)}>
+            <FiArrowRight className="ms-1" />
+            رجوع
+          </Button>
+        </div>
         <Card.Body>
-          {/* رأس البطاقة */}
+          {/* رأس البطاقة مع تفاصيل إضافية */}
           <div className="rgd-header">
-            <div className="rgd-avatar">م</div>
+            <div className="rgd-avatar">{offer?.donorName?.[0] || 'م'}</div>
             <div className="rgd-header-main">
-              <h2 className="rgd-title">عرض استعداد المتبرع</h2>
-              <div className="rgd-badges">
+              {/* اسم المتبرع بشكل بارز */}
+              {offer?.donorName && (
+                <div className="rgd-donor-name fw-bold mb-2" style={{ fontSize: '1.3rem', color: '#115e59' }}>
+                  {offer.donorName}
+                </div>
+              )}
+              <div className="rgd-badges mb-2">
                 {categoryLabel && (
                   <Badge bg="warning" className="me-2 rgd-badge-pill">
                     {categoryLabel}
@@ -257,6 +265,20 @@ const ReadyToDonateGeneralDetails = () => {
                   {donationType}
                 </Badge>
               </div>
+              {/* عبارة صاحب الطلب */}
+              {offer?.ownerPhrase && (
+                <div className="rgd-owner-phrase text-muted small">
+                  <span>صاحب الطلب: </span>
+                  <span>{offer.ownerPhrase}</span>
+                </div>
+              )}
+              {/* تاريخ التسجيل */}
+              {offer?.createdAt && (
+                <div className="rgd-created-date text-muted small">
+                  <span>تاريخ التسجيل: </span>
+                  <span>{formatDate(offer.createdAt)}</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -303,9 +325,8 @@ const ReadyToDonateGeneralDetails = () => {
 
           {/* حالة العرض */}
           <div
-            className={`rgd-status-box mt-4 ${
-              isStillValid ? 'active' : 'expired'
-            }`}
+            className={`rgd-status-box mt-4 ${isStillValid ? 'active' : 'expired'
+              }`}
           >
             {isStillValid
               ? 'العرض ساري المفعول إلى تاريخ الانتهاء.'
@@ -399,10 +420,10 @@ const ReadyToDonateGeneralDetails = () => {
             <h5 className="rgd-section-title">التواصل مع المتبرع</h5>
             <div className="d-flex flex-wrap gap-2">
 
-              <Button variant='outline-success' >      
+              <Button variant='outline-success' >
                 <FiMessageCircle className="ms-1" />
                 <Link to={`/chat/${offer._id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
-                 محادثة عبر النظام
+                  محادثة عبر النظام
                 </Link>
               </Button>
               {contactWhatsapp && (
@@ -439,7 +460,7 @@ const ReadyToDonateGeneralDetails = () => {
           <div className="rgd-footer mt-4 d-flex flex-wrap gap-2">
             <Button variant="outline-secondary" onClick={() => navigate(-1)}>
               <FiArrowRight className="ms-1" />
-              رجوع 
+              رجوع
             </Button>
             <Link to="/general-donors" className="btn go-to-list-btn">
               الذهاب إلى قائمة العروض العامة

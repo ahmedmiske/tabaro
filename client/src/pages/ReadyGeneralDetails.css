@@ -1,3 +1,11 @@
+/* اسم المتبرع البارز */
+.rgd-donor-name {
+  font-size: 1.3rem;
+  color: #115e59;
+  font-weight: 800;
+  margin-bottom: 0.3rem;
+  letter-spacing: 0.01em;
+}
 /* صفحة تفاصيل عروض الاستعداد للتبرع */
 .ready-general-details-page {
   min-height: 100vh;
@@ -12,16 +20,25 @@
 /* الكارت الرئيسي */
 .rgd-card {
   width: 100%;
-  max-width: 600px;
+  max-width: 800px;
   margin: 0 auto;
-  border-radius: 22px;
   box-shadow: 0 18px 50px rgba(0, 164, 67, 0.15);
   border: none;
-  padding: 1.5rem 2rem;
   position: relative;
   overflow: hidden;
-  border-top: #c5610f 6px solid !important;
+  border-top: #707e1f  4px solid !important;
 
+}
+.rgd-card-header {
+  padding: 1rem;
+  color: #fff;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 800;
+  border: #00a443 1px solid;
+  border-radius:0 0 12px 12px;
+  background-color: #00c85397;
+  box-shadow: 0 4px 16px rgba(15, 118, 110, 0.1);
 }
 
 .rgd-card::before {
@@ -39,17 +56,11 @@
 /* رأس الكارت */
 .rgd-header {
   display: flex;
-  background-color: #15974c;
   align-items: center;
   gap: 1rem;
-  padding: 5px;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #e5e7eb;
-  border-radius: 12px;
-  -webkit-border-radius: 12px;
-  -moz-border-radius: 12px;
-  -ms-border-radius: 12px;
-  -o-border-radius: 12px;
+  width: 100%;
+ 
+ 
 }
 
 .rgd-avatar {
@@ -70,9 +81,9 @@
 }
 
 .rgd-title {
-  font-size: 1.25rem;
+  font-size: 1.8rem;
   font-weight: 800;
-  color: #111827;
+  color: #15803d;
   margin: 0 0 0.25rem;
 }
 
@@ -91,6 +102,9 @@
 /* مربعات الملخص */
 .rgd-summary-row {
   margin-top: 1.25rem;
+  border: #00a443 1px solid;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(15, 118, 110, 0.1);
 }
 
 .rgd-summary-box {
@@ -127,11 +141,13 @@
 
 /* حالة العرض */
 .rgd-status-box {
+
   border-radius: 16px;
   padding: 0.8rem 1rem;
   margin-top: 1rem;
   font-size: 0.95rem;
   font-weight: 600;
+
 }
 
 .rgd-status-box.active {
@@ -149,15 +165,21 @@
 /* الأقسام */
 .rgd-section {
   margin-top: 1.5rem;
+  padding-bottom: 1rem;
+  border: 1px solid #00a443;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(15, 118, 110, 0.1);
+
+
 }
 
 .rgd-section-title {
   font-size: 1.15rem;
   font-weight: 800;
-  color: #065f46;
-  margin-bottom: 0.5rem;
+  color: #707e1f;
+  margin: 0.5rem;
   border-bottom: 1px solid #e5e7eb;
-  padding-bottom: 0.4rem;
+  
 }
 
 .rgd-section-subtitle {
@@ -273,7 +295,7 @@
 
 /* فوتر الكارت */
 .rgd-footer {
-  border-top: 1px solid #e5e7eb;
+ 
   padding-top: 0.75rem;
   margin-top: 1rem;
 }
