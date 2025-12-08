@@ -1,19 +1,40 @@
 // src/pages/BloodDonors.js
 import React, { useState, useEffect, useMemo } from 'react';
-import { Container, Row, Col, Card, Badge, Button, Form, InputGroup, Alert, Spinner } from 'react-bootstrap';
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Badge,
+  Button,
+  Form,
+  InputGroup,
+  Alert,
+  Spinner,
+} from 'react-bootstrap';
 import { FaComments } from 'react-icons/fa';
-import { FiSearch, FiMapPin, FiPhone, FiUser, FiDroplet, FiCalendar, FiFilter } from 'react-icons/fi';
+import {
+  FiSearch,
+  FiMapPin,
+  FiPhone,
+  FiUser,
+  FiDroplet,
+  FiCalendar,
+  FiFilter,
+} from 'react-icons/fi';
 import { useAuth } from '../AuthContext.jsx';
 import { Navigate, Link, useLocation } from 'react-router-dom';
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import './BloodDonors.css';
-import QuranVerse from "../components/QuranVerse.jsx";
-
+import QuranVerse from '../components/QuranVerse.jsx';
 
 const BloodDonors = () => {
   const { user } = useAuth();
   const locationHook = useLocation();
-  const urlParams = useMemo(() => new URLSearchParams(locationHook.search), [locationHook.search]);
+  const urlParams = useMemo(
+    () => new URLSearchParams(locationHook.search),
+    [locationHook.search],
+  );
 
   const [donors, setDonors] = useState([]);
   const [filteredDonors, setFilteredDonors] = useState([]);
@@ -22,20 +43,30 @@ const BloodDonors = () => {
 
   // فلاتر واجهة + قراءة من URL
   const [searchTerm, setSearchTerm] = useState(urlParams.get('q') || '');
-  const [filterBloodType, setFilterBloodType] = useState(urlParams.get('bloodType') || '');
-  const [filterLocation, setFilterLocation] = useState(urlParams.get('location') || '');
+  const [filterBloodType, setFilterBloodType] = useState(
+    urlParams.get('bloodType') || '',
+  );
+  const [filterLocation, setFilterLocation] = useState(
+    urlParams.get('location') || '',
+  );
 
-  const bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+  const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
 
   const getBloodTypeColor = (bloodType) => {
-    const colors = {
-      'A+': 'danger', 'A-': 'danger',
-      'B+': 'info', 'B-': 'info',
-      'AB+': 'warning', 'AB-': 'warning',
-      'O+': 'success', 'O-': 'success'
-    };
-    return colors[bloodType] || 'secondary';
+  const colors = {
+    'A+': 'danger',
+    'A-': 'danger',
+    'B+': 'info',
+    'B-': 'info',
+    'AB+': 'warning',
+    'AB-': 'warning',
+    'O+': 'success',
+    'O-': 'success',
   };
+
+  return colors[bloodType] || 'secondary';
+};
+
 
   // الجلب من الباك باستخدام res.body
   const fetchDonors = async () => {
@@ -48,12 +79,20 @@ const BloodDonors = () => {
       if (filterLocation) qs.set('location', filterLocation);
       if (searchTerm) qs.set('q', searchTerm);
 
-      const res = await fetchWithInterceptors(`/api/ready-to-donate-blood?${qs.toString()}`);
+      const res = await fetchWithInterceptors(
+        `/api/ready-to-donate-blood?${qs.toString()}`,
+      );
       const body = res?.body;
 
-      const arr = Array.isArray(body?.data) ? body.data : (Array.isArray(body) ? body : []);
-      const mapped = arr.map(d => {
-        const phone = (d.contactMethods || []).find(m => m.method === 'phone')?.number;
+      const arr = Array.isArray(body?.data)
+        ? body.data
+        : Array.isArray(body)
+          ? body
+          : [];
+      const mapped = arr.map((d) => {
+        const phone = (d.contactMethods || []).find(
+          (m) => m.method === 'phone',
+        )?.number;
         const fullName = d?.createdBy?.firstName
           ? `${d.createdBy.firstName} ${d.createdBy.lastName || ''}`.trim()
           : 'متبرع';
@@ -62,7 +101,7 @@ const BloodDonors = () => {
           : null;
 
         return {
-          _id: d._id,
+          _id: d._id, // 👈 هذا هو ID سجل الاستعداد للتبرع
           fullName,
           bloodType: d.bloodType,
           location: d.location,
@@ -71,14 +110,15 @@ const BloodDonors = () => {
           lastDonation: undefined,
           isAvailable: true,
           joinDate: d.createdAt,
-          profilePicture
+          profilePicture,
         };
       });
 
       setDonors(mapped);
     } catch (err) {
       console.error('Error fetching donors:', err);
-      const msg = err?.body?.error || err?.message || 'حدث خطأ في تحميل البيانات';
+      const msg =
+        err?.body?.error || err?.message || 'حدث خطأ في تحميل البيانات';
       setError(msg);
       setDonors([]);
     } finally {
@@ -91,15 +131,22 @@ const BloodDonors = () => {
 
     if (searchTerm) {
       const q = searchTerm.toLowerCase();
-      filtered = filtered.filter(donor =>
-        donor.fullName?.toLowerCase().includes(q) ||
-        donor.location?.toLowerCase().includes(q)
+      filtered = filtered.filter(
+        (donor) =>
+          donor.fullName?.toLowerCase().includes(q) ||
+          donor.location?.toLowerCase().includes(q),
       );
     }
-    if (filterBloodType) filtered = filtered.filter(donor => donor.bloodType === filterBloodType);
+    if (filterBloodType) {
+      filtered = filtered.filter(
+        (donor) => donor.bloodType === filterBloodType,
+      );
+    }
     if (filterLocation) {
       const q = filterLocation.toLowerCase();
-      filtered = filtered.filter(donor => donor.location?.toLowerCase().includes(q));
+      filtered = filtered.filter((donor) =>
+        donor.location?.toLowerCase().includes(q),
+      );
     }
     setFilteredDonors(filtered);
   };
@@ -110,8 +157,15 @@ const BloodDonors = () => {
     setFilterLocation('');
   };
 
-  useEffect(() => { if (user) fetchDonors(); /* eslint-disable-next-line */ }, [user, filterBloodType, filterLocation]);
-  useEffect(() => { filterDonors(); /* eslint-disable-next-line */ }, [donors, searchTerm, filterBloodType, filterLocation]);
+  useEffect(() => {
+    if (user) fetchDonors();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, filterBloodType, filterLocation]);
+
+  useEffect(() => {
+    filterDonors();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [donors, searchTerm, filterBloodType, filterLocation]);
 
   if (!user) return <Navigate to="/login?next=/donors/blood" replace />;
 
@@ -134,10 +188,11 @@ const BloodDonors = () => {
           <FiDroplet className="me-2" />
           المتبرعون بالدم
         </h1>
-        <p className="page-subtitle">شبكة المتبرعين المسجلين في المنصة الوطنية للتبرع</p>
-         <QuranVerse verse="﴿وَمَا تُقَدِّمُوا لِأَنفُسِكُم مِّنْ خَيْرٍ تَجِدُوهُ عِندَ اللَّهِ هُوَ خَيْرًا وَأَعْظَمَ أَجْرًا﴾" />
-        
-        <div className="title-divider"></div>
+        <p className="page-subtitle">
+          شبكة المتبرعين المسجلين في المنصة الوطنية للتبرع
+        </p>
+        <QuranVerse verse="﴿وَمَا تُقَدِّمُوا لِأَنفُسِكُم مِّنْ خَيْرٍ تَجِدُوهُ عِندَ اللَّهِ هُوَ خَيْرًا وَأَعْظَمَ أَجْرًا﴾" />
+        <div className="title-divider" />
       </div>
 
       {error && (
@@ -152,7 +207,9 @@ const BloodDonors = () => {
           <Row className="g-3">
             <Col md={4}>
               <InputGroup>
-                <InputGroup.Text><FiSearch /></InputGroup.Text>
+                <InputGroup.Text>
+                  <FiSearch />
+                </InputGroup.Text>
                 <Form.Control
                   type="text"
                   placeholder="البحث بالاسم أو المدينة..."
@@ -162,9 +219,16 @@ const BloodDonors = () => {
               </InputGroup>
             </Col>
             <Col md={3}>
-              <Form.Select value={filterBloodType} onChange={(e) => setFilterBloodType(e.target.value)}>
+              <Form.Select
+                value={filterBloodType}
+                onChange={(e) => setFilterBloodType(e.target.value)}
+              >
                 <option value="">جميع فصائل الدم</option>
-                {bloodTypes.map(type => <option key={type} value={type}>{type}</option>)}
+                {bloodTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
               </Form.Select>
             </Col>
             <Col md={3}>
@@ -176,7 +240,11 @@ const BloodDonors = () => {
               />
             </Col>
             <Col md={2}>
-              <Button variant="outline-secondary" onClick={clearFilters} className="w-100">
+              <Button
+                variant="outline-secondary"
+                onClick={clearFilters}
+                className="w-100"
+              >
                 <FiFilter className="me-1" /> إعادة تعيين
               </Button>
             </Col>
@@ -196,11 +264,15 @@ const BloodDonors = () => {
             <div className="stat-label">النتائج المعروضة</div>
           </div>
           <div className="stat-card">
-            <div className="stat-number">{donors.filter(d => d.isAvailable).length}</div>
+            <div className="stat-number">
+              {donors.filter((d) => d.isAvailable).length}
+            </div>
             <div className="stat-label">متاحون للتبرع</div>
           </div>
           <div className="stat-card">
-            <div className="stat-number">{new Set(donors.map(d => d.location)).size}</div>
+            <div className="stat-number">
+              {new Set(donors.map((d) => d.location)).size}
+            </div>
             <div className="stat-label">مدينة</div>
           </div>
         </div>
@@ -218,21 +290,27 @@ const BloodDonors = () => {
                 : 'لا توجد متبرعون مسجلون حالياً'}
             </p>
             {(searchTerm || filterBloodType || filterLocation) && (
-              <Button variant="primary" onClick={clearFilters}>عرض جميع المتبرعين</Button>
+              <Button variant="primary" onClick={clearFilters}>
+                عرض جميع المتبرعين
+              </Button>
             )}
           </Card.Body>
         </Card>
       ) : (
         <Row className="g-4 align-items-stretch">
           {filteredDonors.map((donor, index) => (
-            <Col  key={donor._id || index}>
-              <Card className="donor-card" >
+            <Col key={donor._id || index}>
+              <Card className="donor-card">
                 <Card.Body>
                   {/* صورة + اسم */}
                   <div className="donor-header d-flex align-items-center mb-3">
                     <div className="donor-avatar">
                       {donor.profilePicture ? (
-                        <img src={donor.profilePicture} alt={donor.fullName} className="avatar-img" />
+                        <img
+                          src={donor.profilePicture}
+                          alt={donor.fullName}
+                          className="avatar-img"
+                        />
                       ) : (
                         <div className="avatar-placeholder">
                           {donor.fullName?.charAt(0)?.toUpperCase() || 'م'}
@@ -240,15 +318,24 @@ const BloodDonors = () => {
                       )}
                     </div>
                     <div className="donor-info">
-                      <h5 className="donor-name">{donor.fullName || 'متبرع'}</h5>
+                      <h5 className="donor-name">
+                        {donor.fullName || 'متبرع'}
+                      </h5>
                       <div className="donor-badges">
                         {donor.bloodType && (
-                          <Badge bg={getBloodTypeColor(donor.bloodType)} className="blood-type-badge">
+                          <Badge
+                            bg={getBloodTypeColor(donor.bloodType)}
+                            className="blood-type-badge"
+                          >
                             <FiDroplet className="me-1" />
                             {donor.bloodType}
                           </Badge>
                         )}
-                        {donor.isAvailable && <Badge bg="success" className="ms-2">متاح للتبرع</Badge>}
+                        {donor.isAvailable && (
+                          <Badge bg="success" className="ms-2">
+                            متاح للتبرع
+                          </Badge>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -264,21 +351,48 @@ const BloodDonors = () => {
                     {donor.lastDonation && (
                       <div className="detail-item">
                         <FiCalendar className="detail-icon" />
-                        <span>آخر تبرع: {new Date(donor.lastDonation).toLocaleDateString('ar-SA')}</span>
+                        <span>
+                          آخر تبرع:{' '}
+                          {new Date(
+                            donor.lastDonation,
+                          ).toLocaleDateString('ar-SA')}
+                        </span>
                       </div>
                     )}
                   </div>
 
                   {/* إجراءات */}
                   <div className="donor-actions mt-3">
-                    <Link to={`/users/${donor._id}`} className="btn btn-outline-primary btn-sm me-2">
+                    {/* 👇 زر تفاصيل الاستعداد للتبرع بالدم */}
+                    <Link
+                      to={`/ready-blood/${donor._id}`}
+                      className="btn btn-outline-success btn-sm me-2"
+                    >
+                      <FiDroplet className="me-1" />
+                      عرض تفاصيل الاستعداد
+                    </Link>
+
+                    <Link
+                      to={`/users/${donor._id}`}
+                      className="btn btn-outline-primary btn-sm me-2"
+                    >
                       عرض الملف الشخصي
                     </Link>
-                    <Link to={`/chat/${donor._id}`} className="chat-icon-link me-2" title="دردشة مع المتبرع">
+
+                    <Link
+                      to={`/chat/${donor._id}`}
+                      className="chat-icon-link me-2"
+                      title="دردشة مع المتبرع"
+                    >
                       <FaComments size={26} color="#0dcaf0" />
                     </Link>
+
                     {donor.phone && (
-                      <Button variant="success" size="sm" href={`tel:${donor.phone}`}>
+                      <Button
+                        variant="success"
+                        size="sm"
+                        href={`tel:${donor.phone}`}
+                      >
                         <FiPhone className="me-1" /> اتصال
                       </Button>
                     )}
@@ -289,8 +403,6 @@ const BloodDonors = () => {
           ))}
         </Row>
       )}
-
-     
     </Container>
   );
 };

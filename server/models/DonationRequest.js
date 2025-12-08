@@ -1,18 +1,19 @@
-// server/models/DonationRequest.js
 const mongoose = require("mongoose");
+const statusPlugin = require("./plugins/statusPlugin");
+const HistoryActionSchema = require("./plugins/historyActionSchema");
 
 const paymentMethodSchema = new mongoose.Schema(
   {
     method: { type: String, required: true, trim: true },
-    phone: { type: String, required: true, trim: true }, // 8 أرقام
+    phone: { type: String, required: true, trim: true },
   },
   { _id: false }
 );
 
 const contactMethodSchema = new mongoose.Schema(
   {
-    method: { type: String, required: true, trim: true }, // phone | whatsapp | ...
-    number: { type: String, required: true, trim: true }, // 8 أرقام
+    method: { type: String, required: true, trim: true },
+    number: { type: String, required: true, trim: true },
   },
   { _id: false }
 );
@@ -25,57 +26,57 @@ const donationRequestSchema = new mongoose.Schema(
       required: true,
     },
 
-    // أساسي
     category: { type: String, required: true, trim: true },
     type: { type: String, required: true, trim: true },
     description: { type: String, trim: true },
 
-    // الموقع
     place: { type: String, required: true, trim: true },
 
-    // مالية (اختياري)
     amount: { type: Number, default: 0 },
 
-    // دائمًا مصفوفة
     paymentMethods: {
       type: [paymentMethodSchema],
       default: [],
     },
 
-    // تواصل
     contactMethods: {
       type: [contactMethodSchema],
       default: [],
     },
 
-    // مهلة واستعجال
     deadline: { type: Date },
     isUrgent: { type: Boolean, default: false },
 
-    // دم/اختياري
     bloodType: { type: String, trim: true },
 
-    // ملفات مرفوعة (مسارات)
     proofDocuments: {
       type: [String],
       default: [],
     },
 
-    // وقت الإنشاء (قديم)
     date: { type: Date, default: Date.now },
 
     status: {
       type: String,
-      enum: ["active", "paused", "completed", "cancelled"],
+      enum: ["active", "paused", "finished", "cancelled"],
       default: "active",
+      index: true,
     },
 
-    // ⬇️ جديد: معلومات إيقاف النشر
     closedReason: { type: String, trim: true },
     closedAt: { type: Date },
+
+    // ✅ الأرشيف
+    historyActions: {
+      type: [HistoryActionSchema],
+      default: [],
+    },
   },
   { timestamps: true }
 );
+
+// Plugin: يحدد finished بناءً على deadline
+donationRequestSchema.plugin(statusPlugin, { dateField: "deadline" });
 
 module.exports =
   mongoose.models.DonationRequest ||

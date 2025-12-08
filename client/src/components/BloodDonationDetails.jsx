@@ -1,3 +1,4 @@
+// src/components/BloodDonationDetails.jsx
 import React, { useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -405,7 +406,11 @@ export default function BloodDonationDetails() {
 
   /* ---------- بيانات مشتقة لا تحتاج Hooks ---------- */
 
-  const isActive = request.isActive !== false;
+  // 🔹 نعتمد على status إن وُجد، وإلا نستخدم isActive
+  const status =
+    request.status || (request.isActive === false ? 'paused' : 'active');
+  const isActive = status === 'active';
+
   const closedReason = request.closedReason || '';
   const closedAt = request.closedAt ? new Date(request.closedAt) : null;
 
@@ -575,13 +580,13 @@ export default function BloodDonationDetails() {
     setExpandedOfferId((prev) => (prev === offerId ? null : offerId));
   };
 
-  // ✅ إيقاف نشر الطلب من طرف صاحبه
+  // ✅ إيقاف نشر الطلب من طرف صاحبه (فقط تغيير النص والمنطق حسب status)
   const handleStopPublish = async (e) => {
     if (e) e.preventDefault();
 
     // eslint-disable-next-line no-alert
     const ok = window.confirm(
-      'هل أنت متأكد من رغبتك في إيقاف نشر هذا الطلب؟ سيتم نقله إلى قائمة الطلبات غير النشطة.'
+      'هل أنت متأكد من رغبتك في إيقاف نشر هذا الطلب؟ سيتم نقله إلى قائمة الطلبات غير النشطة.',
     );
     if (!ok) return;
 
@@ -601,7 +606,7 @@ export default function BloodDonationDetails() {
 
         setStopAlert({
           type: 'success',
-          text: 'تم إيقاف نشر هذا الطلب، وسيُنقل إلى قائمة الطلبات غير النشطة.',
+          text: 'تم إيقاف نشر هذا الطلب، ولن يظهر في القوائم العامة.',
         });
         setShowStopBox(false);
       } else {
@@ -611,6 +616,7 @@ export default function BloodDonationDetails() {
         });
       }
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error('stop publish error:', err);
       setStopAlert({
         type: 'danger',
@@ -633,11 +639,7 @@ export default function BloodDonationDetails() {
               variant="light"
               size="sm"
               className="back-btn-strong"
-              onClick={() => {
-                
-                  navigate(-1);
-                }
-              }
+              onClick={() => navigate(-1)}
             >
               ← رجوع
             </Button>
@@ -649,7 +651,13 @@ export default function BloodDonationDetails() {
               </div>
               {!isActive && (
                 <div className="mt-2">
-                  <Badge bg="secondary">هذا الطلب موقوف عن النشر</Badge>
+                  <Badge bg="secondary">
+                    {status === 'paused'
+                      ? 'الطلب موقوف عن النشر'
+                      : status === 'finished'
+                      ? 'الطلب مكتمل'
+                      : 'الطلب غير نشط'}
+                  </Badge>
                 </div>
               )}
             </div>
@@ -667,7 +675,13 @@ export default function BloodDonationDetails() {
           {/* تنبيهات حالة الطلب */}
           {!isActive && (
             <Alert variant="warning" className="mb-3 small">
-              هذا الطلب تم إيقاف نشره من طرف صاحبه.
+              هذا الطلب غير نشط حاليًا (
+              {status === 'paused'
+                ? 'موقوف عن النشر'
+                : status === 'finished'
+                ? 'مكتمل'
+                : status}
+              ).
               {closedReason && (
                 <>
                   <br />
@@ -676,7 +690,7 @@ export default function BloodDonationDetails() {
               )}
               {closedAt && (
                 <div className="mt-1 text-muted">
-                  تم الإيقاف بتاريخ:{' '}
+                  تم التحديث بتاريخ:{' '}
                   {closedAt.toLocaleString('ar-MA')}
                 </div>
               )}
@@ -931,7 +945,8 @@ export default function BloodDonationDetails() {
               {isActive ? (
                 <>
                   <p className="small text-muted mb-2">
-                    يمكنك إيقاف نشر هذا الطلب في أي وقت، وسيتم نقله إلى قائمة الطلبات غير النشطة ولن يظهر للمتبرعين في القوائم العامة.
+                    يمكنك إيقاف نشر هذا الطلب في أي وقت، وسيتم نقله إلى قائمة الطلبات غير
+                    النشطة ولن يظهر للمتبرعين في القوائم العامة.
                   </p>
 
                   {!showStopBox && (
@@ -986,7 +1001,7 @@ export default function BloodDonationDetails() {
               ) : (
                 <>
                   <p className="small text-muted mb-1">
-                    هذا الطلب موقوف حاليًا ولن يظهر في قائمة الطلبات النشطة.
+                    هذا الطلب غير نشط حاليًا ولن يظهر في قائمة الطلبات النشطة.
                   </p>
                   {closedReason && (
                     <p className="small mb-1">
@@ -995,7 +1010,7 @@ export default function BloodDonationDetails() {
                   )}
                   {closedAt && (
                     <p className="small text-muted mb-0">
-                      تم الإيقاف بتاريخ: {closedAt.toLocaleString('ar-MA')}
+                      تم التحديث بتاريخ: {closedAt.toLocaleString('ar-MA')}
                     </p>
                   )}
                 </>

@@ -89,7 +89,7 @@ const COUNTRY_OPTIONS = [
   { iso: 'IQ', ar: 'العراق', en: 'Iraq', code: '+964' },
   { iso: 'YE', ar: 'اليمن', en: 'Yemen', code: '+967' },
 
-  { iso: 'US', ar: 'الولايات المتحدة', en: 'United States', code: '+1' },
+  { iso: 'US', ar: 'الولايات المتحدة الامريكية', en: 'United States', code: '+1' },
   { iso: 'CA', ar: 'كندا', en: 'Canada', code: '+1' },
   { iso: 'BR', ar: 'البرازيل', en: 'Brazil', code: '+55' },
   { iso: 'AR', ar: 'الأرجنتين', en: 'Argentina', code: '+54' },

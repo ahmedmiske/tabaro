@@ -213,7 +213,7 @@ export default function DashboardPage({
 
      
       {/* ========= الوصول السريع ========= */}
-      <ManageQuickCards />
+      <ManageQuickCards /  >
     </main>
   );
 }

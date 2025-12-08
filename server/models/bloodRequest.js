@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const statusPlugin = require("./plugins/statusPlugin");
+const HistoryActionSchema = require("./plugins/historyActionSchema");
 
 const DocumentSchema = new mongoose.Schema(
   {
@@ -17,10 +19,9 @@ const BloodRequestSchema = new mongoose.Schema(
 
     isUrgent: { type: Boolean, default: false },
 
-    // ✅ حالة الطلب: نشِط / موقوف عن النشر
+    // حالة قديمة (للتوافق)
     isActive: { type: Boolean, default: true },
 
-    // ✅ معلومات إيقاف الطلب
     closedReason: { type: String, default: "" },
     closedAt: { type: Date, default: null },
     closedBy: {
@@ -29,16 +30,13 @@ const BloodRequestSchema = new mongoose.Schema(
       default: null,
     },
 
-    // ✅ مدينة / منطقة (اختياري)
     city: { type: String, default: "" },
-
-    // ✅ اسم المستشفى (اختياري)
     hospitalName: { type: String, default: "" },
-
-    // حقل عام قديم/حر (يقبل أي وصف للمكان – نحافظ عليه للتوافق)
     location: { type: String, default: "" },
 
+    // التاريخ الذي يتم بعده اعتبار الطلب منتهي الصلاحية
     deadline: { type: Date, required: true },
+
     description: { type: String, default: "" },
 
     contactMethods: [{ method: String, number: String }],
@@ -49,16 +47,29 @@ const BloodRequestSchema = new mongoose.Schema(
       required: true,
     },
 
-    // الحقل المعتمد لعرض الوثائق:
     documents: { type: [DocumentSchema], default: [] },
-
-    // (اختياري) توافق للخلف — لو موجودة في سجلات قديمة
     files: { type: [String], default: [] },
+
+    // ✅ حالة موحدة: active | paused | finished | cancelled
+    status: {
+      type: String,
+      enum: ["active", "paused", "finished", "cancelled"],
+      default: "active",
+      index: true,
+    },
+
+    // ✅ أرشيف الحركات على الطلب
+    historyActions: {
+      type: [HistoryActionSchema],
+      default: [],
+    },
   },
   { timestamps: true }
 );
 
-// ✅ هذا يمنع OverwriteModelError
+// 🔌 Plugin لتحديث status تلقائياً إلى finished بعد انتهاء deadline
+BloodRequestSchema.plugin(statusPlugin, { dateField: "deadline" });
+
 module.exports =
   mongoose.models.BloodRequest ||
   mongoose.model("BloodRequest", BloodRequestSchema);

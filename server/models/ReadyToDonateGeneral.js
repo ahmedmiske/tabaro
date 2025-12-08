@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const statusPlugin = require('../models/plugins/statusPlugin'); // نفس ما كان عندك
 
 const ContactMethodSchema = new mongoose.Schema(
   {
@@ -12,38 +13,56 @@ const ContactMethodSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { _id: false },
+  { _id: false }
 );
 
 // نفس الفئات الموجودة في GENERAL_CATEGORY_META
 const GENERAL_CATEGORY_ENUM = [
-  'medical_support',      // الإغاثة والدعم الطبي
-  'water',                // سقيا الماء
-  'orphans',              // كفالة ورعاية الأيتام
-  'food',                 // إطعام الفقراء والمساكين
-  'education',            // دعم التعليم والمعرفة
-  'mahadir_quran',        // دعم المحاظر والقرآن الكريم
-  'mosques',              // عمارة بيوت الله
-  'housing',              // إسكان وإيواء المحتاجين
-  'disability_support',   // تمكين ذوي الإعاقة
-  'relief',               // جبر الخواطر وتفريج الكرب
-  'debt_repayment',       // قضاء الديون
-  'clothes_furniture',    // توزيع الملابس والأثاث
-  'udhiyah',              // الأضحية
-  'general_sadaqah',      // الصدقة العامة
-  'zakat',                // زكاة المال
-  'financial_aid',        // المساعدات المالية
-  'other',                // مجالات خير أخرى
+  'medical_support',
+  'water',
+  'orphans',
+  'food',
+  'education',
+  'mahadir_quran',
+  'mosques',
+  'housing',
+  'disability_support',
+  'relief',
+  'debt_repayment',
+  'clothes_furniture',
+  'udhiyah',
+  'general_sadaqah',
+  'zakat',
+  'financial_aid',
+  'other',
 ];
 
 const AttachmentSchema = new mongoose.Schema(
   {
-    url: { type: String, required: true },          // رابط الوصول للملف
-    originalName: { type: String },                 // الاسم الأصلي
-    mimeType: { type: String },                     // نوع الملف
-    size: { type: Number },                         // الحجم بالبايت
+    url: { type: String, required: true },
+    originalName: { type: String },
+    mimeType: { type: String },
+    size: { type: Number },
   },
-  { _id: false },
+  { _id: false }
+);
+
+const HistoryActionSchema = new mongoose.Schema(
+  {
+    action: { type: String, required: true }, // create, user_stop, user_reactivate...
+    by: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
+    role: { type: String, default: 'user' }, // user, admin...
+    fromStatus: { type: String },
+    toStatus: { type: String },
+    reason: { type: String },
+    note: { type: String },
+    createdAt: { type: Date, default: Date.now },
+  },
+  { _id: false }
 );
 
 const ReadyToDonateGeneralSchema = new mongoose.Schema(
@@ -54,37 +73,33 @@ const ReadyToDonateGeneralSchema = new mongoose.Schema(
       immutable: true,
     },
 
-    // الموقع (اختياري)
+    // الموقع
     locationMode: {
       type: String,
       enum: ['none', 'mr', 'abroad'],
       default: 'none',
     },
-    location: { type: String, default: '' }, // نص عام يجمع المدينة/الدولة
+    location: { type: String, default: '' },
     city: { type: String, default: '' },
     country: { type: String, default: '' },
 
     // نوع التبرع وطبيعته
     extra: {
       donationType: {
-        // مادي / عيني
         type: String,
         enum: ['financial', 'inkind'],
         required: true,
       },
       category: {
-        // مجال التبرع من GENERAL_CATEGORY_ENUM
         type: String,
         enum: GENERAL_CATEGORY_ENUM,
         required: true,
       },
       amount: {
-        // مبلغ التبرع (إن كان ماديًا)
         type: Number,
         min: 0,
       },
       attachments: {
-        // مرفقات (صور/وثائق) في حالة التبرع العيني
         type: [AttachmentSchema],
         default: [],
       },
@@ -92,6 +107,7 @@ const ReadyToDonateGeneralSchema = new mongoose.Schema(
 
     note: { type: String, default: '' },
 
+    // تُستخدم لتحديد انتهاء الصلاحية
     availableUntil: {
       type: Date,
       required: true,
@@ -102,17 +118,35 @@ const ReadyToDonateGeneralSchema = new mongoose.Schema(
       validate: (v) => Array.isArray(v) && v.length > 0,
     },
 
+    // ✅ صاحب الإعلان
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       default: null,
     },
+
+    // ✅ معلومات الإيقاف (اختياري)
+    closedReason: { type: String, default: '' },
+    closedAt: { type: Date, default: null },
+
+    // ✅ أرشيف العمليات
+    historyActions: {
+      type: [HistoryActionSchema],
+      default: [],
+    },
+
+    // status يأتي من الـ plugin (يضيف الحقل ويحدثه)
   },
   {
     timestamps: true,
     collection: 'ready_to_donate_general',
-  },
+  }
 );
+
+// 🔌 Plugin: يحسب status الفعلية بناءً على availableUntil
+ReadyToDonateGeneralSchema.plugin(statusPlugin, {
+  dateField: 'availableUntil',
+});
 
 ReadyToDonateGeneralSchema.index({
   location: 'text',
@@ -122,7 +156,6 @@ ReadyToDonateGeneralSchema.index({
   'extra.category': 'text',
 });
 
-module.exports = mongoose.model(
-  'ReadyToDonateGeneral',
-  ReadyToDonateGeneralSchema,
-);
+module.exports =
+  mongoose.models.ReadyToDonateGeneral ||
+  mongoose.model('ReadyToDonateGeneral', ReadyToDonateGeneralSchema);

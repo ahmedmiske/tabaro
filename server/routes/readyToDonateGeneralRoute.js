@@ -6,11 +6,11 @@ const multer = require('multer');
 const router = express.Router();
 
 const ctrl = require('../controllers/readyToDonateGeneralController');
+const { protect } = require('../middlewares/authMiddleware');
 
 // ===== إعداد التخزين للملفات =====
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    // تأكد أن هذا المسار موجود فعليًا على السيرفر
     cb(null, path.join(__dirname, '..', 'uploads', 'ready-general'));
   },
   filename: (req, file, cb) => {
@@ -23,16 +23,20 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB لكل ملف (يمكنك تعديله)
+    fileSize: 5 * 1024 * 1024, // 5MB
   },
 });
 
-// ✅ إنشاء إعلان استعداد للتبرع (مع إمكانية رفع صور/وثائق)
-router.post('/', upload.array('attachments', 10), ctrl.create);
+// ✅ إنشاء إعلان استعداد للتبرع (محمي + مرفقات اختيارية)
+router.post('/', protect, upload.array('attachments', 10), ctrl.create);
 
-// ✅ جلب قائمة الاستعدادات
+// ✅ جلب قائمة الاستعدادات (تُظهر النشطة فقط حسب الكنترولر)
 router.get('/', ctrl.list);
-// 👈 جديد: عرض تفاصيل عرض واحد حسب الـ id
+
+// ✅ تفاصيل عرض واحد
 router.get('/:id', ctrl.getOne);
+
+// ✅ إيقاف / إعادة تفعيل عرض
+router.patch('/:id/stop', protect, ctrl.stopReadyToDonateGeneral);
 
 module.exports = router;

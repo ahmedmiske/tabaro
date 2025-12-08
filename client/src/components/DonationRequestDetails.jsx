@@ -694,7 +694,8 @@ export default function DonationRequestDetails() {
             <Button
               variant="outline-light"
               size="sm"
-              onClick={() => {navigate(-1);
+              onClick={() => {
+                navigate(-1);
               }}
               className="rounded-pill px-3"
               title="رجوع"
@@ -1392,7 +1393,6 @@ export default function DonationRequestDetails() {
                                         </div>
                                       </div>
                                     )}
-
 
                                     <div className="mb-0">
                                       <div className="dtg-section-title mb-1">

@@ -1,5 +1,5 @@
-// server/models/ReadyToDonateBlood.js
 const mongoose = require('mongoose');
+const statusPlugin = require('./plugins/statusPlugin'); // تأكد من المسار الصحيح
 
 const ContactMethodSchema = new mongoose.Schema(
   {
@@ -10,7 +10,26 @@ const ContactMethodSchema = new mongoose.Schema(
     },
     number: { type: String, required: true },
   },
-  { _id: false }
+  { _id: false },
+);
+
+// 👇 سكيمة حركة الأرشيف (نفس الفكرة التي استعملناها في التبرع العام)
+const HistoryActionSchema = new mongoose.Schema(
+  {
+    action: { type: String, required: true }, // create, user_stop, user_reactivate...
+    by: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
+    role: { type: String, default: null }, // user | admin ...
+    fromStatus: { type: String, default: null },
+    toStatus: { type: String, default: null },
+    reason: { type: String, default: '' },
+    note: { type: String, default: '' },
+    createdAt: { type: Date, default: Date.now },
+  },
+  { _id: false },
 );
 
 const ReadyToDonateBloodSchema = new mongoose.Schema(
@@ -21,7 +40,8 @@ const ReadyToDonateBloodSchema = new mongoose.Schema(
     bloodType: {
       type: String,
       required: true,
-      enum: ['A+','A-','B+','B-','AB+','AB-','O+','O-','غير معروف'],
+      enum: ['A+', 'A-', 'B+', 'AB+', 'AB-', 'O+', 'O-', 'غير معروف', 'B-'],
+      // تأكد أن نفس القائمة المستعملة في الفرونت
     },
 
     // 👈 آخر أجل لمهلة التبرع
@@ -41,14 +61,28 @@ const ReadyToDonateBloodSchema = new mongoose.Schema(
       },
     },
 
+    // ✅ المستخدم صاحب الاستعداد
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       default: null,
     },
+
+    // حقول اختيارية لمعلومة الإيقاف
+    closedReason: { type: String },
+    closedAt: { type: Date },
+
+    // ✅ هنا الأرشيف
+    historyActions: {
+      type: [HistoryActionSchema],
+      default: [],
+    },
   },
-  { timestamps: true, collection: 'ready_to_donate_blood' }
+  { timestamps: true, collection: 'ready_to_donate_blood' },
 );
+
+// 🔌 يجعل status = finished تلقائياً إذا تعدّى availableUntil
+ReadyToDonateBloodSchema.plugin(statusPlugin, { dateField: 'availableUntil' });
 
 ReadyToDonateBloodSchema.index({
   location: 'text',
@@ -56,7 +90,6 @@ ReadyToDonateBloodSchema.index({
   note: 'text',
 });
 
-module.exports = mongoose.model(
-  'ReadyToDonateBlood',
-  ReadyToDonateBloodSchema
-);
+module.exports =
+  mongoose.models.ReadyToDonateBlood ||
+  mongoose.model('ReadyToDonateBlood', ReadyToDonateBloodSchema);

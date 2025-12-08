@@ -1,9 +1,25 @@
+// server/controllers/readyToDonateGeneralController.js
 const ReadyToDonateGeneral = require('../models/ReadyToDonateGeneral');
 
+// ملاحظة: حذفنا هذا السطر لأنه يسبب الخطأ
+// const { addHistory } = require('../models/plugins/statusPlugin');
+
+// التحقق من رقم الهاتف (6–15 رقم)
 const isPhone = (v = '') => /^[0-9]{6,15}$/.test(String(v).trim());
 
+/**
+ * إنشاء إعلان استعداد للتبرع العام
+ */
 exports.create = async (req, res) => {
   try {
+    if (!req.user?._id) {
+      return res
+        .status(401)
+        .json({ error: 'غير مصرح، يرجى تسجيل الدخول' });
+    }
+
+    const userId = req.user._id;
+
     const body = req.body || {};
     let {
       locationMode = 'none',
@@ -16,7 +32,7 @@ exports.create = async (req, res) => {
       contactMethods,
     } = body;
 
-    // في حالة multipart/form-data قد يأتي extra كـ JSON string
+    // extra قد تأتي كسلسلة JSON
     if (typeof extra === 'string') {
       try {
         extra = JSON.parse(extra);
@@ -25,13 +41,18 @@ exports.create = async (req, res) => {
       }
     }
 
-    // دعم مفاتيح منفصلة مثل extra.donationType, extra.category, extra.amount
-    if (body['extra.donationType'] || body['extra.category'] || body['extra.amount']) {
+    // دعم الحقول المسطّحة extra.*
+    if (
+      body['extra.donationType'] ||
+      body['extra.category'] ||
+      body['extra.amount']
+    ) {
       extra = {
         ...(extra || {}),
         donationType: body['extra.donationType'] || extra.donationType,
         category: body['extra.category'] || extra.category,
       };
+
       if (body['extra.amount'] != null && body['extra.amount'] !== '') {
         const amountNum = Number(body['extra.amount']);
         if (!Number.isNaN(amountNum)) {
@@ -40,7 +61,7 @@ exports.create = async (req, res) => {
       }
     }
 
-    // وسائل التواصل: قد تأتي كـ JSON string في multipart
+    // contactMethods قد تأتي كسلسلة JSON
     if (typeof contactMethods === 'string') {
       try {
         contactMethods = JSON.parse(contactMethods);
@@ -48,18 +69,15 @@ exports.create = async (req, res) => {
         contactMethods = [];
       }
     }
-
     if (!Array.isArray(contactMethods)) {
       contactMethods = [];
     }
 
-    // المرفقات من req.files (حسب إعداد multer في الراوت)
+    // معالجة المرفقات (إن وجدت)
     let attachments = [];
     if (Array.isArray(req.files) && req.files.length > 0) {
       attachments = req.files.map((f) => ({
-        url:
-          f.path?.replace(/^public[\\/]/, '') ||
-          `/uploads/${f.filename}`,
+        url: f.path?.replace(/^public[\\/]/, '') || `/uploads/${f.filename}`,
         originalName: f.originalname,
         mimeType: f.mimetype,
         size: f.size,
@@ -67,21 +85,17 @@ exports.create = async (req, res) => {
     }
 
     extra = extra || {};
-
     if (attachments.length > 0) {
       extra.attachments = attachments;
     }
 
-    // ======= الفاليديشن =======
-
-    // نوع المجال
+    // التحقق من extra
     if (!extra.category) {
       return res
         .status(400)
         .json({ error: 'category is required in extra.category' });
     }
 
-    // نوع التبرع (مادي / عيني)
     if (!extra.donationType) {
       return res
         .status(400)
@@ -94,38 +108,38 @@ exports.create = async (req, res) => {
         .json({ error: 'donationType must be financial or inkind' });
     }
 
-    // في حالة التبرع المالي يجب تحديد مبلغ صالح
     if (extra.donationType === 'financial') {
       const amountNum = Number(extra.amount);
-      if (
-        extra.amount == null ||
-        Number.isNaN(amountNum) ||
-        amountNum <= 0
-      ) {
+      if (extra.amount == null || Number.isNaN(amountNum) || amountNum <= 0) {
         return res.status(400).json({
-          error: 'amount is required and must be a positive number for financial donations',
+          error:
+            'amount is required and must be a positive number for financial donations',
         });
       }
       extra.amount = amountNum;
     } else {
-      // في التبرع العيني لسنا بحاجة إلى مبلغ
+      // تبرع عيني → لا نحتاج قيمة amount
       delete extra.amount;
     }
 
-    // تاريخ انتهاء العرض
+    // التحقق من availableUntil
     if (!availableUntil) {
-      return res.status(400).json({ error: 'availableUntil is required' });
+      return res
+        .status(400)
+        .json({ error: 'availableUntil is required' });
     }
+
     const untilDate = new Date(availableUntil);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+
     if (Number.isNaN(untilDate.getTime()) || untilDate < today) {
-      return res
-        .status(400)
-        .json({ error: 'availableUntil must be today or a future date' });
+      return res.status(400).json({
+        error: 'availableUntil must be today or a future date',
+      });
     }
 
-    // وسائل التواصل: يجب أن يكون هناك واحد على الأقل صالح
+    // التحقق من وسائل التواصل
     if (!Array.isArray(contactMethods) || contactMethods.length === 0) {
       return res
         .status(400)
@@ -143,6 +157,7 @@ exports.create = async (req, res) => {
       }
     }
 
+    // إنشاء الوثيقة
     const doc = await ReadyToDonateGeneral.create({
       locationMode,
       location,
@@ -152,20 +167,43 @@ exports.create = async (req, res) => {
       note,
       extra,
       contactMethods,
-      createdBy: req.user?._id || null,
+      createdBy: userId,
+      // status & historyActions → من الـ plugin
     });
+
+    // ✅ إضافة history يدويًا عند الإنشاء
+    if (!Array.isArray(doc.historyActions)) {
+      doc.historyActions = [];
+    }
+
+    doc.historyActions.push({
+      action: 'create',
+      by: userId,
+      role: 'user',
+      fromStatus: null,
+      toStatus: doc.status || 'active',
+      reason: undefined,
+      note: 'إنشاء عرض الاستعداد للتبرع العام',
+      createdAt: new Date(),
+    });
+
+    await doc.save();
 
     return res.status(201).json({ ok: true, data: doc });
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.error('ReadyToDonateGeneral.create', err);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res
+      .status(500)
+      .json({ error: 'Internal server error' });
   }
 };
 
+/**
+ * قائمة إعلانات الاستعداد (افتراضيًا النشطة فقط)
+ */
 exports.list = async (req, res) => {
   try {
-    const { category, q = '', donationType } = req.query || {};
+    const { category, q = '', donationType, status = 'active' } = req.query || {};
     const filter = {};
 
     if (category) {
@@ -176,7 +214,12 @@ exports.list = async (req, res) => {
       filter['extra.donationType'] = donationType;
     }
 
-    // إظهار العروض التي لم تنتهِ بعد فقط
+    // افتراضيًا نعرض النشطة فقط، إلا إذا طلب status=all
+    if (status && status !== 'all') {
+      filter.status = status;
+    }
+
+    // لضمان عدم ظهور المنتهية لو لم يتغير status بعد
     const now = new Date();
     filter.availableUntil = { $gte: now };
 
@@ -191,13 +234,14 @@ exports.list = async (req, res) => {
 
     return res.json({ ok: true, data });
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.error('ReadyToDonateGeneral.list', err);
     return res.status(500).json({ error: 'Internal server error' });
   }
 };
 
-// ===== عرض واحد بالتفصيل =====
+/**
+ * تفاصيل إعلان واحد
+ */
 exports.getOne = async (req, res) => {
   try {
     const id = req.params.id;
@@ -219,5 +263,86 @@ exports.getOne = async (req, res) => {
     res
       .status(500)
       .json({ message: 'خطأ في جلب تفاصيل العرض', error: err.message });
+  }
+};
+
+/**
+ * إيقاف / إعادة تفعيل إعلان الاستعداد للتبرع
+ */
+exports.stopReadyToDonateGeneral = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason = '' } = req.body || {};
+    const userId = req.user?._id;
+
+    if (!userId) {
+      return res.status(401).json({ message: 'غير مصرح، يرجى تسجيل الدخول' });
+    }
+
+    const doc = await ReadyToDonateGeneral.findById(id);
+    if (!doc) {
+      return res
+        .status(404)
+        .json({ message: 'عرض الاستعداد للتبرع غير موجود' });
+    }
+
+    // فقط صاحب الإعلان يستطيع الإيقاف/التفعيل
+    if (String(doc.createdBy) !== String(userId)) {
+      return res
+        .status(403)
+        .json({ message: 'غير مسموح لك بتعديل حالة هذا العرض' });
+    }
+
+    const oldStatus = doc.status || 'active';
+    const willPause = oldStatus === 'active';
+
+    let newStatus;
+    if (willPause) {
+      newStatus = 'paused';
+      doc.closedReason = reason.trim() || doc.closedReason || '';
+      doc.closedAt = new Date();
+    } else {
+      newStatus = 'active';
+      // يمكن مسح سبب الإيقاف إذا أحببت
+      // doc.closedReason = '';
+      // doc.closedAt = null;
+    }
+
+    doc.status = newStatus;
+
+    // ✅ تسجيل الحدث في historyActions يدويًا
+    if (!Array.isArray(doc.historyActions)) {
+      doc.historyActions = [];
+    }
+
+    doc.historyActions.push({
+      action: willPause ? 'user_stop' : 'user_reactivate',
+      by: userId,
+      role: 'user',
+      fromStatus: oldStatus,
+      toStatus: newStatus,
+      reason: willPause ? reason : undefined,
+      createdAt: new Date(),
+    });
+
+    await doc.save();
+
+    const populated = await ReadyToDonateGeneral.findById(doc._id).populate(
+      'createdBy',
+      'firstName lastName profileImage',
+    );
+
+    return res.json({
+      message: willPause
+        ? 'تم إيقاف نشر العرض.'
+        : 'تم إعادة تفعيل العرض.',
+      data: populated,
+    });
+  } catch (err) {
+    console.error('❌ stopReadyToDonateGeneral:', err);
+    return res.status(500).json({
+      message: 'خطأ أثناء تحديث حالة العرض',
+      error: err.message,
+    });
   }
 };

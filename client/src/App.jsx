@@ -31,6 +31,7 @@ import NotFound from "./pages/NotFound.jsx";
 import UnderConstruction from "./pages/UnderConstruction.jsx";
 import ReadyToDonateBloodPage from "./pages/ReadyToDonateBloodPage.jsx";
 import ReadyToDonateGeneralPage from "./pages/ReadyToDonateGeneralPage.jsx";
+import ReadyToDonationBloodDetails from "./pages/ReadyToDonateBloodDetails.jsx";
 import ReadyDonors from "./pages/ReadyDonors.jsx";
 import Dashboard from "./pages/DashboardPage.jsx";
 import ManageCenter from './pages/ManageCenter.jsx';
@@ -176,6 +177,14 @@ function App() {
                 element={
                   <RequireAuth>
                     <ReadyToDonateGeneralPage />
+                  </RequireAuth>
+                }
+              />
+              <Route
+                path="/ready-blood/:id"
+                element={
+                  <RequireAuth>
+                    <ReadyToDonationBloodDetails />
                   </RequireAuth>
                 }
               />

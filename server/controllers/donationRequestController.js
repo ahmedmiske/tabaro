@@ -1,15 +1,16 @@
-// server/controllers/donationRequestController.js
 const DonationRequest = require("../models/DonationRequest");
 const DonationRequestConfirmation = require("../models/DonationRequestConfirmation");
+const { addHistory } = require("../utils/historyLogger");
 
 // ===== أدوات مساعدة =====
-const toBool = (v) => v === true || v === "true" || v === 1 || v === "1";
+const toBool = (v) =>
+  v === true || v === "true" || v === 1 || v === "1";
 const toNum = (v) =>
   v === "" || v === null || v === undefined ? null : Number(v);
 const toDate = (v) => {
   if (!v) return null;
   const d = new Date(v);
-  return isNaN(d.getTime()) ? null : d;
+  return Number.isNaN(d.getTime()) ? null : d;
 };
 
 // --- قبول الصيغتين: الأقواس أو JSON ---
@@ -34,11 +35,9 @@ function parseBracketArray(body, root, fields) {
 }
 
 function parseFlexibleArray(body, root, fields) {
-  // 1) جرّب الأقواس
   const bracket = parseBracketArray(body, root, fields);
   if (bracket.length) return bracket;
 
-  // 2) جرّب JSON بسلسلة مفردة (contactMethods: "[{...}]")
   const raw = body[root];
   if (typeof raw === "string") {
     try {
@@ -49,7 +48,6 @@ function parseFlexibleArray(body, root, fields) {
     }
   }
 
-  // 3) جرّب أن تكون مصفوفة جاهزة (قد يرسلها عميل آخر)
   if (Array.isArray(body[root])) {
     return body[root];
   }
@@ -64,8 +62,11 @@ function extractFiles(req) {
       (f) => `/uploads/donationRequests/${f.filename}`
     );
   if (Array.isArray(req.files))
-    return req.files.map((f) => `/uploads/donationRequests/${f.filename}`);
-  if (req.file) return [`/uploads/donationRequests/${req.file.filename}`];
+    return req.files.map(
+      (f) => `/uploads/donationRequests/${f.filename}`
+    );
+  if (req.file)
+    return [`/uploads/donationRequests/${req.file.filename}`];
   return [];
 }
 
@@ -75,8 +76,11 @@ const PUBLISHER_SELECT = "firstName lastName profileImage createdAt";
 exports.createDonationRequest = async (req, res) => {
   try {
     const userId = req.user?._id || req.user?.id || req.userId || null;
-    if (!userId)
-      return res.status(401).json({ message: "غير مصرح. سجل الدخول." });
+    if (!userId) {
+      return res
+        .status(401)
+        .json({ message: "غير مصرح. سجل الدخول." });
+    }
 
     const {
       category,
@@ -88,22 +92,28 @@ exports.createDonationRequest = async (req, res) => {
       amount,
       bloodType,
     } = req.body;
-    if (!category || !type)
-      return res.status(400).json({ message: "الرجاء تحديد المجال والنوع." });
-    if (!place)
+
+    if (!category || !type) {
+      return res
+        .status(400)
+        .json({ message: "الرجاء تحديد المجال والنوع." });
+    }
+    if (!place) {
       return res
         .status(400)
         .json({ message: "الرجاء تحديد الموقع (اسم المكان)." });
+    }
 
-    // ✅ أصبح يقبل الأقواس أو JSON
-    const contactMethods = parseFlexibleArray(req.body, "contactMethods", [
-      "method",
-      "number",
-    ]);
-    const paymentMethods = parseFlexibleArray(req.body, "paymentMethods", [
-      "method",
-      "phone",
-    ]);
+    const contactMethods = parseFlexibleArray(
+      req.body,
+      "contactMethods",
+      ["method", "number"]
+    );
+    const paymentMethods = parseFlexibleArray(
+      req.body,
+      "paymentMethods",
+      ["method", "phone"]
+    );
     const proofDocuments = extractFiles(req);
 
     const doc = await DonationRequest.create({
@@ -120,22 +130,35 @@ exports.createDonationRequest = async (req, res) => {
       paymentMethods,
       proofDocuments,
       date: new Date(),
-      status: "active", // افتراضي
+      status: "active",
     });
+    console.log('معرف المستخدم',userId);
+    // ✅ سجل إنشاء الطلب
+    addHistory(doc, {
+      action: "create",
+      by: userId,
+      role: "user",
+      fromStatus: null,
+      toStatus: "active",
+      note: "إنشاء طلب التبرع العام",
+    });
+    await doc.save();
 
     const populated = await DonationRequest.findById(doc._id).populate({
       path: "userId",
       select: PUBLISHER_SELECT,
     });
 
-    res
-      .status(201)
-      .json({ message: "تم إنشاء طلب التبرع بنجاح", data: populated });
+    res.status(201).json({
+      message: "تم إنشاء طلب التبرع بنجاح",
+      data: populated,
+    });
   } catch (error) {
     console.error("❌ Create DonationRequest:", error);
-    res
-      .status(500)
-      .json({ message: "فشل إنشاء طلب التبرع", error: error.message });
+    res.status(500).json({
+      message: "فشل إنشاء طلب التبرع",
+      error: error.message,
+    });
   }
 };
 
@@ -150,19 +173,17 @@ exports.listDonationRequests = async (req, res) => {
       urgent,
       page = 1,
       limit = 10,
-      status, // ⬅️ جديد
+      status,
     } = req.query;
 
     const q = {};
 
-    // إذا mine=true → يعرض طلباتي، وإلا يعرض العامة
     if (mine && req.user?._id) {
       q.userId = req.user._id;
       if (status && status !== "all") {
         q.status = status;
       }
     } else {
-      // القوائم العامة: افتراضيًا active فقط
       if (status && status !== "all") {
         q.status = status;
       } else {
@@ -199,23 +220,35 @@ exports.listDonationRequests = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ List DonationRequests:", error);
-    res.status(500).json({ message: "فشل جلب الطلبات", error: error.message });
+    res.status(500).json({
+      message: "فشل جلب الطلبات",
+      error: error.message,
+    });
   }
 };
 
 // ===== واحد =====
 exports.getDonationRequest = async (req, res) => {
   try {
-    const doc = await DonationRequest.findById(req.params.id).populate({
+    const doc = await DonationRequest.findById(
+      req.params.id
+    ).populate({
       path: "userId",
       select: PUBLISHER_SELECT,
     });
 
-    if (!doc) return res.status(404).json({ message: "طلب التبرع غير موجود" });
+    if (!doc) {
+      return res
+        .status(404)
+        .json({ message: "طلب التبرع غير موجود" });
+    }
     res.json({ data: doc });
   } catch (error) {
     console.error("❌ Get DonationRequest:", error);
-    res.status(500).json({ message: "فشل جلب الطلب", error: error.message });
+    res.status(500).json({
+      message: "فشل جلب الطلب",
+      error: error.message,
+    });
   }
 };
 
@@ -232,32 +265,38 @@ exports.updateDonationRequest = async (req, res) => {
       "isUrgent",
       "amount",
       "bloodType",
-      // لاحظ: لا نسمح بتعديل status هنا حتى لا يكسر منطق الإيقاف
     ];
-    for (const f of fields) if (f in req.body) data[f] = req.body[f];
+    for (const f of fields) {
+      if (f in req.body) data[f] = req.body[f];
+    }
 
     if ("amount" in data) data.amount = toNum(data.amount);
     if ("deadline" in data) data.deadline = toDate(data.deadline);
     if ("isUrgent" in data) data.isUrgent = toBool(data.isUrgent);
     if ("place" in data) data.place = String(data.place || "").trim();
 
-    const contactMethods = parseFlexibleArray(req.body, "contactMethods", [
-      "method",
-      "number",
-    ]);
-    const paymentMethods = parseFlexibleArray(req.body, "paymentMethods", [
-      "method",
-      "phone",
-    ]);
+    const contactMethods = parseFlexibleArray(
+      req.body,
+      "contactMethods",
+      ["method", "number"]
+    );
+    const paymentMethods = parseFlexibleArray(
+      req.body,
+      "paymentMethods",
+      ["method", "phone"]
+    );
     if (contactMethods.length) data.contactMethods = contactMethods;
     if (paymentMethods.length) data.paymentMethods = paymentMethods;
 
     const newFiles = extractFiles(req);
     if (newFiles.length) {
-      const current = await DonationRequest.findById(req.params.id).select(
-        "proofDocuments"
-      );
-      data.proofDocuments = [...(current?.proofDocuments || []), ...newFiles];
+      const current = await DonationRequest.findById(
+        req.params.id
+      ).select("proofDocuments");
+      data.proofDocuments = [
+        ...(current?.proofDocuments || []),
+        ...newFiles,
+      ];
     }
 
     const updated = await DonationRequest.findByIdAndUpdate(
@@ -265,26 +304,44 @@ exports.updateDonationRequest = async (req, res) => {
       data,
       { new: true }
     ).populate({ path: "userId", select: PUBLISHER_SELECT });
-    if (!updated)
-      return res.status(404).json({ message: "طلب التبرع غير موجود" });
 
-    res.json({ message: "تم تعديل الطلب بنجاح", data: updated });
+    if (!updated) {
+      return res
+        .status(404)
+        .json({ message: "طلب التبرع غير موجود" });
+    }
+
+    res.json({
+      message: "تم تعديل الطلب بنجاح",
+      data: updated,
+    });
   } catch (error) {
     console.error("❌ Update DonationRequest:", error);
-    res.status(500).json({ message: "فشل تعديل الطلب", error: error.message });
+    res.status(500).json({
+      message: "فشل تعديل الطلب",
+      error: error.message,
+    });
   }
 };
 
 // ===== حذف =====
 exports.deleteDonationRequest = async (req, res) => {
   try {
-    const request = await DonationRequest.findByIdAndDelete(req.params.id);
-    if (!request)
-      return res.status(404).json({ message: "طلب التبرع غير موجود" });
+    const request = await DonationRequest.findByIdAndDelete(
+      req.params.id
+    );
+    if (!request) {
+      return res
+        .status(404)
+        .json({ message: "طلب التبرع غير موجود" });
+    }
     res.json({ message: "تم حذف الطلب بنجاح" });
   } catch (error) {
     console.error("❌ Delete DonationRequest:", error);
-    res.status(500).json({ message: "فشل حذف الطلب", error: error.message });
+    res.status(500).json({
+      message: "فشل حذف الطلب",
+      error: error.message,
+    });
   }
 };
 
@@ -298,12 +355,13 @@ exports.getMineWithOffers = async (req, res) => {
       .lean();
 
     const ids = requests.map((r) => r._id);
-    const confirmations = await DonationRequestConfirmation.find({
-      requestId: { $in: ids },
-    })
-      .populate("donor", "firstName lastName")
-      .sort({ createdAt: -1 })
-      .lean();
+    const confirmations =
+      await DonationRequestConfirmation.find({
+        requestId: { $in: ids },
+      })
+        .populate("donor", "firstName lastName")
+        .sort({ createdAt: -1 })
+        .lean();
 
     const grouped = confirmations.reduce((acc, c) => {
       const key = String(c.requestId);
@@ -322,7 +380,7 @@ exports.getMineWithOffers = async (req, res) => {
   }
 };
 
-// ===== إيقاف نشر طلب التبرع العام =====
+// ===== إيقاف / إعادة تفعيل طلب التبرع العام =====
 exports.stopGeneralRequest = async (req, res) => {
   try {
     const { id } = req.params;
@@ -331,35 +389,59 @@ exports.stopGeneralRequest = async (req, res) => {
 
     const reqDoc = await DonationRequest.findById(id);
     if (!reqDoc) {
-      return res.status(404).json({ message: "الطلب غير موجود" });
-    }
-
-    // تأكد أنه صاحب الطلب
-    if (String(reqDoc.userId) !== String(userId)) {
       return res
-        .status(403)
-        .json({ message: "غير مسموح لك بإيقاف هذا الطلب" });
+        .status(404)
+        .json({ message: "الطلب غير موجود" });
     }
 
-    reqDoc.status = "paused";
-    reqDoc.closedReason = reason;
-    reqDoc.closedAt = new Date();
+    if (String(reqDoc.userId) !== String(userId)) {
+      return res.status(403).json({
+        message: "غير مسموح لك بإيقاف هذا الطلب",
+      });
+    }
 
+    const oldStatus = reqDoc.status || "active";
+    const willPause = oldStatus === "active";
+
+    let newStatus;
+    if (willPause) {
+      newStatus = "paused";
+      reqDoc.closedReason =
+        reason.trim() || reqDoc.closedReason || "";
+      reqDoc.closedAt = new Date();
+    } else {
+      newStatus = "active";
+    }
+
+    reqDoc.status = newStatus;
+
+    addHistory(reqDoc, {
+      action: willPause ? "user_stop" : "user_reactivate",
+      by: userId,
+      role: "user",
+      fromStatus: oldStatus,
+      toStatus: newStatus,
+      reason: willPause ? reason : undefined,
+    });
+   
     await reqDoc.save();
 
-    const populated = await DonationRequest.findById(reqDoc._id).populate({
-      path: "userId",
-      select: PUBLISHER_SELECT,
-    });
+    const populated = await DonationRequest.findById(
+      reqDoc._id
+    ).populate({ path: "userId", select: PUBLISHER_SELECT });
 
     res.json({
-      message: "تم إيقاف نشر الطلب، ولن يظهر في القوائم العامة.",
+      message:
+        newStatus === "active"
+          ? "تم إعادة نشر الطلب."
+          : "تم إيقاف نشر الطلب.",
       data: populated,
     });
   } catch (err) {
     console.error("❌ stopGeneralRequest:", err);
-    res
-      .status(500)
-      .json({ message: "خطأ أثناء إيقاف نشر الطلب", error: err.message });
+    res.status(500).json({
+      message: "خطأ أثناء تحديث حالة الطلب",
+      error: err.message,
+    });
   }
 };

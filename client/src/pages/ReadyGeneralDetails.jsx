@@ -27,7 +27,6 @@ import {
 import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import { assetUrl } from '../utils/urls';
 import './ReadyGeneralDetails.css';
-import TitleMain from '../components/TitleMain.jsx';
 
 // تاريخ بصيغة DD/MM/YYYY
 const formatDate = (v) => {
@@ -89,7 +88,7 @@ const isImageAttachment = (file) => {
   return /\.(png|jpe?g|webp|gif|bmp|svg)$/i.test(url);
 };
 
-const ReadyToDonateGeneralDetails = () => {
+const ReadyGeneralDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -101,22 +100,35 @@ const ReadyToDonateGeneralDetails = () => {
   const [viewerOpen, setViewerOpen] = useState(false);
   const [viewerIndex, setViewerIndex] = useState(0);
 
+  // 🔴 إيقاف النشر
+  const [stopAlert, setStopAlert] = useState(null);
+  const [showStopBox, setShowStopBox] = useState(false);
+  const [stopReason, setStopReason] = useState('');
+  const [stopLoading, setStopLoading] = useState(false);
+
+  // المستخدم الحالي
+  const me = useMemo(
+    () => JSON.parse(localStorage.getItem('user') || '{}'),
+    [],
+  );
+
   useEffect(() => {
     const load = async () => {
       try {
         setLoading(true);
         setError('');
         const res = await fetchWithInterceptors(
-          `/api/ready-to-donate-general/${id}`
+          `/api/ready-to-donate-general/${id}`,
         );
         const data = res?.body?.data || res?.body || res?.data;
         setOffer(data || null);
       } catch (e) {
+        // eslint-disable-next-line no-console
         console.error('details ready-general error:', e);
         setError(
           e?.body?.message ||
-          e?.message ||
-          'تعذر تحميل تفاصيل العرض، حاول لاحقًا.'
+            e?.message ||
+            'تعذر تحميل تفاصيل العرض، حاول لاحقًا.',
         );
       } finally {
         setLoading(false);
@@ -128,43 +140,35 @@ const ReadyToDonateGeneralDetails = () => {
 
   const contactPhone = useMemo(
     () =>
-      (offer?.contactMethods || []).find((m) => m.method === 'phone')?.number ||
-      '',
-    [offer]
+      (offer?.contactMethods || []).find((m) => m.method === 'phone')
+        ?.number || '',
+    [offer],
   );
 
   const contactWhatsapp = useMemo(
     () =>
       (offer?.contactMethods || []).find((m) => m.method === 'whatsapp')
         ?.number || '',
-    [offer]
+    [offer],
   );
 
   // المرفقات من extra أو من حقل files
   const attachments = useMemo(
     () => offer?.extra?.attachments || offer?.files || [],
-    [offer]
+    [offer],
   );
 
   const imageAttachments = useMemo(
     () => (attachments || []).filter(isImageAttachment),
-    [attachments]
+    [attachments],
   );
 
   const otherAttachments = useMemo(
     () => (attachments || []).filter((f) => !isImageAttachment(f)),
-    [attachments]
+    [attachments],
   );
 
   const attachmentsCount = (attachments || []).length;
-
-  const isStillValid = useMemo(() => {
-    if (!offer?.availableUntil) return true;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const end = new Date(offer.availableUntil);
-    return !Number.isNaN(end.getTime()) && end >= today;
-  }, [offer]);
 
   // دوال عارض الصور
   const openViewer = (idx) => {
@@ -181,8 +185,8 @@ const ReadyToDonateGeneralDetails = () => {
 
   const goPrev = () => {
     if (!imageAttachments.length) return;
-    setViewerIndex((prev) =>
-      (prev - 1 + imageAttachments.length) % imageAttachments.length
+    setViewerIndex(
+      (prev) => (prev - 1 + imageAttachments.length) % imageAttachments.length,
     );
   };
 
@@ -215,6 +219,27 @@ const ReadyToDonateGeneralDetails = () => {
     );
   }
 
+  // بعد التأكد من وجود offer
+  const status = offer.status || 'active';
+  const isActive = status === 'active';
+  const closedReason = offer.closedReason || '';
+  const closedAt = offer.closedAt ? new Date(offer.closedAt) : null;
+
+  const createdBy = offer.createdBy || {};
+  const isOwner =
+    createdBy && String(createdBy._id || createdBy) === String(me._id);
+
+  // بدون useMemo (تجنّب خطأ hooks)
+  const isStillValid =
+    isActive &&
+    (() => {
+      if (!offer.availableUntil) return true;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const end = new Date(offer.availableUntil);
+      return !Number.isNaN(end.getTime()) && end >= today;
+    })();
+
   const donationType =
     offer?.extra?.donationType === 'inkind' ? 'تبرع عيني' : 'تبرع مالي';
 
@@ -230,9 +255,58 @@ const ReadyToDonateGeneralDetails = () => {
       ? getFileUrl(imageAttachments[viewerIndex])
       : '';
 
+  // إيقاف النشر
+  const handleStopPublish = async (e) => {
+    if (e) e.preventDefault();
+
+    // eslint-disable-next-line no-alert
+    const ok = window.confirm(
+      'هل أنت متأكد من رغبتك في إيقاف نشر هذا العرض؟ لن يظهر في القوائم العامة.',
+    );
+    if (!ok) return;
+
+    try {
+      setStopLoading(true);
+      setStopAlert(null);
+
+      const res = await fetchWithInterceptors(
+        `/api/ready-to-donate-general/${id}/stop`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reason: stopReason }),
+        },
+      );
+
+      if (res.ok) {
+        const updated = res.body?.data || res.body || res.data || null;
+        if (updated) setOffer(updated);
+
+        setStopAlert({
+          type: 'success',
+          text: 'تم إيقاف نشر هذا العرض، ويمكنك الاطلاع على تفاصيل الإيقاف في الأرشيف.',
+        });
+        setShowStopBox(false);
+      } else {
+        setStopAlert({
+          type: 'danger',
+          text: res.body?.message || 'تعذر إيقاف نشر العرض.',
+        });
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error('stop ready-general error:', err);
+      setStopAlert({
+        type: 'danger',
+        text: 'حدث خطأ أثناء إيقاف نشر العرض.',
+      });
+    } finally {
+      setStopLoading(false);
+    }
+  };
+
   return (
     <Container className="ready-general-details-page py-5" dir="rtl">
-
       <Card className="rgd-card">
         <div className="rgd-card-header d-flex justify-content-between align-items-center ">
           <h2 className="rgd-title">عرض استعداد المتبرع</h2>
@@ -242,13 +316,45 @@ const ReadyToDonateGeneralDetails = () => {
           </Button>
         </div>
         <Card.Body>
+          {/* تنبيهات حالة العرض */}
+          {status !== 'active' && (
+            <Alert variant="warning" className="mb-3 small">
+              هذا العرض موقوف حاليًا ولن يظهر في قائمة العروض العامة.
+              {closedReason && (
+                <>
+                  <br />
+                  <strong>سبب الإيقاف:</strong> {closedReason}
+                </>
+              )}
+              {closedAt && (
+                <div className="mt-1 text-muted">
+                  تم الإيقاف بتاريخ: {closedAt.toLocaleString('ar-MA')}
+                </div>
+              )}
+            </Alert>
+          )}
+
+          {stopAlert && (
+            <Alert
+              variant={stopAlert.type}
+              className="mb-3 small"
+              onClose={() => setStopAlert(null)}
+              dismissible
+            >
+              {stopAlert.text}
+            </Alert>
+          )}
+
           {/* رأس البطاقة مع تفاصيل إضافية */}
           <div className="rgd-header">
             <div className="rgd-avatar">{offer?.donorName?.[0] || 'م'}</div>
             <div className="rgd-header-main">
               {/* اسم المتبرع بشكل بارز */}
               {offer?.donorName && (
-                <div className="rgd-donor-name fw-bold mb-2" style={{ fontSize: '1.3rem', color: '#115e59' }}>
+                <div
+                  className="rgd-donor-name fw-bold mb-2"
+                  style={{ fontSize: '1.3rem', color: '#115e59' }}
+                >
                   {offer.donorName}
                 </div>
               )}
@@ -325,12 +431,13 @@ const ReadyToDonateGeneralDetails = () => {
 
           {/* حالة العرض */}
           <div
-            className={`rgd-status-box mt-4 ${isStillValid ? 'active' : 'expired'
-              }`}
+            className={`rgd-status-box mt-4 ${
+              isStillValid ? 'active' : 'expired'
+            }`}
           >
             {isStillValid
               ? 'العرض ساري المفعول إلى تاريخ الانتهاء.'
-              : 'انتهت مدة هذا العرض.'}
+              : 'انتهت مدة هذا العرض أو تم إيقافه.'}
           </div>
 
           {/* تفاصيل العرض */}
@@ -391,18 +498,10 @@ const ReadyToDonateGeneralDetails = () => {
                       <div className="rgd-file-main">
                         <span className="rgd-file-name">{name}</span>
                         <div className="rgd-file-actions">
-                          <a
-                            href={url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
+                          <a href={url} target="_blank" rel="noopener noreferrer">
                             عرض
                           </a>
-                          <a
-                            href={url}
-                            download
-                            className="rgd-file-download"
-                          >
+                          <a href={url} download className="rgd-file-download">
                             <FiDownload className="ms-1" />
                             تحميل
                           </a>
@@ -415,14 +514,96 @@ const ReadyToDonateGeneralDetails = () => {
             </section>
           )}
 
+          {/* إدارة حالة العرض (لصاحب الإعلان) */}
+          {isOwner && (
+            <section className="rgd-section mt-4">
+              <h5 className="rgd-section-title">إدارة حالة العرض</h5>
+
+              {isActive ? (
+                <>
+                  <p className="small text-muted mb-2">
+                    يمكنك إيقاف نشر هذا العرض في أي وقت، وسيتم نقله إلى قائمة
+                    العروض غير النشطة ولن يظهر في صفحة العروض العامة.
+                  </p>
+
+                  {!showStopBox && (
+                    <Button
+                      variant="outline-danger"
+                      size="sm"
+                      onClick={() => setShowStopBox(true)}
+                    >
+                      ⛔ إيقاف نشر العرض
+                    </Button>
+                  )}
+
+                  {showStopBox && (
+                    <form onSubmit={handleStopPublish} className="mt-3">
+                      <div className="mb-2">
+                        <label className="small fw-bold">
+                          سبب إيقاف العرض (اختياري)
+                        </label>
+                        <textarea
+                          className="form-control"
+                          rows={3}
+                          value={stopReason}
+                          onChange={(e) => setStopReason(e.target.value)}
+                          placeholder="مثال: تم تنفيذ التبرع، أو تغيير الظروف..."
+                        />
+                      </div>
+                      <div className="d-flex flex-wrap gap-2 mt-2">
+                        <Button
+                          type="submit"
+                          variant="danger"
+                          size="sm"
+                          disabled={stopLoading}
+                        >
+                          {stopLoading ? 'جارٍ الإيقاف...' : 'تأكيد إيقاف العرض'}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline-secondary"
+                          size="sm"
+                          onClick={() => {
+                            setShowStopBox(false);
+                            setStopReason('');
+                          }}
+                        >
+                          إلغاء
+                        </Button>
+                      </div>
+                    </form>
+                  )}
+                </>
+              ) : (
+                <>
+                  <p className="small text-muted mb-1">
+                    هذا العرض موقوف حاليًا ولن يظهر في قائمة العروض النشطة.
+                  </p>
+                  {closedReason && (
+                    <p className="small mb-1">
+                      <strong>سبب الإيقاف:</strong> {closedReason}
+                    </p>
+                  )}
+                  {closedAt && (
+                    <p className="small text-muted mb-0">
+                      تم الإيقاف بتاريخ: {closedAt.toLocaleString('ar-MA')}
+                    </p>
+                  )}
+                </>
+              )}
+            </section>
+          )}
+
           {/* التواصل */}
           <section className="rgd-section mt-4">
             <h5 className="rgd-section-title">التواصل مع المتبرع</h5>
             <div className="d-flex flex-wrap gap-2">
-
-              <Button variant='outline-success' >
+              <Button variant="outline-success">
                 <FiMessageCircle className="ms-1" />
-                <Link to={`/chat/${offer._id}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+                <Link
+                  to={`/chat/${offer._id}`}
+                  style={{ color: 'inherit', textDecoration: 'none' }}
+                >
                   محادثة عبر النظام
                 </Link>
               </Button>
@@ -439,11 +620,7 @@ const ReadyToDonateGeneralDetails = () => {
                 </Button>
               )}
               {contactPhone && (
-                <Button
-                  variant="outline-success"
-                  as="a"
-                  href={`tel:${contactPhone}`}
-                >
+                <Button variant="outline-success" as="a" href={`tel:${contactPhone}`}>
                   <FiPhone className="ms-1" />
                   اتصال هاتفي
                 </Button>
@@ -531,4 +708,4 @@ const ReadyToDonateGeneralDetails = () => {
   );
 };
 
-export default ReadyToDonateGeneralDetails;
+export default ReadyGeneralDetails;

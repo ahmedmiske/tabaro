@@ -1,0 +1,83 @@
+.hist-box {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #e7e7e7;
+  margin-top: 25px;
+}
+
+.hist-box.empty {
+  text-align: center;
+  color: #777;
+  padding: 40px;
+}
+
+.hist-title {
+  font-weight: bold;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+}
+
+.hist-icon {
+  margin-left: 6px;
+  color: #1976d2;
+}
+
+.hist-list {
+  margin-top: 10px;
+}
+
+.hist-item {
+  border-left: 3px solid #1976d2;
+  padding-left: 15px;
+  margin: 15px 0;
+}
+
+.hist-header {
+  display: flex;
+  justify-content: space-between;
+  font-weight: bold;
+  color: #333;
+}
+
+.hist-date {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.hist-details {
+  font-size: 0.95rem;
+  margin-top: 6px;
+  color: #444;
+}
+
+.actor {
+  padding: 3px 7px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  margin-left: 8px;
+}
+
+.actor.user {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.actor.admin {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.hist-status {
+  margin-top: 4px;
+  color: #555;
+}
+
+.hist-reason {
+  margin-top: 5px;
+  background: #f7f7f7;
+  padding: 6px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
