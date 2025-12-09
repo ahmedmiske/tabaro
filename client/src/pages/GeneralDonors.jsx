@@ -375,7 +375,7 @@ const GeneralDonors = () => {
           </Card.Body>
         </Card>
       ) : (
-        <Row className="g-4 align-items-stretch">
+        <div className="donors-grid">
           {filteredOffers.map((offer) => {
             const dateLabel = offer.availableUntil
               ? formatDate(offer.availableUntil)
@@ -386,8 +386,8 @@ const GeneralDonors = () => {
               : true;
 
             return (
-              <Col lg={8} xl={4} key={offer._id}>
-                <Card className="general-offer-card h-100">
+              <div key={offer._id}>
+                <Card className="general-offer-card">
                   <Card.Body>
                     {/* رأس البطاقة */}
                     <div className="donor-header d-flex align-items-center mb-3 justify-content-between">
@@ -510,10 +510,10 @@ const GeneralDonors = () => {
                     </div>
                   </Card.Body>
                 </Card>
-              </Col>
+              </div>
             );
           })}
-        </Row>
+        </div>
       )}
     </Container>
   );

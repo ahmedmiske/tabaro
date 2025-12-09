@@ -297,9 +297,9 @@ const BloodDonors = () => {
           </Card.Body>
         </Card>
       ) : (
-        <Row className="g-4 align-items-stretch">
+        <div className="donors-grid">
           {filteredDonors.map((donor, index) => (
-            <Col key={donor._id || index}>
+            <div key={donor._id || index}>
               <Card className="donor-card">
                 <Card.Body>
                   {/* صورة + اسم */}
@@ -399,9 +399,9 @@ const BloodDonors = () => {
                   </div>
                 </Card.Body>
               </Card>
-            </Col>
+            </div>
           ))}
-        </Row>
+        </div>
       )}
     </Container>
   );
