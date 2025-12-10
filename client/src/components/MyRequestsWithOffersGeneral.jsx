@@ -1,39 +1,18 @@
-// src/components/MyDonationWithOffersGeneral.jsx
+// src/components/MyRequestsWithOffersGeneral.jsx
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  Table,
-  Badge,
-  Button,
-  Toast,
-  ToastContainer,
-  Form,
-  Collapse,
-} from 'react-bootstrap';
-import PropTypes from 'prop-types';
-import fetchWithInterceptors from '../services/fetchWithInterceptors';
+import { Table, Badge, Button, Form, Collapse, Spinner } from 'react-bootstrap';
 import { useNavigate, useLocation } from 'react-router-dom';
+import fetchWithInterceptors from '../services/fetchWithInterceptors';
 import useTicker from '../hooks/useTicker';
 import useIsMobile from '../hooks/useIsMobile';
-import './MyDonationOffersGeneral.css';
+import './MyRequestsWithOffersBlood.css'; // نعيد استعمال نفس التنسيق
 
-const getStatusLabel = (status) =>
-  status === 'fulfilled'
-    ? 'تم الاستلام'
-    : status === 'rated'
-    ? 'تم التقييم'
-    : 'قيد الاستلام';
-
-const getStatusColor = (status) =>
-  status === 'fulfilled'
-    ? 'info'
-    : status === 'rated'
-    ? 'secondary'
-    : 'warning';
-
+/* ===== Helpers ===== */
 const toDateSafe = (v) => {
   const d = new Date(v);
   return Number.isNaN(d.getTime()) ? null : d;
 };
+
 const getNowMs = (v) =>
   v instanceof Date
     ? v.getTime()
@@ -41,10 +20,10 @@ const getNowMs = (v) =>
     ? v
     : Date.parse(v) || Date.now();
 
-const isExpired = (deadline, nowMs) => {
+const isExpired = (deadline, nowVal) => {
   const d = toDateSafe(deadline);
   if (!d) return false;
-  return d.getTime() < getNowMs(nowMs);
+  return d.getTime() <= getNowMs(nowVal);
 };
 
 const buildDayHourChip = (deadline, nowVal) => {
@@ -56,9 +35,11 @@ const buildDayHourChip = (deadline, nowVal) => {
       cls: 'chip--na',
       title: '',
     };
+
   const now = getNowMs(nowVal);
   const diff = d.getTime() - now;
   const title = d.toLocaleString('ar-MA');
+
   if (diff <= 0)
     return {
       top: 'منتهي',
@@ -66,12 +47,15 @@ const buildDayHourChip = (deadline, nowVal) => {
       cls: 'chip--expired',
       title,
     };
+
   const hoursTotal = Math.floor(diff / 3600_000);
   const days = Math.floor(hoursTotal / 24);
   const hours = hoursTotal % 24;
+
   let cls = 'chip--ok';
   if (hoursTotal <= 24) cls = 'chip--soon';
   if (hoursTotal <= 3) cls = 'chip--urgent';
+
   return {
     top: `${days}ي`,
     bottom: `${hours}س`,
@@ -80,55 +64,10 @@ const buildDayHourChip = (deadline, nowVal) => {
   };
 };
 
-/** ⭐ كومبوننت النجوم لتقييم المتبرع من جهة صاحب الطلب */
-function RatingStars({ value, onChange, disabled }) {
-  const [hover, setHover] = useState(0);
-  const score = hover || value || 0;
-  return (
-    <div
-      dir="ltr"
-      style={{ display: 'inline-flex', gap: 4 }}
-      onClick={(e) => e.stopPropagation()}
-    >
-      {[1, 2, 3, 4, 5].map((n) => (
-        <button
-          key={n}
-          type="button"
-          title={`${n}`}
-          disabled={disabled}
-          onMouseEnter={() => !disabled && setHover(n)}
-          onMouseLeave={() => !disabled && setHover(0)}
-          onClick={() => !disabled && onChange?.(n)}
-          style={{
-            border: 'none',
-            background: 'transparent',
-            cursor: disabled ? 'default' : 'pointer',
-            fontSize: 18,
-            lineHeight: 1,
-            color: score >= n ? '#FFC107' : '#E0E0E0',
-            padding: 0,
-          }}
-          aria-label={`Rate ${n}`}
-        >
-          ★
-        </button>
-      ))}
-    </div>
-  );
-}
-
-RatingStars.propTypes = {
-  value: PropTypes.number,
-  onChange: PropTypes.func,
-  disabled: PropTypes.bool,
-};
-
-const MyDonationWithOffersGeneral = () => {
-  const [offers, setOffers] = useState([]);
+const MyRequestsWithOffersGeneral = () => {
+  const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showToast, setShowToast] = useState(false);
-  const [toastMsg, setToastMsg] = useState('تمت العملية بنجاح');
-  const [statusFilter, setStatusFilter] = useState('');
+  const [urgencyFilter, setUrgencyFilter] = useState('');
   const [openActive, setOpenActive] = useState(true);
   const [openInactive, setOpenInactive] = useState(true);
 
@@ -137,6 +76,7 @@ const MyDonationWithOffersGeneral = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // حفظ مسار القائمة للرجوع
   useEffect(() => {
     sessionStorage.setItem(
       'lastListPath',
@@ -144,54 +84,63 @@ const MyDonationWithOffersGeneral = () => {
     );
   }, [location.pathname, location.search]);
 
-  const fetchMyOffers = async () => {
+  // جلب طلباتي العامة مع العروض عليها
+  const fetchRequests = async () => {
     try {
-      // ✅ طلباتي مع العروض عليها (أنا صاحب الطلب)
       const res = await fetchWithInterceptors(
-        '/api/donation-request-confirmations/mine',
+        '/api/donation-requests/mine-with-offers',
       );
-      if (res.ok) setOffers(Array.isArray(res.body) ? res.body : []);
+      if (res.ok) {
+        const list = Array.isArray(res.body) ? res.body : [];
+        setRequests(
+          list.map((r) => ({
+            ...r,
+            offers: Array.isArray(r.offers) ? r.offers : [],
+          })),
+        );
+      }
     } catch (err) {
-      console.error('خطأ في جلب العروض على طلباتي العامة:', err);
+      console.error('Error loading general requests with offers:', err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchMyOffers();
+    fetchRequests();
   }, []);
 
-  const { activeOffers, inactiveOffers } = useMemo(() => {
+  // فلترة حسب الاستعجال
+  const filtered = useMemo(() => {
+    if (!urgencyFilter) return requests || [];
+    return (requests || []).filter((r) =>
+      urgencyFilter === 'urgent' ? !!r.isUrgent : !r.isUrgent,
+    );
+  }, [requests, urgencyFilter]);
+
+  // تقسيم الطلبات إلى نشطة / غير نشطة حسب status + انتهاء الصلاحية
+  const { activeRequests, inactiveRequests } = useMemo(() => {
     const act = [];
     const inact = [];
-    (offers || []).forEach((offer) => {
-      const req = offer.request || offer.requestId || {};
-      const s = offer?.status || 'pending';
-      const activeStates = ['pending', 'accepted'];
-      const active =
-        activeStates.includes(s) && !isExpired(req?.deadline, now);
-      (active ? act : inact).push(offer);
-    });
 
-    const applyStatusFilter = (list) =>
-      !statusFilter
-        ? list
-        : list.filter(
-            (o) =>
-              o.status === statusFilter ||
-              (statusFilter === 'pending' && o.status === 'accepted'),
-          );
+    (filtered || []).forEach((r) => {
+      const expired = isExpired(r.deadline, now);
+      const status = r.status || 'active';
+
+      const isActive = status === 'active' && !expired;
+      if (isActive) act.push(r);
+      else inact.push(r);
+    });
 
     const byNewest = (a, b) =>
       new Date(b.createdAt || 0).getTime() -
       new Date(a.createdAt || 0).getTime();
 
     return {
-      activeOffers: applyStatusFilter(act).sort(byNewest),
-      inactiveOffers: applyStatusFilter(inact).sort(byNewest),
+      activeRequests: act.sort(byNewest),
+      inactiveRequests: inact.sort(byNewest),
     };
-  }, [offers, now, statusFilter]);
+  }, [filtered, now]);
 
   const openDetails = (reqId) => {
     if (!reqId) return;
@@ -203,84 +152,41 @@ const MyDonationWithOffersGeneral = () => {
     navigate(`/donations/${reqId}`, { state: { from } });
   };
 
-  const handleCancelOffer = async (offerId, e) => {
-    e.stopPropagation();
-    if (!window.confirm('هل أنت متأكد من إلغاء هذا العرض؟')) return;
-    try {
-      const res = await fetchWithInterceptors(
-        `/api/donation-request-confirmations/${offerId}`,
-        { method: 'DELETE' },
-      );
-      if (res.ok) {
-        setOffers((prev) =>
-          Array.isArray(prev)
-            ? prev.filter((o) => o._id !== offerId)
-            : [],
-        );
-        setToastMsg('✅ تم إلغاء العرض بنجاح.');
-        setShowToast(true);
-      }
-    } catch (err) {
-      console.error('فشل في إلغاء العرض العام:', err);
-    }
-  };
-
-  /** ⭐ التقييم من جهة صاحب الطلب (تقييم المتبرع) */
-  const handleRateOffer = async (offerId, score) => {
-    try {
-      const res = await fetchWithInterceptors(
-        `/api/donation-request-confirmations/${offerId}/rate`,
-        {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ rating: score }),
-        },
-      );
-      if (res.ok) {
-        setOffers((prev) =>
-          (prev || []).map((o) =>
-            o._id === offerId
-              ? {
-                  ...o,
-                  ratingByRecipient: score,
-                  status:
-                    o.status === 'fulfilled' ? 'rated' : o.status,
-                }
-              : o,
-          ),
-        );
-        setToastMsg('✅ تم حفظ تقييمك للمتبرع.');
-        setShowToast(true);
-      }
-    } catch (err) {
-      console.error('فشل حفظ التقييم من جهة صاحب الطلب:', err);
-    }
-  };
-
-  /** 🧩 صف الجدول (ديسكتوب) مع زر "تفاصيل الطلب" */
-  const renderRow = (offer) => {
-    const req = offer.request || offer.requestId || {};
-    const reqId =
-      req?._id || offer.requestId?._id || offer.requestId;
-    const donor = offer.donor || {};
-    const donorName =
-      [donor.firstName, donor.lastName].filter(Boolean).join(' ') || '—';
-    const chip = buildDayHourChip(req?.deadline, now);
-
-    const canRate =
-      (offer.status === 'fulfilled' || offer.status === 'rated') &&
-      !offer.ratingByRecipient;
+  /* ====== صف الجدول (دِسك توب) ====== */
+  const renderRow = (req, muted = false) => {
+    const chip = buildDayHourChip(req.deadline, now);
+    const offersCount = Array.isArray(req.offers) ? req.offers.length : 0;
 
     return (
       <tr
-        key={offer._id}
-        className="clickable-row"
-        style={{ cursor: 'default' }}
+        key={req._id}
+        className={`clickable-row ${muted ? 'row-muted' : ''}`}
+        onClick={() => openDetails(req._id)}
+        style={{ cursor: 'pointer' }}
       >
-        <td>{donorName}</td>
+        <td className="text-start">
+          <div className="cell-main-title">
+            {req.description || '—'}
+          </div>
+          <div className="cell-sub text-muted">
+            {req.category || '—'}
+            {req.type ? ` / ${req.type}` : ''}
+          </div>
+        </td>
+        <td>{req.place || '—'}</td>
         <td>
-          {req?.category || '—'}
-          {req?.type ? ` / ${req.type}` : ''}
+          {typeof req.amount === 'number' ? (
+            <span className="badge bg-light text-dark">
+              المبلغ: {req.amount}
+            </span>
+          ) : (
+            '—'
+          )}
+        </td>
+        <td>
+          <Badge bg={req.isUrgent ? 'danger' : 'secondary'}>
+            {req.isUrgent ? 'مستعجل' : 'عادي'}
+          </Badge>
         </td>
         <td>
           <span
@@ -294,96 +200,47 @@ const MyDonationWithOffersGeneral = () => {
           </span>
         </td>
         <td>
-          <Badge bg={getStatusColor(offer.status)}>
-            {getStatusLabel(offer.status)}
-          </Badge>
-          {(canRate || offer.ratingByRecipient) && (
-            <div
-              className="mt-2"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <small className="d-block text-muted mb-1">
-                تقييمك للمتبرع:
-              </small>
-              <RatingStars
-                value={offer.ratingByRecipient || 0}
-                disabled={!!offer.ratingByRecipient}
-                onChange={(n) => handleRateOffer(offer._id, n)}
-              />
-            </div>
+          {offersCount > 0 ? (
+            <span className="offers-highlight">
+              {offersCount} <i className="fas fa-gift" /> عرض
+            </span>
+          ) : (
+            <span className="no-offers-highlight">
+              <i className="fas fa-ban" /> لا توجد عروض
+            </span>
           )}
         </td>
-        <td onClick={(e) => e.stopPropagation()}>
-          {/* زر تفاصيل الطلب */}
+        <td
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
           <Button
-            variant="outline-secondary"
             size="sm"
-            className="me-1 mb-1"
-            onClick={() => openDetails(reqId)}
-            disabled={!reqId}
+            variant="primary"
+            onClick={() => openDetails(req._id)}
           >
-            تفاصيل الطلب
+            إدارة الطلب / عرض العروض
           </Button>
-
-          {donor?._id && (
-            <Button
-              variant="outline-primary"
-              size="sm"
-              className="me-1 mb-1"
-              onClick={() =>
-                navigate(`/chat/${donor._id}`, {
-                  state: {
-                    from: location.pathname + location.search,
-                  },
-                })
-              }
-            >
-              <i className="fas fa-comments" /> دردشة
-            </Button>
-          )}
-          {(offer.status === 'pending' ||
-            offer.status === 'accepted') &&
-            !isExpired(req?.deadline, now) && (
-              <Button
-                variant="outline-danger"
-                size="sm"
-                className="me-1 mb-1"
-                onClick={(e) =>
-                  handleCancelOffer(offer._id, e)
-                }
-              >
-                <i className="fas fa-trash" /> إلغاء العرض
-              </Button>
-            )}
         </td>
       </tr>
     );
   };
 
-  /** 🧩 كارد الموبايل مع زر "تفاصيل" */
-  const renderCard = (offer) => {
-    const req = offer.request || offer.requestId || {};
-    const reqId =
-      req?._id || offer.requestId?._id || offer.requestId;
-    const donor = offer.donor || {};
-    const donorName =
-      [donor.firstName, donor.lastName]
-        .filter(Boolean)
-        .join(' ') || '—';
-    const chip = buildDayHourChip(req?.deadline, now);
-
-    const canRate =
-      (offer.status === 'fulfilled' || offer.status === 'rated') &&
-      !offer.ratingByRecipient;
+  /* ====== كارت الموبايل ====== */
+  const renderCard = (req, muted = false) => {
+    const chip = buildDayHourChip(req.deadline, now);
+    const offersCount = Array.isArray(req.offers) ? req.offers.length : 0;
 
     return (
       <li
-        key={offer._id}
-        className="card-item"
+        key={req._id}
+        className={`req-card ${muted ? 'is-muted' : ''}`}
+        onClick={() => openDetails(req._id)}
       >
-        <div className="ci-head">
-          <div className="ci-title">
-            {req?.title || req?.description || '—'}
+        <div className="rc-head">
+          <div className="rc-title">
+            {req.description || '—'}
           </div>
           <span
             className={`time-chip ${chip.cls}`}
@@ -395,195 +252,193 @@ const MyDonationWithOffersGeneral = () => {
             )}
           </span>
         </div>
-        <div className="ci-meta">
+
+        <div className="rc-meta">
           <span className="badge bg-light text-dark border">
-            المتبرع: {donorName}
+            {req.category || '—'}
+            {req.type ? ` / ${req.type}` : ''}
           </span>
-          <span className="badge bg-success text-white">
-            {req?.category || '—'}
-            {req?.type ? ` / ${req.type}` : ''}
+          <span className="badge bg-light text-dark border">
+            {req.place || '—'}
           </span>
+          {typeof req.amount === 'number' && (
+            <span className="badge bg-success">
+              المبلغ: {req.amount}
+            </span>
+          )}
           <span
-            className={`badge bg-${getStatusColor(
-              offer.status,
-            )}`}
+            className={`badge ${
+              req.isUrgent ? 'bg-danger' : 'bg-secondary'
+            }`}
           >
-            {getStatusLabel(offer.status)}
+            {req.isUrgent ? 'مستعجل' : 'عادي'}
           </span>
+          {offersCount > 0 ? (
+            <span className="offers-highlight">
+              {offersCount} <i className="fas fa-gift" /> عرض
+            </span>
+          ) : (
+            <span className="no-offers-highlight">
+              <i className="fas fa-ban" /> لا توجد عروض
+            </span>
+          )}
         </div>
 
-        {(canRate || offer.ratingByRecipient) && (
-          <div
-            className="mt-2"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <small className="d-block text-muted mb-1">
-              تقييمك للمتبرع:
-            </small>
-            <RatingStars
-              value={offer.ratingByRecipient || 0}
-              disabled={!!offer.ratingByRecipient}
-              onChange={(n) => handleRateOffer(offer._id, n)}
-            />
-          </div>
-        )}
-
         <div
-          className="ci-actions"
+          className="rc-actions"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* زر تفاصيل الطلب في الموبايل */}
           <Button
-            variant="outline-secondary"
             size="sm"
-            className="me-2 mb-1"
-            onClick={() => openDetails(reqId)}
-            disabled={!reqId}
+            variant="primary"
+            onClick={() => openDetails(req._id)}
           >
-            📄 تفاصيل
+            إدارة الطلب / عرض العروض
           </Button>
-
-          {donor?._id && (
-            <Button
-              variant="outline-primary"
-              size="sm"
-              className="me-2 mb-1"
-              onClick={() =>
-                navigate(`/chat/${donor._id}`, {
-                  state: {
-                    from: location.pathname + location.search,
-                  },
-                })
-              }
-            >
-              💬 دردشة
-            </Button>
-          )}
-          {(offer.status === 'pending' ||
-            offer.status === 'accepted') &&
-            !isExpired(req?.deadline, now) && (
-              <Button
-                variant="outline-danger"
-                size="sm"
-                onClick={(e) =>
-                  handleCancelOffer(offer._id, e)
-                }
-              >
-                🗑️ إلغاء
-              </Button>
-            )}
         </div>
       </li>
     );
   };
 
-  const section = (title, list, open, setOpen, badgeVariant) => (
-    <div className="section-card mb-3">
-      <div className="section-head">
-        <h6 className="m-0">
-          {title}{' '}
-          <Badge bg={badgeVariant} className="ms-1">
-            {list.length}
-          </Badge>
-        </h6>
-        <Button
-          size="sm"
-          variant="outline-secondary"
-          onClick={() => setOpen((v) => !v)}
-        >
-          {open ? 'إخفاء' : 'عرض'}
-        </Button>
+  if (loading)
+    return (
+      <div className="text-center mt-5">
+        <Spinner animation="border" />
       </div>
-      <Collapse in={open}>
-        <div>
-          {list.length === 0 ? (
-            <div className="text-muted small p-3">
-              لا توجد عناصر.
-            </div>
-          ) : isMobile ? (
-            <ul className="card-list">{list.map(renderCard)}</ul>
-          ) : (
-            <Table
-              striped
-              bordered
-              hover
-              responsive
-              className="mt-2"
-            >
-              <thead>
-                <tr>
-                  <th>المتبرع</th>
-                  <th>الطلب / المجال</th>
-                  <th>الوقت</th>
-                  <th>الحالة والتقييم</th>
-                  <th>الإجراءات</th>
-                </tr>
-              </thead>
-              <tbody>{list.map(renderRow)}</tbody>
-            </Table>
-          )}
-        </div>
-      </Collapse>
-    </div>
-  );
-
-  if (loading) return <p>⏳ جاري تحميل العروض على طلباتك...</p>;
-  if (!Array.isArray(offers) || offers.length === 0)
-    return <p>لا توجد عروض على طلباتك العامة حتى الآن.</p>;
+    );
 
   return (
-    <div className="my-donation-offers" dir="rtl">
+    <div className="my-requests-with-offers">
       <div className="header-bar mb-3">
         <div className="title-wrap">
           <span className="title-icon">
-            <i className="fas fa-hand-holding-heart" />
+            <i className="fas fa-clipboard-list" />
           </span>
-          <h3 className="main-green-title">طلباتي مع العروض عليها</h3>
+          <h3 className="main-green-title">
+            طلبات التبرع العامة الخاصة بي والعروض عليها
+          </h3>
         </div>
         <div className="status-filter">
           <Form.Select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            aria-label="فلترة بالحالة"
+            value={urgencyFilter}
+            onChange={(e) => setUrgencyFilter(e.target.value)}
           >
             <option value="">كل الحالات</option>
-            <option value="pending">قيد الاستلام</option>
-            <option value="accepted">تم الاستلام</option>
-            <option value="rated">تم التقييم</option>
+            <option value="urgent">مستعجل</option>
+            <option value="normal">عادي</option>
           </Form.Select>
         </div>
       </div>
 
-      {section(
-        'العروض النشطة',
-        activeOffers,
-        openActive,
-        setOpenActive,
-        'success',
-      )}
-      {section(
-        'العروض غير النشطة',
-        inactiveOffers,
-        openInactive,
-        setOpenInactive,
-        'secondary',
-      )}
+      {/* الطلبات النشطة */}
+      <div className="section-card section-card-active mb-3">
+        <div className="section-head">
+          <h6 className="m-0">
+            الطلبات النشطة{' '}
+            <Badge bg="success" className="ms-1">
+              {activeRequests.length}
+            </Badge>
+          </h6>
+          <Button
+            size="sm"
+            variant="outline-secondary"
+            onClick={() => setOpenActive((v) => !v)}
+          >
+            {openActive ? 'إخفاء' : 'عرض'}
+          </Button>
+        </div>
+        <Collapse in={openActive}>
+          <div>
+            {activeRequests.length === 0 ? (
+              <div className="text-muted small p-3">
+                لا توجد طلبات نشطة حسب الفلترة الحالية.
+              </div>
+            ) : isMobile ? (
+              <ul className="card-list">
+                {activeRequests.map((r) => renderCard(r))}
+              </ul>
+            ) : (
+              <Table
+                striped
+                bordered
+                hover
+                responsive
+                className="mt-2"
+              >
+                <thead>
+                  <tr>
+                    <th>تفاصيل الطلب</th>
+                    <th>المكان</th>
+                    <th>المبلغ</th>
+                    <th>الاستعجال</th>
+                    <th>الوقت</th>
+                    <th>العروض</th>
+                    <th>إدارة</th>
+                  </tr>
+                </thead>
+                <tbody>{activeRequests.map((r) => renderRow(r))}</tbody>
+              </Table>
+            )}
+          </div>
+        </Collapse>
+      </div>
 
-      <ToastContainer position="bottom-start" className="p-3">
-        <Toast
-          show={showToast}
-          onClose={() => setShowToast(false)}
-          delay={2500}
-          autohide
-          bg="success"
-        >
-          <Toast.Body className="text-white">
-            {toastMsg}
-          </Toast.Body>
-        </Toast>
-      </ToastContainer>
+      {/* الطلبات غير النشطة */}
+      <div className="section-card section-card-active mb-3">
+        <div className="section-head">
+          <h6 className="m-0">
+            الطلبات غير النشطة{' '}
+            <Badge bg="secondary" className="ms-1">
+              {inactiveRequests.length}
+            </Badge>
+          </h6>
+          <Button
+            size="sm"
+            variant="outline-secondary"
+            onClick={() => setOpenInactive((v) => !v)}
+          >
+            {openInactive ? 'إخفاء' : 'عرض'}
+          </Button>
+        </div>
+        <Collapse in={openInactive}>
+          <div>
+            {inactiveRequests.length === 0 ? (
+              <div className="text-muted small p-3">
+                لا توجد طلبات غير نشطة حسب الفلترة الحالية.
+              </div>
+            ) : isMobile ? (
+              <ul className="card-list">
+                {inactiveRequests.map((r) => renderCard(r, true))}
+              </ul>
+            ) : (
+              <Table
+                striped
+                bordered
+                hover
+                responsive
+                className="mt-2"
+              >
+                <thead>
+                  <tr>
+                    <th>تفاصيل الطلب</th>
+                    <th>المكان</th>
+                    <th>المبلغ</th>
+                    <th>الاستعجال</th>
+                    <th>الوقت</th>
+                    <th>العروض</th>
+                    <th>إدارة</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {inactiveRequests.map((r) => renderRow(r, true))}
+                </tbody>
+              </Table>
+            )}
+          </div>
+        </Collapse>
+      </div>
     </div>
   );
 };
 
-export default MyDonationWithOffersGeneral;
+export default MyRequestsWithOffersGeneral;

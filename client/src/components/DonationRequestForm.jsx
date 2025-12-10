@@ -582,7 +582,7 @@ const DonationRequestForm = () => {
     try {
       setSubmitting(true);
 
-      const resp = await fetchWithInterceptors('/api/donationRequests', {
+      const resp = await fetchWithInterceptors('/api/donation-requests', {
         method: 'POST',
         body: fd,
       });

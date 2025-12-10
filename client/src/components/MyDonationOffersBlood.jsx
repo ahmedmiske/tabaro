@@ -54,7 +54,6 @@ RatingStars.propTypes = { value: PropTypes.number, onRate: PropTypes.func, disab
 RatingStars.defaultProps = { value: 0, onRate: () => {}, disabled: false };
 
 /* ===== Helpers ===== */
-// نص الحالة أكثر وضوحاً
 const statusLabel = (s) =>
   ({
     pending: 'في الانتظار',
@@ -110,6 +109,38 @@ const formatDateShort = (value) => {
   });
 };
 
+/** 🔹 سبب كون الطلب غير نشط (موقوف / منتهي / ملغى) */
+function getInactiveReasonForRequest(req, nowTick) {
+  if (!req) return '';
+  const status = req.status || ''; // active | paused | finished | cancelled
+  const closedReason = (req.closedReason || '').trim();
+  const deadline = req.deadline ? new Date(req.deadline) : null;
+  const now = getNowMs(nowTick);
+  const isExpired = deadline ? deadline.getTime() <= now : false;
+
+  if (status === 'paused') {
+    if (closedReason) return closedReason;
+    return 'تم إيقاف الطلب من طرف صاحب الطلب.';
+  }
+
+  if (status === 'finished') {
+    if (closedReason) return closedReason;
+    if (isExpired) return 'انتهت صلاحية الطلب (انتهى التاريخ المحدد).';
+    return 'تم اعتبار الطلب منتهيًا.';
+  }
+
+  if (status === 'cancelled') {
+    if (closedReason) return closedReason;
+    return 'تم إلغاء هذا الطلب.';
+  }
+
+  if (isExpired && status === 'active') {
+    return 'انتهت صلاحية الطلب بسبب انتهاء التاريخ المحدد.';
+  }
+
+  return '';
+}
+
 const MyDonationOffersBlood = () => {
   const [offers, setOffers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -121,7 +152,6 @@ const MyDonationOffersBlood = () => {
   const [openInactive, setOpenInactive] = useState(true);
   const [openCanceled, setOpenCanceled] = useState(true);
 
-  // 🔹 حالات خاصة بالمودال
   const [showRateModal, setShowRateModal] = useState(false);
   const [rateOffer, setRateOffer] = useState(null);
   const [rateValue, setRateValue] = useState(0);
@@ -146,6 +176,7 @@ const MyDonationOffersBlood = () => {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     fetchMyOffers();
   }, []);
@@ -165,17 +196,27 @@ const MyDonationOffersBlood = () => {
     return out;
   }, [offers]);
 
+  // 🔹 تقسيم العروض حسب حالة الطلب + حالة العرض
   const groups = useMemo(() => {
-    const nowMs = getNowMs(nowTick);
     const g = { active: [], inactive: [], canceled: [] };
+
     (offers || []).forEach((offer) => {
       const req = offer.request || offer.requestId || {};
-      const d = req?.deadline ? new Date(req.deadline) : null;
-      const expired = d ? d.getTime() <= nowMs : false;
+      const reqStatus = req?.status || 'active';
 
-      if (offer.status === 'canceled') g.canceled.push(offer);
-      else if (expired || offer.status === 'fulfilled' || offer.status === 'rated') g.inactive.push(offer);
-      else g.active.push(offer);
+      if (offer.status === 'canceled') {
+        // عروض ملغاة من طرف المتبرع
+        g.canceled.push(offer);
+      } else if (
+        reqStatus === 'active' &&
+        (offer.status === 'pending' || offer.status === 'accepted')
+      ) {
+        // الطلب ما زال active والعرض لم يُنفَّذ بعد → نشط
+        g.active.push(offer);
+      } else {
+        // أي حالة أخرى: طلب موقوف/منتهي/ملغى أو عرض منفَّذ/مُقيَّم
+        g.inactive.push(offer);
+      }
     });
 
     const applyStatus = (list) => {
@@ -195,7 +236,7 @@ const MyDonationOffersBlood = () => {
       inactive: applyStatus(g.inactive).sort(byNewest),
       canceled: applyStatus(g.canceled).sort(byNewest),
     };
-  }, [offers, nowTick, statusFilter]);
+  }, [offers, statusFilter]);
 
   const openDetails = (reqId) => {
     if (!reqId) return;
@@ -212,7 +253,9 @@ const MyDonationOffersBlood = () => {
         method: 'DELETE',
       });
       if (res.ok) {
-        setOffers((prev) => (Array.isArray(prev) ? prev.filter((o) => o._id !== offerId) : []));
+        setOffers((prev) =>
+          Array.isArray(prev) ? prev.filter((o) => o._id !== offerId) : [],
+        );
         setToastMsg('✅ تم إلغاء العرض بنجاح.');
         setShowToast(true);
       }
@@ -238,14 +281,16 @@ const MyDonationOffersBlood = () => {
     }
   };
 
-  // استدعاء الباكند لحفظ التقييم
   const handleRate = async (offerId, rating) => {
     try {
-      const res = await fetchWithInterceptors(`/api/donation-confirmations/${offerId}/rate`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rating }),
-      });
+      const res = await fetchWithInterceptors(
+        `/api/donation-confirmations/${offerId}/rate`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ rating }),
+        },
+      );
       if (res.ok) {
         await fetchMyOffers();
         setToastMsg('⭐ تم حفظ تقييمك.');
@@ -258,7 +303,6 @@ const MyDonationOffersBlood = () => {
     }
   };
 
-  // فتح مودال التقييم
   const openRateModal = (offer) => {
     setRateOffer(offer);
     setRateValue(offer.ratingByDonor || 0);
@@ -292,13 +336,16 @@ const MyDonationOffersBlood = () => {
       const req = offer.request || offer.requestId || {};
       const reqId = req?._id || offer.requestId?._id || offer.requestId;
       const owner = req?.user || req?.userId || {};
-      const ownerName = [owner?.firstName, owner?.lastName].filter(Boolean).join(' ') || '—';
+      const ownerName =
+        [owner?.firstName, owner?.lastName].filter(Boolean).join(' ') || '—';
       const chip = buildDayHourChip(req?.deadline, nowTick);
       const donorRated = !!offer.ratingByDonor;
       const recipientRated = (offer.ratingByRecipient || 0) > 0;
       const canShowRatingBlock = offer.status === 'fulfilled' || offer.status === 'rated';
       const title = req?.title || req?.description || offer.title || '—';
       const city = req?.city || req?.location || req?.hospital || '—';
+
+      const inactiveReason = getInactiveReasonForRequest(req, nowTick);
 
       return (
         <tr
@@ -311,15 +358,21 @@ const MyDonationOffersBlood = () => {
             <div className="cell-main-title">{title}</div>
             <div className="cell-sub text-muted">
               صاحب الطلب: {ownerName}{' '}
-              {!!city && city !== '—' && <span className="dot-sep">•</span>} {city !== '—' && (
-                <span>{city}</span>
-              )}
+              {!!city && city !== '—' && <span className="dot-sep">•</span>}{' '}
+              {city !== '—' && <span>{city}</span>}
             </div>
+            {inactiveReason && (
+              <div className="small text-danger mt-1">
+                سبب توقف الطلب: {inactiveReason}
+              </div>
+            )}
           </td>
           <td>
             {req?.bloodType ? (
               <span className="bloodtype-highlight-table">{req.bloodType}</span>
-            ) : '—'}
+            ) : (
+              '—'
+            )}
           </td>
           <td>
             <span className={`time-chip ${chip.cls}`} title={chip.title}>
@@ -329,7 +382,9 @@ const MyDonationOffersBlood = () => {
           </td>
           <td>
             <Badge bg={statusColor(offer.status)}>{statusLabel(offer.status)}</Badge>
-            <div className="small text-muted mt-1">أُرسل في: {formatDateShort(offer.createdAt)}</div>
+            <div className="small text-muted mt-1">
+              أُرسل في: {formatDateShort(offer.createdAt)}
+            </div>
           </td>
 
           <td
@@ -392,7 +447,9 @@ const MyDonationOffersBlood = () => {
                     </div>
                     {recipientRated && (
                       <div className="d-inline-flex align-items-center gap-2">
-                        <span className="text-muted small">تقييم صاحب الطلب لك:</span>
+                        <span className="text-muted small">
+                          تقييم صاحب الطلب لك:
+                        </span>
                         <RatingStars value={offer.ratingByRecipient} disabled />
                       </div>
                     )}
@@ -418,11 +475,13 @@ const MyDonationOffersBlood = () => {
     const req = offer.request || offer.requestId || {};
     const reqId = req?._id || offer.requestId?._id || offer.requestId;
     const owner = req?.user || req?.userId || {};
-    const ownerName = [owner?.firstName, owner?.lastName].filter(Boolean).join(' ') || '—';
+    const ownerName =
+      [owner?.firstName, owner?.lastName].filter(Boolean).join(' ') || '—';
     const chip = buildDayHourChip(req?.deadline, nowTick);
     const canShowRatingBlock = offer.status === 'fulfilled' || offer.status === 'rated';
     const donorRated = !!offer.ratingByDonor;
     const city = req?.city || req?.location || req?.hospital || '';
+    const inactiveReason = getInactiveReasonForRequest(req, nowTick);
 
     return (
       <li key={offer._id} className="card-item" onClick={() => openDetails(reqId)}>
@@ -437,10 +496,14 @@ const MyDonationOffersBlood = () => {
         </div>
 
         <div className="ci-meta">
-          <span className="badge bg-light text-dark border">صاحب الطلب: {ownerName}</span>
+          <span className="badge bg-light text-dark border">
+            صاحب الطلب: {ownerName}
+          </span>
           {req?.bloodType ? (
             <span className="bloodtype-highlight-card">{req.bloodType}</span>
-          ) : <span className="badge bg-success">فصيلة: —</span>}
+          ) : (
+            <span className="badge bg-success">فصيلة: —</span>
+          )}
           {city && <span className="badge bg-light text-dark border">{city}</span>}
           <span className={`badge bg-${statusColor(offer.status)}`}>
             {statusLabel(offer.status)}
@@ -448,8 +511,16 @@ const MyDonationOffersBlood = () => {
         </div>
 
         <div className="ci-subinfo">
-          <span className="small text-muted">أُرسل في: {formatDateShort(offer.createdAt)}</span>
+          <span className="small text-muted">
+            أُرسل في: {formatDateShort(offer.createdAt)}
+          </span>
         </div>
+
+        {inactiveReason && (
+          <div className="small text-danger mt-1">
+            سبب توقف الطلب: {inactiveReason}
+          </div>
+        )}
 
         <div
           className="ci-actions"
@@ -638,7 +709,7 @@ const MyDonationOffersBlood = () => {
       )}
       {section(
         'العروض غير النشطة',
-        'طلبات منتهية أو تم تنفيذها/تقييمها.',
+        'طلبات منتهية أو تم تنفيذها/تقييمها، أو تم إيقاف الطلب.',
         groups.inactive,
         openInactive,
         setOpenInactive,
@@ -674,9 +745,7 @@ const MyDonationOffersBlood = () => {
                   disabled={ratingLoading}
                 />
                 {rateValue > 0 && (
-                  <span className="small text-muted">
-                    اخترت: {rateValue} / 5
-                  </span>
+                  <span className="small text-muted">اخترت: {rateValue} / 5</span>
                 )}
               </div>
             </>

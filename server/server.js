@@ -87,7 +87,7 @@ app.use("/api/blood-requests", bloodRequestRoutes);
 app.use("/api/donation-confirmations", donationConfirmationRoutes);
 
 app.use("/api/donation-request-confirmations", donationRequestConfirmationRoutes);
-app.use("/api/donationRequests", donationRequestRoutes);
+app.use("/api/donation-requests", donationRequestRoutes);
 
 app.use("/api/messages", messageRoutes);
 app.use("/api/notifications", notificationRoutes);

@@ -77,7 +77,7 @@ function DonationRequestList() {
       params.set('limit', q.limit);
 
       const res = await fetchWithInterceptors(
-        `/api/donationRequests?${params.toString()}`
+        `/api/donation-requests?${params.toString()}`
       );
 
       if (!res.ok) {

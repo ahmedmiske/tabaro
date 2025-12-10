@@ -276,7 +276,7 @@ export default function DonationRequestDetails() {
       try {
         setLoading(true);
         const res = await fetchWithInterceptors(
-          `/api/donationRequests/${id}`,
+          `/api/donation-requests/${id}`,
         );
         if (!res.ok)
           throw new Error(
@@ -609,7 +609,7 @@ export default function DonationRequestDetails() {
       setStopAlert(null);
 
       const res = await fetchWithInterceptors(
-        `/api/donationRequests/${id}/stop`,
+        `/api/donation-requests/${id}/stop`,
         {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
