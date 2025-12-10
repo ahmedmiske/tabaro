@@ -305,10 +305,24 @@
 }
 
 /* شبكة بطاقات المتبرعين */
+
 .donors-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
+}
+
+@media (min-width: 1200px) {
+  .donors-grid {
+    grid-template-columns: 3fr 3fr 3fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .donors-grid {
+    grid-template-columns: 1fr;
+    gap: 1.2rem;
+  }
 }
 
 @media (max-width: 900px) {

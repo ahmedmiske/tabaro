@@ -135,7 +135,7 @@ export default function ReadyToDonateGeneralPage() {
 
   // صورة الخلفية
   const bgCandidates = useMemo(
-    () => ["/images/tabar6.jpg", "/images/tabar5.jpg", "/images/fundo-about.png"],
+    () => ["/images/tabar9.png"],
     []
   );
   const bgUrl = useMemo(() => bgCandidates[0], [bgCandidates]);
