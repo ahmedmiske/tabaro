@@ -416,7 +416,7 @@ export default function ReadyToDonateGeneralPage() {
       {/* الجانب الأيمن / الفورم أو رسالة النجاح */}
       <div
         className="form-side"
-        style={success ? { maxWidth: "900px", margin: "0 auto" } : {}}
+        style={success ? { maxWidth: "900px"  } : {}}
       >
         <div className="form-container">
           {!success && (

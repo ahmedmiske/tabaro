@@ -271,28 +271,7 @@ const GeneralDonors = () => {
       </div>
       
         {/* إحصاءات بسيطة */}
-      <Row className="stats-row mb-2">
-        <div className="stat-card">
-          <div className="stat-number">{offers.length}</div>
-          <div className="stat-label">إجمالي العروض</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-number">{filteredOffers.length}</div>
-          <div className="stat-label">النتائج المعروضة</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-number">
-            {offers.filter((o) => o.isActive).length}
-          </div>
-          <div className="stat-label">عروض نشطة</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-number">
-            {new Set(offers.map((o) => o.location).filter(Boolean)).size}
-          </div>
-          <div className="stat-label">مدن مختلفة</div>
-        </div>
-      </Row>
+
 
 
       {error && (

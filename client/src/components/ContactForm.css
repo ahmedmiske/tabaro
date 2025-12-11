@@ -18,7 +18,6 @@
 .form-container {
     background: #fff;
     box-shadow: var(--shadow-soft);
-    padding: 3rem 2.5rem;
     position: relative;
     overflow: hidden;
     flex: 1 1 55%;
@@ -50,7 +49,6 @@
 .divider-img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
     border-radius: var(--border-radius);
 }
 
@@ -83,7 +81,6 @@
 }
 
 .form-textarea {
-    min-height: 120px;
     resize: vertical;
 }
 
@@ -133,7 +130,6 @@
     display: flex;
     gap: 1.5rem;
     justify-content: center;
-    margin-top: 2rem;
     flex-wrap: wrap;
 }
 
