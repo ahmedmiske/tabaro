@@ -253,30 +253,7 @@ const BloodDonors = () => {
       </Card>
 
       {/* إحصائيات */}
-      <Row className="stats-row mb-4">
-        <div className="stats-row mb-4">
-          <div className="stat-card">
-            <div className="stat-number">{donors.length}</div>
-            <div className="stat-label">إجمالي المتبرعين</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-number">{filteredDonors.length}</div>
-            <div className="stat-label">النتائج المعروضة</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-number">
-              {donors.filter((d) => d.isAvailable).length}
-            </div>
-            <div className="stat-label">متاحون للتبرع</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-number">
-              {new Set(donors.map((d) => d.location)).size}
-            </div>
-            <div className="stat-label">مدينة</div>
-          </div>
-        </div>
-      </Row>
+
 
       {/* قائمة المتبرعين */}
       {filteredDonors.length === 0 ? (

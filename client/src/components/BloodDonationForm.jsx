@@ -534,8 +534,7 @@ const BloodDonationForm = () => {
   return (
     <div className="donation-form-container" dir="rtl">
       {/* رأس النموذج / العنوان */}
-      <header className="form-header">
-        <TitleMain title="طلب تبرع بالدم 🩸" />
+      <TitleMain title="طلب تبرع بالدم 🩸" />
 
         <Alert variant="light" className="small mb-3 border">
           يمكنك استخدام هذا النموذج لطلب التبرع <strong>لنفسك</strong> أو{' '}
@@ -543,6 +542,8 @@ const BloodDonationForm = () => {
           <strong>وسائل تواصل صحيحة</strong> حتى يتمكن المتبرعون من
           الوصول إليكم.
         </Alert>
+      <header>
+        
 
         {/* شريط التقدم */}
         <div

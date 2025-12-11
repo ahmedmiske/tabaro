@@ -83,17 +83,16 @@
     font-size: 1rem;
   }
 }
-
-/* .form-side {
+ .form-side {
   min-width: 400px;
-  max-width: 600px;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0px;
+  margin-top: 1rem;
  
 }
- */
+ 
 .form-container {
   background: #ffffff;
   padding: 2rem;

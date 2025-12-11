@@ -9,7 +9,7 @@
   background-image:
     url('../../public/images/tabar8.png');
   background-repeat: no-repeat;
-  background-position: center;
+  background-position: center ;
   background-size: cover;
   text-align: center;
   overflow: hidden;
@@ -31,7 +31,6 @@
   margin: auto;
   max-width: 600px;
   min-width: 40rem;
-  margin-top: 2rem;
   margin-bottom: 2rem;
 }
 
@@ -42,7 +41,6 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
   width: 80%;
   min-width: 100%;
-  margin-top: 5rem;
   -webkit-border-radius: 16px;
   -moz-border-radius: 16px;
   -ms-border-radius: 16px;
