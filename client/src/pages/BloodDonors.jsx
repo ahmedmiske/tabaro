@@ -372,20 +372,20 @@ const BloodDonors = () => {
                       عرض تفاصيل الاستعداد
                     </Link>
 
-                    <Link
+                    {/* <Link
                       to={`/users/${donor._id}`}
                       className="btn btn-outline-primary btn-sm me-2"
                     >
                       عرض الملف الشخصي
-                    </Link>
+                    </Link> */}
 
-                    <Link
+                    {/* <Link
                       to={`/chat/${donor._id}`}
                       className="chat-icon-link me-2"
                       title="دردشة مع المتبرع"
                     >
                       <FaComments size={26} color="#0dcaf0" />
-                    </Link>
+                    </Link> */}
 
                     {donor.phone && (
                       <Button

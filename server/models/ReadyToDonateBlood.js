@@ -1,3 +1,4 @@
+// server/models/ReadyToDonateBlood.js
 const mongoose = require('mongoose');
 const statusPlugin = require('./plugins/statusPlugin'); // تأكد من المسار الصحيح
 
@@ -34,7 +35,7 @@ const HistoryActionSchema = new mongoose.Schema(
 
 const ReadyToDonateBloodSchema = new mongoose.Schema(
   {
-    // 👈 الموقع إلزامي (اسم البلدية / الحي)
+    // 👈 الموقع إلزامي (اسم البلدية / الحي) – يُحفظ كنص جاهز للعرض
     location: { type: String, required: true, trim: true },
 
     bloodType: {
