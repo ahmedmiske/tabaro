@@ -121,20 +121,34 @@ function Header({ notifCount }) {
   // ===== Routing helpers =====
   const pathname = location.pathname;
 
+
+  // Active states for each main nav
   const bloodActive = useMemo(() => {
     return (
       ['/blood', '/blood-', '/blooddon', '/ready/blood'].some((prefix) =>
-        pathname.startsWith(prefix),
+        pathname.startsWith(prefix)
       ) ||
-      ['/blood-donations', '/blood-donation', '/blood-donors'].some((p) =>
-        pathname.startsWith(p),
-      )
+      ['/blood-donation'].some((p) => pathname.startsWith(p))
+    );
+  }, [pathname]);
+
+  const ordersActive = useMemo(() => {
+    return (
+      ['/blood-donations', '/donations'].some((p) => pathname.startsWith(p))
+    );
+  }, [pathname]);
+
+  const offersActive = useMemo(() => {
+    return (
+      ['/blood-donors', '/general-donors'].some((p) => pathname.startsWith(p))
     );
   }, [pathname]);
 
   const generalActive = useMemo(() => {
-    return ['/donations', '/donation-requests', '/general-donors', '/ready/general'].some(
-      (prefix) => pathname.startsWith(prefix),
+    return (
+      ['/donation-requests', '/ready/general'].some((prefix) =>
+        pathname.startsWith(prefix)
+      )
     );
   }, [pathname]);
 
@@ -360,12 +374,122 @@ function Header({ notifCount }) {
                   aria-expanded={open === 'blood'}
                   aria-controls="mega-blood"
                   id={bloodId}
+                  type="button"
                 >
                   <FiDroplet />
-                  <span>التبرع بالدم</span>
+                  <span tabIndex={-1}>التبرع بالدم</span>
                   <FiChevronDown className="eh-caret" />
                 </button>
               </div>
+
+              {/* قائمة الطلبات الجديدة */}
+              <div className={`eh-nav-item ${open === 'orders' ? 'open' : ''}`}>
+                <button
+                  className={`eh-nav-link ${ordersActive ? 'active' : ''}`}
+                  onClick={() => setOpen(open === 'orders' ? null : 'orders')}
+                  onMouseEnter={() => setOpen('orders')}
+                  aria-expanded={open === 'orders'}
+                  aria-controls="mega-orders"
+                  id="ordersId"
+                  type="button"
+                >
+                  <FiGrid />
+                  <span tabIndex={-1}>قائمة الطلبات</span>
+                  <FiChevronDown className="eh-caret" />
+                </button>
+              </div>
+
+              <div className={`eh-nav-item ${open === 'offers' ? 'open' : ''}`}>
+                <button
+                  className={`eh-nav-link ${(open === 'offers' || offersActive) ? 'active' : ''}`}
+                  onClick={() => setOpen(open === 'offers' ? null : 'offers')}
+                  onMouseEnter={() => setOpen('offers')}
+                  aria-expanded={open === 'offers'}
+                  aria-controls="mega-offers"
+                  id="offersId"
+                  type="button"
+                >
+                  <FiUsers />
+                  <span tabIndex={-1}>قائمة العروض</span>
+                  <FiChevronDown className="eh-caret" />
+                </button>
+              </div>
+                {/* قائمة العروض المنسدلة */}
+                <div
+                  id="mega-offers"
+                  className={`eh-mega-panel ${open === 'offers' ? 'open' : ''}`}
+                  onMouseEnter={() => setOpen('offers')}
+                  onMouseLeave={() => setOpen(null)}
+                  role="region"
+                  aria-labelledby="offersId"
+                >
+                  <div className="eh-mega-grid">
+                    <Link
+                      to="/blood-donors"
+                      className="eh-mega-card"
+                      onClick={() => setOpen(null)}
+                    >
+                      <div className="eh-mega-icon">
+                        <FiUsers />
+                      </div>
+                      <div className="eh-mega-content">
+                        <h4>عروض المستعدون للتبرع بالدم</h4>
+                        <p>المتبرعون المسجّلون</p>
+                      </div>
+                    </Link>
+                    <Link
+                      to="/general-donors"
+                      className="eh-mega-card"
+                      onClick={() => setOpen(null)}
+                    >
+                      <div className="eh-mega-icon">
+                        <FiUsers />
+                      </div>
+                      <div className="eh-mega-content">
+                        <h4>عروض التبرعات العامة </h4>
+                        <p> لائحة عروض التبرعات </p>
+                      </div>
+                    </Link>
+                  </div>
+                </div>
+        {/* قائمة الطلبات المنسدلة */}
+        <div
+          id="mega-orders"
+          className={`eh-mega-panel ${open === 'orders' ? 'open' : ''}`}
+          onMouseEnter={() => setOpen('orders')}
+          onMouseLeave={() => setOpen(null)}
+          role="region"
+          aria-labelledby="ordersId"
+        >
+          <div className="eh-mega-grid">
+            <Link
+              to="/blood-donations"
+              className="eh-mega-card"
+              onClick={() => setOpen(null)}
+            >
+              <div className="eh-mega-icon">
+                <FiGrid />
+              </div>
+              <div className="eh-mega-content">
+                <h4>قائمة طلبات الدم</h4>
+                <p>هنا تجد قائمة بطلبات حالات محتاجة للتبرع بالدم</p>
+              </div>
+            </Link>
+            <Link
+              to="/donations"
+              className="eh-mega-card"
+              onClick={() => setOpen(null)}
+            >
+              <div className="eh-mega-icon">
+                <FiGrid />
+              </div>
+              <div className="eh-mega-content">
+                <h4>قائمة الطلبات العمة</h4>
+                <p>هنا تجد قائمة بطلبات لحالات متنوعة</p>
+              </div>
+            </Link>
+          </div>
+        </div>
 
               <div
                 className={`eh-nav-item ${open === 'general' ? 'open' : ''}`}
@@ -377,9 +501,10 @@ function Header({ notifCount }) {
                   aria-expanded={open === 'general'}
                   aria-controls="mega-general"
                   id={generalId}
+                  type="button"
                 >
                   <FiHeart />
-                  <span>تبرعات عامة</span>
+                  <span tabIndex={-1}>تبرعات عامة</span>
                   <FiChevronDown className="eh-caret" />
                 </button>
               </div>
@@ -494,33 +619,7 @@ function Header({ notifCount }) {
                 </div>
               </Link>
 
-              <Link
-                to="/blood-donations"
-                className="eh-mega-card"
-                onClick={() => setOpen(null)}
-              >
-                <div className="eh-mega-icon">
-                  <FiGrid />
-                </div>
-                <div className="eh-mega-content">
-                  <h4>قائمة الطلبات</h4>
-                  <p>تصفّح وفلترة</p>
-                </div>
-              </Link>
-
-              <Link
-                to="/blood-donors"
-                className="eh-mega-card"
-                onClick={() => setOpen(null)}
-              >
-                <div className="eh-mega-icon">
-                  <FiUsers />
-                </div>
-                <div className="eh-mega-content">
-                  <h4>المتبرعون بالدم</h4>
-                  <p>المتبرعون المسجّلون</p>
-                </div>
-              </Link>
+            
             </div>
           </div>
 
@@ -543,7 +642,7 @@ function Header({ notifCount }) {
                   <FiHeart />
                 </div>
                 <div className="eh-mega-content">
-                  <h4>اعلان تبرع</h4>
+                  <h4>اعلان تبرع عام</h4>
                   <p>ابدأ التبرع الآن</p>
                 </div>
               </Link>
@@ -557,38 +656,12 @@ function Header({ notifCount }) {
                   <FiList />
                 </div>
                 <div className="eh-mega-content">
-                  <h4>طلب التبرع</h4>
+                  <h4> طلب تبرع عام</h4>
                   <p>أنشئ طلبًا عامًا</p>
                 </div>
               </Link>
 
-              <Link
-                to="/donations"
-                className="eh-mega-card"
-                onClick={() => setOpen(null)}
-              >
-                <div className="eh-mega-icon">
-                  <FiGrid />
-                </div>
-                <div className="eh-mega-content">
-                  <h4>قائمة الطلبات</h4>
-                  <p>تصفية حسب النوع</p>
-                </div>
-              </Link>
-
-              <Link
-                to="/general-donors"
-                className="eh-mega-card"
-                onClick={() => setOpen(null)}
-              >
-                <div className="eh-mega-icon">
-                  <FiUsers />
-                </div>
-                <div className="eh-mega-content">
-                  <h4>عروض التبرع</h4>
-                  <p> لائحة عروض التبرعات </p>
-                </div>
-              </Link>
+            
             </div>
           </div>
         </div>
@@ -694,39 +767,23 @@ function Header({ notifCount }) {
 
               <div className="eh-drawer-group">
                 <div className="eh-drawer-group-title">
-                  <FiDroplet />
-                  <span>التبرع بالدم</span>
                 </div>
                 <Link
                   to="/ready/blood"
                   onClick={() => setMobileOpen(false)}
                 >
-                  اعلان تبرع
+                  اعلان تبرع بالدم
                 </Link>
                 <Link
                   to="/blood-donation"
                   onClick={() => setMobileOpen(false)}
                 >
-                  طلب التبرع
-                </Link>
-                <Link
-                  to="/blood-donations"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  قائمة الطلبات
-                </Link>
-                <Link
-                  to="/blood-donors"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  المتبرعون
+                  طلب التبرع بالدم
                 </Link>
               </div>
 
               <div className="eh-drawer-group">
                 <div className="eh-drawer-group-title">
-                  <FiHeart />
-                  <span>تبرعات عامة</span>
                 </div>
                 <Link
                   to="/ready/general"
@@ -738,19 +795,45 @@ function Header({ notifCount }) {
                   to="/donation-requests"
                   onClick={() => setMobileOpen(false)}
                 >
-                  طلب التبرع
+                 طلب التبرع العام
+              </Link>
+              </div>
+
+              <div className="eh-drawer-group">
+                <div className="eh-drawer-group-title">
+                </div>
+                <Link
+                  to="/blood-donations"
+                  onClick={() => setMobileOpen(false)}
+                  className={pathname.startsWith('/blood-donations') ? 'active' : ''}
+                >
+                   قائمة الطلبات الدم
                 </Link>
                 <Link
                   to="/donations"
                   onClick={() => setMobileOpen(false)}
+                  className={pathname.startsWith('/donations') ? 'active' : ''}
                 >
-                  قائمة الطلبات
+                  قائمة الطلبات العامة
+                </Link>
+              </div>
+
+              <div className="eh-drawer-group">
+                <div className="eh-drawer-group-title">
+                </div>
+                <Link
+                  to="/blood-donors"
+                  onClick={() => setMobileOpen(false)}
+                  className={pathname.startsWith('/blood-donors') ? 'active' : ''}
+                >
+               عروض المستعدون للتبرع بالدم
                 </Link>
                 <Link
                   to="/general-donors"
                   onClick={() => setMobileOpen(false)}
+                  className={pathname.startsWith('/general-donors') ? 'active' : ''}
                 >
-                  المتبرعون
+عروض التبرعات العامة
                 </Link>
               </div>
 

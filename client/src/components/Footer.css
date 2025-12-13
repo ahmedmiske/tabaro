@@ -84,7 +84,6 @@
   color: var(--color-background-default) !important; 
   font-family: "Tajawal", sans-serif;
   /* المسافات: استخدام قيم توحيدية */
-  padding: 60px 0 var(--spacing-lg); /* 60px 0 24px */
   position: relative;
   z-index: 0; /* تأكد من أن الفوتر تحت المحتوى */
   width: 100%;

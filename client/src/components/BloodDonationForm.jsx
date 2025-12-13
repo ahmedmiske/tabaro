@@ -541,7 +541,7 @@ const BloodDonationForm = () => {
           <strong>لأي شخص محتاج</strong>، فقط تأكد من إدخال{' '}
           <strong>وسائل تواصل صحيحة</strong> حتى يتمكن المتبرعون من
           الوصول إليكم.
-        </Alert>
+        </Alert>f
       <header>
         
 
