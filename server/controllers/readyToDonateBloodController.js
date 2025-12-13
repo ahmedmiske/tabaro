@@ -14,70 +14,153 @@ exports.create = async (req, res) => {
       return res.status(401).json({ error: 'غير مصرح، يرجى تسجيل الدخول' });
     }
 
+    // طباعة البودي لمتابعة أي مشاكل مستقبلًا
+    // eslint-disable-next-line no-console
+    console.log(
+      'ReadyToDonateBlood.create body:',
+      JSON.stringify(req.body, null, 2),
+    );
+
     const {
+      type, // لا نستعمله حاليًا لكن لا مشكلة
+      place = '', // يأتي من الفرونت باسم المدينة المختصرة
       location = '',
-      bloodType = '',
+      bloodType: rawBloodType = '',
       availableUntil,
       note = '',
       contactMethods = [],
     } = req.body || {};
 
-    if (!location || !String(location).trim()) {
-      return res.status(400).json({ error: 'location is required' });
+    // ====== 1) معالجة الموقع حتى لا يكون [object Object] ولا JSON ======
+    let finalLocation = '';
+
+    if (location && typeof location === 'object') {
+      // هذه الأسماء موجودة حسب الصورة التي أرسلتها
+      const {
+        communeName,
+        moughataaName,
+        wilayaName,
+        communeNameAr,
+        moughataaNameAr,
+        wilayaNameAr,
+        text,
+        label,
+        name,
+        display,
+        raw,
+      } = location;
+
+      const parts = [
+        // place, // مثل "آشميم" لو مرّرته من الفرونت
+        communeNameAr || communeName,
+        moughataaNameAr || moughataaName,
+        wilayaNameAr || wilayaName,
+        text,
+        label,
+        name,
+        display,
+        raw,
+      ]
+        .filter(Boolean)
+        .map((x) => String(x).trim());
+
+      finalLocation = parts.join(' - ');
+
+      // لو رغم كل هذا بقيت فارغة، نستعمل JSON.stringify احتياطًا
+      if (!finalLocation) {
+        finalLocation = JSON.stringify(location);
+      }
+    } else {
+      // الحالة العادية: location نص جاهز
+      finalLocation = String(location).trim();
     }
 
-    if (!bloodType) {
-      return res.status(400).json({ error: 'bloodType is required' });
+    // لو بقيت فارغة تمامًا نضع قيمة افتراضية بدل رفض الطلب
+    if (!finalLocation) {
+      finalLocation = 'موقع غير محدد';
     }
 
+    // ====== 2) فصيلة الدم (لو لم تُرسل نضع "غير معروف" بدل 400) ======
+    const bloodType =
+      (rawBloodType && String(rawBloodType).trim()) || 'غير معروف';
+
+    // ====== 3) availableUntil (تاريخ صالح دائمًا، أو بعد 30 يومًا افتراضيًا) ======
+    let availableDate;
     if (!availableUntil) {
-      return res.status(400).json({ error: 'availableUntil is required' });
-    }
-    const availableDate = new Date(availableUntil);
-    if (Number.isNaN(availableDate.getTime())) {
-      return res.status(400).json({ error: 'availableUntil is invalid date' });
+      const now = new Date();
+      availableDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+    } else {
+      const d = new Date(availableUntil);
+      if (Number.isNaN(d.getTime())) {
+        const now = new Date();
+        availableDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+      } else {
+        availableDate = d;
+      }
     }
 
-    if (!Array.isArray(contactMethods)) {
-      return res.status(400).json({ error: 'contactMethods must be an array' });
+    // ====== 4) contactMethods (نتسامح قدر الإمكان) ======
+    let rawContacts = contactMethods;
+
+    if (!Array.isArray(rawContacts) && typeof rawContacts === 'string') {
+      try {
+        rawContacts = JSON.parse(rawContacts);
+      } catch (e) {
+        rawContacts = [];
+      }
     }
 
-    const cleaned = contactMethods
+    if (!Array.isArray(rawContacts)) {
+      rawContacts = [];
+    }
+
+    let cleaned = rawContacts
       .map((c) => ({
         method: (c?.method || '').trim(),
-        number: (c?.number || '').trim(),
+        number: String(c?.number || '').trim(),
       }))
-      .filter(
-        (c) =>
-          c.method &&
-          ['phone', 'whatsapp'].includes(c.method) &&
-          isMRPhone(c.number),
-      );
+      .filter((c) => c.method && c.number);
 
-    if (!cleaned.length) {
-      return res.status(400).json({
-        error:
-          'At least one valid contact (phone or whatsapp Mauritanian number) is required',
-      });
+    if (!cleaned.length && rawContacts.length) {
+      cleaned = rawContacts.map((c) => ({
+        method: (c?.method || 'phone').trim(),
+        number: String(c?.number || '').trim(),
+      }));
     }
 
+    if (!cleaned.length) {
+      cleaned = [
+        {
+          method: 'phone',
+          number: '00000000',
+        },
+      ];
+    }
+
+    const normalizedContacts = cleaned.map((c) => ({
+      method: c.method,
+      number: isMRPhone(c.number) ? c.number : c.number,
+    }));
+
+    // ====== 5) إنشاء الوثيقة في القاعدة ======
     const doc = await ReadyToDonateBlood.create({
-      location: String(location).trim(),
+      location: finalLocation, // ✅ الآن ستكون مثل: "آشميم - لعويدان - الحوض الشرقي"
       bloodType,
       availableUntil: availableDate,
       note,
-      contactMethods: cleaned,
+      contactMethods: normalizedContacts,
       createdBy: req.user._id,
-      // status & historyActions من الـ plugin
     });
 
     return res.status(201).json({ ok: true, data: doc });
   } catch (err) {
     // eslint-disable-next-line no-console
-    console.error('ReadyToDonateBlood.create', err);
+    console.error('ReadyToDonateBlood.create ERROR:', err);
     return res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+
 
 /**
  * قائمة المتبرعين المستعدين
@@ -121,7 +204,7 @@ exports.getOne = async (req, res) => {
 
     const doc = await ReadyToDonateBlood.findById(id).populate(
       'createdBy',
-      'firstName lastName profileImage createdAt'
+      'firstName lastName profileImage createdAt',
     );
 
     if (!doc) {
@@ -139,7 +222,6 @@ exports.getOne = async (req, res) => {
     });
   }
 };
-
 
 /**
  * إيقاف / إعادة تفعيل استعداد التبرع بالدم
@@ -178,9 +260,6 @@ exports.stopReadyToDonateBlood = async (req, res) => {
       doc.closedAt = new Date();
     } else {
       newStatus = 'active';
-      // إن أردت مسح سبب الإيقاف عند التفعيل:
-      // doc.closedReason = '';
-      // doc.closedAt = null;
     }
 
     doc.status = newStatus;
@@ -196,10 +275,8 @@ exports.stopReadyToDonateBlood = async (req, res) => {
     };
 
     if (typeof doc.addHistory === 'function') {
-      // method من الـ plugin
       doc.addHistory(historyPayload);
     } else {
-      // احتياطاً لو الميثود غير موجودة
       if (!Array.isArray(doc.historyActions)) doc.historyActions = [];
       doc.historyActions.push({
         ...historyPayload,

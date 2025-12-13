@@ -30,9 +30,30 @@ const BloodRequestSchema = new mongoose.Schema(
       default: null,
     },
 
+    // ====== حقول قديمة (للتوافق) ======
     city: { type: String, default: "" },
     hospitalName: { type: String, default: "" },
-    location: { type: String, default: "" },
+    location: { type: String, default: "" }, // نص عام يظهر في الواجهة
+
+    // ====== منطق جديد للموقع ======
+
+    // داخل موريتانيا أو خارجها
+    isInsideMauritania: { type: Boolean, default: true },
+
+    // في حالة موريتانيا: نحتفظ بالأكواد والأسماء بالعربية
+    wilayaCode: { type: String, default: "" },
+    wilayaNameAr: { type: String, default: "" },
+
+    moughataaCode: { type: String, default: "" },
+    moughataaNameAr: { type: String, default: "" },
+
+    communeCode: { type: String, default: "" },
+    communeNameAr: { type: String, default: "" },
+
+    // في حالة خارج موريتانيا
+    countryCode: { type: String, default: "" },
+    countryNameAr: { type: String, default: "" },
+    fullAddress: { type: String, default: "" },
 
     // التاريخ الذي يتم بعده اعتبار الطلب منتهي الصلاحية
     deadline: { type: Date, required: true },

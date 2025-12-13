@@ -1,11 +1,15 @@
-// server/controllers/readyToDonateGeneralController.js
 const ReadyToDonateGeneral = require('../models/ReadyToDonateGeneral');
-
-// ملاحظة: حذفنا هذا السطر لأنه يسبب الخطأ
-// const { addHistory } = require('../models/plugins/statusPlugin');
 
 // التحقق من رقم الهاتف (6–15 رقم)
 const isPhone = (v = '') => /^[0-9]{6,15}$/.test(String(v).trim());
+
+// دالة مساعدة لأخذ أول اسم غير فارغ من عدة احتمالات
+const pickName = (obj = {}, keys = []) => {
+  for (const k of keys) {
+    if (obj[k]) return String(obj[k]).trim();
+  }
+  return '';
+};
 
 /**
  * إنشاء إعلان استعداد للتبرع العام
@@ -32,7 +36,13 @@ exports.create = async (req, res) => {
       contactMethods,
     } = body;
 
-    // extra قد تأتي كسلسلة JSON
+    // eslint-disable-next-line no-console
+    console.log(
+      'ReadyToDonateGeneral.create body:',
+      JSON.stringify(body, null, 2),
+    );
+
+    // -------- 1) extra --------
     if (typeof extra === 'string') {
       try {
         extra = JSON.parse(extra);
@@ -41,7 +51,6 @@ exports.create = async (req, res) => {
       }
     }
 
-    // دعم الحقول المسطّحة extra.*
     if (
       body['extra.donationType'] ||
       body['extra.category'] ||
@@ -61,7 +70,7 @@ exports.create = async (req, res) => {
       }
     }
 
-    // contactMethods قد تأتي كسلسلة JSON
+    // -------- 2) contactMethods --------
     if (typeof contactMethods === 'string') {
       try {
         contactMethods = JSON.parse(contactMethods);
@@ -73,7 +82,24 @@ exports.create = async (req, res) => {
       contactMethods = [];
     }
 
-    // معالجة المرفقات (إن وجدت)
+    if (!Array.isArray(contactMethods) || contactMethods.length === 0) {
+      return res
+        .status(400)
+        .json({ error: 'At least one contact method is required' });
+    }
+
+    for (const c of contactMethods) {
+      if (!c?.method || !c?.number) {
+        return res.status(400).json({ error: 'Invalid contact method' });
+      }
+      if (!isPhone(c.number)) {
+        return res
+          .status(400)
+          .json({ error: 'Contact numbers must be 6–15 digits' });
+      }
+    }
+
+    // -------- 3) المرفقات --------
     let attachments = [];
     if (Array.isArray(req.files) && req.files.length > 0) {
       attachments = req.files.map((f) => ({
@@ -89,7 +115,6 @@ exports.create = async (req, res) => {
       extra.attachments = attachments;
     }
 
-    // التحقق من extra
     if (!extra.category) {
       return res
         .status(400)
@@ -118,11 +143,10 @@ exports.create = async (req, res) => {
       }
       extra.amount = amountNum;
     } else {
-      // تبرع عيني → لا نحتاج قيمة amount
       delete extra.amount;
     }
 
-    // التحقق من availableUntil
+    // -------- 4) availableUntil --------
     if (!availableUntil) {
       return res
         .status(400)
@@ -139,39 +163,116 @@ exports.create = async (req, res) => {
       });
     }
 
-    // التحقق من وسائل التواصل
-    if (!Array.isArray(contactMethods) || contactMethods.length === 0) {
-      return res
-        .status(400)
-        .json({ error: 'At least one contact method is required' });
+    // -------- 5) معالجة الموقع --------
+    if (!['none', 'mr', 'abroad'].includes(locationMode)) {
+      locationMode = 'none';
     }
 
-    for (const c of contactMethods) {
-      if (!c?.method || !c?.number) {
-        return res.status(400).json({ error: 'Invalid contact method' });
+    let locationText = '';
+    let cityText = String(city || '').trim();
+    let countryText = String(country || '').trim();
+
+    // أسماء من جسم الطلب (لو أرسلتها من الفرونت مباشرة)
+    const communeFromBody = pickName(body, [
+      'communeNameAr',
+      'communeName',
+      'mrCommuneNameAr',
+      'mrCommuneName',
+    ]);
+    const moughataaFromBody = pickName(body, [
+      'moughataaNameAr',
+      'moughataaName',
+      'mrMoughataaNameAr',
+      'mrMoughataaName',
+    ]);
+    const wilayaFromBody = pickName(body, [
+      'wilayaNameAr',
+      'wilayaName',
+      'mrWilayaNameAr',
+      'mrWilayaName',
+    ]);
+
+    if (locationMode === 'mr') {
+      // داخل موريتانيا: البلدية - المقاطعة - الولاية
+      const loc =
+        location && typeof location === 'object' ? location : {};
+
+      const communeName =
+        pickName(loc, [
+          'communeNameAr',
+          'communeName',
+          'city',
+          'labelAr',
+          'label',
+          'nameAr',
+          'name',
+        ]) ||
+        communeFromBody ||
+        (typeof location === 'string' ? location.trim() : '');
+
+      const moughataaName =
+        pickName(loc, [
+          'moughataaNameAr',
+          'moughataaName',
+          'moughataa',
+        ]) || moughataaFromBody;
+
+      const wilayaName =
+        pickName(loc, [
+          'wilayaNameAr',
+          'wilayaName',
+          'wilaya',
+        ]) || wilayaFromBody;
+
+      locationText = [communeName, moughataaName, wilayaName]
+        .filter(Boolean)
+        .join(' - ');
+
+      cityText = cityText || communeName || '';
+      countryText = 'موريتانيا';
+
+      // لو ما زال locationText فارغًا ولكن location نص
+      if (!locationText && typeof location === 'string') {
+        locationText = location.trim();
+        if (!cityText) cityText = locationText;
+        countryText = 'موريتانيا';
       }
-      if (!isPhone(c.number)) {
-        return res
-          .status(400)
-          .json({ error: 'Contact numbers must be 6–15 digits' });
-      }
+    } else if (locationMode === 'abroad') {
+      // خارج موريتانيا: العنوان - المدينة - الدولة
+      const locObj =
+        location && typeof location === 'object' ? location : {};
+
+      const address =
+        pickName(locObj, ['address', 'street', 'detail', 'raw', 'text']) ||
+        (typeof location === 'string' ? location.trim() : '');
+
+      cityText = cityText || pickName(locObj, ['city', 'ville']);
+      countryText = countryText || pickName(locObj, ['country', 'pays']);
+
+      locationText = [address, cityText, countryText]
+        .filter(Boolean)
+        .join(' - ');
+    } else {
+      // لا يوجد مكان
+      locationText = '';
+      cityText = '';
+      countryText = '';
     }
 
-    // إنشاء الوثيقة
+    // -------- 6) إنشاء الوثيقة --------
     const doc = await ReadyToDonateGeneral.create({
+      type: 'general',
       locationMode,
-      location,
-      city,
-      country,
+      location: locationText, // 👈 هنا سيكون: "البلدية - المقاطعة - الولاية" أو "العنوان - المدينة - الدولة"
+      city: cityText,
+      country: countryText,
       availableUntil: untilDate,
       note,
       extra,
       contactMethods,
       createdBy: userId,
-      // status & historyActions → من الـ plugin
     });
 
-    // ✅ إضافة history يدويًا عند الإنشاء
     if (!Array.isArray(doc.historyActions)) {
       doc.historyActions = [];
     }
@@ -182,7 +283,6 @@ exports.create = async (req, res) => {
       role: 'user',
       fromStatus: null,
       toStatus: doc.status || 'active',
-      reason: undefined,
       note: 'إنشاء عرض الاستعداد للتبرع العام',
       createdAt: new Date(),
     });
@@ -197,6 +297,9 @@ exports.create = async (req, res) => {
       .json({ error: 'Internal server error' });
   }
 };
+
+
+
 
 /**
  * قائمة إعلانات الاستعداد (افتراضيًا النشطة فقط)
@@ -303,14 +406,11 @@ exports.stopReadyToDonateGeneral = async (req, res) => {
       doc.closedAt = new Date();
     } else {
       newStatus = 'active';
-      // يمكن مسح سبب الإيقاف إذا أحببت
-      // doc.closedReason = '';
-      // doc.closedAt = null;
     }
 
     doc.status = newStatus;
 
-    // ✅ تسجيل الحدث في historyActions يدويًا
+    // ✅ تسجيل الحدث في historyActions
     if (!Array.isArray(doc.historyActions)) {
       doc.historyActions = [];
     }

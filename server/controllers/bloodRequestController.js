@@ -84,8 +84,33 @@ exports.createBloodRequest = async (req, res) => {
       return res.status(401).json({ message: "غير مصرح" });
     }
 
-    const { bloodType, description, location, isUrgent, deadline, title } =
-      req.body;
+    const {
+      bloodType,
+      description,
+      location,     // النص الظاهر في الواجهة
+      isUrgent,
+      deadline,
+      title,
+
+      // اسم المستشفى المرسل من الفورم
+      hospital,
+
+      // موقع داخل موريتانيا؟
+      isInsideMauritania,
+
+      // من الفورم (داخل موريتانيا)
+      wilayaCode,
+      wilayaNameAr,
+      moughataaCode,
+      moughataaNameAr,
+      communeCode,
+      communeNameAr,
+
+      // في حالة خارج موريتانيا (نضيفها لاحقاً في الفورم)
+      countryCode,
+      countryNameAr,
+      fullAddress,
+    } = req.body;
 
     const contactMethods = parseFlexibleArray(req.body, "contactMethods", [
       "method",
@@ -95,24 +120,55 @@ exports.createBloodRequest = async (req, res) => {
     const uploaded = collectMulterFiles(req);
     const documentObjs = mapToDocumentObjects(uploaded, "blood-requests");
 
+    // ✅ نحسم هل هو داخل موريتانيا أم لا
+    const insideMR =
+      String(isInsideMauritania) === "true" || isInsideMauritania === true;
+
+    // ✅ النص الذي سيظهر دائماً في الواجهة
+    const finalLocation =
+      (insideMR ? location : fullAddress || location) || "";
+
     const created = await BloodRequest.create({
       userId: req.user._id,
+
       title: title || undefined,
       bloodType: bloodType || undefined,
       description: description || undefined,
-      location: location || undefined,
+
+      // نص عام للموقع (يُعرض في الكروت / التفاصيل)
+      location: finalLocation,
+
+      // مستشفى (المكان بالتحديد)
+      hospitalName: hospital || req.body.hospitalName || "",
+
       isUrgent: String(isUrgent) === "true" || isUrgent === true,
       deadline: toDate(deadline),
+
       contactMethods,
       documents: documentObjs,
       status: "active",
-      hospitalName: req.body.hospital || undefined
+
+      // 🔹 منطق الموقع الجديد
+      isInsideMauritania: insideMR,
+
+      // إذا كان داخل موريتانيا نحفظ البلدية/المقاطعة/الولاية
+      wilayaCode: insideMR ? (wilayaCode || "") : "",
+      wilayaNameAr: insideMR ? (wilayaNameAr || "") : "",
+      moughataaCode: insideMR ? (moughataaCode || "") : "",
+      moughataaNameAr: insideMR ? (moughataaNameAr || "") : "",
+      communeCode: insideMR ? (communeCode || "") : "",
+      communeNameAr: insideMR ? (communeNameAr || "") : "",
+
+      // إذا كان خارج موريتانيا نحفظ الدولة + العنوان النصي الكامل
+      countryCode: insideMR ? "" : (countryCode || ""),
+      countryNameAr: insideMR ? "" : (countryNameAr || ""),
+      fullAddress: insideMR ? "" : (fullAddress || location || ""),
     });
-   console.log(req.body);
+
     // ✅ سجل إنشاء الطلب
     addHistory(created, {
       action: "create",
-      by:req.user._id,
+      by: req.user._id,
       user: req.user._id,
       role: "user",
       fromStatus: null,
@@ -135,6 +191,7 @@ exports.createBloodRequest = async (req, res) => {
       .json({ message: "خطأ في السيرفر", error: err.message });
   }
 };
+
 
 /* ========= LIST ========= */
 exports.getBloodRequests = async (req, res) => {
