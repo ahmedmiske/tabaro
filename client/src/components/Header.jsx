@@ -833,7 +833,7 @@ function Header({ notifCount }) {
                   onClick={() => setMobileOpen(false)}
                   className={pathname.startsWith('/general-donors') ? 'active' : ''}
                 >
-عروض التبرعات العامةgit checkout mis-cambios
+عروض التبرعات العامة
                 </Link>
               </div>
 
